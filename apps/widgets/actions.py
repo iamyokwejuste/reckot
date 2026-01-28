@@ -1,9 +1,11 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views import View
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.utils.decorators import method_decorator
+from django.contrib.auth.mixins import LoginRequiredMixin
 from apps.widgets.models import EmbedWidget
+from apps.events.models import Event
 
 
 @method_decorator(xframe_options_exempt, name='dispatch')
@@ -82,3 +84,53 @@ class WidgetConfigView(View):
                 'show_price': widget.show_price,
             },
         })
+
+
+class WidgetManageView(LoginRequiredMixin, View):
+    def get(self, request, org_slug, event_slug):
+        event = get_object_or_404(
+            Event.objects.select_related('organization'),
+            organization__slug=org_slug,
+            slug=event_slug,
+            organization__members=request.user
+        )
+
+        try:
+            widget = event.embed_widget
+        except EmbedWidget.DoesNotExist:
+            widget = None
+
+        base_url = request.build_absolute_uri('/').rstrip('/')
+
+        return render(request, 'widgets/manage.html', {
+            'event': event,
+            'widget': widget,
+            'base_url': base_url,
+        })
+
+    def post(self, request, org_slug, event_slug):
+        event = get_object_or_404(
+            Event,
+            organization__slug=org_slug,
+            slug=event_slug,
+            organization__members=request.user
+        )
+
+        try:
+            widget = event.embed_widget
+        except EmbedWidget.DoesNotExist:
+            widget = EmbedWidget(event=event)
+
+        widget.is_active = request.POST.get('is_active') == 'on'
+        widget.theme = request.POST.get('theme', 'AUTO')
+        widget.button_text = request.POST.get('button_text', 'Get Tickets')
+        widget.button_color = request.POST.get('button_color', '#000000')
+        widget.show_price = request.POST.get('show_price') == 'on'
+        widget.show_description = request.POST.get('show_description') == 'on'
+
+        domains_raw = request.POST.get('allowed_domains', '').strip()
+        widget.allowed_domains = [d.strip() for d in domains_raw.split('\n') if d.strip()] if domains_raw else []
+
+        widget.save()
+
+        return redirect('widgets:manage', org_slug=org_slug, event_slug=event_slug)

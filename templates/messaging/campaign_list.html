@@ -1,0 +1,117 @@
+{% extends "layouts/dashboard.html" %}
+{% load slippers %}
+
+{% block title %}Campaigns - {{ organization.name }} - Reckot{% endblock %}
+
+{% block header_title %}
+<div>
+    <h1 class="text-lg font-semibold">Message Campaigns</h1>
+    <p class="text-sm text-muted-foreground">Send messages to your event attendees</p>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'messaging:template_list' org_slug=organization.slug %}" class="btn btn-outline btn-md">
+    <i data-lucide="file-text" class="w-4 h-4"></i>
+    Templates
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <span class="text-sm text-muted-foreground">{{ campaigns.count }} campaign{{ campaigns.count|pluralize }}</span>
+        </div>
+    </div>
+
+    {% if campaigns %}
+    <div class="grid gap-4">
+        {% for campaign in campaigns %}
+        <div class="card p-5 hover:shadow-md transition-shadow">
+            <div class="flex items-start justify-between gap-4">
+                <div class="flex items-start gap-4">
+                    <div class="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                        {% if campaign.message_type == 'EMAIL' %}
+                        <i data-lucide="mail" class="w-5 h-5 text-primary"></i>
+                        {% else %}
+                        <i data-lucide="message-square" class="w-5 h-5 text-primary"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <a href="{% url 'messaging:campaign_detail' org_slug=organization.slug campaign_ref=campaign.reference %}"
+                           class="font-semibold hover:text-primary transition-colors">
+                            {{ campaign.name }}
+                        </a>
+                        <div class="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
+                            <span class="flex items-center gap-1">
+                                <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+                                {{ campaign.event.title }}
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <i data-lucide="users" class="w-3.5 h-3.5"></i>
+                                {{ campaign.total_recipients }} recipient{{ campaign.total_recipients|pluralize }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    {% if campaign.status == 'DRAFT' %}
+                    <span class="badge badge-outline">Draft</span>
+                    {% elif campaign.status == 'SCHEDULED' %}
+                    <span class="badge badge-info">Scheduled</span>
+                    {% elif campaign.status == 'SENDING' %}
+                    <span class="badge badge-warning">Sending</span>
+                    {% elif campaign.status == 'COMPLETED' %}
+                    <span class="badge badge-success">Completed</span>
+                    {% elif campaign.status == 'FAILED' %}
+                    <span class="badge badge-destructive">Failed</span>
+                    {% endif %}
+                    <a href="{% url 'messaging:campaign_detail' org_slug=organization.slug campaign_ref=campaign.reference %}"
+                       class="btn btn-outline btn-sm">
+                        View
+                    </a>
+                </div>
+            </div>
+            {% if campaign.status == 'COMPLETED' %}
+            <div class="mt-4 pt-4 border-t border-border">
+                <div class="grid grid-cols-4 gap-4 text-center">
+                    <div>
+                        <p class="text-lg font-semibold">{{ campaign.sent_count }}</p>
+                        <p class="text-xs text-muted-foreground">Sent</p>
+                    </div>
+                    <div>
+                        <p class="text-lg font-semibold text-emerald-600">
+                            {% widthratio campaign.deliveries.filter.status__in.0 campaign.total_recipients 100 as open_rate %}
+                            {{ campaign.deliveries.filter.status__in|length }}
+                        </p>
+                        <p class="text-xs text-muted-foreground">Delivered</p>
+                    </div>
+                    <div>
+                        <p class="text-lg font-semibold text-blue-600">0</p>
+                        <p class="text-xs text-muted-foreground">Opened</p>
+                    </div>
+                    <div>
+                        <p class="text-lg font-semibold text-red-600">{{ campaign.failed_count }}</p>
+                        <p class="text-xs text-muted-foreground">Failed</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card p-12 text-center">
+        <div class="h-16 w-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+            <i data-lucide="mail" class="w-8 h-8 text-muted-foreground"></i>
+        </div>
+        <h3 class="font-semibold text-lg">No campaigns yet</h3>
+        <p class="text-muted-foreground mt-1">Create a campaign to message your event attendees</p>
+        <p class="text-sm text-muted-foreground mt-4">
+            Select an event from the sidebar to create a new campaign.
+        </p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

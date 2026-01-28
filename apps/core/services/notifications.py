@@ -160,32 +160,21 @@ class NotificationService:
 
     @classmethod
     def send_sms(cls, phone_number: str, template_name: str, context: dict) -> bool:
-        """
-        Send an SMS using a template.
-
-        Args:
-            phone_number: Recipient phone number
-            template_name: Path to the SMS template (e.g., 'sms/otp_verification.txt')
-            context: Template context dictionary
-
-        Returns:
-            True if SMS was sent successfully
-        """
         try:
-            # Render template
             message = render_to_string(template_name, context)
 
-            # TODO: Integrate with SMS provider (Twilio, Africa's Talking, etc.)
-            # For now, log the message
-            logger.info(f"SMS to {phone_number}: {message}")
+            if not all([settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN, settings.TWILIO_PHONE_NUMBER]):
+                logger.warning(f"Twilio not configured, SMS to {phone_number}: {message}")
+                return True
 
-            # Placeholder for actual SMS sending
-            # Example with Africa's Talking:
-            # import africastalking
-            # africastalking.initialize(username, api_key)
-            # sms = africastalking.SMS
-            # sms.send(message, [phone_number])
-
+            from twilio.rest import Client
+            client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+            client.messages.create(
+                body=message,
+                from_=settings.TWILIO_PHONE_NUMBER,
+                to=phone_number
+            )
+            logger.info(f"SMS sent to {phone_number}")
             return True
 
         except Exception as e:

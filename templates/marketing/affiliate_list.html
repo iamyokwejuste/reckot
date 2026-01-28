@@ -1,0 +1,132 @@
+{% extends "layouts/dashboard.html" %}
+{% load slippers %}
+
+{% block title %}Affiliate Links - {{ organization.name }} - Reckot{% endblock %}
+
+{% block header_title %}
+<div>
+    <h1 class="text-lg font-semibold">Affiliate Links</h1>
+    <p class="text-sm text-muted-foreground">Track referrals and commissions</p>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'marketing:affiliate_create' org_slug=organization.slug %}" class="btn btn-primary btn-md">
+    <i data-lucide="plus" class="w-4 h-4"></i>
+    Create Link
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="card p-5">
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <i data-lucide="link" class="w-5 h-5 text-primary"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-semibold">{{ stats.total_links }}</p>
+                    <p class="text-xs text-muted-foreground">Total Links</p>
+                </div>
+            </div>
+        </div>
+        <div class="card p-5">
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                    <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-semibold">{{ stats.active_links }}</p>
+                    <p class="text-xs text-muted-foreground">Active Links</p>
+                </div>
+            </div>
+        </div>
+        <div class="card p-5">
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                    <i data-lucide="mouse-pointer-click" class="w-5 h-5 text-blue-600"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-semibold">{{ stats.total_clicks }}</p>
+                    <p class="text-xs text-muted-foreground">Total Clicks</p>
+                </div>
+            </div>
+        </div>
+        <div class="card p-5">
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                    <i data-lucide="shopping-cart" class="w-5 h-5 text-purple-600"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-semibold">{{ stats.total_conversions }}</p>
+                    <p class="text-xs text-muted-foreground">Conversions</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if links %}
+    <div class="card">
+        <div class="divide-y divide-border">
+            {% for link in links %}
+            <div class="p-4 flex items-center justify-between hover:bg-muted/30 transition-colors">
+                <div class="flex items-center gap-4">
+                    <div class="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
+                        <i data-lucide="link" class="w-5 h-5 text-muted-foreground"></i>
+                    </div>
+                    <div>
+                        <a href="{% url 'marketing:affiliate_detail' org_slug=organization.slug link_code=link.code %}"
+                           class="font-semibold hover:text-primary transition-colors">
+                            {{ link.name }}
+                        </a>
+                        <div class="flex items-center gap-3 mt-0.5 text-sm text-muted-foreground">
+                            <span class="font-mono text-xs">{{ link.code }}</span>
+                            {% if link.event %}
+                            <span>{{ link.event.title }}</span>
+                            {% else %}
+                            <span>All Events</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-6">
+                    <div class="text-center">
+                        <p class="font-semibold">{{ link.clicks }}</p>
+                        <p class="text-xs text-muted-foreground">Clicks</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="font-semibold">{{ link.conversion_count|default:0 }}</p>
+                        <p class="text-xs text-muted-foreground">Conversions</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        {% if link.is_active %}
+                        <span class="badge badge-success">Active</span>
+                        {% else %}
+                        <span class="badge badge-outline">Inactive</span>
+                        {% endif %}
+                        <a href="{% url 'marketing:affiliate_detail' org_slug=organization.slug link_code=link.code %}"
+                           class="btn btn-outline btn-sm">
+                            View
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div class="card p-12 text-center">
+        <div class="h-16 w-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+            <i data-lucide="link" class="w-8 h-8 text-muted-foreground"></i>
+        </div>
+        <h3 class="font-semibold text-lg">No affiliate links yet</h3>
+        <p class="text-muted-foreground mt-1">Create tracking links for your partners and affiliates</p>
+        <a href="{% url 'marketing:affiliate_create' org_slug=organization.slug %}" class="btn btn-primary btn-md mt-6">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            Create Your First Link
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -12,7 +12,7 @@ from django.utils import timezone
 from apps.events.forms import EventForm, TicketTypeForm
 from apps.events.services import create_event
 from apps.events.queries import get_user_events
-from apps.events.models import Event, Coupon, EventFlyerConfig, FlyerTextField
+from apps.events.models import Event, Coupon, EventFlyerConfig, FlyerTextField, CheckoutQuestion, EventCustomization
 from apps.events.flyer_service import generate_flyer
 from apps.orgs.models import Organization
 from apps.tickets.forms import BookingForm
@@ -516,3 +516,98 @@ class FlyerConfigView(LoginRequiredMixin, View):
             )
 
         return redirect('events:flyer_config', org_slug=org_slug, event_slug=event_slug)
+
+
+class CheckoutQuestionsView(LoginRequiredMixin, View):
+    def get(self, request, org_slug, event_slug):
+        event = get_object_or_404(
+            Event.objects.select_related('organization'),
+            organization__slug=org_slug,
+            slug=event_slug,
+            organization__members=request.user
+        )
+        questions = event.checkout_questions.all()
+        return render(request, 'events/checkout_questions.html', {
+            'event': event,
+            'questions': questions,
+        })
+
+    def post(self, request, org_slug, event_slug):
+        event = get_object_or_404(
+            Event,
+            organization__slug=org_slug,
+            slug=event_slug,
+            organization__members=request.user
+        )
+
+        action = request.POST.get('action')
+
+        if action == 'add':
+            CheckoutQuestion.objects.create(
+                event=event,
+                question=request.POST.get('question'),
+                field_type=request.POST.get('field_type', 'TEXT'),
+                options=[o.strip() for o in request.POST.get('options', '').split('\n') if o.strip()],
+                is_required=request.POST.get('is_required') == 'on',
+                per_ticket=request.POST.get('per_ticket') == 'on',
+                order=event.checkout_questions.count()
+            )
+        elif action == 'delete':
+            question_id = request.POST.get('question_id')
+            CheckoutQuestion.objects.filter(id=question_id, event=event).delete()
+        elif action == 'reorder':
+            import json
+            order_data = json.loads(request.POST.get('order', '[]'))
+            for i, qid in enumerate(order_data):
+                CheckoutQuestion.objects.filter(id=qid, event=event).update(order=i)
+
+        return redirect('events:checkout_questions', org_slug=org_slug, event_slug=event_slug)
+
+
+class EventCustomizationView(LoginRequiredMixin, View):
+    def get(self, request, org_slug, event_slug):
+        event = get_object_or_404(
+            Event.objects.select_related('organization'),
+            organization__slug=org_slug,
+            slug=event_slug,
+            organization__members=request.user
+        )
+        try:
+            customization = event.customization
+        except EventCustomization.DoesNotExist:
+            customization = None
+
+        return render(request, 'events/customization.html', {
+            'event': event,
+            'customization': customization,
+        })
+
+    def post(self, request, org_slug, event_slug):
+        event = get_object_or_404(
+            Event,
+            organization__slug=org_slug,
+            slug=event_slug,
+            organization__members=request.user
+        )
+
+        try:
+            customization = event.customization
+        except EventCustomization.DoesNotExist:
+            customization = EventCustomization(event=event)
+
+        customization.primary_color = request.POST.get('primary_color', '#000000')
+        customization.secondary_color = request.POST.get('secondary_color', '#ffffff')
+        customization.background_color = request.POST.get('background_color', '#ffffff')
+        customization.text_color = request.POST.get('text_color', '#000000')
+        customization.heading_font = request.POST.get('heading_font', 'system-ui')
+        customization.body_font = request.POST.get('body_font', 'system-ui')
+        customization.layout_template = request.POST.get('layout_template', 'DEFAULT')
+        customization.hide_reckot_branding = request.POST.get('hide_reckot_branding') == 'on'
+
+        if 'hero_image' in request.FILES:
+            customization.hero_image = request.FILES['hero_image']
+        if 'logo' in request.FILES:
+            customization.logo = request.FILES['logo']
+
+        customization.save()
+        return redirect('events:customization', org_slug=org_slug, event_slug=event_slug)

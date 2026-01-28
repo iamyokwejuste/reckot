@@ -21,4 +21,6 @@ urlpatterns = [
     path('<slug:org_slug>/<slug:event_slug>/apply-feature/', actions.ApplyFeatureView.as_view(), name='apply_feature'),
     path('<slug:org_slug>/<slug:event_slug>/flyer/', actions.FlyerGeneratorView.as_view(), name='flyer_generator'),
     path('<slug:org_slug>/<slug:event_slug>/flyer/config/', actions.FlyerConfigView.as_view(), name='flyer_config'),
+    path('<slug:org_slug>/<slug:event_slug>/questions/', actions.CheckoutQuestionsView.as_view(), name='checkout_questions'),
+    path('<slug:org_slug>/<slug:event_slug>/customize/', actions.EventCustomizationView.as_view(), name='customization'),
 ]

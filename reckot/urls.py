@@ -6,7 +6,9 @@ from django.contrib.sitemaps.views import sitemap
 from django.http import JsonResponse
 from apps.core.actions import (
     HomeView, WhyUsView, PrivacyView, TermsView, FeaturesView,
-    OTPVerificationView, ResendOTPView, robots_txt, service_worker
+    OTPVerificationView, ResendOTPView, robots_txt, service_worker,
+    PhoneLoginRequestView, PhoneLoginVerifyView,
+    PhoneSignupRequestView, PhoneSignupVerifyView
 )
 from apps.core.sitemaps import StaticViewSitemap, HomeSitemap
 
@@ -42,6 +44,10 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path('accounts/verify-email/', OTPVerificationView.as_view(), name='otp_verify'),
     path('accounts/resend-otp/', ResendOTPView.as_view(), name='resend_otp'),
+    path('accounts/phone/login/', PhoneLoginRequestView.as_view(), name='phone_login_request'),
+    path('accounts/phone/login/verify/', PhoneLoginVerifyView.as_view(), name='phone_login_verify'),
+    path('accounts/phone/signup/', PhoneSignupRequestView.as_view(), name='phone_signup_request'),
+    path('accounts/phone/signup/verify/', PhoneSignupVerifyView.as_view(), name='phone_signup_verify'),
 ]
 
 if settings.DEBUG:

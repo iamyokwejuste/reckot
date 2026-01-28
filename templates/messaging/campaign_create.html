@@ -1,0 +1,146 @@
+{% extends "layouts/dashboard.html" %}
+{% load slippers %}
+
+{% block title %}New Campaign - {{ event.title }} - Reckot{% endblock %}
+
+{% block header_title %}
+<div>
+    <h1 class="text-lg font-semibold">New Campaign</h1>
+    <p class="text-sm text-muted-foreground">Send a message to {{ event.title }} attendees</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <form method="post" class="space-y-6" x-data="{
+        messageType: 'EMAIL',
+        recipientFilter: 'ALL',
+        showPreview: false,
+        previewContent: ''
+    }">
+        {% csrf_token %}
+
+        <div class="card p-6 space-y-5">
+            <h2 class="font-semibold flex items-center gap-2">
+                <i data-lucide="settings-2" class="w-4 h-4"></i>
+                Campaign Settings
+            </h2>
+
+            <div>
+                <label for="name" class="block text-sm font-medium mb-2">Campaign Name</label>
+                <input type="text" name="name" id="name" required placeholder="e.g., Event Reminder"
+                       class="input">
+                <p class="text-xs text-muted-foreground mt-1">Internal name to identify this campaign</p>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-2">Message Type</label>
+                <div class="flex p-1 bg-muted rounded-lg">
+                    <button type="button" @click="messageType = 'EMAIL'"
+                            class="flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm font-medium rounded-md transition-all"
+                            :class="messageType === 'EMAIL' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground'">
+                        <i data-lucide="mail" class="w-4 h-4"></i>
+                        Email
+                    </button>
+                    <button type="button" @click="messageType = 'SMS'"
+                            class="flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm font-medium rounded-md transition-all"
+                            :class="messageType === 'SMS' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground'">
+                        <i data-lucide="message-square" class="w-4 h-4"></i>
+                        SMS
+                    </button>
+                </div>
+                <input type="hidden" name="message_type" :value="messageType">
+            </div>
+        </div>
+
+        <div class="card p-6 space-y-5">
+            <h2 class="font-semibold flex items-center gap-2">
+                <i data-lucide="users" class="w-4 h-4"></i>
+                Recipients
+            </h2>
+
+            <div>
+                <label class="block text-sm font-medium mb-2">Who should receive this message?</label>
+                <select name="recipient_filter" class="input" x-model="recipientFilter">
+                    <option value="ALL">All Attendees</option>
+                    <option value="TICKET_TYPE">Specific Ticket Types</option>
+                    <option value="CHECKED_IN">Checked In Only</option>
+                    <option value="NOT_CHECKED_IN">Not Checked In</option>
+                </select>
+            </div>
+
+            <div x-show="recipientFilter === 'TICKET_TYPE'" x-cloak class="space-y-3">
+                <label class="block text-sm font-medium">Select Ticket Types</label>
+                {% for tt in ticket_types %}
+                <label class="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 cursor-pointer">
+                    <input type="checkbox" name="ticket_types" value="{{ tt.id }}" class="h-4 w-4 rounded border-border">
+                    <span class="font-medium text-sm">{{ tt.name }}</span>
+                    <span class="text-xs text-muted-foreground ml-auto">{{ tt.price|floatformat:0 }} XAF</span>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="card p-6 space-y-5">
+            <h2 class="font-semibold flex items-center gap-2">
+                <i data-lucide="pen-line" class="w-4 h-4"></i>
+                Message Content
+            </h2>
+
+            {% if templates %}
+            <div>
+                <label class="block text-sm font-medium mb-2">Use Template (optional)</label>
+                <select class="input" @change="if($event.target.value) {
+                    const tpl = JSON.parse($event.target.selectedOptions[0].dataset.template || '{}');
+                    document.getElementById('subject').value = tpl.subject || '';
+                    document.getElementById('body').value = tpl.body || '';
+                }">
+                    <option value="">Choose a template...</option>
+                    {% for tpl in templates %}
+                    <option value="{{ tpl.id }}" data-template='{"subject":"{{ tpl.subject|escapejs }}","body":"{{ tpl.body|escapejs }}"}'>
+                        {{ tpl.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+
+            <div x-show="messageType === 'EMAIL'">
+                <label for="subject" class="block text-sm font-medium mb-2">Subject</label>
+                <input type="text" name="subject" id="subject" placeholder="Your message subject"
+                       class="input">
+            </div>
+
+            <div>
+                <label for="body" class="block text-sm font-medium mb-2">Message</label>
+                <textarea name="body" id="body" rows="8" required
+                          placeholder="Write your message here..."
+                          class="input resize-none font-mono text-sm"></textarea>
+                <div class="mt-2 flex items-center justify-between">
+                    <p class="text-xs text-muted-foreground">
+                        Available variables: <code class="px-1 py-0.5 rounded bg-muted">{{ "{{" }}name{{ "}}" }}</code>,
+                        <code class="px-1 py-0.5 rounded bg-muted">{{ "{{" }}ticket_type{{ "}}" }}</code>,
+                        <code class="px-1 py-0.5 rounded bg-muted">{{ "{{" }}event_name{{ "}}" }}</code>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between gap-4">
+            <a href="{% url 'messaging:campaign_list' org_slug=organization.slug %}" class="btn btn-outline btn-md">
+                Cancel
+            </a>
+            <div class="flex items-center gap-3">
+                <button type="submit" name="send_now" value="" class="btn btn-outline btn-md">
+                    <i data-lucide="save" class="w-4 h-4"></i>
+                    Save Draft
+                </button>
+                <button type="submit" name="send_now" value="1" class="btn btn-primary btn-md">
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                    Send Now
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

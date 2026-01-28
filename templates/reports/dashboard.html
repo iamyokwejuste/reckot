@@ -1,125 +1,356 @@
-{% extends "base.html" %}
+{% extends "layouts/dashboard.html" %}
 {% load slippers %}
 
 {% block title %}Reports - {{ event.title }} - Reckot{% endblock %}
 
+{% block header_title %}
+<div>
+    <h1 class="text-lg font-semibold">Real-time Statistics</h1>
+    <p class="text-sm text-muted-foreground">{{ event.title }}</p>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<div class="flex items-center gap-2">
+    <span id="live-indicator" class="flex items-center gap-2 text-sm text-muted-foreground">
+        <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        Live
+    </span>
+    <a href="{% url 'reports:attendee_list' org_slug=event.organization.slug event_slug=event.slug %}"
+       class="btn btn-outline btn-sm">
+        <i data-lucide="users" class="w-4 h-4"></i>
+        Attendee List
+    </a>
+    <a href="{% url 'reports:export_center' org_slug=event.organization.slug event_slug=event.slug %}"
+       class="btn btn-primary btn-sm">
+        <i data-lucide="download" class="w-4 h-4"></i>
+        Export
+    </a>
+</div>
+{% endblock %}
+
 {% block content %}
-<div class="container py-8">
-    {% #breadcrumb %}
-        {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
-        {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-        {% #breadcrumb_item href="/events/" %}Events{% /breadcrumb_item %}
-        {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-        {% #breadcrumb_item %}Reports{% /breadcrumb_item %}
-    {% /breadcrumb %}
+<div class="space-y-6">
+    <div id="live-stats-container"
+         hx-get="{% url 'reports:live_stats' org_slug=event.organization.slug event_slug=event.slug %}"
+         hx-trigger="every 30s"
+         hx-swap="innerHTML"
+         hx-indicator="#live-indicator">
 
-    <div class="mt-6" data-animate="fade-up">
-        <h1 class="text-2xl font-bold">{{ event.title }}</h1>
-        <p class="text-muted-foreground">Reports and Exports</p>
-    </div>
-
-    <div class="mt-8 grid gap-6 md:grid-cols-4" data-stagger>
-        {% #card class="text-center" %}
-            <p class="text-3xl font-bold">{{ summary.total_tickets }}</p>
-            <p class="text-sm text-muted-foreground">Total Tickets</p>
-        {% /card %}
-        {% #card class="text-center" %}
-            <p class="text-3xl font-bold text-success">{{ summary.checked_in }}</p>
-            <p class="text-sm text-muted-foreground">Checked In</p>
-        {% /card %}
-        {% #card class="text-center" %}
-            <p class="text-3xl font-bold">{{ summary.check_in_rate }}%</p>
-            <p class="text-sm text-muted-foreground">Check-in Rate</p>
-        {% /card %}
-        {% #card class="text-center" %}
-            <p class="text-3xl font-bold gradient-text">{{ summary.total_revenue }} XAF</p>
-            <p class="text-sm text-muted-foreground">Total Revenue</p>
-        {% /card %}
-    </div>
-
-    <div class="mt-8 grid gap-8 lg:grid-cols-2">
-        <div data-animate="fade-up" data-delay="0.1">
-            {% #card %}
-                <h2 class="text-lg font-semibold">Generate Report</h2>
-                <p class="text-sm text-muted-foreground mb-4">Export data for this event</p>
-
-                <form
-                    hx-post="{% url 'reports:generate' org_slug=event.organization.slug event_slug=event.slug %}"
-                    hx-target="#export-result"
-                    hx-swap="innerHTML"
-                    class="space-y-4"
-                >
-                    {% csrf_token %}
-
-                    <div class="space-y-2">
-                        {% #label for="report_type" %}Report Type{% /label %}
-                        {% #select name="report_type" required=True %}
-                            {% for value, label in report_types %}
-                            <option value="{{ value }}">{{ label }}</option>
-                            {% endfor %}
-                        {% /select %}
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="stat-card group hover:border-primary/50 transition-colors">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-medium text-muted-foreground">Total Tickets</p>
+                    <div class="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <i data-lucide="ticket" class="h-4 w-4 text-primary"></i>
                     </div>
+                </div>
+                <div class="mt-3">
+                    <p class="text-3xl font-bold">{{ summary.total_tickets }}</p>
+                    <p class="text-xs text-muted-foreground mt-1">Confirmed tickets sold</p>
+                </div>
+            </div>
 
-                    <div class="space-y-2">
-                        {% #label for="format" %}Format{% /label %}
-                        {% #select name="format" %}
-                            <option value="CSV">CSV</option>
-                            <option value="EXCEL">Excel (.xlsx)</option>
-                        {% /select %}
+            <div class="stat-card group hover:border-emerald-500/50 transition-colors">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-medium text-muted-foreground">Checked In</p>
+                    <div class="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                        <i data-lucide="scan-line" class="h-4 w-4 text-emerald-500"></i>
                     </div>
+                </div>
+                <div class="mt-3">
+                    <p class="text-3xl font-bold text-emerald-600">{{ summary.checked_in }}</p>
+                    <div class="flex items-center gap-2 mt-1">
+                        <div class="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                            <div class="h-full bg-emerald-500 rounded-full transition-all duration-500"
+                                 style="width: {{ summary.check_in_rate }}%"></div>
+                        </div>
+                        <span class="text-xs text-muted-foreground">{{ summary.check_in_rate }}%</span>
+                    </div>
+                </div>
+            </div>
 
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input
-                            type="checkbox"
-                            name="mask_emails"
-                            id="mask_emails"
-                            checked
-                            class="h-4 w-4 rounded border-2 border-input text-primary focus:ring-primary"
-                        />
-                        <span class="text-sm font-medium">
-                            Mask email addresses (privacy)
-                        </span>
-                    </label>
+            <div class="stat-card group hover:border-blue-500/50 transition-colors">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-medium text-muted-foreground">Total Revenue</p>
+                    <div class="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                        <i data-lucide="banknote" class="h-4 w-4 text-blue-500"></i>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <p class="text-3xl font-bold text-blue-600">{{ summary.total_revenue|floatformat:0 }}</p>
+                    <p class="text-xs text-muted-foreground mt-1">XAF confirmed</p>
+                </div>
+            </div>
 
-                    {% #button type="submit" class="w-full" variant="gradient" %}
-                        <i data-lucide="download" class="mr-2 h-4 w-4"></i>
-                        Generate Report
-                    {% /button %}
-                </form>
-
-                <div id="export-result" class="mt-4"></div>
-            {% /card %}
+            <div class="stat-card group hover:border-amber-500/50 transition-colors">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-medium text-muted-foreground">Pending</p>
+                    <div class="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                        <i data-lucide="clock" class="h-4 w-4 text-amber-500"></i>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <p class="text-3xl font-bold text-amber-600">{{ summary.pending_count|default:0 }}</p>
+                    <p class="text-xs text-muted-foreground mt-1">Awaiting payment</p>
+                </div>
+            </div>
         </div>
 
-        <div data-animate="fade-up" data-delay="0.2">
-            {% #card %}
-                <h2 class="text-lg font-semibold mb-4">Recent Exports</h2>
-
-                {% if recent_exports %}
-                <div class="space-y-3">
-                    {% for export in recent_exports %}
-                    <div class="flex items-center justify-between rounded-xl border border-border p-4 hover:bg-accent/50 transition-colors">
-                        <div>
-                            <p class="font-medium">{{ export.get_report_type_display }}</p>
-                            <p class="text-xs text-muted-foreground">
-                                {{ export.get_format_display }} - {{ export.created_at|date:"M d, Y H:i" }}
-                            </p>
+        <!-- Ticket Breakdown -->
+        {% if summary.ticket_breakdown %}
+        <div class="mt-6 card p-5">
+            <h3 class="font-semibold flex items-center gap-2 mb-4">
+                <i data-lucide="pie-chart" class="w-4 h-4"></i>
+                Ticket Breakdown
+            </h3>
+            <div class="space-y-3">
+                {% for item in summary.ticket_breakdown %}
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="h-3 w-3 rounded-full bg-primary" style="opacity: {% widthratio forloop.counter 10 100 %}%"></div>
+                        <span class="text-sm">{{ item.ticket_type__name }}</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="w-32 h-2 bg-muted rounded-full overflow-hidden">
+                            <div class="h-full bg-primary rounded-full"
+                                 style="width: {% widthratio item.count summary.total_tickets 100 %}%"></div>
                         </div>
-                        {% if export.file %}
-                        <a href="{% url 'reports:download' export.reference %}">
-                            {% #button variant="outline" size="icon" %}
-                                <i data-lucide="download" class="h-4 w-4"></i>
-                            {% /button %}
-                        </a>
-                        {% endif %}
+                        <span class="text-sm font-medium w-12 text-right">{{ item.count }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Sales Timeline & Recent Activity -->
+    <div class="grid gap-6 lg:grid-cols-2">
+        <!-- Sales Timeline Chart -->
+        <div class="card p-5">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-semibold flex items-center gap-2">
+                    <i data-lucide="trending-up" class="w-4 h-4"></i>
+                    Sales Timeline
+                </h3>
+                <div class="flex items-center gap-1 bg-muted rounded-lg p-1">
+                    <button type="button" class="px-2 py-1 text-xs rounded bg-background shadow-sm">7D</button>
+                    <button type="button" class="px-2 py-1 text-xs rounded text-muted-foreground hover:text-foreground">30D</button>
+                    <button type="button" class="px-2 py-1 text-xs rounded text-muted-foreground hover:text-foreground">All</button>
+                </div>
+            </div>
+
+            {% if sales_timeline %}
+            <div class="h-48 flex items-end gap-1">
+                {% for day in sales_timeline %}
+                <div class="flex-1 flex flex-col items-center gap-1">
+                    <div class="w-full bg-primary/20 rounded-t transition-all hover:bg-primary/30 relative group"
+                         style="height: {% if max_daily_sales > 0 %}{% widthratio day.count max_daily_sales 100 %}{% else %}0{% endif %}%;">
+                        <div class="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity
+                                    bg-foreground text-background text-xs px-2 py-1 rounded whitespace-nowrap">
+                            {{ day.count }} tickets
+                        </div>
+                    </div>
+                    <span class="text-[10px] text-muted-foreground">{{ day.date|date:"d" }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="h-48 flex items-center justify-center text-muted-foreground">
+                <div class="text-center">
+                    <i data-lucide="bar-chart-3" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+                    <p class="text-sm">No sales data yet</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card p-5">
+            <h3 class="font-semibold flex items-center gap-2 mb-4">
+                <i data-lucide="activity" class="w-4 h-4"></i>
+                Recent Activity
+            </h3>
+
+            <div id="recent-activity"
+                 hx-get="{% url 'reports:recent_activity' org_slug=event.organization.slug event_slug=event.slug %}"
+                 hx-trigger="every 30s"
+                 hx-swap="innerHTML">
+                {% if recent_activity %}
+                <div class="space-y-3">
+                    {% for activity in recent_activity %}
+                    <div class="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                        <div class="h-8 w-8 rounded-full flex items-center justify-center shrink-0
+                                    {% if activity.type == 'sale' %}bg-emerald-500/10 text-emerald-500
+                                    {% elif activity.type == 'checkin' %}bg-blue-500/10 text-blue-500
+                                    {% else %}bg-muted text-muted-foreground{% endif %}">
+                            {% if activity.type == 'sale' %}
+                            <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                            {% elif activity.type == 'checkin' %}
+                            <i data-lucide="scan-line" class="w-4 h-4"></i>
+                            {% else %}
+                            <i data-lucide="info" class="w-4 h-4"></i>
+                            {% endif %}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium">{{ activity.title }}</p>
+                            <p class="text-xs text-muted-foreground truncate">{{ activity.description }}</p>
+                        </div>
+                        <span class="text-xs text-muted-foreground whitespace-nowrap">{{ activity.time }}</span>
                     </div>
                     {% endfor %}
                 </div>
                 {% else %}
-                {% #empty_state icon="file-text" title="No exports yet" description="Generate your first report above." %}{% /empty_state %}
+                <div class="text-center py-8 text-muted-foreground">
+                    <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+                    <p class="text-sm">No recent activity</p>
+                </div>
                 {% endif %}
-            {% /card %}
+            </div>
         </div>
     </div>
+
+    <!-- Quick Actions & Revenue Breakdown -->
+    <div class="grid gap-6 lg:grid-cols-3">
+        <!-- Revenue by Ticket Type -->
+        <div class="card p-5 lg:col-span-2">
+            <h3 class="font-semibold flex items-center gap-2 mb-4">
+                <i data-lucide="coins" class="w-4 h-4"></i>
+                Revenue by Ticket Type
+            </h3>
+            {% if summary.revenue_breakdown %}
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-border">
+                            <th class="text-left text-sm font-medium text-muted-foreground pb-3">Ticket Type</th>
+                            <th class="text-center text-sm font-medium text-muted-foreground pb-3">Sold</th>
+                            <th class="text-center text-sm font-medium text-muted-foreground pb-3">Price</th>
+                            <th class="text-right text-sm font-medium text-muted-foreground pb-3">Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border">
+                        {% for item in summary.revenue_breakdown %}
+                        <tr class="hover:bg-muted/50 transition-colors">
+                            <td class="py-3">
+                                <span class="font-medium text-sm">{{ item.name }}</span>
+                            </td>
+                            <td class="py-3 text-center text-sm">{{ item.sold }}</td>
+                            <td class="py-3 text-center text-sm text-muted-foreground">{{ item.price|floatformat:0 }} XAF</td>
+                            <td class="py-3 text-right text-sm font-semibold">{{ item.revenue|floatformat:0 }} XAF</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr class="border-t-2 border-border">
+                            <td class="pt-3 font-semibold">Total</td>
+                            <td class="pt-3 text-center font-semibold">{{ summary.total_tickets }}</td>
+                            <td class="pt-3"></td>
+                            <td class="pt-3 text-right font-bold text-primary">{{ summary.total_revenue|floatformat:0 }} XAF</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-8 text-muted-foreground">
+                <i data-lucide="receipt" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+                <p class="text-sm">No revenue data yet</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card p-5">
+            <h3 class="font-semibold flex items-center gap-2 mb-4">
+                <i data-lucide="zap" class="w-4 h-4"></i>
+                Quick Actions
+            </h3>
+            <div class="space-y-2">
+                <a href="{% url 'reports:export_center' org_slug=event.organization.slug event_slug=event.slug %}"
+                   class="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                    <div class="h-9 w-9 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                        <i data-lucide="file-spreadsheet" class="w-4 h-4 text-blue-500"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium">Export Reports</p>
+                        <p class="text-xs text-muted-foreground">CSV, Excel, PDF</p>
+                    </div>
+                </a>
+                <a href="{% url 'reports:attendee_list' org_slug=event.organization.slug event_slug=event.slug %}"
+                   class="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                    <div class="h-9 w-9 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                        <i data-lucide="users" class="w-4 h-4 text-emerald-500"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium">Attendee List</p>
+                        <p class="text-xs text-muted-foreground">View all attendees</p>
+                    </div>
+                </a>
+                <a href="{% url 'reports:attendee_list' org_slug=event.organization.slug event_slug=event.slug %}?print=1"
+                   class="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                    <div class="h-9 w-9 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                        <i data-lucide="printer" class="w-4 h-4 text-purple-500"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium">Print Check-in List</p>
+                        <p class="text-xs text-muted-foreground">Printable format</p>
+                    </div>
+                </a>
+                <a href="{% url 'check_in:scan' org_slug=event.organization.slug event_slug=event.slug %}"
+                   class="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                    <div class="h-9 w-9 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                        <i data-lucide="qr-code" class="w-4 h-4 text-amber-500"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium">QR Scanner</p>
+                        <p class="text-xs text-muted-foreground">Check in attendees</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Exports -->
+    {% if recent_exports %}
+    <div class="card p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold flex items-center gap-2">
+                <i data-lucide="file-text" class="w-4 h-4"></i>
+                Recent Exports
+            </h3>
+            <a href="{% url 'reports:export_center' org_slug=event.organization.slug event_slug=event.slug %}"
+               class="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                View all
+            </a>
+        </div>
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {% for export in recent_exports %}
+            <div class="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                <div class="flex items-center gap-3">
+                    <div class="h-8 w-8 rounded-lg bg-muted flex items-center justify-center">
+                        {% if export.format == 'PDF' %}
+                        <i data-lucide="file-text" class="w-4 h-4 text-red-500"></i>
+                        {% elif export.format == 'EXCEL' %}
+                        <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-500"></i>
+                        {% else %}
+                        <i data-lucide="file" class="w-4 h-4 text-blue-500"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium">{{ export.get_report_type_display }}</p>
+                        <p class="text-xs text-muted-foreground">{{ export.created_at|date:"M d, H:i" }}</p>
+                    </div>
+                </div>
+                {% if export.file %}
+                <a href="{% url 'reports:download' export.reference %}" class="btn btn-outline btn-sm p-2">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                </a>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

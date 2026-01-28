@@ -1,0 +1,195 @@
+{% extends "layouts/dashboard.html" %}
+{% load slippers %}
+
+{% block title %}{{ campaign.name }} - Reckot{% endblock %}
+
+{% block header_title %}
+<div>
+    <h1 class="text-lg font-semibold">{{ campaign.name }}</h1>
+    <p class="text-sm text-muted-foreground">{{ campaign.event.title }}</p>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+{% if campaign.status == 'DRAFT' %}
+<form method="post" action="{% url 'messaging:campaign_send' org_slug=organization.slug campaign_ref=campaign.reference %}">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary btn-md">
+        <i data-lucide="send" class="w-4 h-4"></i>
+        Send Campaign
+    </button>
+</form>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="grid md:grid-cols-4 gap-4">
+        <div class="card p-5">
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <i data-lucide="users" class="w-5 h-5 text-primary"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-semibold">{{ campaign.total_recipients }}</p>
+                    <p class="text-xs text-muted-foreground">Recipients</p>
+                </div>
+            </div>
+        </div>
+        <div class="card p-5">
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                    <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-semibold">{{ campaign.sent_count }}</p>
+                    <p class="text-xs text-muted-foreground">Sent</p>
+                </div>
+            </div>
+        </div>
+        <div class="card p-5">
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                    <i data-lucide="eye" class="w-5 h-5 text-blue-600"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-semibold">0</p>
+                    <p class="text-xs text-muted-foreground">Opened</p>
+                </div>
+            </div>
+        </div>
+        <div class="card p-5">
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-lg bg-red-500/10 flex items-center justify-center">
+                    <i data-lucide="x-circle" class="w-5 h-5 text-red-600"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-semibold">{{ campaign.failed_count }}</p>
+                    <p class="text-xs text-muted-foreground">Failed</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-6">
+        <div class="card p-6">
+            <h2 class="font-semibold mb-4 flex items-center gap-2">
+                <i data-lucide="info" class="w-4 h-4"></i>
+                Campaign Details
+            </h2>
+            <dl class="space-y-4">
+                <div class="flex justify-between py-2 border-b border-border">
+                    <dt class="text-muted-foreground">Status</dt>
+                    <dd>
+                        {% if campaign.status == 'DRAFT' %}
+                        <span class="badge badge-outline">Draft</span>
+                        {% elif campaign.status == 'SCHEDULED' %}
+                        <span class="badge badge-info">Scheduled</span>
+                        {% elif campaign.status == 'SENDING' %}
+                        <span class="badge badge-warning">Sending</span>
+                        {% elif campaign.status == 'COMPLETED' %}
+                        <span class="badge badge-success">Completed</span>
+                        {% elif campaign.status == 'FAILED' %}
+                        <span class="badge badge-destructive">Failed</span>
+                        {% endif %}
+                    </dd>
+                </div>
+                <div class="flex justify-between py-2 border-b border-border">
+                    <dt class="text-muted-foreground">Type</dt>
+                    <dd class="font-medium">{{ campaign.get_message_type_display }}</dd>
+                </div>
+                <div class="flex justify-between py-2 border-b border-border">
+                    <dt class="text-muted-foreground">Recipients</dt>
+                    <dd class="font-medium">{{ campaign.get_recipient_filter_display }}</dd>
+                </div>
+                <div class="flex justify-between py-2 border-b border-border">
+                    <dt class="text-muted-foreground">Created</dt>
+                    <dd>{{ campaign.created_at|date:"M d, Y H:i" }}</dd>
+                </div>
+                {% if campaign.sent_at %}
+                <div class="flex justify-between py-2">
+                    <dt class="text-muted-foreground">Sent</dt>
+                    <dd>{{ campaign.sent_at|date:"M d, Y H:i" }}</dd>
+                </div>
+                {% endif %}
+            </dl>
+        </div>
+
+        <div class="card p-6">
+            <h2 class="font-semibold mb-4 flex items-center gap-2">
+                <i data-lucide="file-text" class="w-4 h-4"></i>
+                Message Content
+            </h2>
+            {% if campaign.subject %}
+            <div class="mb-4">
+                <p class="text-xs text-muted-foreground mb-1">Subject</p>
+                <p class="font-medium">{{ campaign.subject }}</p>
+            </div>
+            {% endif %}
+            <div>
+                <p class="text-xs text-muted-foreground mb-1">Body</p>
+                <div class="p-4 rounded-lg bg-muted/50 text-sm whitespace-pre-wrap">{{ campaign.body }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="p-5 border-b border-border">
+            <h2 class="font-semibold flex items-center gap-2">
+                <i data-lucide="list" class="w-4 h-4"></i>
+                Delivery Status
+            </h2>
+        </div>
+        {% if deliveries %}
+        <div class="divide-y divide-border">
+            {% for delivery in deliveries %}
+            <div class="p-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
+                        <i data-lucide="user" class="w-4 h-4 text-muted-foreground"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium">
+                            {% if delivery.recipient_email %}{{ delivery.recipient_email }}{% else %}{{ delivery.recipient_phone }}{% endif %}
+                        </p>
+                        <p class="text-xs text-muted-foreground">{{ delivery.ticket.ticket_type.name }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    {% if delivery.status == 'PENDING' %}
+                    <span class="badge badge-outline">Pending</span>
+                    {% elif delivery.status == 'SENT' %}
+                    <span class="badge badge-info">Sent</span>
+                    {% elif delivery.status == 'DELIVERED' %}
+                    <span class="badge badge-success">Delivered</span>
+                    {% elif delivery.status == 'OPENED' %}
+                    <span class="badge badge-success">Opened</span>
+                    {% elif delivery.status == 'CLICKED' %}
+                    <span class="badge badge-success">Clicked</span>
+                    {% elif delivery.status == 'BOUNCED' %}
+                    <span class="badge badge-warning">Bounced</span>
+                    {% elif delivery.status == 'FAILED' %}
+                    <span class="badge badge-destructive">Failed</span>
+                    {% endif %}
+                    {% if delivery.sent_at %}
+                    <span class="text-xs text-muted-foreground">{{ delivery.sent_at|date:"M d, H:i" }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="p-8 text-center text-muted-foreground">
+            <p>No deliveries yet. Send the campaign to see delivery status.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="flex items-center gap-3">
+        <a href="{% url 'messaging:campaign_list' org_slug=organization.slug %}" class="btn btn-outline btn-md">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            Back to Campaigns
+        </a>
+    </div>
+</div>
+{% endblock %}

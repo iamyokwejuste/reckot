@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    {% for item in tickets_data %}
+    <div class="ticket-card {% if not forloop.first %}page-break{% endif %}">
+        <div class="ticket-header">
+            <div class="event-info">
+                <h2>{{ event.title }}</h2>
+                <p>{{ organization.name }}</p>
+            </div>
+            <span class="ticket-type-badge">{{ item.ticket.ticket_type.name }}</span>
+        </div>
+
+        <div class="ticket-body">
+            <div class="ticket-details">
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <label>Date</label>
+                        <span>{{ event.start_at|date:"F d, Y" }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Time</label>
+                        <span>{{ event.start_at|date:"g:i A" }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Location</label>
+                        <span>{{ event.location }}</span>
+                    </div>
+                    {% if item.ticket.attendee_name %}
+                    <div class="detail-item">
+                        <label>Attendee</label>
+                        <span>{{ item.ticket.attendee_name }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="detail-item">
+                        <label>Ticket #</label>
+                        <span>{{ forloop.counter }} of {{ tickets_data|length }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Booking Ref</label>
+                        <span>{{ booking.reference|slice:":8"|upper }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="qr-section">
+                <div class="qr-code">
+                    <img src="data:image/png;base64,{{ item.qr_code_data }}" alt="QR Code">
+                </div>
+                <p class="ticket-code">{{ item.ticket.code|slice:":8" }}</p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</body>
+</html>

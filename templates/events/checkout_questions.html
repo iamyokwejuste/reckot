@@ -1,0 +1,147 @@
+{% extends "layouts/dashboard.html" %}
+{% load slippers %}
+
+{% block title %}Checkout Questions - {{ event.title }} - Reckot{% endblock %}
+
+{% block header_title %}
+<div>
+    <h1 class="text-lg font-semibold">Checkout Questions</h1>
+    <p class="text-sm text-muted-foreground">{{ event.title }}</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+    <div class="flex items-center justify-between">
+        <a href="{% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug %}" class="btn btn-outline btn-sm">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            Back to Event
+        </a>
+        <span class="text-sm text-muted-foreground">{{ questions.count }} question{{ questions.count|pluralize }}</span>
+    </div>
+
+    <div class="card p-6" x-data="{ showForm: false }">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="font-semibold">Custom Questions</h2>
+            <button type="button" @click="showForm = !showForm" class="btn btn-primary btn-sm">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                Add Question
+            </button>
+        </div>
+
+        <form x-show="showForm" x-cloak method="post" class="mb-6 p-4 rounded-lg border border-border bg-muted/30 space-y-4">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="add">
+
+            <div>
+                <label for="question" class="block text-sm font-medium mb-2">Question</label>
+                <input type="text" name="question" id="question" required placeholder="e.g., What is your T-shirt size?" class="input">
+            </div>
+
+            <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="field_type" class="block text-sm font-medium mb-2">Field Type</label>
+                    <select name="field_type" id="field_type" class="input" x-data x-ref="fieldType" @change="$refs.optionsGroup.style.display = ['SELECT', 'RADIO'].includes($refs.fieldType.value) ? 'block' : 'none'">
+                        <option value="TEXT">Text</option>
+                        <option value="TEXTAREA">Long Text</option>
+                        <option value="SELECT">Dropdown</option>
+                        <option value="RADIO">Radio Buttons</option>
+                        <option value="CHECKBOX">Checkbox</option>
+                        <option value="EMAIL">Email</option>
+                        <option value="PHONE">Phone Number</option>
+                        <option value="DATE">Date</option>
+                        <option value="NUMBER">Number</option>
+                    </select>
+                </div>
+                <div x-ref="optionsGroup" style="display: none;">
+                    <label for="options" class="block text-sm font-medium mb-2">Options (one per line)</label>
+                    <textarea name="options" id="options" rows="3" placeholder="Small&#10;Medium&#10;Large&#10;X-Large" class="input resize-none text-sm"></textarea>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-6">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="is_required" class="h-4 w-4 rounded border-border">
+                    <span class="text-sm">Required</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="per_ticket" class="h-4 w-4 rounded border-border">
+                    <span class="text-sm">Ask per ticket</span>
+                </label>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    Add Question
+                </button>
+                <button type="button" @click="showForm = false" class="btn btn-outline btn-sm">Cancel</button>
+            </div>
+        </form>
+
+        {% if questions %}
+        <div class="space-y-3" x-data="{ dragging: null }">
+            {% for q in questions %}
+            <div class="flex items-center gap-3 p-4 rounded-lg border border-border bg-background hover:shadow-sm transition-shadow">
+                <div class="cursor-grab text-muted-foreground hover:text-foreground">
+                    <i data-lucide="grip-vertical" class="w-4 h-4"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                        <p class="font-medium text-sm truncate">{{ q.question }}</p>
+                        {% if q.is_required %}
+                        <span class="badge badge-outline text-xs">Required</span>
+                        {% endif %}
+                        {% if q.per_ticket %}
+                        <span class="badge badge-info text-xs">Per ticket</span>
+                        {% endif %}
+                    </div>
+                    <div class="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                        <span>{{ q.get_field_type_display }}</span>
+                        {% if q.options %}
+                        <span>{{ q.options|length }} option{{ q.options|length|pluralize }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <form method="post" onsubmit="return confirm('Delete this question?')">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="question_id" value="{{ q.id }}">
+                    <button type="submit" class="btn btn-outline btn-xs text-red-500 hover:bg-red-500/10">
+                        <i data-lucide="trash-2" class="w-3 h-3"></i>
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-8 text-muted-foreground">
+            <i data-lucide="clipboard-list" class="w-10 h-10 mx-auto mb-3 opacity-50"></i>
+            <p>No custom questions yet</p>
+            <p class="text-sm mt-1">Add questions to collect additional info during checkout</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="card p-6 bg-muted/30">
+        <h3 class="font-semibold flex items-center gap-2 mb-3">
+            <i data-lucide="info" class="w-4 h-4"></i>
+            How it works
+        </h3>
+        <ul class="text-sm text-muted-foreground space-y-2">
+            <li class="flex items-start gap-2">
+                <i data-lucide="check" class="w-4 h-4 text-emerald-500 mt-0.5"></i>
+                <span>Questions appear during checkout after ticket selection</span>
+            </li>
+            <li class="flex items-start gap-2">
+                <i data-lucide="check" class="w-4 h-4 text-emerald-500 mt-0.5"></i>
+                <span>"Per ticket" questions are asked for each ticket purchased</span>
+            </li>
+            <li class="flex items-start gap-2">
+                <i data-lucide="check" class="w-4 h-4 text-emerald-500 mt-0.5"></i>
+                <span>Responses are saved with the booking and exportable in reports</span>
+            </li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

@@ -145,3 +145,164 @@ class SettingsView(LoginRequiredMixin, View):
         user.save()
         messages.success(request, 'Settings updated successfully.')
         return redirect('core:settings')
+
+
+class PhoneLoginRequestView(View):
+    def post(self, request):
+        from apps.core.models import User
+        phone = request.POST.get('phone_number', '').strip()
+        if not phone:
+            return HttpResponse(
+                '<p class="text-sm text-red-500 mt-2">Please enter a phone number</p>',
+                status=400
+            )
+
+        phone = self._normalize_phone(phone)
+        user = User.objects.filter(phone_number=phone).first()
+        if not user:
+            return HttpResponse(
+                '<p class="text-sm text-red-500 mt-2">No account found with this phone number</p>',
+                status=400
+            )
+
+        otp = OTPVerification.create_for_user(user, OTPVerification.Type.PHONE)
+        self._send_otp_sms(phone, otp.code)
+        return HttpResponse(
+            '<p class="text-sm text-emerald-500 mt-2">Verification code sent!</p>'
+        )
+
+    def _normalize_phone(self, phone):
+        import re
+        return re.sub(r'[\s\-\(\)]', '', phone)
+
+    def _send_otp_sms(self, phone, code):
+        from apps.core.services.notifications import NotificationService
+        NotificationService.send_otp_sms(phone, code)
+
+
+class PhoneLoginVerifyView(View):
+    def post(self, request):
+        from django.contrib.auth import login
+        from apps.core.models import User
+        phone = request.POST.get('phone_number', '').strip()
+        code = request.POST.get('otp_code', '').strip()
+
+        if not phone or not code:
+            messages.error(request, 'Phone number and code are required')
+            return redirect('account_login')
+
+        phone = self._normalize_phone(phone)
+        user = User.objects.filter(phone_number=phone).first()
+        if not user:
+            messages.error(request, 'Invalid phone number')
+            return redirect('account_login')
+
+        otp = OTPVerification.objects.filter(
+            user=user,
+            otp_type=OTPVerification.Type.PHONE,
+            is_used=False
+        ).order_by('-created_at').first()
+
+        if not otp:
+            messages.error(request, 'No verification code found. Please request a new one.')
+            return redirect('account_login')
+
+        if otp.verify(code):
+            user.phone_verified = True
+            user.save(update_fields=['phone_verified'])
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            messages.success(request, 'Logged in successfully!')
+            return redirect('home')
+        elif otp.is_expired:
+            messages.error(request, 'Code expired. Please request a new one.')
+        elif otp.attempts >= 5:
+            messages.error(request, 'Too many attempts. Please request a new code.')
+        else:
+            messages.error(request, 'Invalid code. Please try again.')
+
+        return redirect('account_login')
+
+    def _normalize_phone(self, phone):
+        import re
+        return re.sub(r'[\s\-\(\)]', '', phone)
+
+
+class PhoneSignupRequestView(View):
+    def post(self, request):
+        from apps.core.models import User
+        phone = request.POST.get('phone_number', '').strip()
+        if not phone:
+            return HttpResponse(
+                '<p class="text-sm text-red-500 mt-2">Please enter a phone number</p>',
+                status=400
+            )
+
+        phone = self._normalize_phone(phone)
+        if User.objects.filter(phone_number=phone).exists():
+            return HttpResponse(
+                '<p class="text-sm text-red-500 mt-2">An account with this phone number already exists</p>',
+                status=400
+            )
+
+        request.session['signup_phone'] = phone
+        request.session['signup_otp'] = OTPVerification.generate_code()
+        self._send_otp_sms(phone, request.session['signup_otp'])
+        return HttpResponse(
+            '<p class="text-sm text-emerald-500 mt-2">Verification code sent!</p>'
+        )
+
+    def _normalize_phone(self, phone):
+        import re
+        return re.sub(r'[\s\-\(\)]', '', phone)
+
+    def _send_otp_sms(self, phone, code):
+        from apps.core.services.notifications import NotificationService
+        NotificationService.send_otp_sms(phone, code)
+
+
+class PhoneSignupVerifyView(View):
+    def post(self, request):
+        from django.contrib.auth import login
+        from apps.core.models import User
+        phone = request.POST.get('phone_number', '').strip()
+        code = request.POST.get('otp_code', '').strip()
+        password1 = request.POST.get('password1', '')
+        password2 = request.POST.get('password2', '')
+
+        phone = self._normalize_phone(phone)
+        stored_phone = request.session.get('signup_phone')
+        stored_otp = request.session.get('signup_otp')
+
+        if phone != stored_phone:
+            messages.error(request, 'Phone number mismatch. Please start over.')
+            return redirect('account_signup')
+
+        if code != stored_otp:
+            messages.error(request, 'Invalid verification code')
+            return redirect('account_signup')
+
+        if not password1 or password1 != password2:
+            messages.error(request, 'Passwords do not match')
+            return redirect('account_signup')
+
+        if len(password1) < 8:
+            messages.error(request, 'Password must be at least 8 characters')
+            return redirect('account_signup')
+
+        user = User.objects.create_user(
+            username=phone,
+            phone_number=phone,
+            phone_verified=True,
+            password=password1
+        )
+
+        del request.session['signup_phone']
+        del request.session['signup_otp']
+
+        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+        messages.success(request, 'Account created successfully!')
+        return redirect('home')
+
+    def _normalize_phone(self, phone):
+        import re
+        return re.sub(r'[\s\-\(\)]', '', phone)

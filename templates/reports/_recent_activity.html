@@ -1,0 +1,39 @@
+{% if activities %}
+<div class="space-y-3">
+    {% for activity in activities %}
+    <div class="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+        <div class="h-8 w-8 rounded-full flex items-center justify-center shrink-0
+                    {% if activity.type == 'sale' %}bg-emerald-500/10 text-emerald-500
+                    {% elif activity.type == 'checkin' %}bg-blue-500/10 text-blue-500
+                    {% elif activity.type == 'refund' %}bg-red-500/10 text-red-500
+                    {% else %}bg-muted text-muted-foreground{% endif %}">
+            {% if activity.type == 'sale' %}
+            <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+            {% elif activity.type == 'checkin' %}
+            <i data-lucide="scan-line" class="w-4 h-4"></i>
+            {% elif activity.type == 'refund' %}
+            <i data-lucide="undo-2" class="w-4 h-4"></i>
+            {% else %}
+            <i data-lucide="info" class="w-4 h-4"></i>
+            {% endif %}
+        </div>
+        <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium">{{ activity.title }}</p>
+            <p class="text-xs text-muted-foreground truncate">{{ activity.description }}</p>
+        </div>
+        <span class="text-xs text-muted-foreground whitespace-nowrap">{{ activity.time }}</span>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-8 text-muted-foreground">
+    <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+    <p class="text-sm">No recent activity</p>
+</div>
+{% endif %}
+
+<script>
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+</script>

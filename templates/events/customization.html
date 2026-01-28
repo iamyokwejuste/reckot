@@ -1,0 +1,197 @@
+{% extends "layouts/dashboard.html" %}
+{% load slippers %}
+
+{% block title %}Customize Event - {{ event.title }} - Reckot{% endblock %}
+
+{% block header_title %}
+<div>
+    <h1 class="text-lg font-semibold">Customize Event Page</h1>
+    <p class="text-sm text-muted-foreground">{{ event.title }}</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <div class="flex items-center justify-between">
+        <a href="{% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug %}" class="btn btn-outline btn-sm">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            Back to Event
+        </a>
+        <a href="{% url 'events:public_detail' org_slug=event.organization.slug event_slug=event.slug %}" target="_blank" class="btn btn-outline btn-sm">
+            <i data-lucide="external-link" class="w-4 h-4"></i>
+            Preview
+        </a>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="space-y-6" x-data="{
+        primaryColor: '{{ customization.primary_color|default:'#000000' }}',
+        secondaryColor: '{{ customization.secondary_color|default:'#ffffff' }}',
+        backgroundColor: '{{ customization.background_color|default:'#ffffff' }}',
+        textColor: '{{ customization.text_color|default:'#000000' }}'
+    }">
+        {% csrf_token %}
+
+        <div class="grid lg:grid-cols-2 gap-6">
+            <div class="card p-6 space-y-5">
+                <h2 class="font-semibold flex items-center gap-2">
+                    <i data-lucide="palette" class="w-4 h-4"></i>
+                    Colors
+                </h2>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="primary_color" class="block text-sm font-medium mb-2">Primary Color</label>
+                        <div class="flex items-center gap-2">
+                            <input type="color" name="primary_color" id="primary_color" x-model="primaryColor"
+                                   class="h-10 w-14 rounded border border-border cursor-pointer">
+                            <input type="text" :value="primaryColor" @input="primaryColor = $event.target.value"
+                                   class="input flex-1 font-mono text-sm" placeholder="#000000">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="secondary_color" class="block text-sm font-medium mb-2">Secondary Color</label>
+                        <div class="flex items-center gap-2">
+                            <input type="color" name="secondary_color" id="secondary_color" x-model="secondaryColor"
+                                   class="h-10 w-14 rounded border border-border cursor-pointer">
+                            <input type="text" :value="secondaryColor" @input="secondaryColor = $event.target.value"
+                                   class="input flex-1 font-mono text-sm" placeholder="#ffffff">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="background_color" class="block text-sm font-medium mb-2">Background</label>
+                        <div class="flex items-center gap-2">
+                            <input type="color" name="background_color" id="background_color" x-model="backgroundColor"
+                                   class="h-10 w-14 rounded border border-border cursor-pointer">
+                            <input type="text" :value="backgroundColor" @input="backgroundColor = $event.target.value"
+                                   class="input flex-1 font-mono text-sm" placeholder="#ffffff">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="text_color" class="block text-sm font-medium mb-2">Text Color</label>
+                        <div class="flex items-center gap-2">
+                            <input type="color" name="text_color" id="text_color" x-model="textColor"
+                                   class="h-10 w-14 rounded border border-border cursor-pointer">
+                            <input type="text" :value="textColor" @input="textColor = $event.target.value"
+                                   class="input flex-1 font-mono text-sm" placeholder="#000000">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-lg border border-border" :style="'background-color:' + backgroundColor + '; color:' + textColor">
+                    <p class="text-sm font-medium mb-2">Preview</p>
+                    <p class="text-xs opacity-75">This is how your text will look</p>
+                    <button type="button" class="mt-3 px-4 py-2 rounded-lg text-sm font-medium"
+                            :style="'background-color:' + primaryColor + '; color:' + secondaryColor">
+                        Button Preview
+                    </button>
+                </div>
+            </div>
+
+            <div class="card p-6 space-y-5">
+                <h2 class="font-semibold flex items-center gap-2">
+                    <i data-lucide="type" class="w-4 h-4"></i>
+                    Typography
+                </h2>
+
+                <div>
+                    <label for="heading_font" class="block text-sm font-medium mb-2">Heading Font</label>
+                    <select name="heading_font" id="heading_font" class="input">
+                        <option value="system-ui" {% if customization.heading_font == 'system-ui' %}selected{% endif %}>System Default</option>
+                        <option value="Inter" {% if customization.heading_font == 'Inter' %}selected{% endif %}>Inter</option>
+                        <option value="Poppins" {% if customization.heading_font == 'Poppins' %}selected{% endif %}>Poppins</option>
+                        <option value="Roboto" {% if customization.heading_font == 'Roboto' %}selected{% endif %}>Roboto</option>
+                        <option value="Open Sans" {% if customization.heading_font == 'Open Sans' %}selected{% endif %}>Open Sans</option>
+                        <option value="Montserrat" {% if customization.heading_font == 'Montserrat' %}selected{% endif %}>Montserrat</option>
+                        <option value="Playfair Display" {% if customization.heading_font == 'Playfair Display' %}selected{% endif %}>Playfair Display</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="body_font" class="block text-sm font-medium mb-2">Body Font</label>
+                    <select name="body_font" id="body_font" class="input">
+                        <option value="system-ui" {% if customization.body_font == 'system-ui' %}selected{% endif %}>System Default</option>
+                        <option value="Inter" {% if customization.body_font == 'Inter' %}selected{% endif %}>Inter</option>
+                        <option value="Roboto" {% if customization.body_font == 'Roboto' %}selected{% endif %}>Roboto</option>
+                        <option value="Open Sans" {% if customization.body_font == 'Open Sans' %}selected{% endif %}>Open Sans</option>
+                        <option value="Lato" {% if customization.body_font == 'Lato' %}selected{% endif %}>Lato</option>
+                        <option value="Source Sans Pro" {% if customization.body_font == 'Source Sans Pro' %}selected{% endif %}>Source Sans Pro</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-6">
+            <div class="card p-6 space-y-5">
+                <h2 class="font-semibold flex items-center gap-2">
+                    <i data-lucide="layout" class="w-4 h-4"></i>
+                    Layout
+                </h2>
+
+                <div>
+                    <label for="layout_template" class="block text-sm font-medium mb-2">Page Layout</label>
+                    <select name="layout_template" id="layout_template" class="input">
+                        <option value="DEFAULT" {% if customization.layout_template == 'DEFAULT' %}selected{% endif %}>Default</option>
+                        <option value="MINIMAL" {% if customization.layout_template == 'MINIMAL' %}selected{% endif %}>Minimal</option>
+                        <option value="FULL_WIDTH" {% if customization.layout_template == 'FULL_WIDTH' %}selected{% endif %}>Full Width</option>
+                        <option value="CENTERED" {% if customization.layout_template == 'CENTERED' %}selected{% endif %}>Centered</option>
+                    </select>
+                </div>
+
+                <label class="flex items-center gap-3 p-3 rounded-lg border border-border cursor-pointer hover:bg-muted/50">
+                    <input type="checkbox" name="hide_reckot_branding" class="h-4 w-4 rounded border-border"
+                           {% if customization.hide_reckot_branding %}checked{% endif %}>
+                    <div>
+                        <p class="font-medium text-sm">Hide Reckot branding</p>
+                        <p class="text-xs text-muted-foreground">Remove "Powered by Reckot" footer</p>
+                    </div>
+                </label>
+            </div>
+
+            <div class="card p-6 space-y-5">
+                <h2 class="font-semibold flex items-center gap-2">
+                    <i data-lucide="image" class="w-4 h-4"></i>
+                    Images
+                </h2>
+
+                <div>
+                    <label class="block text-sm font-medium mb-2">Event Logo</label>
+                    <div class="flex items-center gap-4">
+                        {% if customization.logo %}
+                        <img src="{{ customization.logo.url }}" alt="" class="h-16 w-16 rounded-lg object-cover border border-border">
+                        {% else %}
+                        <div class="h-16 w-16 rounded-lg bg-muted flex items-center justify-center">
+                            <i data-lucide="image" class="w-6 h-6 text-muted-foreground"></i>
+                        </div>
+                        {% endif %}
+                        <input type="file" name="logo" accept="image/*" class="text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-2">Hero Image</label>
+                    <div class="flex items-center gap-4">
+                        {% if customization.hero_image %}
+                        <img src="{{ customization.hero_image.url }}" alt="" class="h-16 w-24 rounded-lg object-cover border border-border">
+                        {% else %}
+                        <div class="h-16 w-24 rounded-lg bg-muted flex items-center justify-center">
+                            <i data-lucide="image" class="w-6 h-6 text-muted-foreground"></i>
+                        </div>
+                        {% endif %}
+                        <input type="file" name="hero_image" accept="image/*" class="text-sm">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-3">
+            <a href="{% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug %}" class="btn btn-outline btn-md">
+                Cancel
+            </a>
+            <button type="submit" class="btn btn-primary btn-md">
+                <i data-lucide="save" class="w-4 h-4"></i>
+                Save Changes
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

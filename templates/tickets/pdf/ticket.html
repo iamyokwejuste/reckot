@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <div class="ticket">
+        <div class="ticket-header">
+            {% if organization.logo %}
+            <img src="{{ organization.logo.url }}" alt="{{ organization.name }}" class="ticket-logo">
+            {% endif %}
+            <h1 class="event-title">{{ event.title }}</h1>
+            <p class="ticket-type">{{ ticket.ticket_type.name }}</p>
+        </div>
+
+        <div class="ticket-details">
+            <div class="detail-row">
+                <div>
+                    <p class="detail-label">Date</p>
+                    <p class="detail-value">{{ event.start_at|date:"F d, Y" }}</p>
+                </div>
+                <div>
+                    <p class="detail-label">Time</p>
+                    <p class="detail-value">{{ event.start_at|date:"g:i A" }}</p>
+                </div>
+            </div>
+
+            <div class="detail-row">
+                <div>
+                    <p class="detail-label">Location</p>
+                    <p class="detail-value">{{ event.location }}</p>
+                </div>
+            </div>
+
+            {% if ticket.attendee_name %}
+            <div class="detail-row">
+                <div>
+                    <p class="detail-label">Attendee</p>
+                    <p class="detail-value">{{ ticket.attendee_name }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="qr-section">
+            <div class="qr-code">
+                <img src="data:image/png;base64,{{ qr_code_data }}" alt="QR Code">
+            </div>
+            <p class="ticket-code">{{ ticket.code }}</p>
+        </div>
+    </div>
+</body>
+</html>

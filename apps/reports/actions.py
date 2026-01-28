@@ -2,8 +2,10 @@ from django.views import View
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import FileResponse, Http404
-from django.db.models import Sum, Count, Q
+from django.db.models import Sum, Count, Q, F
+from django.db.models.functions import TruncDate
 from django.utils import timezone
+from django.utils.timesince import timesince
 from datetime import timedelta
 from apps.events.models import Event
 from apps.reports.models import ReportExport
@@ -88,12 +90,180 @@ class ReportsDashboardView(LoginRequiredMixin, View):
         event = get_object_or_404(Event, organization__slug=org_slug, slug=event_slug)
         summary = get_event_summary(event.id)
         recent_exports = get_recent_exports(event.id)
+
+        # Get pending payments count
+        pending_count = Payment.objects.filter(
+            booking__event=event,
+            status=Payment.Status.PENDING
+        ).count()
+        summary['pending_count'] = pending_count
+
+        # Sales timeline - last 7 days
+        seven_days_ago = timezone.now() - timedelta(days=7)
+        sales_timeline = Ticket.objects.filter(
+            booking__event=event,
+            booking__status=Booking.Status.CONFIRMED,
+            booking__created_at__gte=seven_days_ago
+        ).annotate(
+            date=TruncDate('booking__created_at')
+        ).values('date').annotate(
+            count=Count('id')
+        ).order_by('date')
+
+        # Fill in missing days
+        timeline_dict = {item['date']: item['count'] for item in sales_timeline}
+        sales_timeline_filled = []
+        max_daily_sales = 0
+        for i in range(7):
+            date = (seven_days_ago + timedelta(days=i)).date()
+            count = timeline_dict.get(date, 0)
+            sales_timeline_filled.append({'date': date, 'count': count})
+            if count > max_daily_sales:
+                max_daily_sales = count
+
+        # Revenue breakdown by ticket type
+        revenue_breakdown = Ticket.objects.filter(
+            booking__event=event,
+            booking__status=Booking.Status.CONFIRMED
+        ).values(
+            'ticket_type__name',
+            'ticket_type__price'
+        ).annotate(
+            sold=Count('id'),
+            revenue=Sum('ticket_type__price')
+        ).order_by('-revenue')
+
+        revenue_breakdown_list = [
+            {
+                'name': item['ticket_type__name'],
+                'price': item['ticket_type__price'],
+                'sold': item['sold'],
+                'revenue': item['revenue'] or 0
+            }
+            for item in revenue_breakdown
+        ]
+        summary['revenue_breakdown'] = revenue_breakdown_list
+
+        # Ticket breakdown for initial load
+        ticket_breakdown = Ticket.objects.filter(
+            booking__event=event,
+            booking__status=Booking.Status.CONFIRMED
+        ).values('ticket_type__name').annotate(
+            count=Count('id')
+        ).order_by('-count')
+        summary['ticket_breakdown'] = list(ticket_breakdown)
+
+        # Recent activity
+        recent_activity = self._get_recent_activity(event)
+
         return render(request, 'reports/dashboard.html', {
             'event': event,
             'summary': summary,
             'recent_exports': recent_exports,
             'report_types': ReportExport.Type.choices,
+            'sales_timeline': sales_timeline_filled,
+            'max_daily_sales': max_daily_sales,
+            'recent_activity': recent_activity,
         })
+
+    def _get_recent_activity(self, event, limit=5):
+        activities = []
+        now = timezone.now()
+
+        # Recent ticket sales
+        recent_tickets = Ticket.objects.filter(
+            booking__event=event,
+            booking__status=Booking.Status.CONFIRMED
+        ).select_related(
+            'booking__user', 'ticket_type'
+        ).order_by('-booking__created_at')[:limit]
+
+        for ticket in recent_tickets:
+            email = ticket.booking.user.email if ticket.booking.user else 'Guest'
+            activities.append({
+                'type': 'sale',
+                'title': 'New ticket sold',
+                'description': f'{ticket.ticket_type.name} - {email}',
+                'time': timesince(ticket.booking.created_at, now) + ' ago',
+                'timestamp': ticket.booking.created_at
+            })
+
+        # Recent check-ins
+        recent_checkins = Ticket.objects.filter(
+            booking__event=event,
+            is_checked_in=True,
+            checked_in_at__isnull=False
+        ).select_related(
+            'booking__user', 'ticket_type'
+        ).order_by('-checked_in_at')[:limit]
+
+        for ticket in recent_checkins:
+            email = ticket.booking.user.email if ticket.booking.user else 'Guest'
+            activities.append({
+                'type': 'checkin',
+                'title': 'Attendee checked in',
+                'description': f'{ticket.ticket_type.name} - {email}',
+                'time': timesince(ticket.checked_in_at, now) + ' ago',
+                'timestamp': ticket.checked_in_at
+            })
+
+        # Sort by timestamp and limit
+        activities.sort(key=lambda x: x['timestamp'], reverse=True)
+        return activities[:limit]
+
+
+class RecentActivityView(LoginRequiredMixin, View):
+    def get(self, request, org_slug, event_slug):
+        event = get_object_or_404(Event, organization__slug=org_slug, slug=event_slug)
+        activities = self._get_recent_activity(event)
+        return render(request, 'reports/_recent_activity.html', {
+            'activities': activities,
+        })
+
+    def _get_recent_activity(self, event, limit=5):
+        activities = []
+        now = timezone.now()
+
+        # Recent ticket sales
+        recent_tickets = Ticket.objects.filter(
+            booking__event=event,
+            booking__status=Booking.Status.CONFIRMED
+        ).select_related(
+            'booking__user', 'ticket_type'
+        ).order_by('-booking__created_at')[:limit]
+
+        for ticket in recent_tickets:
+            email = ticket.booking.user.email if ticket.booking.user else 'Guest'
+            activities.append({
+                'type': 'sale',
+                'title': 'New ticket sold',
+                'description': f'{ticket.ticket_type.name} - {email}',
+                'time': timesince(ticket.booking.created_at, now) + ' ago',
+                'timestamp': ticket.booking.created_at
+            })
+
+        # Recent check-ins
+        recent_checkins = Ticket.objects.filter(
+            booking__event=event,
+            is_checked_in=True,
+            checked_in_at__isnull=False
+        ).select_related(
+            'booking__user', 'ticket_type'
+        ).order_by('-checked_in_at')[:limit]
+
+        for ticket in recent_checkins:
+            email = ticket.booking.user.email if ticket.booking.user else 'Guest'
+            activities.append({
+                'type': 'checkin',
+                'title': 'Attendee checked in',
+                'description': f'{ticket.ticket_type.name} - {email}',
+                'time': timesince(ticket.checked_in_at, now) + ' ago',
+                'timestamp': ticket.checked_in_at
+            })
+
+        # Sort by timestamp and limit
+        activities.sort(key=lambda x: x['timestamp'], reverse=True)
+        return activities[:limit]
 
 
 class GenerateReportView(LoginRequiredMixin, View):

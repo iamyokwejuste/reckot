@@ -1,0 +1,166 @@
+{% extends "layouts/dashboard.html" %}
+{% load slippers %}
+
+{% block title %}Widget Settings - {{ event.title }} - Reckot{% endblock %}
+
+{% block header_title %}
+<div>
+    <h1 class="text-lg font-semibold">Embed Widget</h1>
+    <p class="text-sm text-muted-foreground">{{ event.title }}</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <div class="flex items-center justify-between">
+        <a href="{% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug %}" class="btn btn-outline btn-sm">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            Back to Event
+        </a>
+        {% if widget %}
+        <a href="{{ base_url }}/widgets/{{ widget.widget_id }}/" target="_blank" class="btn btn-outline btn-sm">
+            <i data-lucide="external-link" class="w-4 h-4"></i>
+            Preview Widget
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-6">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+
+            <div class="card p-6 space-y-5">
+                <h2 class="font-semibold flex items-center gap-2">
+                    <i data-lucide="settings-2" class="w-4 h-4"></i>
+                    Widget Settings
+                </h2>
+
+                <label class="flex items-center gap-3 p-3 rounded-lg border border-border cursor-pointer hover:bg-muted/50">
+                    <input type="checkbox" name="is_active" class="h-4 w-4 rounded border-border"
+                           {% if widget.is_active %}checked{% endif %}>
+                    <div>
+                        <p class="font-medium text-sm">Enable Widget</p>
+                        <p class="text-xs text-muted-foreground">Allow embedding on external websites</p>
+                    </div>
+                </label>
+
+                <div>
+                    <label for="theme" class="block text-sm font-medium mb-2">Theme</label>
+                    <select name="theme" id="theme" class="input">
+                        <option value="AUTO" {% if widget.theme == 'AUTO' %}selected{% endif %}>Auto (System)</option>
+                        <option value="LIGHT" {% if widget.theme == 'LIGHT' %}selected{% endif %}>Light</option>
+                        <option value="DARK" {% if widget.theme == 'DARK' %}selected{% endif %}>Dark</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="button_text" class="block text-sm font-medium mb-2">Button Text</label>
+                    <input type="text" name="button_text" id="button_text"
+                           value="{{ widget.button_text|default:'Get Tickets' }}"
+                           placeholder="Get Tickets" class="input">
+                </div>
+
+                <div>
+                    <label for="button_color" class="block text-sm font-medium mb-2">Button Color</label>
+                    <div class="flex items-center gap-2">
+                        <input type="color" name="button_color" id="button_color"
+                               value="{{ widget.button_color|default:'#000000' }}"
+                               class="h-10 w-14 rounded border border-border cursor-pointer">
+                        <input type="text" value="{{ widget.button_color|default:'#000000' }}"
+                               class="input flex-1 font-mono text-sm" readonly>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" name="show_price" class="h-4 w-4 rounded border-border"
+                               {% if widget.show_price %}checked{% endif %}>
+                        <span class="text-sm">Show ticket prices</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" name="show_description" class="h-4 w-4 rounded border-border"
+                               {% if widget.show_description %}checked{% endif %}>
+                        <span class="text-sm">Show event description</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="card p-6 space-y-5">
+                <h2 class="font-semibold flex items-center gap-2">
+                    <i data-lucide="shield" class="w-4 h-4"></i>
+                    Domain Restrictions
+                </h2>
+
+                <div>
+                    <label for="allowed_domains" class="block text-sm font-medium mb-2">Allowed Domains</label>
+                    <textarea name="allowed_domains" id="allowed_domains" rows="4"
+                              placeholder="example.com&#10;mysite.org&#10;(leave empty to allow all domains)"
+                              class="input resize-none font-mono text-sm">{% for domain in widget.allowed_domains %}{{ domain }}{% if not forloop.last %}
+{% endif %}{% endfor %}</textarea>
+                    <p class="text-xs text-muted-foreground mt-1">One domain per line. Leave empty to allow all domains.</p>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-md">
+                <i data-lucide="save" class="w-4 h-4"></i>
+                Save Settings
+            </button>
+        </form>
+
+        <div class="space-y-6">
+            {% if widget %}
+            <div class="card p-6 space-y-4">
+                <h2 class="font-semibold flex items-center gap-2">
+                    <i data-lucide="code" class="w-4 h-4"></i>
+                    Embed Code
+                </h2>
+
+                <div>
+                    <label class="block text-sm font-medium mb-2">JavaScript Snippet</label>
+                    <div class="relative">
+                        <pre class="p-4 rounded-lg bg-muted text-xs overflow-x-auto"><code>&lt;div id="reckot-widget-{{ widget.widget_id }}"&gt;&lt;/div&gt;
+&lt;script src="{{ base_url }}/widgets/{{ widget.widget_id }}/embed.js" async&gt;&lt;/script&gt;</code></pre>
+                        <button type="button" onclick="navigator.clipboard.writeText(this.previousElementSibling.textContent); this.innerHTML='<i data-lucide=&quot;check&quot; class=&quot;w-4 h-4&quot;></i>'; setTimeout(() => { this.innerHTML='<i data-lucide=&quot;copy&quot; class=&quot;w-4 h-4&quot;></i>'; lucide.createIcons(); }, 2000); lucide.createIcons();"
+                                class="absolute top-2 right-2 btn btn-outline btn-xs">
+                            <i data-lucide="copy" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-2">Direct iFrame URL</label>
+                    <div class="relative">
+                        <input type="text" readonly value="{{ base_url }}/widgets/{{ widget.widget_id }}/"
+                               class="input font-mono text-sm pr-12">
+                        <button type="button" onclick="navigator.clipboard.writeText(this.previousElementSibling.value); this.innerHTML='<i data-lucide=&quot;check&quot; class=&quot;w-4 h-4&quot;></i>'; setTimeout(() => { this.innerHTML='<i data-lucide=&quot;copy&quot; class=&quot;w-4 h-4&quot;></i>'; lucide.createIcons(); }, 2000); lucide.createIcons();"
+                                class="absolute top-1/2 right-2 -translate-y-1/2 btn btn-outline btn-xs">
+                            <i data-lucide="copy" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card p-6">
+                <h2 class="font-semibold flex items-center gap-2 mb-4">
+                    <i data-lucide="eye" class="w-4 h-4"></i>
+                    Preview
+                </h2>
+                <div class="border border-border rounded-lg overflow-hidden">
+                    <iframe src="{{ base_url }}/widgets/{{ widget.widget_id }}/"
+                            class="w-full" style="min-height: 300px; border: none;"
+                            title="Widget Preview"></iframe>
+                </div>
+            </div>
+            {% else %}
+            <div class="card p-8 text-center">
+                <div class="h-16 w-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="code" class="w-8 h-8 text-muted-foreground"></i>
+                </div>
+                <h3 class="font-semibold">No widget configured</h3>
+                <p class="text-muted-foreground text-sm mt-1">Enable the widget to get your embed code</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

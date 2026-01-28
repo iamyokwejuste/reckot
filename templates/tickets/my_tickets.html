@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load slippers %}
+
+{% block title %}My Tickets - Reckot{% endblock %}
+
+{% block content %}
+<div class="py-8 md:py-12">
+    <div class="container max-w-4xl">
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-2xl font-semibold">My Tickets</h1>
+                <p class="text-muted-foreground mt-1">Your confirmed event tickets</p>
+            </div>
+        </div>
+
+        {% if tickets %}
+        <div class="grid gap-4">
+            {% regroup tickets by booking.event as events %}
+            {% for event in events %}
+            <div class="card overflow-hidden">
+                <div class="p-5 border-b border-border bg-muted/30">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <h2 class="font-semibold text-lg">{{ event.grouper.title }}</h2>
+                            <div class="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                                <span class="flex items-center gap-1">
+                                    <i data-lucide="calendar" class="w-4 h-4"></i>
+                                    {{ event.grouper.start_at|date:"M d, Y" }}
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <i data-lucide="clock" class="w-4 h-4"></i>
+                                    {{ event.grouper.start_at|date:"g:i A" }}
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <i data-lucide="map-pin" class="w-4 h-4"></i>
+                                    {{ event.grouper.location|truncatechars:30 }}
+                                </span>
+                            </div>
+                        </div>
+                        <a href="{% url 'tickets:booking_pdf' booking_ref=event.list.0.booking.reference %}"
+                           class="btn btn-primary btn-sm shrink-0">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                            Download All
+                        </a>
+                    </div>
+                </div>
+
+                <div class="divide-y divide-border">
+                    {% for ticket in event.list %}
+                    <div class="p-4 flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                                <i data-lucide="ticket" class="w-6 h-6 text-primary"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium">{{ ticket.ticket_type.name }}</p>
+                                <div class="flex items-center gap-3 mt-0.5 text-sm text-muted-foreground">
+                                    <span class="font-mono">{{ ticket.code|slice:":8" }}</span>
+                                    {% if ticket.is_checked_in %}
+                                    <span class="badge badge-success text-xs">Checked In</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <a href="{% url 'tickets:ticket_pdf' ticket_code=ticket.code %}" target="_blank"
+                               class="btn btn-outline btn-sm">
+                                <i data-lucide="file-text" class="w-4 h-4"></i>
+                                PDF
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="card p-12 text-center">
+            <div class="h-20 w-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="ticket" class="w-10 h-10 text-muted-foreground"></i>
+            </div>
+            <h3 class="font-semibold text-lg">No tickets yet</h3>
+            <p class="text-muted-foreground mt-1">Your confirmed tickets will appear here</p>
+            <a href="{% url 'events:discover' %}" class="btn btn-primary btn-md mt-6">
+                <i data-lucide="search" class="w-4 h-4"></i>
+                Discover Events
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

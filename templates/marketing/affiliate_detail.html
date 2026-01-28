@@ -1,0 +1,149 @@
+{% extends "layouts/dashboard.html" %}
+{% load slippers %}
+
+{% block title %}{{ link.name }} - Affiliate Link - Reckot{% endblock %}
+
+{% block header_title %}
+<div>
+    <h1 class="text-lg font-semibold">{{ link.name }}</h1>
+    <p class="text-sm text-muted-foreground">Affiliate link details</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <div class="flex items-center justify-between">
+        <a href="{% url 'marketing:affiliate_list' org_slug=organization.slug %}" class="btn btn-outline btn-sm">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            Back to Links
+        </a>
+        <div class="flex items-center gap-2">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="toggle">
+                <button type="submit" class="btn btn-outline btn-sm">
+                    {% if link.is_active %}
+                    <i data-lucide="pause" class="w-4 h-4"></i>
+                    Deactivate
+                    {% else %}
+                    <i data-lucide="play" class="w-4 h-4"></i>
+                    Activate
+                    {% endif %}
+                </button>
+            </form>
+            <form method="post" onsubmit="return confirm('Delete this affiliate link?')">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <button type="submit" class="btn btn-outline btn-sm text-red-500 hover:bg-red-500/10">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-4">
+        <div class="card p-5">
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                    <i data-lucide="mouse-pointer-click" class="w-5 h-5 text-blue-600"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-semibold">{{ link.clicks }}</p>
+                    <p class="text-xs text-muted-foreground">Total Clicks</p>
+                </div>
+            </div>
+        </div>
+        <div class="card p-5">
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                    <i data-lucide="shopping-cart" class="w-5 h-5 text-emerald-600"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-semibold">{{ link.conversions.count }}</p>
+                    <p class="text-xs text-muted-foreground">Conversions</p>
+                </div>
+            </div>
+        </div>
+        <div class="card p-5">
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                    <i data-lucide="coins" class="w-5 h-5 text-purple-600"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-semibold">{{ link.commission_value }}{% if link.commission_type == 'PERCENTAGE' %}%{% else %} XAF{% endif %}</p>
+                    <p class="text-xs text-muted-foreground">Commission</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-6">
+        <h2 class="font-semibold flex items-center gap-2 mb-4">
+            <i data-lucide="link" class="w-4 h-4"></i>
+            Share Link
+        </h2>
+
+        <div class="relative">
+            <input type="text" readonly id="affiliate-url"
+                   value="{{ request.scheme }}://{{ request.get_host }}/m/ref/{{ link.code }}/"
+                   class="input font-mono text-sm pr-24">
+            <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('affiliate-url').value); this.innerHTML='Copied!'; setTimeout(() => this.innerHTML='Copy', 2000);"
+                    class="absolute top-1/2 right-2 -translate-y-1/2 btn btn-primary btn-sm">
+                Copy
+            </button>
+        </div>
+
+        <div class="mt-4 p-4 rounded-lg bg-muted/50">
+            <p class="text-sm text-muted-foreground">
+                {% if link.event %}
+                This link directs to: <strong>{{ link.event.title }}</strong>
+                {% else %}
+                This link directs to your organization page and tracks all event purchases.
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="p-5 border-b border-border">
+            <h2 class="font-semibold flex items-center gap-2">
+                <i data-lucide="list" class="w-4 h-4"></i>
+                Conversions
+            </h2>
+        </div>
+
+        {% if conversions %}
+        <div class="divide-y divide-border">
+            {% for conversion in conversions %}
+            <div class="p-4 flex items-center justify-between">
+                <div>
+                    <p class="font-medium text-sm">{{ conversion.booking.event.title }}</p>
+                    <p class="text-xs text-muted-foreground mt-0.5">
+                        Order: {{ conversion.order_amount|floatformat:0 }} XAF
+                    </p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-right">
+                        <p class="font-semibold text-emerald-600">+{{ conversion.commission_amount|floatformat:0 }} XAF</p>
+                        <p class="text-xs text-muted-foreground">{{ conversion.created_at|date:"M d, Y" }}</p>
+                    </div>
+                    {% if conversion.status == 'PENDING' %}
+                    <span class="badge badge-warning">Pending</span>
+                    {% elif conversion.status == 'APPROVED' %}
+                    <span class="badge badge-info">Approved</span>
+                    {% elif conversion.status == 'PAID' %}
+                    <span class="badge badge-success">Paid</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="p-8 text-center text-muted-foreground">
+            <p>No conversions yet</p>
+            <p class="text-sm mt-1">Share your affiliate link to start earning</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

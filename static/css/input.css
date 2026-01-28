@@ -409,3 +409,203 @@
 .custom-select-options::-webkit-scrollbar-thumb:hover {
     background: var(--color-muted-foreground);
 }
+
+.flatpickr-calendar {
+    z-index: 9999 !important;
+    margin-top: 0.25rem !important;
+    font-family: inherit !important;
+    background: var(--color-card) !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: 0.75rem !important;
+    box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.25) !important;
+    padding: 0.5rem !important;
+    min-width: 300px !important;
+}
+
+.flatpickr-calendar.static {
+    position: absolute !important;
+}
+
+.flatpickr-calendar.static.open {
+    z-index: 9999 !important;
+}
+
+.flatpickr-calendar .flatpickr-months {
+    background: var(--color-card) !important;
+    padding: 0.5rem 0.25rem !important;
+    border-radius: 0.5rem 0.5rem 0 0 !important;
+}
+
+.flatpickr-calendar .flatpickr-month {
+    background: var(--color-card) !important;
+    color: var(--color-foreground) !important;
+    fill: var(--color-foreground) !important;
+    height: 2.25rem !important;
+}
+
+.flatpickr-calendar .flatpickr-current-month {
+    color: var(--color-foreground) !important;
+}
+
+.flatpickr-calendar .flatpickr-current-month .flatpickr-monthDropdown-months {
+    background: var(--color-card) !important;
+    color: var(--color-foreground) !important;
+    font-weight: 600 !important;
+}
+
+.flatpickr-calendar .flatpickr-current-month input.cur-year {
+    color: var(--color-foreground) !important;
+    font-weight: 600 !important;
+}
+
+.flatpickr-calendar .flatpickr-weekdays {
+    background: var(--color-card) !important;
+    padding: 0.5rem 0 !important;
+}
+
+.flatpickr-calendar span.flatpickr-weekday {
+    background: var(--color-card) !important;
+    color: var(--color-muted-foreground) !important;
+    font-weight: 500 !important;
+    font-size: 0.75rem !important;
+}
+
+.flatpickr-calendar .flatpickr-innerContainer {
+    background: var(--color-card) !important;
+    padding: 0.25rem !important;
+}
+
+.flatpickr-calendar .flatpickr-rContainer {
+    background: var(--color-card) !important;
+}
+
+.flatpickr-calendar .flatpickr-days {
+    background: var(--color-card) !important;
+    width: 100% !important;
+}
+
+.flatpickr-calendar .dayContainer {
+    background: var(--color-card) !important;
+    width: 100% !important;
+    min-width: 280px !important;
+    max-width: 300px !important;
+}
+
+.flatpickr-calendar .flatpickr-day {
+    color: var(--color-foreground) !important;
+    background: transparent !important;
+    border-color: transparent !important;
+    border-radius: 0.375rem !important;
+    margin: 2px !important;
+    line-height: 2.25rem !important;
+    height: 2.25rem !important;
+    max-width: 2.25rem !important;
+    flex-basis: 2.25rem !important;
+}
+
+.flatpickr-calendar .flatpickr-day.prevMonthDay,
+.flatpickr-calendar .flatpickr-day.nextMonthDay {
+    color: var(--color-muted-foreground) !important;
+}
+
+.flatpickr-calendar .flatpickr-day:hover {
+    background: var(--color-foreground) !important;
+    border-color: var(--color-foreground) !important;
+    color: var(--color-background) !important;
+}
+
+.flatpickr-calendar .flatpickr-day.today {
+    border: 2px solid var(--color-foreground) !important;
+    background: transparent !important;
+    color: var(--color-foreground) !important;
+}
+
+.flatpickr-calendar .flatpickr-day.today:hover {
+    background: var(--color-foreground) !important;
+    color: var(--color-background) !important;
+}
+
+.flatpickr-calendar .flatpickr-day.selected,
+.flatpickr-calendar .flatpickr-day.selected:hover {
+    background: var(--color-foreground) !important;
+    border-color: var(--color-foreground) !important;
+    color: var(--color-background) !important;
+}
+
+.flatpickr-calendar .flatpickr-time {
+    background: var(--color-card) !important;
+    border-top: 1px solid var(--color-border) !important;
+    padding: 0.75rem 0.5rem !important;
+    margin-top: 0.5rem !important;
+    max-height: none !important;
+    height: auto !important;
+}
+
+.flatpickr-calendar .flatpickr-time input {
+    color: var(--color-foreground) !important;
+    background: var(--color-muted) !important;
+    border-radius: 0.375rem !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+}
+
+.flatpickr-calendar .flatpickr-time .flatpickr-time-separator {
+    color: var(--color-foreground) !important;
+}
+
+.flatpickr-calendar .flatpickr-time .flatpickr-am-pm {
+    color: var(--color-foreground) !important;
+    background: var(--color-muted) !important;
+    border-radius: 0.375rem !important;
+    font-weight: 600 !important;
+}
+
+.flatpickr-calendar .flatpickr-prev-month,
+.flatpickr-calendar .flatpickr-next-month {
+    padding: 0.5rem !important;
+    border-radius: 0.375rem !important;
+    fill: var(--color-foreground) !important;
+}
+
+.flatpickr-calendar .flatpickr-prev-month:hover,
+.flatpickr-calendar .flatpickr-next-month:hover {
+    background: var(--color-muted) !important;
+}
+
+.flatpickr-calendar .flatpickr-prev-month svg,
+.flatpickr-calendar .flatpickr-next-month svg {
+    fill: var(--color-foreground) !important;
+    width: 0.875rem !important;
+    height: 0.875rem !important;
+}
+
+.flatpickr-calendar .numInputWrapper {
+    background: transparent !important;
+}
+
+.flatpickr-calendar .numInputWrapper span.arrowUp {
+    top: 0 !important;
+    border-bottom-color: var(--color-muted-foreground) !important;
+}
+
+.flatpickr-calendar .numInputWrapper span.arrowDown {
+    top: 50% !important;
+    border-top-color: var(--color-muted-foreground) !important;
+}
+
+.flatpickr-calendar .numInputWrapper:hover span.arrowUp {
+    border-bottom-color: var(--color-foreground) !important;
+}
+
+.flatpickr-calendar .numInputWrapper:hover span.arrowDown {
+    border-top-color: var(--color-foreground) !important;
+}
+
+.flatpickr-calendar .flatpickr-time .flatpickr-time-separator {
+    color: var(--color-muted-foreground) !important;
+    font-weight: 600 !important;
+}
+
+.card-overflow-visible {
+    overflow: visible !important;
+}
