@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load slippers %}
+
+{% block title %}{{ organization.name }} - Events on Reckot{% endblock %}
+
+{% block meta_description %}Discover events by {{ organization.name }} on Reckot. Browse upcoming events and get your tickets.{% endblock %}
+
+{% block content %}
+<div class="py-12 md:py-20">
+    <div class="container">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-12">
+                {% if organization.logo %}
+                <img src="{{ organization.logo.url }}" alt="{{ organization.name }}"
+                     class="h-20 w-20 rounded-xl object-cover mx-auto mb-4">
+                {% else %}
+                <div class="h-20 w-20 rounded-xl bg-muted flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="building-2" class="h-10 w-10 text-muted-foreground"></i>
+                </div>
+                {% endif %}
+
+                <h1 class="text-3xl md:text-4xl font-semibold tracking-tight">{{ organization.name }}</h1>
+
+                {% if organization.description %}
+                <p class="text-muted-foreground mt-3 max-w-xl mx-auto">{{ organization.description }}</p>
+                {% endif %}
+
+                {% if organization.website %}
+                <a href="{{ organization.website }}" target="_blank" rel="noopener"
+                   class="inline-flex items-center gap-1 text-sm text-primary hover:underline mt-3">
+                    <i data-lucide="external-link" class="h-4 w-4"></i>
+                    {{ organization.website }}
+                </a>
+                {% endif %}
+            </div>
+
+            {% if upcoming_events %}
+            <section class="mb-12">
+                <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
+                    <i data-lucide="calendar" class="h-5 w-5 text-primary"></i>
+                    Upcoming Events
+                </h2>
+                <div class="grid sm:grid-cols-2 gap-4">
+                    {% for event in upcoming_events %}
+                    <a href="{% url 'events:public_detail' org_slug=organization.slug event_slug=event.slug %}"
+                       class="card p-0 overflow-hidden group hover:shadow-lg transition-shadow">
+                        {% if event.cover_image %}
+                        <div class="aspect-video relative overflow-hidden">
+                            <img src="{{ event.cover_image.url }}" alt="{{ event.title }}"
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                        </div>
+                        {% else %}
+                        <div class="aspect-video bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+                            <i data-lucide="calendar" class="h-12 w-12 text-primary/30"></i>
+                        </div>
+                        {% endif %}
+                        <div class="p-4">
+                            <h3 class="font-semibold group-hover:text-primary transition-colors">{{ event.title }}</h3>
+                            <div class="flex items-center gap-3 mt-2 text-sm text-muted-foreground">
+                                <span class="flex items-center gap-1">
+                                    <i data-lucide="calendar" class="h-4 w-4"></i>
+                                    {{ event.start_at|date:"M d, Y" }}
+                                </span>
+                                {% if event.location %}
+                                <span class="flex items-center gap-1">
+                                    <i data-lucide="map-pin" class="h-4 w-4"></i>
+                                    {{ event.location|truncatewords:3 }}
+                                </span>
+                                {% endif %}
+                            </div>
+                            {% with min_price=event.ticket_types.first.price %}
+                            {% if min_price %}
+                            <p class="mt-3 font-medium text-primary">From {{ min_price|floatformat:0 }} XAF</p>
+                            {% else %}
+                            <p class="mt-3 font-medium text-emerald-600">Free</p>
+                            {% endif %}
+                            {% endwith %}
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+
+            {% if past_events %}
+            <section>
+                <h2 class="text-xl font-semibold mb-6 flex items-center gap-2 text-muted-foreground">
+                    <i data-lucide="history" class="h-5 w-5"></i>
+                    Past Events
+                </h2>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for event in past_events %}
+                    <div class="card p-4 opacity-75">
+                        <h3 class="font-medium">{{ event.title }}</h3>
+                        <p class="text-sm text-muted-foreground mt-1">
+                            {{ event.start_at|date:"M d, Y" }}
+                        </p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+
+            {% if not upcoming_events and not past_events %}
+            <div class="text-center py-12">
+                <i data-lucide="calendar-x" class="h-16 w-16 mx-auto text-muted-foreground/50"></i>
+                <h2 class="text-xl font-semibold mt-4">No events yet</h2>
+                <p class="text-muted-foreground mt-2">{{ organization.name }} hasn't published any events yet.</p>
+                <a href="{% url 'events:discover' %}" class="btn btn-primary btn-md mt-6 inline-flex">
+                    Discover other events
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

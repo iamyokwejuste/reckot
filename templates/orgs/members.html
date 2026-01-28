@@ -16,9 +16,13 @@
         <i data-lucide="arrow-left" class="w-4 h-4"></i>
         Back
     </a>
+    <a href="{% url 'orgs:bulk_invite' organization.slug %}" class="btn btn-outline btn-sm">
+        <i data-lucide="users" class="w-4 h-4"></i>
+        Bulk Import
+    </a>
     <a href="{% url 'orgs:invite_member' organization.slug %}" class="btn btn-primary btn-sm">
         <i data-lucide="user-plus" class="w-4 h-4"></i>
-        Invite Member
+        Invite
     </a>
 </div>
 {% endblock %}

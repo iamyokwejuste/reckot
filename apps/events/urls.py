@@ -6,6 +6,7 @@ app_name = 'events'
 urlpatterns = [
     path('', actions.EventListView.as_view(), name='list'),
     path('discover/', actions.PublicEventListView.as_view(), name='discover'),
+    path('organizer/<slug:org_slug>/', actions.PublicOrganizerView.as_view(), name='public_organizer'),
     path('create/', actions.EventCreateView.as_view(), name='create'),
     path('coupons/', actions.CouponListView.as_view(), name='coupons'),
     path('coupons/create/', actions.CouponCreateView.as_view(), name='coupon_create'),

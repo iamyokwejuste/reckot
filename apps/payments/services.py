@@ -104,6 +104,8 @@ def verify_and_confirm_payment(payment: Payment) -> dict:
 
 
 def confirm_payment(payment: Payment, external_ref: str = '') -> Payment:
+    from apps.payments.invoice_service import create_invoice
+
     with transaction.atomic():
         payment = Payment.objects.select_for_update().get(pk=payment.pk)
         if payment.status != Payment.Status.PENDING:
@@ -112,7 +114,13 @@ def confirm_payment(payment: Payment, external_ref: str = '') -> Payment:
         payment.external_reference = external_ref
         payment.confirmed_at = timezone.now()
         payment.save()
-        return payment
+
+    try:
+        create_invoice(payment)
+    except Exception:
+        pass
+
+    return payment
 
 
 def fail_payment(payment: Payment, reason: str = '') -> Payment:

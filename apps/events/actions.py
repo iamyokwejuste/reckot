@@ -72,6 +72,31 @@ class PublicEventDetailView(View):
         })
 
 
+class PublicOrganizerView(View):
+    def get(self, request, org_slug):
+        organization = get_object_or_404(Organization, slug=org_slug)
+
+        upcoming_events = Event.objects.filter(
+            organization=organization,
+            state=Event.State.PUBLISHED,
+            is_public=True,
+            start_at__gte=timezone.now()
+        ).order_by('start_at')
+
+        past_events = Event.objects.filter(
+            organization=organization,
+            state=Event.State.PUBLISHED,
+            is_public=True,
+            start_at__lt=timezone.now()
+        ).order_by('-start_at')[:12]
+
+        return render(request, 'events/public_organizer.html', {
+            'organization': organization,
+            'upcoming_events': upcoming_events,
+            'past_events': past_events,
+        })
+
+
 class EventListView(LoginRequiredMixin, View):
     def get(self, request):
         events = get_user_events(request.user)

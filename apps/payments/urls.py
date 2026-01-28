@@ -36,4 +36,20 @@ urlpatterns = [
         actions.CampayWebhookView.as_view(),
         name='webhook_campay'
     ),
+    path(
+        '<uuid:payment_ref>/invoice/',
+        actions.InvoiceDownloadView.as_view(),
+        name='invoice'
+    ),
+    path(
+        '<uuid:payment_ref>/refund/',
+        actions.RefundRequestView.as_view(),
+        name='refund_request'
+    ),
+    path('refunds/', actions.RefundListView.as_view(), name='refunds'),
+    path(
+        'refunds/<int:refund_id>/process/',
+        actions.RefundProcessView.as_view(),
+        name='refund_process'
+    ),
 ]

@@ -286,3 +286,52 @@ class RefundAuditLog(models.Model):
 
     def __str__(self):
         return f"{self.refund.reference} - {self.action}"
+
+
+class Invoice(models.Model):
+    payment = models.OneToOneField(
+        Payment,
+        on_delete=models.CASCADE,
+        related_name='invoice'
+    )
+    invoice_number = models.CharField(max_length=50, unique=True)
+    issued_at = models.DateTimeField(auto_now_add=True)
+    due_date = models.DateField(null=True, blank=True)
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2)
+    service_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    tax_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    currency = models.CharField(max_length=3, choices=Currency.choices, default=Currency.XAF)
+    billing_name = models.CharField(max_length=255)
+    billing_email = models.EmailField()
+    billing_address = models.TextField(blank=True)
+    organization_name = models.CharField(max_length=255)
+    organization_address = models.TextField(blank=True)
+    organization_email = models.EmailField(blank=True)
+    organization_phone = models.CharField(max_length=50, blank=True)
+    organization_logo = models.URLField(blank=True)
+    notes = models.TextField(blank=True)
+    pdf_file = models.FileField(upload_to='invoices/', blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-issued_at']
+        indexes = [
+            models.Index(fields=['invoice_number']),
+            models.Index(fields=['payment']),
+        ]
+
+    def __str__(self):
+        return f"Invoice {self.invoice_number}"
+
+    @classmethod
+    def generate_invoice_number(cls):
+        now = timezone.now()
+        prefix = f"INV-{now.strftime('%Y%m')}"
+        last_invoice = cls.objects.filter(
+            invoice_number__startswith=prefix
+        ).order_by('-invoice_number').first()
+        if last_invoice:
+            last_num = int(last_invoice.invoice_number.split('-')[-1])
+            return f"{prefix}-{last_num + 1:04d}"
+        return f"{prefix}-0001"

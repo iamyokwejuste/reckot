@@ -10,9 +10,10 @@ from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
-from apps.payments.models import Payment, PaymentProvider
+from apps.payments.models import Payment, PaymentProvider, Invoice, Refund
 from apps.payments.services import initiate_payment, confirm_payment, fail_payment
 from apps.payments.queries import get_payment_by_id, get_booking_payment
+from apps.payments.invoice_service import get_invoice_pdf, create_invoice
 from apps.tickets.models import Booking
 from apps.tickets.services import create_multi_ticket_booking
 from apps.events.models import Event
@@ -203,3 +204,121 @@ class CampayWebhookView(View):
             logger.info(f'Payment {external_reference} failed via CamPay webhook')
 
         return HttpResponse('OK', status=200)
+
+
+class InvoiceDownloadView(LoginRequiredMixin, View):
+    def get(self, request, payment_ref):
+        payment = get_object_or_404(Payment, reference=payment_ref, booking__user=request.user)
+        if payment.status != Payment.Status.CONFIRMED:
+            messages.error(request, 'Invoice not available for unpaid orders.')
+            return redirect('payments:list')
+
+        try:
+            invoice = payment.invoice
+        except Invoice.DoesNotExist:
+            invoice = create_invoice(payment)
+
+        pdf_content = get_invoice_pdf(invoice)
+        if not pdf_content:
+            messages.error(request, 'Failed to generate invoice.')
+            return redirect('payments:list')
+
+        response = HttpResponse(pdf_content, content_type='application/pdf')
+        response['Content-Disposition'] = f'inline; filename="{invoice.invoice_number}.pdf"'
+        return response
+
+
+class RefundListView(LoginRequiredMixin, View):
+    def get(self, request):
+        refunds = Refund.objects.filter(
+            payment__booking__event__organization__members=request.user
+        ).select_related(
+            'payment__booking__user',
+            'payment__booking__event'
+        ).order_by('-created_at')[:100]
+
+        stats = {
+            'pending': refunds.filter(status=Refund.Status.PENDING).count(),
+            'approved': refunds.filter(status=Refund.Status.APPROVED).count(),
+            'processed': refunds.filter(status=Refund.Status.PROCESSED).count(),
+        }
+
+        return render(request, 'payments/refunds/list.html', {
+            'refunds': refunds,
+            'stats': stats,
+        })
+
+
+class RefundRequestView(LoginRequiredMixin, View):
+    def get(self, request, payment_ref):
+        payment = get_object_or_404(
+            Payment,
+            reference=payment_ref,
+            booking__user=request.user,
+            status=Payment.Status.CONFIRMED
+        )
+        return render(request, 'payments/refunds/request.html', {'payment': payment})
+
+    def post(self, request, payment_ref):
+        payment = get_object_or_404(
+            Payment,
+            reference=payment_ref,
+            booking__user=request.user,
+            status=Payment.Status.CONFIRMED
+        )
+
+        existing_refund = Refund.objects.filter(
+            payment=payment,
+            status__in=[Refund.Status.PENDING, Refund.Status.APPROVED]
+        ).exists()
+
+        if existing_refund:
+            messages.warning(request, 'A refund request already exists for this payment.')
+            return redirect('payments:success', payment_ref=payment_ref)
+
+        refund_type = request.POST.get('refund_type', 'FULL')
+        amount = payment.amount if refund_type == 'FULL' else request.POST.get('amount', 0)
+        reason = request.POST.get('reason', '').strip()
+
+        Refund.objects.create(
+            payment=payment,
+            amount=amount,
+            refund_type=refund_type,
+            reason=reason,
+            requested_by=request.user,
+        )
+
+        messages.success(request, 'Refund request submitted successfully.')
+        return redirect('payments:success', payment_ref=payment_ref)
+
+
+class RefundProcessView(LoginRequiredMixin, View):
+    def get(self, request, refund_id):
+        refund = get_object_or_404(
+            Refund.objects.select_related('payment__booking__event__organization'),
+            id=refund_id,
+            payment__booking__event__organization__members=request.user
+        )
+        return render(request, 'payments/refunds/process.html', {'refund': refund})
+
+    def post(self, request, refund_id):
+        refund = get_object_or_404(
+            Refund.objects.select_related('payment__booking__event__organization'),
+            id=refund_id,
+            payment__booking__event__organization__members=request.user
+        )
+
+        action = request.POST.get('action')
+
+        if action == 'approve':
+            refund.approve(processed_by=request.user)
+            messages.success(request, 'Refund approved.')
+        elif action == 'process':
+            refund.process(processed_by=request.user)
+            messages.success(request, 'Refund marked as processed.')
+        elif action == 'reject':
+            reason = request.POST.get('rejection_reason', '')
+            refund.reject(reason, processed_by=request.user)
+            messages.success(request, 'Refund rejected.')
+
+        return redirect('payments:refunds')

@@ -45,6 +45,61 @@
         }
         document.addEventListener("DOMContentLoaded", () => lucide.createIcons());
         document.addEventListener("htmx:afterSwap", () => lucide.createIcons());
+
+        // Handle toast messages from HTMX responses via HX-Trigger header
+        document.addEventListener("showToast", (e) => {
+            const { type, message } = e.detail;
+            showToast(type, message);
+        });
+
+        // Global toast function for programmatic use
+        window.showToast = function(type, message) {
+            const container = document.getElementById('toast-container') || createToastContainer();
+            const toast = document.createElement('div');
+            toast.className = `pointer-events-auto rounded-lg border shadow-lg p-4 flex items-start gap-3 transition-all duration-300 transform translate-x-4 opacity-0`;
+
+            const colors = {
+                success: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400',
+                warning: 'bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-400',
+                error: 'bg-red-500/10 border-red-500/20 text-red-700 dark:text-red-400',
+                info: 'bg-card border-border'
+            };
+            const icons = {
+                success: 'check-circle',
+                warning: 'alert-triangle',
+                error: 'x-circle',
+                info: 'info'
+            };
+
+            toast.classList.add(...(colors[type] || colors.info).split(' '));
+            toast.innerHTML = `
+                <i data-lucide="${icons[type] || icons.info}" class="h-5 w-5 shrink-0 mt-0.5"></i>
+                <p class="text-sm flex-1">${message}</p>
+                <button onclick="this.parentElement.remove()" class="shrink-0 -mr-1 -mt-1 p-1 rounded hover:bg-black/5 dark:hover:bg-white/10">
+                    <i data-lucide="x" class="h-4 w-4"></i>
+                </button>
+            `;
+
+            container.appendChild(toast);
+            lucide.createIcons();
+
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-x-4', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('translate-x-4', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        };
+
+        function createToastContainer() {
+            const container = document.createElement('div');
+            container.id = 'toast-container';
+            container.className = 'fixed top-4 right-4 z-[100] flex flex-col gap-2 max-w-sm w-full pointer-events-none';
+            document.body.appendChild(container);
+            return container;
+        }
     </script>
     <style>
         body { font-family: 'Inter', system-ui, sans-serif; }
@@ -53,6 +108,7 @@
     {% block extra_head %}{% endblock %}
 </head>
 <body class="min-h-full bg-background text-foreground antialiased" hx-boost="true">
+    {% include "partials/messages.html" %}
     <div x-data="{ sidebarOpen: false, collapsed: localStorage.getItem('sidebarCollapsed') === 'true' }"
          x-init="$watch('collapsed', val => localStorage.setItem('sidebarCollapsed', val))"
          class="flex min-h-screen">
@@ -142,6 +198,12 @@
                        class="sidebar-item {% if request.resolver_match.url_name == 'list' and 'payments' in request.path %}sidebar-item-active{% endif %}">
                         <i data-lucide="credit-card" class="h-5 w-5 shrink-0"></i>
                         <span x-show="!collapsed" x-transition class="truncate">Payments</span>
+                    </a>
+
+                    <a href="{% url 'payments:refunds' %}"
+                       class="sidebar-item {% if 'refunds' in request.path %}sidebar-item-active{% endif %}">
+                        <i data-lucide="rotate-ccw" class="h-5 w-5 shrink-0"></i>
+                        <span x-show="!collapsed" x-transition class="truncate">Refunds</span>
                     </a>
 
                     <a href="{% url 'events:coupons' %}"

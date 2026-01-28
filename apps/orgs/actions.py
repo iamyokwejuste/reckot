@@ -1,9 +1,11 @@
+import csv
+import io
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.db.models import Count, Sum
-from django.http import JsonResponse, Http404
+from django.http import JsonResponse, Http404, HttpResponse
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
@@ -451,3 +453,117 @@ class OrganizationEditView(LoginRequiredMixin, OrgPermissionMixin, View):
 
         messages.success(request, 'Organization updated successfully!')
         return redirect('orgs:detail', slug=organization.slug)
+
+
+class BulkInviteView(LoginRequiredMixin, OrgPermissionMixin, View):
+    required_permission = 'invite_members'
+
+    def get(self, request, slug):
+        organization = self.organization
+        return render(request, 'orgs/bulk_invite.html', {
+            'organization': organization,
+            'roles': [r for r in MemberRole.choices if r[0] != MemberRole.OWNER],
+        })
+
+    def post(self, request, slug):
+        organization = self.organization
+        role = request.POST.get('role', MemberRole.MEMBER)
+        message_text = request.POST.get('message', '').strip()
+
+        if role == MemberRole.OWNER:
+            messages.error(request, 'Cannot invite users as Owner.')
+            return redirect('orgs:bulk_invite', slug=slug)
+
+        csv_file = request.FILES.get('csv_file')
+        emails_text = request.POST.get('emails', '').strip()
+
+        emails = []
+
+        if csv_file:
+            try:
+                decoded = csv_file.read().decode('utf-8')
+                reader = csv.reader(io.StringIO(decoded))
+                for row in reader:
+                    if row:
+                        email = row[0].strip().lower()
+                        if '@' in email and email not in emails:
+                            emails.append(email)
+            except Exception:
+                messages.error(request, 'Failed to parse CSV file.')
+                return redirect('orgs:bulk_invite', slug=slug)
+
+        if emails_text:
+            for line in emails_text.replace(',', '\n').split('\n'):
+                email = line.strip().lower()
+                if '@' in email and email not in emails:
+                    emails.append(email)
+
+        if not emails:
+            messages.error(request, 'No valid emails found.')
+            return redirect('orgs:bulk_invite', slug=slug)
+
+        sent_count = 0
+        skipped_count = 0
+
+        for email in emails:
+            existing_user = User.objects.filter(email=email).first()
+            if existing_user and organization.members.filter(id=existing_user.id).exists():
+                skipped_count += 1
+                continue
+
+            existing_invitation = Invitation.objects.filter(
+                organization=organization,
+                email=email,
+                status=Invitation.Status.PENDING
+            ).exists()
+
+            if existing_invitation:
+                skipped_count += 1
+                continue
+
+            invitation = Invitation.objects.create(
+                organization=organization,
+                email=email,
+                role=role,
+                message=message_text,
+                invited_by=request.user,
+            )
+
+            try:
+                invite_url = request.build_absolute_uri(f'/orgs/invite/{invitation.token}/')
+                subject = f"You're invited to join {organization.name} on Reckot"
+                html_message = render_to_string('emails/invitation.html', {
+                    'organization': organization,
+                    'invitation': invitation,
+                    'invite_url': invite_url,
+                    'inviter': request.user,
+                })
+                send_mail(
+                    subject,
+                    f"You've been invited to join {organization.name}. Visit: {invite_url}",
+                    settings.DEFAULT_FROM_EMAIL,
+                    [email],
+                    html_message=html_message,
+                    fail_silently=True,
+                )
+                sent_count += 1
+            except Exception:
+                sent_count += 1
+
+        if sent_count > 0:
+            messages.success(request, f'Sent {sent_count} invitation(s).')
+        if skipped_count > 0:
+            messages.info(request, f'Skipped {skipped_count} existing member(s) or pending invitation(s).')
+
+        return redirect('orgs:members', slug=slug)
+
+
+class DownloadInviteTemplateView(LoginRequiredMixin, View):
+    def get(self, request):
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="invite_template.csv"'
+        writer = csv.writer(response)
+        writer.writerow(['email'])
+        writer.writerow(['user1@example.com'])
+        writer.writerow(['user2@example.com'])
+        return response

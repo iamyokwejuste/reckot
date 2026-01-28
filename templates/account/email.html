@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load slippers %}
+{% load static %}
+
+{% block title %}Manage Email - Reckot{% endblock %}
+
+{% block content %}
+<div class="min-h-[calc(100vh-4rem)] flex items-center justify-center py-12 px-4">
+    <div class="w-full max-w-md">
+        <div class="card p-6 sm:p-8">
+            <div class="text-center mb-6">
+                <div class="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-foreground mb-4">
+                    <img x-show="isDark" x-cloak src="{% static 'images/logo/reckto_logo_light_mode.png' %}" alt="" class="h-8 w-8">
+                    <img x-show="!isDark" src="{% static 'images/logo/reckto_logo_dark_mode.png' %}" alt="" class="h-8 w-8">
+                </div>
+                <h1 class="text-2xl font-bold">Manage Email</h1>
+                <p class="text-muted-foreground mt-2">Verify or change your email address</p>
+            </div>
+
+            {% if emailaddresses %}
+            <div class="space-y-3 mb-6">
+                {% for emailaddress in emailaddresses %}
+                <div class="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="mail" class="w-4 h-4 text-muted-foreground"></i>
+                        <div>
+                            <p class="text-sm font-medium">{{ emailaddress.email }}</p>
+                            <div class="flex items-center gap-2 mt-0.5">
+                                {% if emailaddress.verified %}
+                                <span class="text-xs text-emerald-600">Verified</span>
+                                {% else %}
+                                <span class="text-xs text-amber-600">Unverified</span>
+                                {% endif %}
+                                {% if emailaddress.primary %}
+                                <span class="text-xs text-primary">Primary</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        {% if not emailaddress.verified %}
+                        <form method="post" action="{% url 'account_email' %}" class="inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="email" value="{{ emailaddress.email }}">
+                            <button type="submit" name="action_send" class="btn btn-outline btn-xs" title="Resend verification">
+                                <i data-lucide="send" class="w-3 h-3"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                        {% if not emailaddress.primary %}
+                        <form method="post" action="{% url 'account_email' %}" class="inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="email" value="{{ emailaddress.email }}">
+                            <button type="submit" name="action_primary" class="btn btn-outline btn-xs" title="Make primary"
+                                    {% if not emailaddress.verified %}disabled{% endif %}>
+                                <i data-lucide="star" class="w-3 h-3"></i>
+                            </button>
+                        </form>
+                        <form method="post" action="{% url 'account_email' %}" class="inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="email" value="{{ emailaddress.email }}">
+                            <button type="submit" name="action_remove" class="btn btn-outline btn-xs text-red-500 hover:bg-red-500/10" title="Remove">
+                                <i data-lucide="trash-2" class="w-3 h-3"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if can_add_email %}
+            <div class="border-t border-border pt-6">
+                <h2 class="text-sm font-semibold mb-3">Add Email Address</h2>
+                <form method="post" action="{% url 'account_email' %}" class="space-y-4">
+                    {% csrf_token %}
+                    <div>
+                        <input type="email" name="email" placeholder="new@email.com" required class="input">
+                    </div>
+                    <button type="submit" name="action_add" class="btn btn-primary btn-sm w-full">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        Add Email
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+
+            <div class="mt-6 pt-6 border-t border-border">
+                <a href="{% url 'settings' %}" class="btn btn-outline btn-md w-full">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    Back to Settings
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
