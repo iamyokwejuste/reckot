@@ -1,0 +1,35 @@
+{% with variant=variant|default:"default" %}
+<div
+    x-data="{ show: true }"
+    x-init="setTimeout(() => show = false, {{ duration|default:'5000' }})"
+    x-show="show"
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0 translate-x-full"
+    x-transition:enter-end="opacity-100 translate-x-0"
+    x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="opacity-100 translate-x-0"
+    x-transition:leave-end="opacity-0 translate-x-full"
+    class="
+        pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg
+        {% if variant == 'default' %}border-border bg-background text-foreground{% endif %}
+        {% if variant == 'destructive' %}border-destructive bg-destructive text-destructive-foreground{% endif %}
+        {% if variant == 'success' %}border-success bg-success text-success-foreground{% endif %}
+        {{ class }}
+    "
+    role="alert"
+    {{ attrs }}
+>
+    <div class="grid gap-1">
+        {% if title %}
+        <div class="text-sm font-semibold">{{ title }}</div>
+        {% endif %}
+        <div class="text-sm opacity-90">{{ children }}</div>
+    </div>
+    <button
+        @click="show = false"
+        class="absolute right-2 top-2 rounded-md p-1 opacity-70 hover:opacity-100 focus:outline-none focus:ring-2"
+    >
+        <i data-lucide="x" class="h-4 w-4"></i>
+    </button>
+</div>
+{% endwith %}

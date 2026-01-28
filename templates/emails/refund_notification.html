@@ -1,0 +1,104 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Refund {% if refund.status == 'APPROVED' %}Approved{% elif refund.status == 'PROCESSED' %}Processed{% elif refund.status == 'REJECTED' %}Update{% else %}Request Received{% endif %} - Reckot{% endblock %}
+
+{% block content %}
+{% if refund.status == 'PENDING' %}
+<h1 class="heading">Refund request received</h1>
+<p class="subheading email-muted">We've received your refund request and will review it shortly</p>
+
+{% elif refund.status == 'APPROVED' %}
+<h1 class="heading">Refund approved!</h1>
+<p class="subheading email-muted">Your refund has been approved and is being processed</p>
+
+{% elif refund.status == 'PROCESSED' %}
+<h1 class="heading">Refund complete</h1>
+<p class="subheading email-muted">Your money is on its way back to you</p>
+
+{% elif refund.status == 'REJECTED' %}
+<h1 class="heading">Refund request update</h1>
+<p class="subheading email-muted">Unfortunately, we couldn't process your refund request</p>
+{% endif %}
+
+<!-- Refund Details -->
+<div class="ticket-info email-badge">
+    <table class="detail-table">
+        <tr>
+            <td class="detail-label email-muted" style="width: 40%;">Reference</td>
+            <td class="detail-value" style="font-family: monospace;">{{ refund.reference|slice:":8"|upper }}</td>
+        </tr>
+        <tr>
+            <td class="detail-label email-muted">Event</td>
+            <td class="detail-value">{{ event.title }}</td>
+        </tr>
+        <tr>
+            <td class="detail-label email-muted">Original Amount</td>
+            <td class="detail-value">{{ original_amount|floatformat:0 }} XAF</td>
+        </tr>
+        <tr>
+            <td class="detail-label email-muted">Refund Amount</td>
+            <td class="detail-value amount" style="font-size: 20px;">{{ refund.amount|floatformat:0 }} XAF</td>
+        </tr>
+        <tr>
+            <td class="detail-label email-muted">Status</td>
+            <td>
+                {% if refund.status == 'PENDING' %}
+                <span class="email-badge-warning" style="display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 500;">
+                    Under Review
+                </span>
+                {% elif refund.status == 'APPROVED' %}
+                <span class="email-badge-success" style="display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 500;">
+                    Approved
+                </span>
+                {% elif refund.status == 'PROCESSED' %}
+                <span class="email-badge-success" style="display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 500;">
+                    Completed
+                </span>
+                {% elif refund.status == 'REJECTED' %}
+                <span class="email-badge-danger" style="display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 500;">
+                    Rejected
+                </span>
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+</div>
+
+{% if refund.status == 'PENDING' %}
+<p class="content email-muted">
+    Our team will review your request within <strong>2-3 business days</strong>. We'll send you another email once a decision has been made.
+</p>
+
+{% elif refund.status == 'APPROVED' %}
+<p class="content email-muted">
+    Your refund is being processed and will be credited to your original payment method within <strong>5-7 business days</strong>.
+</p>
+
+{% elif refund.status == 'PROCESSED' %}
+<p class="content email-muted">
+    The refund has been sent to your {{ payment_method }}. Depending on your provider, it may take <strong>1-3 business days</strong> to appear in your account.
+</p>
+
+{% elif refund.status == 'REJECTED' %}
+{% if refund.rejection_reason %}
+<div class="ticket-info" style="background-color: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);">
+    <p style="margin: 0; font-size: 14px;">
+        <strong>Reason:</strong> {{ refund.rejection_reason }}
+    </p>
+</div>
+{% endif %}
+<p class="content email-muted">
+    If you believe this decision was made in error, please contact our support team.
+</p>
+{% endif %}
+
+<div class="divider email-border" style="border-top: 1px solid;"></div>
+
+<p class="email-muted" style="font-size: 14px; margin: 0;">
+    Questions about your refund? Reply to this email or contact us at <a href="mailto:support@reckot.com" style="text-decoration: underline;">support@reckot.com</a>
+</p>
+{% endblock %}
+
+{% block footer_message %}
+This email confirms a refund action on your Reckot account.
+{% endblock %}

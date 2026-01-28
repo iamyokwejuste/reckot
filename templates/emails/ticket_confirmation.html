@@ -1,0 +1,104 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Your Tickets - {{ event.title }} - Reckot{% endblock %}
+
+{% block content %}
+<h1 class="heading">You're going to {{ event.title }}!</h1>
+<p class="subheading email-muted">Your tickets are confirmed and ready</p>
+
+<!-- Event Details -->
+<div class="ticket-info email-badge">
+    <table class="detail-table">
+        <tr>
+            <td class="detail-label email-muted" style="width: 40%;">Event</td>
+            <td class="detail-value">{{ event.title }}</td>
+        </tr>
+        <tr>
+            <td class="detail-label email-muted">Date</td>
+            <td class="detail-value">{{ event.date|date:"l, F j, Y" }}</td>
+        </tr>
+        <tr>
+            <td class="detail-label email-muted">Time</td>
+            <td class="detail-value">{{ event.date|time:"g:i A" }}</td>
+        </tr>
+        <tr>
+            <td class="detail-label email-muted">Location</td>
+            <td class="detail-value">{{ event.location }}</td>
+        </tr>
+    </table>
+</div>
+
+<!-- Tickets -->
+<div class="divider email-border" style="border-top: 1px solid;"></div>
+
+<h2 style="font-size: 18px; font-weight: 600; margin: 0 0 16px 0;">Your Tickets ({{ tickets|length }})</h2>
+
+{% for ticket in tickets %}
+<div class="ticket-info email-card" style="margin-bottom: 16px; border: 1px solid;">
+    <table style="width: 100%;">
+        <tr>
+            <td style="vertical-align: top;">
+                <p style="margin: 0 0 4px 0; font-weight: 600;">{{ ticket.ticket_type.name }}</p>
+                <p class="email-muted" style="margin: 0; font-size: 14px;">Ticket #{{ ticket.code|slice:":8"|upper }}</p>
+            </td>
+            <td style="text-align: right; vertical-align: top;">
+                <span class="email-badge-success" style="display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 500;">
+                    Confirmed
+                </span>
+            </td>
+        </tr>
+    </table>
+</div>
+{% endfor %}
+
+<!-- QR Code -->
+<div class="qr-container email-badge">
+    <p style="margin: 0 0 16px 0; font-weight: 500;">Scan for Check-in</p>
+    {% if qr_code_url %}
+    <img src="{{ qr_code_url }}" alt="Check-in QR Code" class="qr-code" style="max-width: 200px;">
+    {% else %}
+    <img src="cid:qr_code" alt="Check-in QR Code" class="qr-code" style="max-width: 200px;">
+    {% endif %}
+    <p class="email-muted" style="margin: 16px 0 0 0; font-size: 13px;">
+        Show this QR code at the venue for quick check-in
+    </p>
+</div>
+
+<!-- Order Summary -->
+<div class="divider email-border" style="border-top: 1px solid;"></div>
+
+<h2 style="font-size: 18px; font-weight: 600; margin: 0 0 16px 0;">Order Summary</h2>
+
+<table class="detail-table">
+    <tr>
+        <td class="email-muted">Order Reference</td>
+        <td style="text-align: right; font-family: monospace;">{{ booking.payment.reference|slice:":8"|upper }}</td>
+    </tr>
+    {% for ticket in tickets %}
+    <tr>
+        <td class="email-muted">{{ ticket.ticket_type.name }}</td>
+        <td style="text-align: right;">{{ ticket.ticket_type.price|floatformat:0 }} XAF</td>
+    </tr>
+    {% endfor %}
+    <tr>
+        <td colspan="2">
+            <div class="divider email-border" style="border-top: 1px solid; margin: 8px 0;"></div>
+        </td>
+    </tr>
+    <tr>
+        <td style="font-weight: 600;">Total Paid</td>
+        <td style="text-align: right;" class="amount">{{ total_amount|floatformat:0 }} XAF</td>
+    </tr>
+</table>
+
+<!-- CTA Button -->
+<div style="text-align: center; margin-top: 32px;">
+    <a href="{{ site_url }}/events/{{ event.slug }}/" class="button email-button">
+        View Event Details
+    </a>
+</div>
+{% endblock %}
+
+{% block footer_message %}
+Keep this email safe - you'll need it for check-in at the event.
+{% endblock %}

@@ -1,0 +1,50 @@
+{% load slippers %}
+<div class="space-y-6" data-motion>
+    <div class="flex flex-col items-center justify-center py-8">
+        <div class="flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
+            <i data-lucide="x-circle" class="h-8 w-8 text-destructive"></i>
+        </div>
+        <h3 class="mt-4 text-lg font-semibold">Payment Failed</h3>
+        <p class="mt-2 text-sm text-muted-foreground text-center">
+            {% if payment.status == 'EXPIRED' %}
+            Your payment request has expired.
+            {% else %}
+            There was an issue processing your payment.
+            {% endif %}
+        </p>
+    </div>
+
+    {% #alert variant="destructive" icon="alert-triangle" %}
+        <div class="space-y-2 text-sm">
+            <p><strong>Reference:</strong> {{ payment.reference }}</p>
+            <p><strong>Status:</strong> {{ payment.get_status_display }}</p>
+            {% if payment.external_reference %}
+            <p><strong>Reason:</strong> {{ payment.external_reference }}</p>
+            {% endif %}
+        </div>
+    {% /alert %}
+
+    <div class="flex flex-col gap-2">
+        <a href="{% url 'payments:select' payment.booking_id %}" class="w-full">
+            {% #button variant="default" class="w-full" %}
+                <i data-lucide="refresh-cw" class="mr-2 h-4 w-4"></i>
+                Try Again
+            {% /button %}
+        </a>
+        <a href="{% url 'events:list' %}" class="w-full">
+            {% #button variant="outline" class="w-full" %}
+                Back to Events
+            {% /button %}
+        </a>
+    </div>
+</div>
+
+<script>
+    if (typeof motion !== 'undefined') {
+        motion.animate(
+            "[data-motion]",
+            { opacity: [0, 1], y: [6, 0] },
+            { duration: 0.2 }
+        );
+    }
+</script>

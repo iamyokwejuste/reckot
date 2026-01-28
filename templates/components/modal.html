@@ -1,0 +1,38 @@
+<div
+    x-data="{ open: {{ open|default:'false' }} }"
+    x-show="open"
+    x-cloak
+    @keydown.escape.window="open = false"
+    class="relative z-50"
+    role="dialog"
+    aria-modal="true"
+    {{ attrs }}
+>
+    <div
+        x-show="open"
+        x-transition:enter="ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 bg-background/80 backdrop-blur-sm"
+    ></div>
+    <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div
+                x-show="open"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                @click.away="open = false"
+                class="w-full max-w-lg rounded-lg border border-border bg-background p-6 shadow-lg {{ class }}"
+            >
+                {{ children }}
+            </div>
+        </div>
+    </div>
+</div>

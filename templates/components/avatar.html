@@ -1,0 +1,24 @@
+{% with size=size|default:"default" %}
+<div
+    class="
+        relative flex shrink-0 overflow-hidden rounded-full
+        {% if size == 'sm' %}h-8 w-8{% endif %}
+        {% if size == 'default' %}h-10 w-10{% endif %}
+        {% if size == 'lg' %}h-12 w-12{% endif %}
+        {{ class }}
+    "
+    {{ attrs }}
+>
+    {% if src %}
+    <img src="{{ src }}" alt="{{ alt|default:'' }}" class="aspect-square h-full w-full object-cover" />
+    {% else %}
+    <div class="flex h-full w-full items-center justify-center bg-muted text-muted-foreground">
+        {% if initials %}
+        <span class="{% if size == 'sm' %}text-xs{% else %}text-sm{% endif %} font-medium">{{ initials }}</span>
+        {% else %}
+        <i data-lucide="user" class="{% if size == 'sm' %}h-4 w-4{% else %}h-5 w-5{% endif %}"></i>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endwith %}

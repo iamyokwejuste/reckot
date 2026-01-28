@@ -1,0 +1,554 @@
+{% extends 'base.html' %}
+{% load slippers %}
+
+{% block title %}Features - Reckot{% endblock %}
+
+{% block content %}
+<section class="py-20 md:py-28">
+    <div class="container">
+        <div class="text-center max-w-3xl mx-auto mb-16" x-data x-intersect.once="$el.classList.add('animate-in')">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-card text-sm font-medium mb-6">
+                <i data-lucide="sparkles" class="w-4 h-4"></i>
+                All Features
+            </div>
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.1]">
+                Everything you need to run amazing events
+            </h1>
+            <p class="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto">
+                From ticket sales to check-in, analytics to refunds. Reckot gives you the complete toolkit for event success in Africa.
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="py-16 md:py-20">
+    <div class="container">
+        <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <div x-data x-intersect.once="$el.classList.add('animate-in')">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-yellow-500/10 text-yellow-600 text-sm font-medium mb-4">
+                    <i data-lucide="smartphone" class="w-4 h-4"></i>
+                    Payments
+                </div>
+                <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">Mobile money, built-in</h2>
+                <p class="text-muted-foreground mt-4 text-lg">Accept MTN MoMo and Orange Money payments instantly. No bank account needed. Your attendees pay the way they're used to.</p>
+                <ul class="mt-8 space-y-4">
+                    <li class="flex items-start gap-3">
+                        <div class="h-6 w-6 rounded-full bg-emerald-500/10 flex items-center justify-center mt-0.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i>
+                        </div>
+                        <div>
+                            <span class="font-medium">MTN MoMo integration</span>
+                            <p class="text-sm text-muted-foreground">Instant payment confirmation across all MoMo-supported countries</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <div class="h-6 w-6 rounded-full bg-emerald-500/10 flex items-center justify-center mt-0.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i>
+                        </div>
+                        <div>
+                            <span class="font-medium">Orange Money support</span>
+                            <p class="text-sm text-muted-foreground">Accept payments from Orange Money users seamlessly</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <div class="h-6 w-6 rounded-full bg-emerald-500/10 flex items-center justify-center mt-0.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i>
+                        </div>
+                        <div>
+                            <span class="font-medium">24-hour payouts</span>
+                            <p class="text-sm text-muted-foreground">Get your money fast, directly to your mobile money account</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="relative" x-data x-intersect.once="$el.classList.add('animate-scale')">
+                <div class="aspect-[4/3] rounded-2xl border border-border bg-card p-6 lg:p-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <span class="text-sm font-medium">Payment methods</span>
+                        <span class="text-xs text-muted-foreground">All active</span>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="p-4 rounded-xl border border-border bg-background flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="h-10 w-10 rounded-lg bg-yellow-500/10 flex items-center justify-center">
+                                    <span class="text-sm font-bold text-yellow-600">M</span>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-sm">MTN MoMo</p>
+                                    <p class="text-xs text-muted-foreground">Cameroon, Ghana, Uganda</p>
+                                </div>
+                            </div>
+                            <div class="h-3 w-3 rounded-full bg-emerald-500"></div>
+                        </div>
+                        <div class="p-4 rounded-xl border border-border bg-background flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="h-10 w-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                                    <span class="text-sm font-bold text-orange-600">O</span>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-sm">Orange Money</p>
+                                    <p class="text-xs text-muted-foreground">Cameroon, Senegal, Mali</p>
+                                </div>
+                            </div>
+                            <div class="h-3 w-3 rounded-full bg-emerald-500"></div>
+                        </div>
+                        <div class="p-4 rounded-xl border border-border bg-background flex items-center justify-between opacity-50">
+                            <div class="flex items-center gap-3">
+                                <div class="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
+                                    <i data-lucide="credit-card" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-sm">Card payments</p>
+                                    <p class="text-xs text-muted-foreground">Coming soon</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-16 md:py-20 bg-muted/30">
+    <div class="container">
+        <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <div class="order-2 lg:order-1 relative" x-data x-intersect.once="$el.classList.add('animate-scale')">
+                <div class="aspect-[4/3] rounded-2xl border border-border bg-card p-6 lg:p-8">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="h-3 w-3 rounded-full bg-red-400"></div>
+                        <div class="h-3 w-3 rounded-full bg-yellow-400"></div>
+                        <div class="h-3 w-3 rounded-full bg-emerald-400"></div>
+                    </div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-sm font-medium">Attendee list</span>
+                        <div class="flex gap-2">
+                            <div class="h-8 px-3 rounded-lg bg-muted flex items-center gap-2 text-xs">
+                                <i data-lucide="download" class="w-3 h-3"></i>
+                                CSV
+                            </div>
+                            <div class="h-8 px-3 rounded-lg bg-foreground text-background flex items-center gap-2 text-xs">
+                                <i data-lucide="download" class="w-3 h-3"></i>
+                                Excel
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-3 p-3 rounded-lg bg-background">
+                            <div class="h-8 w-8 rounded-full bg-muted"></div>
+                            <div class="flex-1">
+                                <div class="h-3 w-28 rounded bg-muted"></div>
+                                <div class="h-2 w-36 rounded bg-muted/50 mt-1.5"></div>
+                            </div>
+                            <div class="h-6 px-2 rounded-full bg-emerald-500/10 text-xs text-emerald-600 flex items-center">Checked in</div>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 rounded-lg bg-background">
+                            <div class="h-8 w-8 rounded-full bg-muted"></div>
+                            <div class="flex-1">
+                                <div class="h-3 w-32 rounded bg-muted"></div>
+                                <div class="h-2 w-28 rounded bg-muted/50 mt-1.5"></div>
+                            </div>
+                            <div class="h-6 px-2 rounded-full bg-yellow-500/10 text-xs text-yellow-600 flex items-center">Pending</div>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 rounded-lg bg-background">
+                            <div class="h-8 w-8 rounded-full bg-muted"></div>
+                            <div class="flex-1">
+                                <div class="h-3 w-24 rounded bg-muted"></div>
+                                <div class="h-2 w-32 rounded bg-muted/50 mt-1.5"></div>
+                            </div>
+                            <div class="h-6 px-2 rounded-full bg-emerald-500/10 text-xs text-emerald-600 flex items-center">Checked in</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="order-1 lg:order-2" x-data x-intersect.once="$el.classList.add('animate-in')">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 text-blue-600 text-sm font-medium mb-4">
+                    <i data-lucide="users" class="w-4 h-4"></i>
+                    Attendee Management
+                </div>
+                <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">Easy attendee management</h2>
+                <p class="text-muted-foreground mt-4 text-lg">Keep track of every attendee. Export data anytime. Send messages to specific groups.</p>
+                <ul class="mt-8 space-y-4">
+                    <li class="flex items-start gap-3">
+                        <div class="h-6 w-6 rounded-full bg-emerald-500/10 flex items-center justify-center mt-0.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i>
+                        </div>
+                        <div>
+                            <span class="font-medium">Export to CSV, Excel, PDF</span>
+                            <p class="text-sm text-muted-foreground">Download your attendee list in any format</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <div class="h-6 w-6 rounded-full bg-emerald-500/10 flex items-center justify-center mt-0.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i>
+                        </div>
+                        <div>
+                            <span class="font-medium">Print-friendly attendee list</span>
+                            <p class="text-sm text-muted-foreground">Generate printable lists for registration desks</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <div class="h-6 w-6 rounded-full bg-emerald-500/10 flex items-center justify-center mt-0.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i>
+                        </div>
+                        <div>
+                            <span class="font-medium">Message attendees</span>
+                            <p class="text-sm text-muted-foreground">Send updates to all or specific ticket holders</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-16 md:py-20">
+    <div class="container">
+        <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <div x-data x-intersect.once="$el.classList.add('animate-in')">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-600 text-sm font-medium mb-4">
+                    <i data-lucide="scan-line" class="w-4 h-4"></i>
+                    Check-in
+                </div>
+                <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">Lightning-fast QR check-in</h2>
+                <p class="text-muted-foreground mt-4 text-lg">Scan tickets in under 2 seconds. Works offline. Track swag distribution at check-in.</p>
+                <ul class="mt-8 space-y-4">
+                    <li class="flex items-start gap-3">
+                        <div class="h-6 w-6 rounded-full bg-emerald-500/10 flex items-center justify-center mt-0.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i>
+                        </div>
+                        <div>
+                            <span class="font-medium">QR code scanning</span>
+                            <p class="text-sm text-muted-foreground">Use any smartphone camera to scan tickets</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <div class="h-6 w-6 rounded-full bg-emerald-500/10 flex items-center justify-center mt-0.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i>
+                        </div>
+                        <div>
+                            <span class="font-medium">Offline mode</span>
+                            <p class="text-sm text-muted-foreground">Keep checking in even without internet</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <div class="h-6 w-6 rounded-full bg-emerald-500/10 flex items-center justify-center mt-0.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i>
+                        </div>
+                        <div>
+                            <span class="font-medium">Swag tracking</span>
+                            <p class="text-sm text-muted-foreground">Mark swag items as distributed during check-in</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="relative" x-data x-intersect.once="$el.classList.add('animate-scale')">
+                <div class="aspect-square max-w-sm mx-auto rounded-2xl border border-border bg-card p-6 lg:p-8">
+                    <div class="text-center mb-6">
+                        <div class="h-12 w-12 rounded-xl bg-foreground flex items-center justify-center mx-auto mb-3">
+                            <i data-lucide="scan-line" class="w-6 h-6 text-background"></i>
+                        </div>
+                        <p class="text-sm font-medium">Scan ticket</p>
+                    </div>
+                    <div class="aspect-square rounded-xl border-2 border-dashed border-border flex items-center justify-center bg-muted/30">
+                        <div class="text-center">
+                            <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;" class="mb-4">
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+                                <div class="h-3 w-3 rounded-sm bg-muted"></div>
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+                                <div class="h-3 w-3 rounded-sm bg-muted"></div>
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+                                <div class="h-3 w-3 rounded-sm bg-muted"></div>
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+                                <div class="h-3 w-3 rounded-sm bg-muted"></div>
+                                <div class="h-3 w-3 rounded-sm bg-muted"></div>
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+
+                                <div class="h-3 w-3 rounded-sm bg-muted"></div>
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+                                <div class="h-3 w-3 rounded-sm bg-muted"></div>
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+                                <div class="h-3 w-3 rounded-sm bg-muted"></div>
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+                                <div class="h-3 w-3 rounded-sm bg-muted"></div>
+
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+                                <div class="h-3 w-3 rounded-sm bg-muted"></div>
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+                                <div class="h-3 w-3 rounded-sm bg-muted"></div>
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+                                <div class="h-3 w-3 rounded-sm bg-muted"></div>
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+                                <div class="h-3 w-3 rounded-sm bg-muted"></div>
+                                <div class="h-3 w-3 rounded-sm bg-muted"></div>
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+                                <div class="h-3 w-3 rounded-sm bg-muted"></div>
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+                                <div class="h-3 w-3 rounded-sm bg-foreground"></div>
+                            </div>
+                            <p class="text-xs text-muted-foreground">Position QR code here</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="absolute -bottom-4 -right-4 lg:-bottom-6 lg:-right-6 p-4 rounded-xl border border-border bg-card shadow-lg">
+                    <div class="flex items-center gap-3">
+                        <div class="h-10 w-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                            <i data-lucide="check" class="w-5 h-5 text-emerald-600"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-sm">Check-in successful</p>
+                            <p class="text-xs text-muted-foreground">VIP Ticket - Row A</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-16 md:py-20 bg-muted/30">
+    <div class="container">
+        <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <div class="order-2 lg:order-1 relative" x-data x-intersect.once="$el.classList.add('animate-scale')">
+                <div class="aspect-[4/3] rounded-2xl border border-border bg-card p-6 lg:p-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <span class="text-sm font-medium">Sales Analytics</span>
+                        <div class="flex gap-2 text-xs">
+                            <span class="px-2 py-1 rounded bg-foreground text-background">Live</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="p-4 rounded-xl bg-background">
+                            <p class="text-2xl font-semibold">247</p>
+                            <p class="text-xs text-muted-foreground mt-1">Tickets sold</p>
+                        </div>
+                        <div class="p-4 rounded-xl bg-background">
+                            <p class="text-2xl font-semibold">1.2M</p>
+                            <p class="text-xs text-muted-foreground mt-1">Revenue (XAF)</p>
+                        </div>
+                    </div>
+                    <div class="h-32 flex items-end gap-2">
+                        <div class="flex-1 bg-foreground/20 rounded-t" style="height: 40%"></div>
+                        <div class="flex-1 bg-foreground/20 rounded-t" style="height: 65%"></div>
+                        <div class="flex-1 bg-foreground/20 rounded-t" style="height: 45%"></div>
+                        <div class="flex-1 bg-foreground/20 rounded-t" style="height: 80%"></div>
+                        <div class="flex-1 bg-foreground/20 rounded-t" style="height: 55%"></div>
+                        <div class="flex-1 bg-foreground rounded-t" style="height: 95%"></div>
+                        <div class="flex-1 bg-foreground/20 rounded-t" style="height: 70%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-muted-foreground mt-2">
+                        <span>Mon</span>
+                        <span>Tue</span>
+                        <span>Wed</span>
+                        <span>Thu</span>
+                        <span>Fri</span>
+                        <span>Sat</span>
+                        <span>Sun</span>
+                    </div>
+                </div>
+            </div>
+            <div class="order-1 lg:order-2" x-data x-intersect.once="$el.classList.add('animate-in')">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-500/10 text-purple-600 text-sm font-medium mb-4">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                    Analytics
+                </div>
+                <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">Real-time analytics</h2>
+                <p class="text-muted-foreground mt-4 text-lg">Track sales, revenue, and attendance as it happens. Make data-driven decisions.</p>
+                <ul class="mt-8 space-y-4">
+                    <li class="flex items-start gap-3">
+                        <div class="h-6 w-6 rounded-full bg-emerald-500/10 flex items-center justify-center mt-0.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i>
+                        </div>
+                        <div>
+                            <span class="font-medium">Live sales dashboard</span>
+                            <p class="text-sm text-muted-foreground">Watch ticket sales happen in real-time</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <div class="h-6 w-6 rounded-full bg-emerald-500/10 flex items-center justify-center mt-0.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i>
+                        </div>
+                        <div>
+                            <span class="font-medium">Revenue breakdown</span>
+                            <p class="text-sm text-muted-foreground">See revenue by ticket type, time period, or source</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <div class="h-6 w-6 rounded-full bg-emerald-500/10 flex items-center justify-center mt-0.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i>
+                        </div>
+                        <div>
+                            <span class="font-medium">Attendance tracking</span>
+                            <p class="text-sm text-muted-foreground">Monitor check-in rates and timing</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-16 md:py-20">
+    <div class="container">
+        <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <div x-data x-intersect.once="$el.classList.add('animate-in')">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 text-red-600 text-sm font-medium mb-4">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                    Refunds
+                </div>
+                <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">Simple refund management</h2>
+                <p class="text-muted-foreground mt-4 text-lg">Handle refund requests efficiently. Full or partial refunds with complete audit trails.</p>
+                <ul class="mt-8 space-y-4">
+                    <li class="flex items-start gap-3">
+                        <div class="h-6 w-6 rounded-full bg-emerald-500/10 flex items-center justify-center mt-0.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i>
+                        </div>
+                        <div>
+                            <span class="font-medium">Full & partial refunds</span>
+                            <p class="text-sm text-muted-foreground">Process refunds for any amount</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <div class="h-6 w-6 rounded-full bg-emerald-500/10 flex items-center justify-center mt-0.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i>
+                        </div>
+                        <div>
+                            <span class="font-medium">Approval workflow</span>
+                            <p class="text-sm text-muted-foreground">Review and approve refund requests</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <div class="h-6 w-6 rounded-full bg-emerald-500/10 flex items-center justify-center mt-0.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i>
+                        </div>
+                        <div>
+                            <span class="font-medium">Audit trail</span>
+                            <p class="text-sm text-muted-foreground">Complete history of all refund actions</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="relative" x-data x-intersect.once="$el.classList.add('animate-scale')">
+                <div class="aspect-[4/3] rounded-2xl border border-border bg-card p-6 lg:p-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <span class="text-sm font-medium">Refund request</span>
+                        <span class="px-2 py-1 rounded-full bg-yellow-500/10 text-yellow-600 text-xs">Pending</span>
+                    </div>
+                    <div class="p-4 rounded-xl border border-border bg-background mb-4">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="h-10 w-10 rounded-full bg-muted"></div>
+                            <div>
+                                <p class="font-medium text-sm">John Doe</p>
+                                <p class="text-xs text-muted-foreground">VIP Ticket - 25,000 XAF</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-muted-foreground">Unable to attend due to travel conflict.</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <button class="btn btn-outline btn-sm flex-1">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                            Decline
+                        </button>
+                        <button class="btn btn-primary btn-sm flex-1">
+                            <i data-lucide="check" class="w-4 h-4"></i>
+                            Approve
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-16 md:py-20 bg-muted/30">
+    <div class="container">
+        <div class="text-center max-w-2xl mx-auto mb-12" x-data x-intersect.once="$el.classList.add('animate-in')">
+            <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">And much more</h2>
+            <p class="text-muted-foreground mt-4 text-lg">Everything else you need to run successful events</p>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+            <div class="card p-6" x-data x-intersect.once="$el.classList.add('animate-scale')">
+                <div class="h-10 w-10 rounded-xl bg-foreground flex items-center justify-center mb-4">
+                    <i data-lucide="users" class="w-5 h-5 text-background"></i>
+                </div>
+                <h3 class="font-semibold">Team collaboration</h3>
+                <p class="text-muted-foreground text-sm mt-2">Add unlimited team members with custom permissions</p>
+            </div>
+            <div class="card p-6" x-data x-intersect.once="$el.classList.add('animate-scale', 'delay-1')">
+                <div class="h-10 w-10 rounded-xl bg-foreground flex items-center justify-center mb-4">
+                    <i data-lucide="ticket" class="w-5 h-5 text-background"></i>
+                </div>
+                <h3 class="font-semibold">Custom ticket types</h3>
+                <p class="text-muted-foreground text-sm mt-2">Create unlimited ticket tiers with different prices</p>
+            </div>
+            <div class="card p-6" x-data x-intersect.once="$el.classList.add('animate-scale', 'delay-2')">
+                <div class="h-10 w-10 rounded-xl bg-foreground flex items-center justify-center mb-4">
+                    <i data-lucide="mail" class="w-5 h-5 text-background"></i>
+                </div>
+                <h3 class="font-semibold">Email notifications</h3>
+                <p class="text-muted-foreground text-sm mt-2">Automatic confirmations and reminders</p>
+            </div>
+            <div class="card p-6" x-data x-intersect.once="$el.classList.add('animate-scale', 'delay-3')">
+                <div class="h-10 w-10 rounded-xl bg-foreground flex items-center justify-center mb-4">
+                    <i data-lucide="globe" class="w-5 h-5 text-background"></i>
+                </div>
+                <h3 class="font-semibold">Public event pages</h3>
+                <p class="text-muted-foreground text-sm mt-2">Beautiful, mobile-friendly event pages</p>
+            </div>
+            <div class="card p-6" x-data x-intersect.once="$el.classList.add('animate-scale', 'delay-4')">
+                <div class="h-10 w-10 rounded-xl bg-foreground flex items-center justify-center mb-4">
+                    <i data-lucide="gift" class="w-5 h-5 text-background"></i>
+                </div>
+                <h3 class="font-semibold">Swag management</h3>
+                <p class="text-muted-foreground text-sm mt-2">Track merchandise and giveaways at check-in</p>
+            </div>
+            <div class="card p-6" x-data x-intersect.once="$el.classList.add('animate-scale', 'delay-5')">
+                <div class="h-10 w-10 rounded-xl bg-foreground flex items-center justify-center mb-4">
+                    <i data-lucide="calendar" class="w-5 h-5 text-background"></i>
+                </div>
+                <h3 class="font-semibold">Unlimited events</h3>
+                <p class="text-muted-foreground text-sm mt-2">Host as many events as you need</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 md:py-28">
+    <div class="container">
+        <div class="rounded-2xl border border-border bg-card p-8 md:p-12 lg:p-16 text-center" x-data x-intersect.once="$el.classList.add('animate-in')">
+            <h2 class="text-2xl md:text-3xl lg:text-4xl font-semibold tracking-tight max-w-xl mx-auto">Ready to try all these features?</h2>
+            <p class="mt-4 text-muted-foreground text-lg">Start for free. No credit card required.</p>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center mt-8">
+                <a href="{% url 'account_signup' %}" class="btn btn-primary btn-lg">
+                    Get started free
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </a>
+                <a href="{% url 'home' %}#pricing" class="btn btn-outline btn-lg">View pricing</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

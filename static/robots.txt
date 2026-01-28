@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /accounts/
+Disallow: /payments/
+Disallow: /checkin/
+
+# Sitemap URL is generated dynamically based on request host

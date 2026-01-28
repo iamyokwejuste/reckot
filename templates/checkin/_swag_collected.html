@@ -1,0 +1,14 @@
+{% load slippers %}
+<div class="flex items-center justify-between" data-motion>
+    <span class="text-sm">{{ collection.item.name }}</span>
+    <span class="inline-flex items-center text-xs text-success">
+        <i data-lucide="check" class="mr-1 h-3 w-3"></i>
+        Collected
+    </span>
+</div>
+
+<script>
+    if (typeof motion !== 'undefined') {
+        motion.animate("[data-motion]", { opacity: [0, 1] }, { duration: 0.2 });
+    }
+</script>

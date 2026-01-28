@@ -1,0 +1,32 @@
+{% load slippers %}
+{% if results %}
+<div class="space-y-2">
+    {% for ticket in results %}
+    <div class="flex items-center justify-between rounded-lg border border-border p-3 hover:bg-accent/50">
+        <div class="flex items-center gap-3">
+            {% #avatar initials=ticket.booking.user.email|slice:":2"|upper size="sm" %}{% /avatar %}
+            <div>
+                <p class="font-medium">{{ ticket.booking.user.email }}</p>
+                <p class="text-xs text-muted-foreground">{{ ticket.ticket_type.name }}</p>
+                <p class="font-mono text-xs text-muted-foreground">{{ ticket.code }}</p>
+            </div>
+        </div>
+        {% if ticket.is_checked_in %}
+        {% #badge variant="success" %}Checked In{% /badge %}
+        {% else %}
+        <button
+            hx-post="{% url 'checkin:ticket' ticket.code %}"
+            hx-target="closest div.flex"
+            hx-swap="outerHTML"
+            class="inline-flex items-center rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+        >
+            <i data-lucide="check" class="mr-1 h-3 w-3"></i>
+            Check In
+        </button>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p class="text-center text-sm text-muted-foreground py-4">No results found</p>
+{% endif %}

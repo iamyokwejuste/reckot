@@ -1,0 +1,20 @@
+{% load slippers %}
+<div data-motion>
+    {% #alert variant="destructive" icon="x-circle" title="Check-in Failed" %}
+        <p class="text-sm">{{ error }}</p>
+        {% if ticket %}
+        <div class="mt-2 text-sm">
+            <p><strong>Ticket:</strong> {{ ticket.code }}</p>
+            {% if checked_in_at %}
+            <p><strong>Checked in at:</strong> {{ checked_in_at|date:"M d, Y H:i" }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
+    {% /alert %}
+</div>
+
+<script>
+    if (typeof motion !== 'undefined') {
+        motion.animate("[data-motion]", { opacity: [0, 1], y: [8, 0] }, { duration: 0.25 });
+    }
+</script>

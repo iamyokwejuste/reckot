@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% load slippers %}
+
+{% block title %}Reports - {{ event.title }} - Reckot{% endblock %}
+
+{% block content %}
+<div class="container py-8">
+    {% #breadcrumb %}
+        {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+        {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+        {% #breadcrumb_item href="/events/" %}Events{% /breadcrumb_item %}
+        {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+        {% #breadcrumb_item %}Reports{% /breadcrumb_item %}
+    {% /breadcrumb %}
+
+    <div class="mt-6" data-animate="fade-up">
+        <h1 class="text-2xl font-bold">{{ event.title }}</h1>
+        <p class="text-muted-foreground">Reports and Exports</p>
+    </div>
+
+    <div class="mt-8 grid gap-6 md:grid-cols-4" data-stagger>
+        {% #card class="text-center" %}
+            <p class="text-3xl font-bold">{{ summary.total_tickets }}</p>
+            <p class="text-sm text-muted-foreground">Total Tickets</p>
+        {% /card %}
+        {% #card class="text-center" %}
+            <p class="text-3xl font-bold text-success">{{ summary.checked_in }}</p>
+            <p class="text-sm text-muted-foreground">Checked In</p>
+        {% /card %}
+        {% #card class="text-center" %}
+            <p class="text-3xl font-bold">{{ summary.check_in_rate }}%</p>
+            <p class="text-sm text-muted-foreground">Check-in Rate</p>
+        {% /card %}
+        {% #card class="text-center" %}
+            <p class="text-3xl font-bold gradient-text">{{ summary.total_revenue }} XAF</p>
+            <p class="text-sm text-muted-foreground">Total Revenue</p>
+        {% /card %}
+    </div>
+
+    <div class="mt-8 grid gap-8 lg:grid-cols-2">
+        <div data-animate="fade-up" data-delay="0.1">
+            {% #card %}
+                <h2 class="text-lg font-semibold">Generate Report</h2>
+                <p class="text-sm text-muted-foreground mb-4">Export data for this event</p>
+
+                <form
+                    hx-post="{% url 'reports:generate' event.id %}"
+                    hx-target="#export-result"
+                    hx-swap="innerHTML"
+                    class="space-y-4"
+                >
+                    {% csrf_token %}
+
+                    <div class="space-y-2">
+                        {% #label for="report_type" %}Report Type{% /label %}
+                        {% #select name="report_type" required=True %}
+                            {% for value, label in report_types %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        {% /select %}
+                    </div>
+
+                    <div class="space-y-2">
+                        {% #label for="format" %}Format{% /label %}
+                        {% #select name="format" %}
+                            <option value="CSV">CSV</option>
+                            <option value="EXCEL">Excel (.xlsx)</option>
+                        {% /select %}
+                    </div>
+
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            name="mask_emails"
+                            id="mask_emails"
+                            checked
+                            class="h-4 w-4 rounded border-2 border-input text-primary focus:ring-primary"
+                        />
+                        <span class="text-sm font-medium">
+                            Mask email addresses (privacy)
+                        </span>
+                    </label>
+
+                    {% #button type="submit" class="w-full" variant="gradient" %}
+                        <i data-lucide="download" class="mr-2 h-4 w-4"></i>
+                        Generate Report
+                    {% /button %}
+                </form>
+
+                <div id="export-result" class="mt-4"></div>
+            {% /card %}
+        </div>
+
+        <div data-animate="fade-up" data-delay="0.2">
+            {% #card %}
+                <h2 class="text-lg font-semibold mb-4">Recent Exports</h2>
+
+                {% if recent_exports %}
+                <div class="space-y-3">
+                    {% for export in recent_exports %}
+                    <div class="flex items-center justify-between rounded-xl border border-border p-4 hover:bg-accent/50 transition-colors">
+                        <div>
+                            <p class="font-medium">{{ export.get_report_type_display }}</p>
+                            <p class="text-xs text-muted-foreground">
+                                {{ export.get_format_display }} - {{ export.created_at|date:"M d, Y H:i" }}
+                            </p>
+                        </div>
+                        {% if export.file %}
+                        <a href="{% url 'reports:download' export.id %}">
+                            {% #button variant="outline" size="icon" %}
+                                <i data-lucide="download" class="h-4 w-4"></i>
+                            {% /button %}
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                {% #empty_state icon="file-text" title="No exports yet" description="Generate your first report above." %}{% /empty_state %}
+                {% endif %}
+            {% /card %}
+        </div>
+    </div>
+</div>
+{% endblock %}

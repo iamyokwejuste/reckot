@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-xl mx-auto py-12 text-center">
+    {% component 'empty_state' title="No Organization Found" description="You need to create or be invited to an organization before you can create an event." %}
+        {# In a real app, this would link to an organization creation page #}
+        <p class="text-sm text-muted">Please contact your administrator.</p>
+    {% endcomponent %}
+</div>
+{% endblock %}

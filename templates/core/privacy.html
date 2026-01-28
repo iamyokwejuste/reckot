@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load slippers %}
+
+{% block title %}Privacy Policy - Reckot{% endblock %}
+
+{% block content %}
+<section class="py-16 md:py-24">
+    <div class="container">
+        <div class="max-w-3xl mx-auto px-4 sm:px-0">
+            <div class="mb-12">
+                <a href="{% url 'home' %}" class="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    Back to home
+                </a>
+                <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight">Privacy Policy</h1>
+                <div class="mt-4 flex flex-wrap items-center gap-3">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted text-xs font-medium">
+                        <i data-lucide="calendar" class="w-3 h-3"></i>
+                        January 28, 2025
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 text-xs font-medium">
+                        <i data-lucide="git-branch" class="w-3 h-3"></i>
+                        v1.0.0
+                    </span>
+                </div>
+            </div>
+
+            <div class="prose prose-neutral dark:prose-invert max-w-none">
+                <div class="space-y-12">
+                    <section>
+                        <h2 class="text-xl font-semibold mb-4">1. Introduction</h2>
+                        <p class="text-muted-foreground leading-relaxed">
+                            Reckot ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our event management platform.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-semibold mb-4">2. Information We Collect</h2>
+                        <div class="space-y-3 text-muted-foreground">
+                            <p><span class="text-foreground font-medium">Personal Information:</span> When you create an account, we collect your name, email address, phone number, and payment information (mobile money details).</p>
+                            <p><span class="text-foreground font-medium">Event Data:</span> Information about events you create or attend, including event details, ticket purchases, and check-in records.</p>
+                            <p><span class="text-foreground font-medium">Usage Data:</span> We automatically collect information about how you interact with our platform, including IP address, browser type, and device information.</p>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-semibold mb-4">3. How We Use Your Information</h2>
+                        <ul class="space-y-2 text-muted-foreground ml-5">
+                            <li class="flex items-start gap-2">
+                                <span class="text-emerald-500 mt-1.5">✓</span>
+                                <span>To provide and maintain our services</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-emerald-500 mt-1.5">✓</span>
+                                <span>To process transactions and send related information</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-emerald-500 mt-1.5">✓</span>
+                                <span>To send you technical notices, updates, and support messages</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-emerald-500 mt-1.5">✓</span>
+                                <span>To respond to your comments and questions</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-emerald-500 mt-1.5">✓</span>
+                                <span>To analyze usage patterns and improve our platform</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-emerald-500 mt-1.5">✓</span>
+                                <span>To detect, prevent, and address technical issues or fraud</span>
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-semibold mb-4">4. Information Sharing</h2>
+                        <p class="text-muted-foreground leading-relaxed mb-4">
+                            We do not sell your personal information. We may share your information in the following circumstances:
+                        </p>
+                        <div class="space-y-3 text-muted-foreground">
+                            <p><span class="text-foreground font-medium">With Event Organizers:</span> When you purchase a ticket, we share your registration information with the event organizer.</p>
+                            <p><span class="text-foreground font-medium">Payment Processors:</span> We share necessary information with MTN MoMo and Orange Money to process your payments.</p>
+                            <p><span class="text-foreground font-medium">Legal Requirements:</span> We may disclose information if required by law or to protect our rights.</p>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-semibold mb-4">5. Data Security</h2>
+                        <p class="text-muted-foreground leading-relaxed">
+                            We implement appropriate technical and organizational security measures to protect your personal information. However, no method of transmission over the Internet is 100% secure, and we cannot guarantee absolute security.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-semibold mb-4">6. Data Retention</h2>
+                        <p class="text-muted-foreground leading-relaxed">
+                            We retain your personal information for as long as your account is active or as needed to provide you services. We will retain and use your information as necessary to comply with legal obligations, resolve disputes, and enforce our agreements.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-semibold mb-4">7. Your Rights</h2>
+                        <p class="text-muted-foreground leading-relaxed mb-4">You have the right to:</p>
+                        <ul class="space-y-2 text-muted-foreground ml-5">
+                            <li class="flex items-start gap-2">
+                                <span class="text-foreground mt-1.5">•</span>
+                                <span>Access your personal information</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-foreground mt-1.5">•</span>
+                                <span>Correct inaccurate or incomplete data</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-foreground mt-1.5">•</span>
+                                <span>Request deletion of your data</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-foreground mt-1.5">•</span>
+                                <span>Object to processing of your data</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-foreground mt-1.5">•</span>
+                                <span>Request data portability</span>
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-semibold mb-4">8. Cookies</h2>
+                        <p class="text-muted-foreground leading-relaxed">
+                            We use cookies and similar tracking technologies to track activity on our platform and store certain information. You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent.
+                        </p>
+                    </section>
+
+                    <section class="pt-6 mt-6 border-t border-border">
+                        <h2 class="text-xl font-semibold mb-4">9. Contact Us</h2>
+                        <p class="text-muted-foreground leading-relaxed mb-4">
+                            If you have any questions about this Privacy Policy, please contact us:
+                        </p>
+                        <a href="mailto:reckot@yokwejuste.me" class="inline-flex items-center gap-2 text-foreground font-medium hover:underline">
+                            <i data-lucide="mail" class="w-4 h-4"></i>
+                            reckot@yokwejuste.me
+                        </a>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

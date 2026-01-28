@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load slippers %}
+
+{% block title %}Scan Tickets - {{ event.title }} - Reckot{% endblock %}
+
+{% block content %}
+<div class="container py-8">
+    {% #breadcrumb %}
+        {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+        {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+        {% #breadcrumb_item href="{% url 'checkin:dashboard' event.id %}" %}Check-in{% /breadcrumb_item %}
+        {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+        {% #breadcrumb_item %}Scan{% /breadcrumb_item %}
+    {% /breadcrumb %}
+
+    <div class="mt-6" data-animate="fade-up">
+        <h1 class="text-2xl font-bold">{{ event.title }}</h1>
+        <p class="text-muted-foreground">Scan or search for tickets</p>
+    </div>
+
+    <div class="mt-8 grid gap-8 lg:grid-cols-2">
+        <div>
+            <div data-animate="fade-up" data-delay="0.1">
+                {% #card %}
+                    <h2 class="text-lg font-semibold">Manual Check-in</h2>
+                    <p class="text-sm text-muted-foreground mb-4">Enter ticket code or scan QR</p>
+
+                    <form
+                        hx-post="{% url 'checkin:verify' event.id %}"
+                        hx-target="#checkin-result"
+                        hx-swap="innerHTML"
+                        class="space-y-4"
+                    >
+                        {% csrf_token %}
+                        <div class="space-y-2">
+                            {% #label for="code" %}Ticket Code{% /label %}
+                            {% #input name="code" placeholder="Enter ticket code or UUID" required=True class="font-mono" %}{% /input %}
+                        </div>
+                        {% #button type="submit" class="w-full" variant="gradient" %}
+                            <i data-lucide="check" class="mr-2 h-4 w-4"></i>
+                            Check In
+                        {% /button %}
+                    </form>
+
+                    <div id="checkin-result" class="mt-6"></div>
+                {% /card %}
+            </div>
+
+            <div class="mt-6 grid grid-cols-3 gap-4" data-stagger>
+                {% #card class="text-center" %}
+                    <p class="text-3xl font-bold">{{ stats.total }}</p>
+                    <p class="text-sm text-muted-foreground">Total</p>
+                {% /card %}
+                {% #card class="text-center" %}
+                    <p class="text-3xl font-bold text-success">{{ stats.checked_in }}</p>
+                    <p class="text-sm text-muted-foreground">Checked In</p>
+                {% /card %}
+                {% #card class="text-center" %}
+                    <p class="text-3xl font-bold text-warning">{{ stats.remaining }}</p>
+                    <p class="text-sm text-muted-foreground">Remaining</p>
+                {% /card %}
+            </div>
+        </div>
+
+        <div data-animate="fade-up" data-delay="0.2">
+            {% #card %}
+                <h2 class="text-lg font-semibold">Search Attendees</h2>
+                <p class="text-sm text-muted-foreground mb-4">Find by name or email</p>
+
+                {% #input
+                    type="search"
+                    name="q"
+                    placeholder="Search by name, email, or code..."
+                    attrs='hx-get="{% url "checkin:search" event.id %}" hx-trigger="keyup changed delay:300ms" hx-target="#search-results"'
+                %}{% /input %}
+
+                <div id="search-results" class="mt-4"></div>
+            {% /card %}
+        </div>
+    </div>
+</div>
+{% endblock %}

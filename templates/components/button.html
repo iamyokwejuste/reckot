@@ -1,0 +1,48 @@
+{% with variant=variant|default:"default" size=size|default:"default" %}
+<button
+    type="{{ type|default:'button' }}"
+    {% if disabled %}disabled{% endif %}
+    {% if id %}id="{{ id }}"{% endif %}
+    class="
+        btn-hover
+        inline-flex items-center justify-center gap-2
+        font-semibold
+        transition-all duration-200
+        focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
+        disabled:pointer-events-none disabled:opacity-50
+        {% if variant == 'default' or variant == 'gradient' %}
+            bg-gradient-primary text-white rounded-full shadow-lg hover:shadow-xl
+        {% elif variant == 'destructive' %}
+            bg-destructive text-white rounded-full shadow-lg hover:shadow-xl
+        {% elif variant == 'outline' %}
+            border-2 border-border bg-white hover:bg-muted hover:border-primary/50 rounded-full
+        {% elif variant == 'secondary' %}
+            bg-secondary text-secondary-foreground rounded-full shadow-sm hover:shadow-md
+        {% elif variant == 'ghost' %}
+            hover:bg-muted rounded-lg
+        {% elif variant == 'link' %}
+            text-primary underline-offset-4 hover:underline
+        {% endif %}
+        {% if size == 'default' %}
+            h-11 px-6 text-sm
+        {% elif size == 'sm' %}
+            h-9 px-4 text-xs
+        {% elif size == 'lg' %}
+            h-12 px-8 text-base
+        {% elif size == 'xl' %}
+            h-14 px-10 text-lg
+        {% elif size == 'icon' %}
+            h-10 w-10 rounded-lg
+        {% endif %}
+        {{ class }}"
+    {{ attrs }}
+>
+    {{ children }}
+    <span class="htmx-indicator ml-2">
+        <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+    </span>
+</button>
+{% endwith %}

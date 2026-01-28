@@ -1,0 +1,1 @@
+Reckot: Your payment for {{ event.title }} is pending. Complete payment within {{ minutes_remaining }} minutes or your booking will expire. Ref: {{ booking.payment.reference|slice:":8"|upper }}

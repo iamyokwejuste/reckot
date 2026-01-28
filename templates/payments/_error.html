@@ -1,0 +1,11 @@
+{% load slippers %}
+<div class="space-y-4" data-motion>
+    {% #alert variant="destructive" icon="alert-circle" title="Error" %}
+        {{ error }}
+    {% /alert %}
+
+    {% #button variant="outline" class="w-full" attrs='onclick="history.back()"' %}
+        <i data-lucide="arrow-left" class="mr-2 h-4 w-4"></i>
+        Go Back
+    {% /button %}
+</div>

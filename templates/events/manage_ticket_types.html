@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load slippers %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-12">
+    <div class="flex justify-between items-center">
+        <h1 class="text-2xl font-bold">Manage Ticket Types for {{ event.title }}</h1>
+        <a href="{% url 'events:list' %}" class="text-primary hover:text-primary/90">Back to Events</a>
+    </div>
+
+    <div class="mt-8">
+        <h2 class="text-xl font-semibold">Existing Ticket Types</h2>
+        {% if ticket_types %}
+            <div class="mt-4 border rounded-md">
+                {% #table %}
+                    <thead>
+                        <tr class="border-b">
+                            <th class="text-left p-4">Name</th>
+                            <th class="text-left p-4">Price</th>
+                            <th class="text-left p-4">Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tt in ticket_types %}
+                            <tr class="border-b last:border-b-0">
+                                <td class="p-4">{{ tt.name }}</td>
+                                <td class="p-4">${{ tt.price }}</td>
+                                <td class="p-4">{{ tt.quantity }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                {% /table %}
+            </div>
+        {% else %}
+            <div class="mt-4">
+                {% #empty_state title="No Ticket Types Yet" description="Add your first ticket type for this event." %}
+                {% /empty_state %}
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="mt-8">
+        <h2 class="text-xl font-semibold">Add New Ticket Type</h2>
+        <form method="post" class="mt-4 space-y-6">
+            {% csrf_token %}
+            <div>
+                <label for="id_name" class="block text-sm font-medium text-gray-700">Name</label>
+                <div class="mt-1">
+                    {% #input type='text' name='name' id='id_name' value=form.name.value|default:'' class='w-full' required=True %}
+                </div>
+            </div>
+            <div>
+                <label for="id_price" class="block text-sm font-medium text-gray-700">Price</label>
+                <div class="mt-1">
+                    {% #input type='number' name='price' id='id_price' value=form.price.value|default:'' step='0.01' class='w-full' required=True %}
+                </div>
+            </div>
+            <div>
+                <label for="id_quantity" class="block text-sm font-medium text-gray-700">Quantity</label>
+                <div class="mt-1">
+                    {% #input type='number' name='quantity' id='id_quantity' value=form.quantity.value|default:'' class='w-full' required=True %}
+                </div>
+            </div>
+            {% if form.errors %}
+                <div class="mt-4 text-sm text-red-600">
+                    {{ form.errors.as_ul }}
+                </div>
+            {% endif %}
+            <div class="pt-4">
+                {% #button type='submit' %}
+                    Add Ticket Type
+                {% /button %}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

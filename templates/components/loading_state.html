@@ -1,0 +1,16 @@
+{% with size=size|default:"default" %}
+<div class="flex items-center justify-center {{ class }}" {{ attrs }}>
+    <i
+        data-lucide="loader-2"
+        class="
+            animate-spin text-muted-foreground
+            {% if size == 'sm' %}h-4 w-4{% endif %}
+            {% if size == 'default' %}h-8 w-8{% endif %}
+            {% if size == 'lg' %}h-12 w-12{% endif %}
+        "
+    ></i>
+    {% if text %}
+    <span class="ml-2 text-sm text-muted-foreground">{{ text }}</span>
+    {% endif %}
+</div>
+{% endwith %}

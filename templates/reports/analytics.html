@@ -1,0 +1,262 @@
+{% extends "layouts/dashboard.html" %}
+{% load slippers %}
+
+{% block title %}Analytics - Reckot{% endblock %}
+
+{% block header_title %}
+<div>
+    <h1 class="text-lg font-semibold">Analytics</h1>
+    <p class="text-sm text-muted-foreground">Track your event performance</p>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<div class="flex items-center gap-2">
+    <select class="h-9 rounded-md border border-border bg-card px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+        <option value="7d">Last 7 days</option>
+        <option value="30d" selected>Last 30 days</option>
+        <option value="90d">Last 90 days</option>
+        <option value="1y">Last year</option>
+    </select>
+    <button class="btn btn-primary btn-sm">
+        <i data-lucide="download" class="h-4 w-4"></i>
+        <span class="hidden sm:inline">Export</span>
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="stat-card">
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-muted-foreground">Total Revenue</p>
+                <i data-lucide="banknote" class="h-4 w-4 text-muted-foreground"></i>
+            </div>
+            <div class="mt-2">
+                <p class="text-2xl font-bold">{{ total_revenue|default:"2,450,000" }} <span class="text-sm font-normal text-muted-foreground">XAF</span></p>
+                <p class="text-xs text-emerald-500 flex items-center gap-1 mt-1">
+                    <i data-lucide="trending-up" class="h-3 w-3"></i>
+                    +12.5% from last month
+                </p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-muted-foreground">Tickets Sold</p>
+                <i data-lucide="ticket" class="h-4 w-4 text-muted-foreground"></i>
+            </div>
+            <div class="mt-2">
+                <p class="text-2xl font-bold">{{ tickets_sold|default:"1,247" }}</p>
+                <p class="text-xs text-emerald-500 flex items-center gap-1 mt-1">
+                    <i data-lucide="trending-up" class="h-3 w-3"></i>
+                    +8.2% from last month
+                </p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-muted-foreground">Check-in Rate</p>
+                <i data-lucide="scan-line" class="h-4 w-4 text-muted-foreground"></i>
+            </div>
+            <div class="mt-2">
+                <p class="text-2xl font-bold">{{ checkin_rate|default:"87.3" }}%</p>
+                <p class="text-xs text-emerald-500 flex items-center gap-1 mt-1">
+                    <i data-lucide="trending-up" class="h-3 w-3"></i>
+                    +2.1% from last month
+                </p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-muted-foreground">Active Events</p>
+                <i data-lucide="calendar" class="h-4 w-4 text-muted-foreground"></i>
+            </div>
+            <div class="mt-2">
+                <p class="text-2xl font-bold">{{ active_events|default:"12" }}</p>
+                <p class="text-xs text-muted-foreground mt-1">3 upcoming this week</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid gap-4 lg:grid-cols-7">
+        <div class="lg:col-span-4 card p-4 lg:p-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div>
+                    <h3 class="font-semibold">Revenue Overview</h3>
+                    <p class="text-sm text-muted-foreground">Monthly revenue for the current year</p>
+                </div>
+                <div class="flex gap-2">
+                    <button class="tab-trigger tab-trigger-active">Revenue</button>
+                    <button class="tab-trigger">Tickets</button>
+                </div>
+            </div>
+            <div class="h-[240px] sm:h-[300px] flex items-end gap-1 sm:gap-2">
+                {% for i in "123456789012" %}
+                <div class="flex-1 flex flex-col items-center gap-2">
+                    <div class="w-full bg-foreground/10 rounded-t-sm relative overflow-hidden" style="height: {% widthratio forloop.counter 12 220 %}px;">
+                        <div class="absolute inset-0 bg-foreground rounded-t-sm" style="height: {% widthratio forloop.counter 12 100 %}%;"></div>
+                    </div>
+                    <span class="text-xs text-muted-foreground">{% cycle 'J' 'F' 'M' 'A' 'M' 'J' 'J' 'A' 'S' 'O' 'N' 'D' %}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="lg:col-span-3 card p-4 lg:p-6">
+            <div class="mb-6">
+                <h3 class="font-semibold">Ticket Types</h3>
+                <p class="text-sm text-muted-foreground">Distribution by ticket category</p>
+            </div>
+            <div class="space-y-4">
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between text-sm">
+                        <span>VIP Tickets</span>
+                        <span class="font-medium">32%</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar" style="width: 32%;"></div>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between text-sm">
+                        <span>Standard Tickets</span>
+                        <span class="font-medium">45%</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar" style="width: 45%;"></div>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between text-sm">
+                        <span>Early Bird</span>
+                        <span class="font-medium">18%</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar" style="width: 18%;"></div>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between text-sm">
+                        <span>Free Tickets</span>
+                        <span class="font-medium">5%</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar" style="width: 5%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid gap-4 lg:grid-cols-2">
+        <div class="card p-4 lg:p-6">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h3 class="font-semibold">Recent Sales</h3>
+                    <p class="text-sm text-muted-foreground">Latest ticket purchases</p>
+                </div>
+                <a href="#" class="text-sm text-muted-foreground hover:text-foreground transition-colors">View all</a>
+            </div>
+            <div class="space-y-4">
+                {% for sale in recent_sales|default:"12345" %}
+                <div class="flex items-center gap-4">
+                    <div class="h-10 w-10 rounded-full bg-muted flex items-center justify-center shrink-0">
+                        <span class="text-sm font-medium">{% cycle 'JD' 'AM' 'PK' 'EN' 'FC' %}</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium truncate">{% cycle 'Jean Dupont' 'Alice Martin' 'Paul Kamga' 'Eric Ndam' 'Flora Chen' %}</p>
+                        <p class="text-xs text-muted-foreground truncate">{% cycle 'VIP Ticket - Tech Summit' 'Standard - Music Fest' 'Early Bird - Startup Night' 'VIP - Afro Culture' 'Standard - Code Camp' %}</p>
+                    </div>
+                    <p class="text-sm font-medium">+{% cycle '25,000' '10,000' '15,000' '30,000' '5,000' %} XAF</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="card p-4 lg:p-6">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h3 class="font-semibold">Upcoming Events</h3>
+                    <p class="text-sm text-muted-foreground">Events in the next 7 days</p>
+                </div>
+                <a href="{% url 'events:list' %}" class="text-sm text-muted-foreground hover:text-foreground transition-colors">View all</a>
+            </div>
+            <div class="space-y-4">
+                {% for event in upcoming_events|default:"1234" %}
+                <div class="flex items-center gap-4 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                    <div class="h-12 w-12 rounded-lg bg-muted flex flex-col items-center justify-center shrink-0">
+                        <span class="text-xs text-muted-foreground">{% cycle 'JAN' 'JAN' 'FEB' 'FEB' %}</span>
+                        <span class="text-lg font-bold leading-none">{% cycle '28' '30' '02' '05' %}</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium truncate">{% cycle 'Cameroon Tech Summit 2025' 'Afro Music Night' 'Startup Weekend Douala' 'Digital Marketing Workshop' %}</p>
+                        <p class="text-xs text-muted-foreground">{% cycle '245 tickets sold' '189 tickets sold' '78 tickets sold' '45 tickets sold' %}</p>
+                    </div>
+                    <div class="badge">{% cycle 'Live' 'Soon' 'Draft' 'Soon' %}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 lg:p-6">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h3 class="font-semibold">Top Performing Events</h3>
+                <p class="text-sm text-muted-foreground">Events ranked by revenue</p>
+            </div>
+        </div>
+        <div class="overflow-x-auto -mx-4 lg:-mx-6">
+            <div class="px-4 lg:px-6 min-w-[640px]">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-border">
+                            <th class="text-left text-sm font-medium text-muted-foreground pb-3 pr-4">Event</th>
+                            <th class="text-left text-sm font-medium text-muted-foreground pb-3 pr-4">Date</th>
+                            <th class="text-left text-sm font-medium text-muted-foreground pb-3 pr-4">Tickets</th>
+                            <th class="text-left text-sm font-medium text-muted-foreground pb-3 pr-4">Revenue</th>
+                            <th class="text-left text-sm font-medium text-muted-foreground pb-3 pr-4">Check-in</th>
+                            <th class="text-right text-sm font-medium text-muted-foreground pb-3">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border">
+                        {% for i in "12345" %}
+                        <tr class="hover:bg-muted/50 transition-colors">
+                            <td class="py-3 pr-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="h-10 w-10 rounded-lg bg-muted"></div>
+                                    <div>
+                                        <p class="font-medium text-sm">{% cycle 'Tech Summit Douala' 'Afro Night Live' 'Startup Weekend' 'Code Camp 237' 'Digital Marketing' %}</p>
+                                        <p class="text-xs text-muted-foreground">{% cycle 'Douala' 'Yaounde' 'Douala' 'Buea' 'Yaounde' %}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-3 pr-4 text-sm text-muted-foreground">{% cycle 'Jan 28, 2025' 'Feb 14, 2025' 'Feb 20, 2025' 'Mar 05, 2025' 'Mar 12, 2025' %}</td>
+                            <td class="py-3 pr-4 text-sm">{% cycle '456' '312' '245' '189' '156' %}</td>
+                            <td class="py-3 pr-4 text-sm font-medium">{% cycle '890,000' '624,000' '490,000' '378,000' '312,000' %} XAF</td>
+                            <td class="py-3 pr-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="progress w-16">
+                                        <div class="progress-bar" style="width: {% cycle '92' '87' '78' '65' '0' %}%;"></div>
+                                    </div>
+                                    <span class="text-sm">{% cycle '92%' '87%' '78%' '65%' '--' %}</span>
+                                </div>
+                            </td>
+                            <td class="py-3 text-right">
+                                <span class="badge {% cycle 'badge-success' 'badge-success' 'badge-warning' 'badge-warning' 'badge-default' %}">
+                                    {% cycle 'Completed' 'Completed' 'Live' 'Upcoming' 'Draft' %}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

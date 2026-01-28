@@ -1,0 +1,47 @@
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.contrib.auth import get_user_model
+from allauth.account.signals import user_signed_up
+from allauth.socialaccount.signals import social_account_added
+
+from .models import OTPVerification
+
+User = get_user_model()
+
+
+@receiver(user_signed_up)
+def handle_user_signup(sender, request, user, **kwargs):
+    """
+    Handle new user registration.
+    - For email signups: send OTP verification
+    - For social signups: mark as verified and send welcome email
+    """
+    from .tasks import send_otp_verification_task, send_welcome_email_task
+
+    # Check if this is a social signup
+    sociallogin = kwargs.get('sociallogin')
+
+    if sociallogin:
+        # Social signup - mark email as verified
+        user.email_verified = True
+        user.save(update_fields=['email_verified'])
+
+        # Send welcome email
+        send_welcome_email_task(user.id)
+    else:
+        # Email signup - send OTP verification
+        otp = OTPVerification.create_for_user(
+            user=user,
+            otp_type=OTPVerification.Type.EMAIL,
+            expiry_minutes=10
+        )
+        send_otp_verification_task(user.id, otp.id)
+
+
+@receiver(social_account_added)
+def handle_social_account_added(sender, request, sociallogin, **kwargs):
+    """Handle when a social account is added to existing user."""
+    user = sociallogin.user
+    if not user.email_verified and sociallogin.account.provider == 'google':
+        user.email_verified = True
+        user.save(update_fields=['email_verified'])

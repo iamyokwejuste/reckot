@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+{% load slippers %}
+
+{% block title %}Terms of Service - Reckot{% endblock %}
+
+{% block content %}
+<section class="py-16 md:py-24">
+    <div class="container">
+        <div class="max-w-3xl mx-auto px-4 sm:px-0">
+            <div class="mb-12">
+                <a href="{% url 'home' %}" class="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    Back to home
+                </a>
+                <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight">Terms of Service</h1>
+                <div class="mt-4 flex flex-wrap items-center gap-3">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted text-xs font-medium">
+                        <i data-lucide="calendar" class="w-3 h-3"></i>
+                        January 28, 2025
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 text-xs font-medium">
+                        <i data-lucide="git-branch" class="w-3 h-3"></i>
+                        v1.0.0
+                    </span>
+                </div>
+            </div>
+
+            <div class="prose prose-neutral dark:prose-invert max-w-none">
+                <div class="space-y-12">
+                    <section>
+                        <h2 class="text-xl font-semibold mb-4">1. Acceptance of Terms</h2>
+                        <p class="text-muted-foreground leading-relaxed">
+                            By accessing or using Reckot's event management platform, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-semibold mb-4">2. Description of Service</h2>
+                        <p class="text-muted-foreground leading-relaxed">
+                            Reckot provides an event management platform that enables users to create, manage, and sell tickets for events, as well as purchase tickets and attend events. Our services include event creation, ticketing, mobile money payment processing, and check-in management.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-semibold mb-4">3. User Accounts</h2>
+                        <p class="text-muted-foreground leading-relaxed mb-4">To use certain features of our platform, you must create an account. You agree to:</p>
+                        <ul class="space-y-2 text-muted-foreground ml-5">
+                            <li class="flex items-start gap-2">
+                                <span class="text-foreground mt-1.5">•</span>
+                                <span>Provide accurate and complete information</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-foreground mt-1.5">•</span>
+                                <span>Maintain the security of your account credentials</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-foreground mt-1.5">•</span>
+                                <span>Promptly update any changes to your information</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-foreground mt-1.5">•</span>
+                                <span>Accept responsibility for all activities under your account</span>
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-semibold mb-4">4. Event Organizers</h2>
+                        <p class="text-muted-foreground leading-relaxed mb-4">If you create events on Reckot, you agree to:</p>
+                        <ul class="space-y-2 text-muted-foreground ml-5">
+                            <li class="flex items-start gap-2">
+                                <span class="text-emerald-500 mt-1.5">✓</span>
+                                <span>Provide accurate event information</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-emerald-500 mt-1.5">✓</span>
+                                <span>Honor all tickets sold through our platform</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-emerald-500 mt-1.5">✓</span>
+                                <span>Comply with all applicable laws and regulations</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-emerald-500 mt-1.5">✓</span>
+                                <span>Obtain necessary permits and licenses for your events</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-emerald-500 mt-1.5">✓</span>
+                                <span>Not create events for illegal activities</span>
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-semibold mb-4">5. Fees and Payments</h2>
+                        <div class="rounded-xl border border-border p-5 mb-5">
+                            <div class="grid sm:grid-cols-3 gap-4 text-center">
+                                <div>
+                                    <div class="text-2xl font-semibold">5%</div>
+                                    <p class="text-sm text-muted-foreground mt-1">Service fee on paid tickets</p>
+                                </div>
+                                <div>
+                                    <div class="text-2xl font-semibold">24h</div>
+                                    <p class="text-sm text-muted-foreground mt-1">Payout to your wallet</p>
+                                </div>
+                                <div>
+                                    <div class="text-2xl font-semibold text-emerald-500">Free</div>
+                                    <p class="text-sm text-muted-foreground mt-1">For free events</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-3 text-muted-foreground">
+                            <p><span class="text-foreground font-medium">Service Fee:</span> Reckot charges a 5% fee on all paid ticket sales. Free events incur no fees.</p>
+                            <p><span class="text-foreground font-medium">Payouts:</span> Event organizers receive payouts within 24 hours of ticket sales to their registered mobile money wallet.</p>
+                            <p><span class="text-foreground font-medium">Refunds:</span> Refund policies are set by event organizers. Reckot does not provide refunds directly but facilitates communication between organizers and attendees.</p>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-semibold mb-4">6. Prohibited Activities</h2>
+                        <p class="text-muted-foreground leading-relaxed mb-4">You may not use our platform to:</p>
+                        <ul class="space-y-2 text-muted-foreground ml-5">
+                            <li class="flex items-start gap-2">
+                                <span class="text-red-500 mt-1.5">✕</span>
+                                <span>Violate any laws or regulations</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-red-500 mt-1.5">✕</span>
+                                <span>Infringe on intellectual property rights</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-red-500 mt-1.5">✕</span>
+                                <span>Transmit harmful or malicious content</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-red-500 mt-1.5">✕</span>
+                                <span>Engage in fraudulent activities</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-red-500 mt-1.5">✕</span>
+                                <span>Resell tickets at inflated prices (scalping)</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-red-500 mt-1.5">✕</span>
+                                <span>Create fake events or misleading listings</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-red-500 mt-1.5">✕</span>
+                                <span>Harass or harm other users</span>
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-semibold mb-4">7. Intellectual Property</h2>
+                        <p class="text-muted-foreground leading-relaxed">
+                            The Reckot platform, including its design, features, and content, is owned by Reckot and protected by intellectual property laws. You retain ownership of content you create on our platform but grant us a license to use it for providing our services.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-semibold mb-4">8. Limitation of Liability</h2>
+                        <p class="text-muted-foreground leading-relaxed">
+                            Reckot is not liable for any indirect, incidental, special, or consequential damages arising from your use of our platform. We are not responsible for the actions of event organizers or attendees. Our total liability is limited to the fees you paid to us in the past 12 months.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-semibold mb-4">9. Termination</h2>
+                        <p class="text-muted-foreground leading-relaxed">
+                            We may suspend or terminate your account at any time for violations of these terms or for any other reason at our discretion. You may close your account at any time by contacting us.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-semibold mb-4">10. Changes to Terms</h2>
+                        <p class="text-muted-foreground leading-relaxed">
+                            We may update these Terms of Service from time to time. We will notify you of significant changes by posting a notice on our platform or sending you an email. Continued use of our services after changes constitutes acceptance of the new terms.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 class="text-xl font-semibold mb-4">11. Governing Law</h2>
+                        <p class="text-muted-foreground leading-relaxed">
+                            These Terms of Service are governed by the laws of Cameroon. Any disputes shall be resolved in the courts of Cameroon.
+                        </p>
+                    </section>
+
+                    <section class="pt-6 mt-6 border-t border-border">
+                        <h2 class="text-xl font-semibold mb-4">12. Contact Us</h2>
+                        <p class="text-muted-foreground leading-relaxed mb-4">
+                            If you have any questions about these Terms of Service, please contact us:
+                        </p>
+                        <a href="mailto:reckot@yokwejuste.me" class="inline-flex items-center gap-2 text-foreground font-medium hover:underline">
+                            <i data-lucide="mail" class="w-4 h-4"></i>
+                            reckot@yokwejuste.me
+                        </a>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

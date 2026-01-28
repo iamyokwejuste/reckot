@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load slippers %}
+
+{% block title %}Select Payment Method - Reckot{% endblock %}
+
+{% block content %}
+<div class="container py-8">
+    {% #breadcrumb %}
+        {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+        {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+        {% #breadcrumb_item href="/events/" %}Events{% /breadcrumb_item %}
+        {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+        {% #breadcrumb_item %}Payment{% /breadcrumb_item %}
+    {% /breadcrumb %}
+
+    <div class="mx-auto mt-8 max-w-lg" data-animate="scale-in">
+        {% #card class="shadow-xl" %}
+            <div class="text-center mb-6">
+                <div class="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-animated mb-4">
+                    <i data-lucide="credit-card" class="h-7 w-7 text-white"></i>
+                </div>
+                <h1 class="text-2xl font-bold">Complete Payment</h1>
+                <p class="text-sm text-muted-foreground mt-1">
+                    Select your preferred payment method
+                </p>
+            </div>
+
+            <div id="payment-panel">
+                <form
+                    hx-post="{% url 'payments:start' booking.id %}"
+                    hx-target="#payment-panel"
+                    hx-swap="innerHTML"
+                    class="space-y-6"
+                >
+                    {% csrf_token %}
+
+                    <div class="space-y-3">
+                        <p class="text-sm font-medium">Payment Method</p>
+                        <div class="grid gap-3">
+                            {% for value, label in methods %}
+                            <label class="flex cursor-pointer items-center space-x-3 rounded-xl border-2 border-input p-4 hover:bg-accent hover:border-primary/30 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+                                <input
+                                    type="radio"
+                                    name="method"
+                                    value="{{ value }}"
+                                    class="h-4 w-4 border-2 border-input text-primary focus:ring-primary"
+                                    required
+                                />
+                                <div class="flex items-center gap-3">
+                                    {% if value == 'MTN_MOMO' %}
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-warning/10">
+                                        <i data-lucide="smartphone" class="h-5 w-5 text-warning"></i>
+                                    </div>
+                                    {% else %}
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-500/10">
+                                        <i data-lucide="smartphone" class="h-5 w-5 text-orange-500"></i>
+                                    </div>
+                                    {% endif %}
+                                    <span class="font-medium">{{ label }}</span>
+                                </div>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        {% #label for="phone" %}Phone Number{% /label %}
+                        {% #input type="tel" name="phone" placeholder="+237 6XX XXX XXX" required=True %}{% /input %}
+                    </div>
+
+                    <div class="rounded-xl bg-accent/50 p-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-muted-foreground">Total Amount</span>
+                            <span class="text-xl font-bold gradient-text">{{ booking.tickets.first.ticket_type.price }} XAF</span>
+                        </div>
+                    </div>
+
+                    {% #button type="submit" class="w-full" variant="gradient" %}
+                        <i data-lucide="credit-card" class="mr-2 h-4 w-4"></i>
+                        Pay Now
+                    {% /button %}
+                </form>
+            </div>
+        {% /card %}
+    </div>
+</div>
+{% endblock %}

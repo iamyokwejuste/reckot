@@ -1,0 +1,11 @@
+{% with interactive=interactive|default:False %}
+<div
+    class="
+        rounded-2xl border border-gray-200 bg-white p-6
+        {% if interactive %}card-interactive shadow-md hover:shadow-xl{% else %}shadow-sm{% endif %}
+        {{ class }}"
+    {{ attrs }}
+>
+    {{ children }}
+</div>
+{% endwith %}

@@ -1,0 +1,19 @@
+{% load slippers %}
+<div class="grid grid-cols-4 gap-4">
+    {% #card class="text-center" %}
+        <p class="text-2xl font-bold">{{ summary.total_tickets }}</p>
+        <p class="text-xs text-muted-foreground">Total</p>
+    {% /card %}
+    {% #card class="text-center" %}
+        <p class="text-2xl font-bold text-success">{{ summary.checked_in }}</p>
+        <p class="text-xs text-muted-foreground">Checked In</p>
+    {% /card %}
+    {% #card class="text-center" %}
+        <p class="text-2xl font-bold">{{ summary.check_in_rate }}%</p>
+        <p class="text-xs text-muted-foreground">Rate</p>
+    {% /card %}
+    {% #card class="text-center" %}
+        <p class="text-2xl font-bold">{{ summary.total_revenue }}</p>
+        <p class="text-xs text-muted-foreground">Revenue</p>
+    {% /card %}
+</div>

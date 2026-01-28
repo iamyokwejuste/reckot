@@ -1,0 +1,1 @@
+Reckot: Tickets confirmed for {{ event.title }} on {{ event.date|date:"M j" }}. {{ tickets|length }} ticket(s). Ref: {{ booking.payment.reference|slice:":8"|upper }}. Check email for QR code.

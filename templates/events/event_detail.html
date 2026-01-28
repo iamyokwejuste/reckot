@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% load slippers %}
+
+{% block title %}{{ event.title }} - Reckot{% endblock %}
+
+{% block content %}
+<div class="container py-8">
+    {% #breadcrumb %}
+        {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+        {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+        {% #breadcrumb_item href="{% url 'events:list' %}" %}Events{% /breadcrumb_item %}
+        {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+        {% #breadcrumb_item %}{{ event.title }}{% /breadcrumb_item %}
+    {% /breadcrumb %}
+
+    <div class="mt-6 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4" data-animate="fade-up">
+        <div>
+            <div class="flex items-center gap-3">
+                <h1 class="text-3xl font-bold">{{ event.title }}</h1>
+                {% #status_pill variant="{% if event.state == 'PUBLISHED' %}success{% elif event.state == 'DRAFT' %}default{% else %}warning{% endif %}" dot=True %}
+                    {{ event.state }}
+                {% /status_pill %}
+            </div>
+            <p class="mt-1 text-muted-foreground">{{ event.organization.name }}</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <a href="{% url 'checkin:dashboard' event.id %}">
+                {% #button variant="outline" %}
+                    <i data-lucide="scan" class="mr-2 h-4 w-4"></i>
+                    Check-in
+                {% /button %}
+            </a>
+            <a href="{% url 'reports:dashboard' event.id %}">
+                {% #button variant="outline" %}
+                    <i data-lucide="bar-chart-2" class="mr-2 h-4 w-4"></i>
+                    Reports
+                {% /button %}
+            </a>
+            <a href="{% url 'events:manage_ticket_types' event.id %}">
+                {% #button variant="outline" %}
+                    <i data-lucide="ticket" class="mr-2 h-4 w-4"></i>
+                    Manage Tickets
+                {% /button %}
+            </a>
+        </div>
+    </div>
+
+    <div class="mt-8 grid gap-8 lg:grid-cols-3">
+        <div class="lg:col-span-2" data-animate="fade-up" data-delay="0.1">
+            {% #card %}
+                <h2 class="text-lg font-semibold mb-4">Event Details</h2>
+
+                <div class="prose prose-sm max-w-none text-muted-foreground">
+                    <p>{{ event.description }}</p>
+                </div>
+
+                <div class="mt-6 grid gap-4 sm:grid-cols-2">
+                    <div class="flex items-center gap-3 p-4 rounded-xl bg-accent/50">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                            <i data-lucide="calendar" class="h-5 w-5 text-primary"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium">Date</p>
+                            <p class="text-sm text-muted-foreground">{{ event.start_at|date:"D, M d, Y" }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 p-4 rounded-xl bg-accent/50">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                            <i data-lucide="clock" class="h-5 w-5 text-primary"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium">Time</p>
+                            <p class="text-sm text-muted-foreground">{{ event.start_at|date:"H:i" }} - {{ event.end_at|date:"H:i" }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 p-4 rounded-xl bg-accent/50">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                            <i data-lucide="map-pin" class="h-5 w-5 text-primary"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium">Location</p>
+                            <p class="text-sm text-muted-foreground">{{ event.location }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 p-4 rounded-xl bg-accent/50">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                            <i data-lucide="users" class="h-5 w-5 text-primary"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium">Capacity</p>
+                            <p class="text-sm text-muted-foreground">{{ event.capacity }} attendees</p>
+                        </div>
+                    </div>
+                </div>
+            {% /card %}
+        </div>
+
+        <div data-animate="fade-up" data-delay="0.2">
+            {% #card %}
+                <h2 class="text-lg font-semibold mb-4">Book Tickets</h2>
+
+                {% if event.ticket_types.all %}
+                <form method="post" class="space-y-4">
+                    {% csrf_token %}
+                    <div class="space-y-2">
+                        {% #label for="ticket_type" %}Ticket Type{% /label %}
+                        {% #select name="ticket_type" required=True %}
+                            {% for tt in event.ticket_types.all %}
+                            <option value="{{ tt.id }}" {% if booking_form.ticket_type.value == tt.id %}selected{% endif %}>
+                                {{ tt.name }} - {{ tt.price }} XAF ({{ tt.quantity }} left)
+                            </option>
+                            {% endfor %}
+                        {% /select %}
+                    </div>
+
+                    <div class="space-y-2">
+                        {% #label for="quantity" %}Quantity{% /label %}
+                        {% #input type="number" name="quantity" value=booking_form.quantity.value|default:"1" min="1" required=True %}{% /input %}
+                    </div>
+
+                    {% if booking_form.errors %}
+                    {% #alert variant="destructive" %}
+                        {{ booking_form.errors.as_ul }}
+                    {% /alert %}
+                    {% endif %}
+
+                    {% if error %}
+                    {% #alert variant="destructive" %}
+                        {{ error }}
+                    {% /alert %}
+                    {% endif %}
+
+                    {% #button type="submit" class="w-full" variant="gradient" %}
+                        <i data-lucide="ticket" class="mr-2 h-4 w-4"></i>
+                        Book Now
+                    {% /button %}
+                </form>
+                {% else %}
+                {% #empty_state icon="ticket" title="No Tickets Available" description="Ticket types have not been set up for this event yet." %}{% /empty_state %}
+                {% endif %}
+            {% /card %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Verify Your Email - Reckot{% endblock %}
+
+{% block content %}
+<h1 class="heading">Verify your email</h1>
+<p class="subheading email-muted">Enter this code to complete your registration</p>
+
+<div class="otp-code email-badge">
+    {{ otp_code }}
+</div>
+
+<p class="content email-muted">
+    This code will expire in <strong>{{ expiry_minutes }} minutes</strong>. If you didn't request this code, you can safely ignore this email.
+</p>
+
+<div class="divider email-border" style="border-top: 1px solid;"></div>
+
+<p class="email-muted" style="font-size: 14px; margin: 0;">
+    For security reasons, never share this code with anyone. Reckot staff will never ask for your verification code.
+</p>
+{% endblock %}
+
+{% block footer_message %}
+You're receiving this email because you recently created a Reckot account.
+{% endblock %}

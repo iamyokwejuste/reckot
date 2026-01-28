@@ -1,0 +1,145 @@
+{% load static %}
+{% load slippers %}
+<!DOCTYPE html>
+<html lang="en" class="h-full" x-data="themeHandler()" :class="{ 'dark': isDark }">
+<head>
+    <meta charset="UTF-8">
+    <script>
+        (function() {
+            var mode = localStorage.getItem('theme') || 'system';
+            var isDark = mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (isDark) document.documentElement.classList.add('dark');
+        })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block meta_description %}Reckot - Modern event management platform for Africa. Create, manage, and sell tickets for your events with ease.{% endblock %}">
+    <meta name="theme-color" content="#09090b">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Reckot">
+    <title>{% block title %}Reckot - Event Management Platform{% endblock %}</title>
+
+    <link rel="canonical" href="{{ request.build_absolute_uri }}">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{% block og_title %}Reckot - Event Management Platform{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Modern event management platform for Africa. Create, manage, and sell tickets for your events with ease.{% endblock %}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:site_name" content="Reckot">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Reckot - Event Management Platform">
+    <meta name="twitter:description" content="Modern event management platform for Africa.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com" crossorigin>
+    <link rel="dns-prefetch" href="https://unpkg.com">
+    <link rel="preload" href="{% static 'css/output.css' %}" as="style" fetchpriority="high">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
+
+    <link href="{% static 'css/output.css' %}" rel="stylesheet">
+
+    <script>
+        function themeHandler() {
+            return {
+                isDark: document.documentElement.classList.contains('dark'),
+                mode: localStorage.getItem('theme') || 'system',
+                init() {
+                    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                        if (this.mode === 'system') this.updateTheme();
+                    });
+                },
+                updateTheme() {
+                    if (this.mode === 'system') {
+                        this.isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    } else {
+                        this.isDark = this.mode === 'dark';
+                    }
+                },
+                setMode(m) {
+                    this.mode = m;
+                    localStorage.setItem('theme', m);
+                    this.updateTheme();
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        [x-cloak] { display: none !important; }
+    </style>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Reckot",
+        "description": "Modern event management platform for Africa. Create, manage, and sell tickets for your events with ease.",
+        "url": "{{ request.scheme }}://{{ request.get_host }}",
+        "logo": "{{ request.scheme }}://{{ request.get_host }}{% static 'images/logo/logo_light_mode.png' %}"
+    }
+    </script>
+    {% block structured_data %}{% endblock %}
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="min-h-full bg-background text-foreground antialiased flex flex-col transition-colors duration-300" hx-boost="true">
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-foreground focus:text-background focus:rounded-lg">Skip to main content</a>
+    {% include "partials/navigation.html" %}
+    <main id="main-content" class="flex-1" role="main">{% block content %}{% endblock %}</main>
+    <footer class="border-t border-border py-8 sm:py-12 mt-auto" role="contentinfo">
+        <div class="container">
+            <div class="grid grid-cols-2 gap-6 sm:gap-8 md:grid-cols-4">
+                <div class="col-span-2 md:col-span-1 mb-2 md:mb-0">
+                    <a href="/" class="inline-block" aria-label="Reckot Home">
+                        <img x-show="!isDark" src="{% static 'images/logo/logo_light_mode.png' %}" alt="Reckot" width="120" height="32" class="h-7 sm:h-8 w-auto" loading="lazy">
+                        <img x-show="isDark" x-cloak src="{% static 'images/logo/logo_dark_mode.png' %}" alt="Reckot" width="120" height="32" class="h-7 sm:h-8 w-auto" loading="lazy">
+                    </a>
+                    <p class="mt-3 text-xs sm:text-sm text-muted-foreground">Modern event management for Africa.</p>
+                </div>
+                <div>
+                    <h2 class="font-medium text-sm mb-3">Product</h2>
+                    <ul class="space-y-2 text-xs sm:text-sm text-muted-foreground">
+                        <li><a href="{% url 'features' %}" class="hover:text-foreground transition-colors">Features</a></li>
+                        <li><a href="{% url 'home' %}#pricing" class="hover:text-foreground transition-colors">Pricing</a></li>
+                        <li><a href="{% url 'why_us' %}" class="hover:text-foreground transition-colors">Why Us</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h2 class="font-medium text-sm mb-3">Company</h2>
+                    <ul class="space-y-2 text-xs sm:text-sm text-muted-foreground">
+                        <li><a href="https://yokwejuste.me" target="_blank" rel="noopener noreferrer" class="hover:text-foreground transition-colors">About</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h2 class="font-medium text-sm mb-3">Legal</h2>
+                    <ul class="space-y-2 text-xs sm:text-sm text-muted-foreground">
+                        <li><a href="{% url 'privacy' %}" class="hover:text-foreground transition-colors">Privacy</a></li>
+                        <li><a href="{% url 'terms' %}" class="hover:text-foreground transition-colors">Terms</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-6 pt-6 border-t border-border">
+                <p class="text-xs sm:text-sm text-muted-foreground text-center md:text-left">&copy; {% now "Y" %} Reckot. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script defer src="https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js"></script>
+    <script defer src="https://unpkg.com/@alpinejs/collapse@3.14.8/dist/cdn.min.js"></script>
+    <script defer src="https://unpkg.com/@alpinejs/intersect@3.14.8/dist/cdn.min.js"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js"></script>
+    <script defer src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js" onload="lucide.createIcons()"></script>
+
+    <script>
+        document.addEventListener("htmx:afterSwap", () => {
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        });
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

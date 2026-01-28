@@ -1,0 +1,19 @@
+{% load slippers %}
+<div data-motion>
+    {% #alert variant="success" icon="check-circle" title="Report Ready" %}
+        <p class="text-sm">Your {{ export.get_report_type_display }} report has been generated.</p>
+    {% /alert %}
+
+    <a href="{% url 'reports:download' export.id %}" class="mt-4 block">
+        {% #button variant="outline" class="w-full" %}
+            <i data-lucide="download" class="mr-2 h-4 w-4"></i>
+            Download {{ export.get_format_display }}
+        {% /button %}
+    </a>
+</div>
+
+<script>
+    if (typeof motion !== 'undefined') {
+        motion.animate("[data-motion]", { opacity: [0, 1], y: [8, 0] }, { duration: 0.25 });
+    }
+</script>

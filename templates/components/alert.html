@@ -1,0 +1,28 @@
+{% with variant=variant|default:"default" %}
+<div
+    role="alert"
+    class="
+        relative w-full rounded-lg border p-4
+        {% if variant == 'default' %}bg-background text-foreground{% endif %}
+        {% if variant == 'destructive' %}border-destructive/50 text-destructive bg-destructive/10{% endif %}
+        {% if variant == 'success' %}border-success/50 text-success bg-success/10{% endif %}
+        {% if variant == 'warning' %}border-warning/50 text-warning bg-warning/10{% endif %}
+        {{ class }}
+    "
+    {{ attrs }}
+>
+    {% if icon %}
+    <i data-lucide="{{ icon }}" class="h-4 w-4 absolute left-4 top-4"></i>
+    <div class="pl-7">
+    {% endif %}
+        {% if title %}
+        <h5 class="mb-1 font-medium leading-none tracking-tight">{{ title }}</h5>
+        {% endif %}
+        <div class="text-sm {% if not title %}{% else %}mt-1{% endif %} [&_p]:leading-relaxed">
+            {{ children }}
+        </div>
+    {% if icon %}
+    </div>
+    {% endif %}
+</div>
+{% endwith %}

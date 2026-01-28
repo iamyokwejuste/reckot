@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% load slippers %}
+
+{% block content %}
+<div class="max-w-md mx-auto py-12 text-center">
+    {% #empty_state title="Bad Request (400)" description="The server cannot process the request due to a client error. (e.g., malformed request syntax, invalid message framing, or deceptive request routing)." %}
+        <p class="text-sm text-muted mt-4">Please check your request and try again.</p>
+    {% /empty_state %}
+</div>
+{% endblock %}

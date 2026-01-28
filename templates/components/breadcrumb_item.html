@@ -1,0 +1,7 @@
+<li class="inline-flex items-center gap-1.5 {{ class }}" {{ attrs }}>
+    {% if href %}
+    <a href="{{ href }}" class="transition-colors hover:text-foreground">{{ children }}</a>
+    {% else %}
+    <span class="font-normal text-foreground" aria-current="page">{{ children }}</span>
+    {% endif %}
+</li>

@@ -1,0 +1,20 @@
+{% load slippers %}
+<div class="flex items-center justify-between rounded-lg border border-success/20 bg-success/5 p-3" data-motion>
+    <div class="flex items-center gap-3">
+        {% #avatar initials=ticket.booking.user.email|slice:":2"|upper size="sm" %}{% /avatar %}
+        <div>
+            <p class="font-medium">{{ ticket.booking.user.email }}</p>
+            <p class="text-xs text-muted-foreground">{{ ticket.ticket_type.name }}</p>
+        </div>
+    </div>
+    <div class="flex items-center gap-2">
+        {% #badge variant="success" %}Checked In{% /badge %}
+        <i data-lucide="check-circle" class="h-4 w-4 text-success"></i>
+    </div>
+</div>
+
+<script>
+    if (typeof motion !== 'undefined') {
+        motion.animate("[data-motion]", { opacity: [0, 1], scale: [0.98, 1] }, { duration: 0.2 });
+    }
+</script>

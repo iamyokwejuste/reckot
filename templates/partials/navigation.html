@@ -1,0 +1,194 @@
+{% load slippers %}
+{% load static %}
+
+<header class="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-lg border-b border-border">
+    <div class="container">
+        <nav class="flex h-16 items-center justify-between" aria-label="Main navigation">
+            <a href="/" class="flex items-center gap-2" aria-label="Reckot Home">
+                <img x-show="!isDark" src="{% static 'images/logo/logo_light_mode.png' %}" alt="Reckot" width="120" height="36" class="h-9 w-auto">
+                <img x-show="isDark" x-cloak src="{% static 'images/logo/logo_dark_mode.png' %}" alt="Reckot" width="120" height="36" class="h-9 w-auto">
+            </a>
+
+            <div class="hidden md:flex items-center gap-1">
+                {% if user.is_authenticated %}
+                <a href="{% url 'events:list' %}" class="px-4 py-2 text-sm transition-colors {% if request.resolver_match.url_name == 'list' and request.resolver_match.namespace == 'events' %}text-foreground font-medium{% else %}text-muted-foreground hover:text-foreground{% endif %}">Events</a>
+                {% if user.current_org %}
+                <a href="{% url 'events:create' %}" class="px-4 py-2 text-sm transition-colors {% if request.resolver_match.url_name == 'create' and request.resolver_match.namespace == 'events' %}text-foreground font-medium{% else %}text-muted-foreground hover:text-foreground{% endif %}">Create</a>
+                {% endif %}
+                {% else %}
+                <a href="{% url 'features' %}" class="px-4 py-2 text-sm transition-colors {% if request.resolver_match.url_name == 'features' %}text-foreground font-medium{% else %}text-muted-foreground hover:text-foreground{% endif %}">Features</a>
+                <a href="{% url 'home' %}#pricing" class="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
+                <a href="{% url 'why_us' %}" class="px-4 py-2 text-sm transition-colors {% if request.resolver_match.url_name == 'why_us' %}text-foreground font-medium{% else %}text-muted-foreground hover:text-foreground{% endif %}">Why Us</a>
+                {% endif %}
+            </div>
+
+            <div class="hidden md:flex items-center gap-3">
+                <button @click="setMode(isDark ? 'light' : 'dark')" class="p-2 rounded-lg hover:bg-muted transition-colors" aria-label="Toggle theme">
+                    <i x-show="!isDark" data-lucide="moon" class="h-5 w-5" aria-hidden="true"></i>
+                    <i x-show="isDark" x-cloak data-lucide="sun" class="h-5 w-5" aria-hidden="true"></i>
+                </button>
+
+                {% if user.is_authenticated %}
+                <div class="relative" x-data="{ userOpen: false }">
+                    <button @click="userOpen = !userOpen" @click.outside="userOpen = false" class="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full hover:bg-muted transition-colors" aria-label="User menu" aria-haspopup="true" :aria-expanded="userOpen.toString()">
+                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-foreground text-background text-sm font-medium">
+                            {{ user.email|slice:":1"|upper }}
+                        </div>
+                        <i data-lucide="chevron-down" class="h-4 w-4 text-muted-foreground" aria-hidden="true"></i>
+                    </button>
+                    <div x-show="userOpen" x-transition class="absolute right-0 mt-2 w-56 rounded-xl border border-border bg-card p-2 shadow-lg" x-cloak role="menu">
+                        <div class="px-3 py-2 border-b border-border mb-2">
+                            <p class="text-sm font-medium truncate">{{ user.email }}</p>
+                        </div>
+                        <a href="{% url 'events:list' %}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors" role="menuitem">
+                            <i data-lucide="calendar" class="h-4 w-4" aria-hidden="true"></i>
+                            My Events
+                        </a>
+                        <a href="{% url 'reports:analytics' %}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors" role="menuitem">
+                            <i data-lucide="bar-chart-3" class="h-4 w-4" aria-hidden="true"></i>
+                            Analytics
+                        </a>
+                        <div class="border-t border-border mt-2 pt-2">
+                            <a href="{% url 'account_logout' %}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-red-500 hover:bg-red-500/10 transition-colors" role="menuitem">
+                                <i data-lucide="log-out" class="h-4 w-4" aria-hidden="true"></i>
+                                Log out
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <a href="{% url 'account_login' %}" class="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">Log in</a>
+                <a href="{% url 'account_signup' %}" class="btn btn-primary btn-md">Get Started</a>
+                {% endif %}
+            </div>
+
+            <div class="flex md:hidden items-center gap-2">
+                <button @click="setMode(isDark ? 'light' : 'dark')" class="p-2 rounded-lg hover:bg-muted transition-colors" aria-label="Toggle theme">
+                    <i x-show="!isDark" data-lucide="moon" class="h-5 w-5" aria-hidden="true"></i>
+                    <i x-show="isDark" x-cloak data-lucide="sun" class="h-5 w-5" aria-hidden="true"></i>
+                </button>
+                <button id="mobile-menu-toggle" class="p-2 rounded-lg hover:bg-muted transition-colors" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+                    <i id="hamburger-icon" data-lucide="menu" class="h-6 w-6" aria-hidden="true"></i>
+                    <i id="close-icon" data-lucide="x" class="h-6 w-6" aria-hidden="true" style="display: none;"></i>
+                </button>
+            </div>
+        </nav>
+    </div>
+</header>
+
+
+<div id="mobile-menu" class="hidden md:hidden fixed inset-0 bg-background text-foreground flex flex-col" style="z-index: 9999; display: none;">
+    <div class="flex items-center justify-between h-16 px-4 border-b border-border">
+        <a href="/" onclick="closeMobileMenu()" aria-label="Reckot Home">
+            <img id="mobile-logo-light" src="{% static 'images/logo/logo_light_mode.png' %}" alt="Reckot" width="120" height="36" class="h-9 w-auto">
+            <img id="mobile-logo-dark" src="{% static 'images/logo/logo_dark_mode.png' %}" alt="Reckot" width="120" height="36" class="h-9 w-auto">
+        </a>
+        <button onclick="closeMobileMenu()" class="p-2 rounded-lg hover:bg-muted transition-colors" aria-label="Close menu">
+            <i data-lucide="x" class="h-6 w-6" aria-hidden="true"></i>
+        </button>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto p-6" aria-label="Mobile navigation">
+        {% if user.is_authenticated %}
+        <div class="flex items-center gap-3 p-4 mb-6 rounded-xl bg-muted">
+            <div class="h-12 w-12 rounded-full bg-foreground text-background flex items-center justify-center text-lg font-semibold">
+                {{ user.email|slice:":1"|upper }}
+            </div>
+            <span class="font-medium truncate text-foreground">{{ user.email }}</span>
+        </div>
+        <div class="space-y-2">
+            <a href="{% url 'events:list' %}" onclick="closeMobileMenu()" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted transition-colors">
+                <i data-lucide="calendar" class="h-6 w-6" aria-hidden="true"></i>
+                My Events
+            </a>
+            <a href="{% url 'reports:analytics' %}" onclick="closeMobileMenu()" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted transition-colors">
+                <i data-lucide="bar-chart-3" class="h-6 w-6" aria-hidden="true"></i>
+                Analytics
+            </a>
+        </div>
+        {% else %}
+        <div class="space-y-2">
+            <a href="{% url 'features' %}" onclick="closeMobileMenu()" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted transition-colors">
+                <i data-lucide="sparkles" class="h-6 w-6" aria-hidden="true"></i>
+                Features
+            </a>
+            <a href="{% url 'home' %}#pricing" onclick="closeMobileMenu()" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted transition-colors">
+                <i data-lucide="tag" class="h-6 w-6" aria-hidden="true"></i>
+                Pricing
+            </a>
+            <a href="{% url 'why_us' %}" onclick="closeMobileMenu()" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted transition-colors">
+                <i data-lucide="heart" class="h-6 w-6" aria-hidden="true"></i>
+                Why Us
+            </a>
+        </div>
+        {% endif %}
+    </nav>
+
+    <div class="p-6 border-t border-border space-y-3">
+        {% if user.is_authenticated %}
+        <a href="{% url 'account_logout' %}" class="flex items-center justify-center gap-2 w-full py-4 rounded-xl text-red-500 bg-red-500/10 font-semibold text-lg">
+            <i data-lucide="log-out" class="h-5 w-5" aria-hidden="true"></i>
+            Log out
+        </a>
+        {% else %}
+        <a href="{% url 'account_login' %}" onclick="closeMobileMenu()" class="flex items-center justify-center w-full py-4 rounded-xl border border-border text-foreground font-semibold text-lg hover:bg-muted transition-colors">
+            Log in
+        </a>
+        <a href="{% url 'account_signup' %}" onclick="closeMobileMenu()" class="flex items-center justify-center w-full py-4 rounded-xl bg-foreground text-background font-semibold text-lg hover:opacity-90 transition-opacity">
+            Get Started
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function updateMobileLogo() {
+    const isDark = document.documentElement.classList.contains('dark');
+    const lightLogo = document.getElementById('mobile-logo-light');
+    const darkLogo = document.getElementById('mobile-logo-dark');
+    if (lightLogo && darkLogo) {
+        lightLogo.style.display = isDark ? 'none' : 'block';
+        darkLogo.style.display = isDark ? 'block' : 'none';
+    }
+}
+function updateToggleIcon(isOpen) {
+    const hamburger = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    if (hamburger && closeIcon) {
+        hamburger.style.display = isOpen ? 'none' : 'block';
+        closeIcon.style.display = isOpen ? 'block' : 'none';
+    }
+}
+function openMobileMenu() {
+    updateMobileLogo();
+    updateToggleIcon(true);
+    document.getElementById('mobile-menu').style.display = 'flex';
+    document.getElementById('mobile-menu-toggle').setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+function closeMobileMenu() {
+    updateToggleIcon(false);
+    document.getElementById('mobile-menu').style.display = 'none';
+    document.getElementById('mobile-menu-toggle').setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+}
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobile-menu');
+    if (menu.style.display === 'flex') {
+        closeMobileMenu();
+    } else {
+        openMobileMenu();
+    }
+}
+document.addEventListener('DOMContentLoaded', function() {
+    updateMobileLogo();
+    const observer = new MutationObserver(updateMobileLogo);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    const toggleBtn = document.getElementById('mobile-menu-toggle');
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', toggleMobileMenu);
+    }
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+});
+</script>

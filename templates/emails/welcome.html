@@ -1,0 +1,66 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Welcome to Reckot{% endblock %}
+
+{% block content %}
+<h1 class="heading">Welcome to Reckot!</h1>
+<p class="subheading email-muted">Your account is ready. Let's get you started.</p>
+
+<p class="content">
+    Hi {{ user.first_name|default:user.email }},
+</p>
+
+<p class="content">
+    Thanks for joining Reckot - the modern way to discover, create, and manage events in Africa. We're excited to have you on board!
+</p>
+
+<div class="ticket-info email-badge">
+    <h3 style="margin: 0 0 16px 0; font-size: 16px; font-weight: 600;">Here's what you can do:</h3>
+    <table style="width: 100%;">
+        <tr>
+            <td style="padding: 8px 0; vertical-align: top; width: 32px;">
+                <span style="display: inline-block; width: 24px; height: 24px; background: #09090b; color: #fafafa; border-radius: 50%; text-align: center; line-height: 24px; font-size: 12px; font-weight: 600;">1</span>
+            </td>
+            <td style="padding: 8px 0 8px 12px;">
+                <strong>Discover events</strong><br>
+                <span class="email-muted" style="font-size: 14px;">Find amazing events happening near you</span>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 8px 0; vertical-align: top;">
+                <span style="display: inline-block; width: 24px; height: 24px; background: #09090b; color: #fafafa; border-radius: 50%; text-align: center; line-height: 24px; font-size: 12px; font-weight: 600;">2</span>
+            </td>
+            <td style="padding: 8px 0 8px 12px;">
+                <strong>Book tickets instantly</strong><br>
+                <span class="email-muted" style="font-size: 14px;">Secure your spot with mobile money</span>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 8px 0; vertical-align: top;">
+                <span style="display: inline-block; width: 24px; height: 24px; background: #09090b; color: #fafafa; border-radius: 50%; text-align: center; line-height: 24px; font-size: 12px; font-weight: 600;">3</span>
+            </td>
+            <td style="padding: 8px 0 8px 12px;">
+                <strong>Create your own events</strong><br>
+                <span class="email-muted" style="font-size: 14px;">Start selling tickets in minutes</span>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<!-- CTA Button -->
+<div style="text-align: center; margin-top: 32px;">
+    <a href="{{ site_url }}/events/" class="button email-button">
+        Explore Events
+    </a>
+</div>
+
+<div class="divider email-border" style="border-top: 1px solid;"></div>
+
+<p class="email-muted" style="font-size: 14px; margin: 0;">
+    Need help getting started? Check out our <a href="{{ site_url }}/features/" style="text-decoration: underline;">features page</a> or reply to this email.
+</p>
+{% endblock %}
+
+{% block footer_message %}
+Welcome to the Reckot community!
+{% endblock %}

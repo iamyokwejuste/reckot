@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% load slippers %}
+
+{% block content %}
+<div class="max-w-md mx-auto py-12 text-center">
+    {% #empty_state title="Server Error (500)" description="Something went wrong on our end." %}
+        <p class="text-sm text-muted mt-4">We're working to fix it. Please try again later.</p>
+    {% /empty_state %}
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+<input
+    type="{{ type|default:'text' }}"
+    {% if name %}name="{{ name }}"{% endif %}
+    {% if id %}id="{{ id }}"{% endif %}
+    {% if value %}value="{{ value }}"{% endif %}
+    {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+    {% if required %}required{% endif %}
+    {% if disabled %}disabled{% endif %}
+    {% if readonly %}readonly{% endif %}
+    {% if min %}min="{{ min }}"{% endif %}
+    {% if max %}max="{{ max }}"{% endif %}
+    {% if step %}step="{{ step }}"{% endif %}
+    {% if autocomplete %}autocomplete="{{ autocomplete }}"{% endif %}
+    class="
+        input-focus
+        flex h-12 w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-3
+        text-sm text-gray-900 placeholder:text-gray-400
+        transition-all duration-200
+        hover:border-gray-300
+        disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-50
+        {{ class }}"
+    {{ attrs }}
+/>

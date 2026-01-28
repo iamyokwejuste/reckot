@@ -1,0 +1,1 @@
+Reckot: Refund of {{ refund.amount|floatformat:0 }} XAF approved for {{ event.title }}. Funds will be credited within 5-7 days. Ref: {{ refund.reference|slice:":8"|upper }}

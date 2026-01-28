@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% load slippers %}
+
+{% block content %}
+<div class="max-w-md mx-auto py-12 text-center">
+    {% #empty_state title="Forbidden (403)" description="You don't have permission to access this resource." %}
+        <p class="text-sm text-muted mt-4">Please check your credentials or contact the administrator.</p>
+    {% /empty_state %}
+</div>
+{% endblock %}

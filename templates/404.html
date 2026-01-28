@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load slippers %}
+
+{% block content %}
+<div class="max-w-md mx-auto py-12 text-center">
+    {% #empty_state title="Page Not Found (404)" description="Sorry, the page you're looking for doesn't exist." %}
+        <p class="text-sm text-muted mt-4">It might have been moved or deleted.</p>
+        <div class="mt-6">
+            <a href="{% url 'home' %}">
+                {% #button %}
+                    Go to Homepage
+                {% /button %}
+            </a>
+        </div>
+    {% /empty_state %}
+</div>
+{% endblock %}

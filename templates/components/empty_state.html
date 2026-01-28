@@ -1,0 +1,19 @@
+<div
+    class="flex flex-col items-center justify-center rounded-lg border border-dashed border-border p-12 text-center {{ class }}"
+    {{ attrs }}
+>
+    {% if icon %}
+    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+        <i data-lucide="{{ icon }}" class="h-6 w-6 text-muted-foreground"></i>
+    </div>
+    {% endif %}
+    <h3 class="mt-4 text-lg font-semibold text-foreground">{{ title }}</h3>
+    {% if description %}
+    <p class="mt-2 text-sm text-muted-foreground">{{ description }}</p>
+    {% endif %}
+    {% if children %}
+    <div class="mt-6">
+        {{ children }}
+    </div>
+    {% endif %}
+</div>
