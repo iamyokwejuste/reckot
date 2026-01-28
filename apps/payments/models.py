@@ -1,9 +1,74 @@
 from django.db import models
 from django.conf import settings
 from apps.tickets.models import Booking
+from apps.orgs.models import Organization
 import uuid
 from datetime import timedelta
 from django.utils import timezone
+
+
+class Currency(models.TextChoices):
+    XAF = 'XAF', 'Central African CFA Franc'
+    XOF = 'XOF', 'West African CFA Franc'
+    USD = 'USD', 'US Dollar'
+    EUR = 'EUR', 'Euro'
+    GBP = 'GBP', 'British Pound'
+    NGN = 'NGN', 'Nigerian Naira'
+    GHS = 'GHS', 'Ghanaian Cedi'
+    UGX = 'UGX', 'Ugandan Shilling'
+
+
+class PaymentProvider(models.TextChoices):
+    MTN_MOMO = 'MTN_MOMO', 'MTN Mobile Money'
+    ORANGE_MONEY = 'ORANGE_MONEY', 'Orange Money'
+    STRIPE = 'STRIPE', 'Stripe'
+    PAYPAL = 'PAYPAL', 'PayPal'
+    OFFLINE = 'OFFLINE', 'Offline Payment'
+
+
+class PaymentGatewayConfig(models.Model):
+    class ServiceFeeType(models.TextChoices):
+        FIXED = 'FIXED', 'Fixed Amount'
+        PERCENTAGE = 'PERCENTAGE', 'Percentage'
+        BOTH = 'BOTH', 'Fixed + Percentage'
+
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.CASCADE,
+        related_name='payment_gateways'
+    )
+    provider = models.CharField(max_length=20, choices=PaymentProvider.choices)
+    is_active = models.BooleanField(default=True)
+    is_default = models.BooleanField(default=False)
+    credentials = models.JSONField(default=dict, blank=True)
+    supported_currencies = models.JSONField(default=list)
+    service_fee_type = models.CharField(
+        max_length=20,
+        choices=ServiceFeeType.choices,
+        default=ServiceFeeType.PERCENTAGE
+    )
+    service_fee_fixed = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0
+    )
+    service_fee_percentage = models.DecimalField(
+        max_digits=5, decimal_places=2, default=0
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['organization', 'provider']
+        indexes = [
+            models.Index(fields=['organization', 'is_active']),
+        ]
+
+    def calculate_service_fee(self, amount):
+        if self.service_fee_type == self.ServiceFeeType.FIXED:
+            return self.service_fee_fixed
+        elif self.service_fee_type == self.ServiceFeeType.PERCENTAGE:
+            return amount * (self.service_fee_percentage / 100)
+        else:
+            return self.service_fee_fixed + (amount * (self.service_fee_percentage / 100))
 
 
 class Payment(models.Model):
@@ -12,10 +77,6 @@ class Payment(models.Model):
         CONFIRMED = 'CONFIRMED', 'Confirmed'
         FAILED = 'FAILED', 'Failed'
         EXPIRED = 'EXPIRED', 'Expired'
-
-    class Method(models.TextChoices):
-        MTN_MOMO = 'MTN_MOMO', 'MTN Mobile Money'
-        ORANGE_MONEY = 'ORANGE_MONEY', 'Orange Money'
 
     booking = models.OneToOneField(
         Booking,
@@ -28,14 +89,33 @@ class Payment(models.Model):
         unique=True
     )
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    method = models.CharField(max_length=20, choices=Method.choices)
-    phone_number = models.CharField(max_length=20)
+    service_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    currency = models.CharField(
+        max_length=3,
+        choices=Currency.choices,
+        default=Currency.XAF
+    )
+    provider = models.CharField(
+        max_length=20,
+        choices=PaymentProvider.choices,
+        default=PaymentProvider.MTN_MOMO
+    )
+    phone_number = models.CharField(max_length=20, blank=True)
+    customer_email = models.EmailField(blank=True)
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
         default=Status.PENDING
     )
-    external_reference = models.CharField(max_length=100, blank=True)
+    external_reference = models.CharField(max_length=255, blank=True)
+    redirect_url = models.URLField(blank=True)
+    gateway_config = models.ForeignKey(
+        PaymentGatewayConfig,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    metadata = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     confirmed_at = models.DateTimeField(null=True, blank=True)
     expires_at = models.DateTimeField()
@@ -45,6 +125,7 @@ class Payment(models.Model):
             models.Index(fields=['reference']),
             models.Index(fields=['status', 'expires_at']),
             models.Index(fields=['booking']),
+            models.Index(fields=['provider']),
         ]
         ordering = ['-created_at']
 
@@ -56,6 +137,10 @@ class Payment(models.Model):
     @property
     def is_expired(self):
         return timezone.now() > self.expires_at and self.status == self.Status.PENDING
+
+    @property
+    def total_amount(self):
+        return self.amount + self.service_fee
 
 
 class Refund(models.Model):
