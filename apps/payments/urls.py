@@ -1,26 +1,28 @@
 from django.urls import path
-from . import actions
+from apps.payments import actions
 
 app_name = 'payments'
 
 urlpatterns = [
+    path('', actions.PaymentListView.as_view(), name='list'),
+    path('checkout/', actions.CheckoutView.as_view(), name='checkout'),
     path(
-        '<int:booking_id>/select/',
+        '<uuid:booking_ref>/select/',
         actions.PaymentSelectMethodView.as_view(),
         name='select'
     ),
     path(
-        '<int:booking_id>/start/',
+        '<uuid:booking_ref>/start/',
         actions.PaymentStartView.as_view(),
         name='start'
     ),
     path(
-        '<int:payment_id>/poll/',
+        '<uuid:payment_ref>/poll/',
         actions.PaymentPollView.as_view(),
         name='poll'
     ),
     path(
-        '<int:payment_id>/success/',
+        '<uuid:payment_ref>/success/',
         actions.PaymentSuccessView.as_view(),
         name='success'
     ),
@@ -28,5 +30,10 @@ urlpatterns = [
         'webhook/',
         actions.PaymentWebhookView.as_view(),
         name='webhook'
+    ),
+    path(
+        'webhook/campay/',
+        actions.CampayWebhookView.as_view(),
+        name='webhook_campay'
     ),
 ]

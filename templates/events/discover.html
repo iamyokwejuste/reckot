@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load slippers %}
+
+{% block title %}Discover Events - Reckot{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold mb-2">Discover Events</h1>
+        <p class="text-muted-foreground">Find amazing events happening near you</p>
+    </div>
+
+    <form method="get" class="mb-8">
+        <div class="flex flex-col md:flex-row gap-4 max-w-2xl mx-auto">
+            <div class="flex-1">
+                <input type="text" name="q" value="{{ search }}" placeholder="Search events..." class="input w-full">
+            </div>
+            <div class="flex-1">
+                <input type="text" name="location" value="{{ location }}" placeholder="Location..." class="input w-full">
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i data-lucide="search" class="w-4 h-4 mr-2"></i>
+                Search
+            </button>
+        </div>
+    </form>
+
+    {% if events %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for event in events %}
+        <a href="{% url 'events:public_detail' org_slug=event.organization.slug event_slug=event.slug %}" class="card hover:shadow-lg transition-shadow">
+            <div class="p-6">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex-shrink-0 w-12 h-12 rounded-lg bg-foreground/5 flex items-center justify-center">
+                        <i data-lucide="calendar" class="w-6 h-6 text-foreground"></i>
+                    </div>
+                    {% if event.ticket_types.exists %}
+                    <span class="text-sm font-semibold">From {{ event.ticket_types.first.price }} XAF</span>
+                    {% endif %}
+                </div>
+                <h3 class="font-semibold text-lg mb-2">{{ event.title }}</h3>
+                <p class="text-sm text-muted-foreground mb-4">{{ event.description|truncatewords:20 }}</p>
+                <div class="flex items-center gap-4 text-sm text-muted-foreground">
+                    <span class="flex items-center gap-1">
+                        <i data-lucide="clock" class="w-4 h-4"></i>
+                        {{ event.start_at|date:"M j, Y" }}
+                    </span>
+                    <span class="flex items-center gap-1">
+                        <i data-lucide="map-pin" class="w-4 h-4"></i>
+                        {{ event.location|truncatewords:3 }}
+                    </span>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    {% if events.has_other_pages %}
+    <div class="flex justify-center mt-8 gap-2">
+        {% if events.has_previous %}
+        <a href="?page={{ events.previous_page_number }}{% if search %}&q={{ search }}{% endif %}{% if location %}&location={{ location }}{% endif %}" class="btn btn-outline btn-sm">Previous</a>
+        {% endif %}
+        <span class="btn btn-ghost btn-sm">Page {{ events.number }} of {{ events.paginator.num_pages }}</span>
+        {% if events.has_next %}
+        <a href="?page={{ events.next_page_number }}{% if search %}&q={{ search }}{% endif %}{% if location %}&location={{ location }}{% endif %}" class="btn btn-outline btn-sm">Next</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="text-center py-16">
+        <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-foreground/5 mb-4">
+            <i data-lucide="calendar-x" class="w-8 h-8 text-muted-foreground"></i>
+        </div>
+        <h3 class="font-semibold text-lg mb-2">No events found</h3>
+        <p class="text-muted-foreground">Try adjusting your search criteria</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

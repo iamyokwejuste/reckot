@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load slippers %}
+
+{% block title %}Attendee List - {{ event.title }}{% endblock %}
+
+{% block extra_head %}
+{% if print_mode %}
+<style>
+    @media print {
+        body { background: white !important; }
+        .no-print { display: none !important; }
+        .card { box-shadow: none !important; border: 1px solid #ddd !important; }
+        table { font-size: 10pt; }
+        th, td { padding: 4px 8px !important; }
+    }
+    @page { margin: 1cm; }
+</style>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 {% if print_mode %}max-w-full{% endif %}">
+    <div class="flex justify-between items-center mb-6 no-print">
+        <div>
+            <h1 class="text-2xl font-bold">Attendee List</h1>
+            <p class="text-muted-foreground">{{ event.title }}</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="?print=1" class="btn btn-outline btn-sm" onclick="window.print(); return false;">
+                <i data-lucide="printer" class="w-4 h-4 mr-1"></i>
+                Print
+            </a>
+            <a href="{% url 'reports:dashboard' org_slug=event.organization.slug event_slug=event.slug %}" class="btn btn-outline btn-sm">
+                <i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i>
+                Back
+            </a>
+        </div>
+    </div>
+
+    <div class="card mb-6">
+        <div class="p-4 border-b border-border flex justify-between items-center">
+            <div>
+                <span class="font-medium">{{ total_count }}</span> attendees
+                <span class="text-muted-foreground">|</span>
+                <span class="font-medium">{{ checked_in_count }}</span> checked in
+            </div>
+            <div class="text-sm text-muted-foreground">
+                {{ event.start_at|date:"F j, Y" }}
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-border bg-muted/30">
+                        <th class="text-left p-3 text-sm font-medium">#</th>
+                        <th class="text-left p-3 text-sm font-medium">Name</th>
+                        <th class="text-left p-3 text-sm font-medium">Email</th>
+                        <th class="text-left p-3 text-sm font-medium">Ticket</th>
+                        <th class="text-left p-3 text-sm font-medium">Code</th>
+                        <th class="text-center p-3 text-sm font-medium">Checked In</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in tickets %}
+                    <tr class="border-b border-border hover:bg-muted/20">
+                        <td class="p-3 text-sm text-muted-foreground">{{ forloop.counter }}</td>
+                        <td class="p-3 text-sm font-medium">
+                            {% if ticket.attendee_name %}
+                                {{ ticket.attendee_name }}
+                            {% else %}
+                                {{ ticket.booking.user.get_full_name|default:ticket.booking.user.email }}
+                            {% endif %}
+                        </td>
+                        <td class="p-3 text-sm">
+                            {% if ticket.attendee_email %}
+                                {{ ticket.attendee_email }}
+                            {% else %}
+                                {{ ticket.booking.user.email }}
+                            {% endif %}
+                        </td>
+                        <td class="p-3 text-sm">{{ ticket.ticket_type.name }}</td>
+                        <td class="p-3 text-sm font-mono text-xs">{{ ticket.code|slice:":8" }}...</td>
+                        <td class="p-3 text-center">
+                            {% if ticket.is_checked_in %}
+                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-500/10 text-green-500">
+                                <i data-lucide="check" class="w-4 h-4"></i>
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-muted text-muted-foreground">
+                                <i data-lucide="minus" class="w-4 h-4"></i>
+                            </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="p-8 text-center text-muted-foreground">
+                            No attendees yet
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

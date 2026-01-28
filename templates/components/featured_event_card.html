@@ -1,0 +1,48 @@
+{% with size=size|default:"default" %}
+<a href="{{ href }}"
+   class="
+       group relative overflow-hidden rounded-2xl bg-card border border-border shadow-lg hover:shadow-xl transition-all duration-300
+       {% if size == 'large' %}col-span-2 row-span-2{% endif %}
+       {{ class }}
+   "
+   {{ attrs }}>
+    {% if image %}
+    <div class="absolute inset-0">
+        <img src="{{ image }}" alt="{{ title }}" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+    </div>
+    {% else %}
+    <div class="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5"></div>
+    {% endif %}
+
+    <div class="relative h-full flex flex-col justify-end p-5 {% if size == 'large' %}p-8{% endif %}">
+        {% if badge %}
+        <span class="absolute top-4 left-4 inline-flex items-center gap-1 rounded-full bg-amber-500 px-2.5 py-1 text-xs font-semibold text-white">
+            <i data-lucide="star" class="h-3 w-3"></i>
+            Featured
+        </span>
+        {% endif %}
+
+        <div class="{% if image %}text-white{% endif %}">
+            {% if organization %}
+            <p class="text-xs {% if image %}text-white/80{% else %}text-muted-foreground{% endif %} mb-1">{{ organization }}</p>
+            {% endif %}
+            <h3 class="font-semibold {% if size == 'large' %}text-xl{% else %}text-base{% endif %} line-clamp-2 mb-2 group-hover:text-primary transition-colors">
+                {{ title }}
+            </h3>
+            <div class="flex items-center gap-3 text-xs {% if image %}text-white/70{% else %}text-muted-foreground{% endif %}">
+                <span class="flex items-center gap-1">
+                    <i data-lucide="calendar" class="h-3.5 w-3.5"></i>
+                    {{ date }}
+                </span>
+                {% if location %}
+                <span class="flex items-center gap-1">
+                    <i data-lucide="map-pin" class="h-3.5 w-3.5"></i>
+                    {{ location }}
+                </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</a>
+{% endwith %}

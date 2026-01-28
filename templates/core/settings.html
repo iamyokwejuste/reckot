@@ -1,0 +1,161 @@
+{% extends "layouts/dashboard.html" %}
+{% load slippers %}
+{% load static %}
+
+{% block title %}Settings - Reckot{% endblock %}
+
+{% block header_title %}
+<div>
+    <h1 class="text-lg font-semibold">Settings</h1>
+    <p class="text-sm text-muted-foreground">Manage your account settings</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-6">
+    <div class="card p-6">
+        <h2 class="text-lg font-semibold mb-4">Profile Information</h2>
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                    <label for="first_name" class="block text-sm font-medium mb-2">First name</label>
+                    <input type="text" name="first_name" id="first_name" value="{{ user.first_name }}" placeholder="Enter your first name" class="input">
+                </div>
+                <div>
+                    <label for="last_name" class="block text-sm font-medium mb-2">Last name</label>
+                    <input type="text" name="last_name" id="last_name" value="{{ user.last_name }}" placeholder="Enter your last name" class="input">
+                </div>
+            </div>
+            <div>
+                <label for="email" class="block text-sm font-medium mb-2">Email address</label>
+                <input type="email" id="email" value="{{ user.email }}" disabled class="input bg-muted cursor-not-allowed">
+                <p class="text-xs text-muted-foreground mt-1">Email cannot be changed</p>
+            </div>
+            <div>
+                <label for="phone" class="block text-sm font-medium mb-2">Phone number</label>
+                <input type="tel" name="phone" id="phone" value="{{ user.phone|default:'' }}" placeholder="+237 6XX XXX XXX" class="input">
+            </div>
+            <div class="pt-2">
+                <button type="submit" class="btn btn-primary btn-md">
+                    Save changes
+                    <i data-lucide="check" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card p-6">
+        <h2 class="text-lg font-semibold mb-4">Account Status</h2>
+        <div class="space-y-4">
+            <div class="flex items-center justify-between py-3 border-b border-border">
+                <div>
+                    <p class="font-medium">Email verification</p>
+                    <p class="text-sm text-muted-foreground">{{ user.email }}</p>
+                </div>
+                {% if user.email_verified %}
+                <span class="badge badge-success">Verified</span>
+                {% else %}
+                <span class="badge badge-warning">Not verified</span>
+                {% endif %}
+            </div>
+            <div class="flex items-center justify-between py-3">
+                <div>
+                    <p class="font-medium">Account created</p>
+                    <p class="text-sm text-muted-foreground">{{ user.date_joined|date:"F d, Y" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-6" x-data="{
+        offlineMode: false,
+        syncing: false,
+        pendingCount: 0,
+        async init() {
+            if (window.ReckotOffline) {
+                this.offlineMode = await ReckotOffline.isOfflineModeEnabled();
+                const queue = await ReckotOffline.getSyncQueue();
+                this.pendingCount = queue.length;
+            }
+        },
+        async toggleOffline() {
+            if (window.ReckotOffline) {
+                await ReckotOffline.setOfflineMode(this.offlineMode);
+                if (this.offlineMode) {
+                    window.OfflineIndicator?.init();
+                }
+            }
+        },
+        async syncNow() {
+            if (!window.ReckotOffline) return;
+            this.syncing = true;
+            const result = await ReckotOffline.syncPendingChanges();
+            this.syncing = false;
+            this.pendingCount = (await ReckotOffline.getSyncQueue()).length;
+        }
+    }">
+        <h2 class="text-lg font-semibold mb-4">Offline Mode</h2>
+        <div class="space-y-4">
+            <div class="flex items-center justify-between py-3 border-b border-border">
+                <div>
+                    <p class="font-medium">Enable offline mode</p>
+                    <p class="text-sm text-muted-foreground">Work without internet, sync when reconnected</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" x-model="offlineMode" @change="toggleOffline()" class="sr-only peer">
+                    <div class="w-11 h-6 bg-muted peer-focus:ring-2 peer-focus:ring-foreground/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-foreground"></div>
+                </label>
+            </div>
+            <div x-show="offlineMode" x-cloak class="space-y-3">
+                <div class="flex items-center justify-between py-3 border-b border-border">
+                    <div>
+                        <p class="font-medium">Pending changes</p>
+                        <p class="text-sm text-muted-foreground" x-text="pendingCount + ' item' + (pendingCount !== 1 ? 's' : '') + ' waiting to sync'"></p>
+                    </div>
+                    <button type="button" @click="syncNow()" :disabled="syncing || pendingCount === 0"
+                            class="btn btn-outline btn-sm" :class="syncing && 'opacity-50 cursor-not-allowed'">
+                        <i x-show="!syncing" data-lucide="refresh-cw" class="w-4 h-4"></i>
+                        <i x-show="syncing" x-cloak data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
+                        <span x-text="syncing ? 'Syncing...' : 'Sync now'"></span>
+                    </button>
+                </div>
+                <div class="rounded-lg bg-blue-500/10 border border-blue-500/20 p-4 text-sm text-blue-600 dark:text-blue-400">
+                    <div class="flex gap-3">
+                        <i data-lucide="info" class="w-5 h-5 shrink-0 mt-0.5"></i>
+                        <div>
+                            <p class="font-medium mb-1">How offline mode works</p>
+                            <ul class="text-xs space-y-1 text-blue-500 dark:text-blue-300">
+                                <li>• Forms auto-save to your device as you type</li>
+                                <li>• Changes are queued when you're offline</li>
+                                <li>• Data syncs automatically when you reconnect</li>
+                                <li>• Cached pages remain accessible offline</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-6">
+        <h2 class="text-lg font-semibold mb-4">Security</h2>
+        <div class="space-y-4">
+            <a href="{% url 'account_change_password' %}" class="flex items-center justify-between py-3 border-b border-border hover:bg-muted/50 -mx-6 px-6 transition-colors">
+                <div>
+                    <p class="font-medium">Change password</p>
+                    <p class="text-sm text-muted-foreground">Update your account password</p>
+                </div>
+                <i data-lucide="chevron-right" class="h-5 w-5 text-muted-foreground"></i>
+            </a>
+            <a href="{% url 'account_logout' %}" class="flex items-center justify-between py-3 hover:bg-red-500/10 -mx-6 px-6 transition-colors text-red-500">
+                <div>
+                    <p class="font-medium">Sign out</p>
+                    <p class="text-sm text-red-400">Log out of your account</p>
+                </div>
+                <i data-lucide="log-out" class="h-5 w-5"></i>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

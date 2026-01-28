@@ -1,4 +1,4 @@
-from .models import Event
+from apps.events.models import Event
 
 def get_events_for_organization(organization):
     return Event.objects.filter(organization=organization).order_by('-start_at')

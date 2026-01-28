@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
-from .models import Payment, Refund, RefundAuditLog
+from apps.payments.models import Payment, Refund, RefundAuditLog
 
 
 @receiver(post_save, sender=Payment)

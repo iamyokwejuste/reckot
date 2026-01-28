@@ -12,12 +12,34 @@
 
 {% block header_actions %}
 <div class="flex items-center gap-2">
-    <select class="h-9 rounded-md border border-border bg-card px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
-        <option value="7d">Last 7 days</option>
-        <option value="30d" selected>Last 30 days</option>
-        <option value="90d">Last 90 days</option>
-        <option value="1y">Last year</option>
-    </select>
+    <div class="custom-select-wrapper w-40" x-data="{ open: false, value: '30d', label: 'Last 30 days' }">
+        <input type="hidden" name="date_range" :value="value">
+        <button type="button" @click="open = !open" @click.outside="open = false"
+                class="custom-select-trigger" :class="{ 'custom-select-trigger-active': open }">
+            <span class="custom-select-value" x-text="label"></span>
+            <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4" :class="{ 'rotate-180': open }"></i>
+        </button>
+        <div x-show="open" x-transition @click.outside="open = false" class="custom-select-dropdown" x-cloak>
+            <div class="custom-select-options">
+                <button type="button" @click="value = '7d'; label = 'Last 7 days'; open = false" class="custom-select-option" :class="{ 'custom-select-option-selected': value === '7d' }">
+                    <span>Last 7 days</span>
+                    <i x-show="value === '7d'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                </button>
+                <button type="button" @click="value = '30d'; label = 'Last 30 days'; open = false" class="custom-select-option" :class="{ 'custom-select-option-selected': value === '30d' }">
+                    <span>Last 30 days</span>
+                    <i x-show="value === '30d'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                </button>
+                <button type="button" @click="value = '90d'; label = 'Last 90 days'; open = false" class="custom-select-option" :class="{ 'custom-select-option-selected': value === '90d' }">
+                    <span>Last 90 days</span>
+                    <i x-show="value === '90d'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                </button>
+                <button type="button" @click="value = '1y'; label = 'Last year'; open = false" class="custom-select-option" :class="{ 'custom-select-option-selected': value === '1y' }">
+                    <span>Last year</span>
+                    <i x-show="value === '1y'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </div>
     <button class="btn btn-primary btn-sm">
         <i data-lucide="download" class="h-4 w-4"></i>
         <span class="hidden sm:inline">Export</span>
@@ -27,6 +49,7 @@
 
 {% block content %}
 <div class="space-y-6">
+    <!-- Stats Cards -->
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div class="stat-card">
             <div class="flex items-center justify-between">
@@ -34,11 +57,8 @@
                 <i data-lucide="banknote" class="h-4 w-4 text-muted-foreground"></i>
             </div>
             <div class="mt-2">
-                <p class="text-2xl font-bold">{{ total_revenue|default:"2,450,000" }} <span class="text-sm font-normal text-muted-foreground">XAF</span></p>
-                <p class="text-xs text-emerald-500 flex items-center gap-1 mt-1">
-                    <i data-lucide="trending-up" class="h-3 w-3"></i>
-                    +12.5% from last month
-                </p>
+                <p class="text-2xl font-bold">{{ total_revenue }} <span class="text-sm font-normal text-muted-foreground">XAF</span></p>
+                <p class="text-xs text-muted-foreground mt-1">All time revenue</p>
             </div>
         </div>
 
@@ -48,11 +68,8 @@
                 <i data-lucide="ticket" class="h-4 w-4 text-muted-foreground"></i>
             </div>
             <div class="mt-2">
-                <p class="text-2xl font-bold">{{ tickets_sold|default:"1,247" }}</p>
-                <p class="text-xs text-emerald-500 flex items-center gap-1 mt-1">
-                    <i data-lucide="trending-up" class="h-3 w-3"></i>
-                    +8.2% from last month
-                </p>
+                <p class="text-2xl font-bold">{{ tickets_sold }}</p>
+                <p class="text-xs text-muted-foreground mt-1">Total confirmed tickets</p>
             </div>
         </div>
 
@@ -62,11 +79,8 @@
                 <i data-lucide="scan-line" class="h-4 w-4 text-muted-foreground"></i>
             </div>
             <div class="mt-2">
-                <p class="text-2xl font-bold">{{ checkin_rate|default:"87.3" }}%</p>
-                <p class="text-xs text-emerald-500 flex items-center gap-1 mt-1">
-                    <i data-lucide="trending-up" class="h-3 w-3"></i>
-                    +2.1% from last month
-                </p>
+                <p class="text-2xl font-bold">{{ checkin_rate }}%</p>
+                <p class="text-xs text-muted-foreground mt-1">Average attendance</p>
             </div>
         </div>
 
@@ -76,107 +90,45 @@
                 <i data-lucide="calendar" class="h-4 w-4 text-muted-foreground"></i>
             </div>
             <div class="mt-2">
-                <p class="text-2xl font-bold">{{ active_events|default:"12" }}</p>
-                <p class="text-xs text-muted-foreground mt-1">3 upcoming this week</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="grid gap-4 lg:grid-cols-7">
-        <div class="lg:col-span-4 card p-4 lg:p-6">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                <div>
-                    <h3 class="font-semibold">Revenue Overview</h3>
-                    <p class="text-sm text-muted-foreground">Monthly revenue for the current year</p>
-                </div>
-                <div class="flex gap-2">
-                    <button class="tab-trigger tab-trigger-active">Revenue</button>
-                    <button class="tab-trigger">Tickets</button>
-                </div>
-            </div>
-            <div class="h-[240px] sm:h-[300px] flex items-end gap-1 sm:gap-2">
-                {% for i in "123456789012" %}
-                <div class="flex-1 flex flex-col items-center gap-2">
-                    <div class="w-full bg-foreground/10 rounded-t-sm relative overflow-hidden" style="height: {% widthratio forloop.counter 12 220 %}px;">
-                        <div class="absolute inset-0 bg-foreground rounded-t-sm" style="height: {% widthratio forloop.counter 12 100 %}%;"></div>
-                    </div>
-                    <span class="text-xs text-muted-foreground">{% cycle 'J' 'F' 'M' 'A' 'M' 'J' 'J' 'A' 'S' 'O' 'N' 'D' %}</span>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-
-        <div class="lg:col-span-3 card p-4 lg:p-6">
-            <div class="mb-6">
-                <h3 class="font-semibold">Ticket Types</h3>
-                <p class="text-sm text-muted-foreground">Distribution by ticket category</p>
-            </div>
-            <div class="space-y-4">
-                <div class="space-y-2">
-                    <div class="flex items-center justify-between text-sm">
-                        <span>VIP Tickets</span>
-                        <span class="font-medium">32%</span>
-                    </div>
-                    <div class="progress">
-                        <div class="progress-bar" style="width: 32%;"></div>
-                    </div>
-                </div>
-                <div class="space-y-2">
-                    <div class="flex items-center justify-between text-sm">
-                        <span>Standard Tickets</span>
-                        <span class="font-medium">45%</span>
-                    </div>
-                    <div class="progress">
-                        <div class="progress-bar" style="width: 45%;"></div>
-                    </div>
-                </div>
-                <div class="space-y-2">
-                    <div class="flex items-center justify-between text-sm">
-                        <span>Early Bird</span>
-                        <span class="font-medium">18%</span>
-                    </div>
-                    <div class="progress">
-                        <div class="progress-bar" style="width: 18%;"></div>
-                    </div>
-                </div>
-                <div class="space-y-2">
-                    <div class="flex items-center justify-between text-sm">
-                        <span>Free Tickets</span>
-                        <span class="font-medium">5%</span>
-                    </div>
-                    <div class="progress">
-                        <div class="progress-bar" style="width: 5%;"></div>
-                    </div>
-                </div>
+                <p class="text-2xl font-bold">{{ active_events }}</p>
+                <p class="text-xs text-muted-foreground mt-1">Published events</p>
             </div>
         </div>
     </div>
 
     <div class="grid gap-4 lg:grid-cols-2">
+        <!-- Recent Sales -->
         <div class="card p-4 lg:p-6">
             <div class="flex items-center justify-between mb-6">
                 <div>
                     <h3 class="font-semibold">Recent Sales</h3>
                     <p class="text-sm text-muted-foreground">Latest ticket purchases</p>
                 </div>
-                <a href="#" class="text-sm text-muted-foreground hover:text-foreground transition-colors">View all</a>
             </div>
             <div class="space-y-4">
-                {% for sale in recent_sales|default:"12345" %}
-                <div class="flex items-center gap-4">
-                    <div class="h-10 w-10 rounded-full bg-muted flex items-center justify-center shrink-0">
-                        <span class="text-sm font-medium">{% cycle 'JD' 'AM' 'PK' 'EN' 'FC' %}</span>
+                {% if recent_sales %}
+                    {% for ticket in recent_sales %}
+                    <div class="flex items-center gap-4">
+                        <div class="h-10 w-10 rounded-full bg-muted flex items-center justify-center shrink-0">
+                            <span class="text-sm font-medium">{{ ticket.booking.user.email|slice:":2"|upper }}</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium truncate">{{ ticket.booking.user.email }}</p>
+                            <p class="text-xs text-muted-foreground truncate">{{ ticket.ticket_type.name }} - {{ ticket.booking.event.title }}</p>
+                        </div>
+                        <p class="text-sm font-medium">{{ ticket.ticket_type.price }} XAF</p>
                     </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium truncate">{% cycle 'Jean Dupont' 'Alice Martin' 'Paul Kamga' 'Eric Ndam' 'Flora Chen' %}</p>
-                        <p class="text-xs text-muted-foreground truncate">{% cycle 'VIP Ticket - Tech Summit' 'Standard - Music Fest' 'Early Bird - Startup Night' 'VIP - Afro Culture' 'Standard - Code Camp' %}</p>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-8 text-muted-foreground">
+                        <i data-lucide="inbox" class="h-8 w-8 mx-auto mb-2 opacity-50"></i>
+                        <p class="text-sm">No sales yet</p>
                     </div>
-                    <p class="text-sm font-medium">+{% cycle '25,000' '10,000' '15,000' '30,000' '5,000' %} XAF</p>
-                </div>
-                {% endfor %}
+                {% endif %}
             </div>
         </div>
 
+        <!-- Upcoming Events -->
         <div class="card p-4 lg:p-6">
             <div class="flex items-center justify-between mb-6">
                 <div>
@@ -186,23 +138,38 @@
                 <a href="{% url 'events:list' %}" class="text-sm text-muted-foreground hover:text-foreground transition-colors">View all</a>
             </div>
             <div class="space-y-4">
-                {% for event in upcoming_events|default:"1234" %}
-                <div class="flex items-center gap-4 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
-                    <div class="h-12 w-12 rounded-lg bg-muted flex flex-col items-center justify-center shrink-0">
-                        <span class="text-xs text-muted-foreground">{% cycle 'JAN' 'JAN' 'FEB' 'FEB' %}</span>
-                        <span class="text-lg font-bold leading-none">{% cycle '28' '30' '02' '05' %}</span>
+                {% if upcoming_events %}
+                    {% for event in upcoming_events %}
+                    <div class="flex items-center gap-4 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                        <div class="h-12 w-12 rounded-lg bg-muted flex flex-col items-center justify-center shrink-0">
+                            <span class="text-xs text-muted-foreground">{{ event.start_at|date:"M"|upper }}</span>
+                            <span class="text-lg font-bold leading-none">{{ event.start_at|date:"d" }}</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium truncate">{{ event.title }}</p>
+                            <p class="text-xs text-muted-foreground">{{ event.location|truncatewords:4 }}</p>
+                        </div>
+                        {% if event.state == 'PUBLISHED' %}
+                            <span class="badge badge-success">Live</span>
+                        {% elif event.state == 'DRAFT' %}
+                            <span class="badge badge-default">Draft</span>
+                        {% else %}
+                            <span class="badge badge-warning">{{ event.state }}</span>
+                        {% endif %}
                     </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium truncate">{% cycle 'Cameroon Tech Summit 2025' 'Afro Music Night' 'Startup Weekend Douala' 'Digital Marketing Workshop' %}</p>
-                        <p class="text-xs text-muted-foreground">{% cycle '245 tickets sold' '189 tickets sold' '78 tickets sold' '45 tickets sold' %}</p>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-8 text-muted-foreground">
+                        <i data-lucide="calendar-off" class="h-8 w-8 mx-auto mb-2 opacity-50"></i>
+                        <p class="text-sm">No upcoming events</p>
+                        <a href="{% url 'events:create' %}" class="text-sm text-primary hover:underline mt-2 inline-block">Create an event</a>
                     </div>
-                    <div class="badge">{% cycle 'Live' 'Soon' 'Draft' 'Soon' %}</div>
-                </div>
-                {% endfor %}
+                {% endif %}
             </div>
         </div>
     </div>
 
+    <!-- Top Events Table -->
     <div class="card p-4 lg:p-6">
         <div class="flex items-center justify-between mb-6">
             <div>
@@ -210,6 +177,7 @@
                 <p class="text-sm text-muted-foreground">Events ranked by revenue</p>
             </div>
         </div>
+        {% if top_events %}
         <div class="overflow-x-auto -mx-4 lg:-mx-6">
             <div class="px-4 lg:px-6 min-w-[640px]">
                 <table class="w-full">
@@ -224,32 +192,44 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-border">
-                        {% for i in "12345" %}
+                        {% for event in top_events %}
                         <tr class="hover:bg-muted/50 transition-colors">
                             <td class="py-3 pr-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="h-10 w-10 rounded-lg bg-muted"></div>
+                                    <div class="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
+                                        <i data-lucide="calendar" class="h-5 w-5 text-muted-foreground"></i>
+                                    </div>
                                     <div>
-                                        <p class="font-medium text-sm">{% cycle 'Tech Summit Douala' 'Afro Night Live' 'Startup Weekend' 'Code Camp 237' 'Digital Marketing' %}</p>
-                                        <p class="text-xs text-muted-foreground">{% cycle 'Douala' 'Yaounde' 'Douala' 'Buea' 'Yaounde' %}</p>
+                                        <p class="font-medium text-sm">{{ event.title }}</p>
+                                        <p class="text-xs text-muted-foreground">{{ event.location|truncatewords:3 }}</p>
                                     </div>
                                 </div>
                             </td>
-                            <td class="py-3 pr-4 text-sm text-muted-foreground">{% cycle 'Jan 28, 2025' 'Feb 14, 2025' 'Feb 20, 2025' 'Mar 05, 2025' 'Mar 12, 2025' %}</td>
-                            <td class="py-3 pr-4 text-sm">{% cycle '456' '312' '245' '189' '156' %}</td>
-                            <td class="py-3 pr-4 text-sm font-medium">{% cycle '890,000' '624,000' '490,000' '378,000' '312,000' %} XAF</td>
+                            <td class="py-3 pr-4 text-sm text-muted-foreground">{{ event.start_at|date:"M d, Y" }}</td>
+                            <td class="py-3 pr-4 text-sm">{{ event.ticket_count|default:0 }}</td>
+                            <td class="py-3 pr-4 text-sm font-medium">{{ event.revenue|default:0|floatformat:0 }} XAF</td>
                             <td class="py-3 pr-4">
+                                {% with rate=event.checkin_count|default:0 total=event.ticket_count|default:1 %}
                                 <div class="flex items-center gap-2">
                                     <div class="progress w-16">
-                                        <div class="progress-bar" style="width: {% cycle '92' '87' '78' '65' '0' %}%;"></div>
+                                        <div class="progress-bar" style="width: {% widthratio rate total 100 %}%;"></div>
                                     </div>
-                                    <span class="text-sm">{% cycle '92%' '87%' '78%' '65%' '--' %}</span>
+                                    <span class="text-sm">{% widthratio rate total 100 %}%</span>
                                 </div>
+                                {% endwith %}
                             </td>
                             <td class="py-3 text-right">
-                                <span class="badge {% cycle 'badge-success' 'badge-success' 'badge-warning' 'badge-warning' 'badge-default' %}">
-                                    {% cycle 'Completed' 'Completed' 'Live' 'Upcoming' 'Draft' %}
-                                </span>
+                                {% if event.state == 'PUBLISHED' %}
+                                    {% if event.end_at < now %}
+                                        <span class="badge badge-success">Completed</span>
+                                    {% else %}
+                                        <span class="badge badge-warning">Live</span>
+                                    {% endif %}
+                                {% elif event.state == 'DRAFT' %}
+                                    <span class="badge badge-default">Draft</span>
+                                {% else %}
+                                    <span class="badge">{{ event.state }}</span>
+                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}
@@ -257,6 +237,17 @@
                 </table>
             </div>
         </div>
+        {% else %}
+        <div class="text-center py-12 text-muted-foreground">
+            <i data-lucide="bar-chart-3" class="h-12 w-12 mx-auto mb-4 opacity-50"></i>
+            <p class="text-lg font-medium mb-2">No events yet</p>
+            <p class="text-sm mb-4">Create your first event to start tracking analytics</p>
+            <a href="{% url 'events:create' %}" class="btn btn-primary btn-md">
+                <i data-lucide="plus" class="mr-2 h-4 w-4"></i>
+                Create Event
+            </a>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

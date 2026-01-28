@@ -1,7 +1,7 @@
 {% load slippers %}
 <div
     id="payment-status"
-    hx-get="{% url 'payments:poll' payment.id %}"
+    hx-get="{% url 'payments:poll' payment_ref=payment.reference %}"
     hx-trigger="every 3s"
     hx-target="#payment-panel"
     hx-swap="innerHTML"

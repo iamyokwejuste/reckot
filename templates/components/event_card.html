@@ -1,0 +1,44 @@
+<div class="card p-4 hover:border-muted-foreground/50 transition-colors {{ class }}" {{ attrs }}>
+    <div class="flex items-start justify-between mb-3">
+        <div class="flex-1 min-w-0">
+            {% if href %}
+            <a href="{{ href }}" class="text-base font-semibold hover:text-primary transition-colors line-clamp-1">
+                {{ title }}
+            </a>
+            {% else %}
+            <span class="text-base font-semibold line-clamp-1">{{ title }}</span>
+            {% endif %}
+            <p class="text-sm text-muted-foreground">{{ organization }}</p>
+        </div>
+        {% if state == 'PUBLISHED' %}
+        <span class="badge badge-success">Live</span>
+        {% elif state == 'DRAFT' %}
+        <span class="badge">Draft</span>
+        {% elif state %}
+        <span class="badge badge-warning">{{ state }}</span>
+        {% endif %}
+    </div>
+
+    {% if description %}
+    <p class="text-sm text-muted-foreground line-clamp-2 mb-3">{{ description }}</p>
+    {% endif %}
+
+    <div class="flex items-center gap-3 text-xs text-muted-foreground mb-4">
+        <span class="flex items-center gap-1">
+            <i data-lucide="calendar" class="h-3.5 w-3.5"></i>
+            {{ date }}
+        </span>
+        {% if location %}
+        <span class="flex items-center gap-1">
+            <i data-lucide="map-pin" class="h-3.5 w-3.5"></i>
+            {{ location }}
+        </span>
+        {% endif %}
+    </div>
+
+    {% if children %}
+    <div class="pt-3 border-t border-border flex flex-wrap gap-2">
+        {{ children }}
+    </div>
+    {% endif %}
+</div>

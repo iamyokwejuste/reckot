@@ -1,26 +1,27 @@
 from django.urls import path
-from . import actions
+from apps.checkin import actions
 
 app_name = 'checkin'
 
 urlpatterns = [
+    path('', actions.CheckInListView.as_view(), name='list'),
     path(
-        '<int:event_id>/',
+        '<slug:org_slug>/<slug:event_slug>/',
         actions.CheckInDashboardView.as_view(),
         name='dashboard'
     ),
     path(
-        '<int:event_id>/verify/',
+        '<slug:org_slug>/<slug:event_slug>/verify/',
         actions.CheckInVerifyView.as_view(),
         name='verify'
     ),
     path(
-        '<int:event_id>/search/',
+        '<slug:org_slug>/<slug:event_slug>/search/',
         actions.CheckInSearchView.as_view(),
         name='search'
     ),
     path(
-        '<int:event_id>/stats/',
+        '<slug:org_slug>/<slug:event_slug>/stats/',
         actions.CheckInStatsView.as_view(),
         name='stats'
     ),
@@ -30,7 +31,7 @@ urlpatterns = [
         name='ticket'
     ),
     path(
-        '<int:checkin_id>/swag/<int:item_id>/',
+        'swag/<uuid:checkin_ref>/<int:item_id>/',
         actions.CollectSwagView.as_view(),
         name='collect_swag'
     ),

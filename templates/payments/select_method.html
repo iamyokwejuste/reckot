@@ -27,7 +27,7 @@
 
             <div id="payment-panel">
                 <form
-                    hx-post="{% url 'payments:start' booking.id %}"
+                    hx-post="{% url 'payments:start' booking_ref=booking.reference %}"
                     hx-target="#payment-panel"
                     hx-swap="innerHTML"
                     class="space-y-6"
@@ -64,21 +64,30 @@
                     </div>
 
                     <div class="space-y-2">
-                        {% #label for="phone" %}Phone Number{% /label %}
-                        {% #input type="tel" name="phone" placeholder="+237 6XX XXX XXX" required=True %}{% /input %}
+                        <label for="phone" class="block text-sm font-medium">Phone Number</label>
+                        <input type="tel" name="phone" id="phone"
+                               placeholder="+237 6XX XXX XXX" required
+                               class="input w-full">
                     </div>
 
-                    <div class="rounded-xl bg-accent/50 p-4">
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm text-muted-foreground">Total Amount</span>
-                            <span class="text-xl font-bold gradient-text">{{ booking.tickets.first.ticket_type.price }} XAF</span>
+                    <div class="rounded-xl bg-accent/50 p-4 space-y-3">
+                        <div class="text-sm text-muted-foreground mb-2">Order Summary</div>
+                        {% for ticket in booking.tickets.all %}
+                        <div class="flex items-center justify-between text-sm">
+                            <span>{{ ticket.ticket_type.name }}</span>
+                            <span>{{ ticket.ticket_type.price }} XAF</span>
+                        </div>
+                        {% endfor %}
+                        <div class="border-t border-border pt-3 flex items-center justify-between">
+                            <span class="font-medium">Total Amount</span>
+                            <span class="text-xl font-bold">{{ booking.total_amount }} XAF</span>
                         </div>
                     </div>
 
-                    {% #button type="submit" class="w-full" variant="gradient" %}
+                    <button type="submit" class="btn btn-primary btn-md w-full">
                         <i data-lucide="credit-card" class="mr-2 h-4 w-4"></i>
                         Pay Now
-                    {% /button %}
+                    </button>
                 </form>
             </div>
         {% /card %}

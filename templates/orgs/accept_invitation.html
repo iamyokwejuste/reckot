@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load slippers %}
+
+{% block title %}Join {{ invitation.organization.name }} - Reckot{% endblock %}
+
+{% block content %}
+<div class="min-h-[80vh] flex items-center justify-center py-12">
+    <div class="w-full max-w-md">
+        <div class="card p-8 text-center">
+            {% if invitation.organization.logo %}
+            <img src="{{ invitation.organization.logo.url }}" alt="{{ invitation.organization.name }}"
+                 class="h-16 w-16 rounded-xl mx-auto mb-4 object-cover">
+            {% else %}
+            <div class="h-16 w-16 rounded-xl bg-muted flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="building-2" class="w-8 h-8 text-muted-foreground"></i>
+            </div>
+            {% endif %}
+
+            <h1 class="text-xl font-semibold mb-2">Join {{ invitation.organization.name }}</h1>
+            <p class="text-muted-foreground mb-6">
+                {{ invitation.invited_by.get_full_name|default:invitation.invited_by.email }} has invited you to join as a <strong>{{ invitation.get_role_display }}</strong>.
+            </p>
+
+            {% if invitation.message %}
+            <div class="bg-muted rounded-lg p-4 mb-6 text-left text-sm">
+                <p class="text-muted-foreground italic">"{{ invitation.message }}"</p>
+            </div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary btn-lg w-full">
+                    <i data-lucide="check" class="w-5 h-5"></i>
+                    Accept Invitation
+                </button>
+            </form>
+
+            <p class="text-xs text-muted-foreground mt-4">
+                By accepting, you'll be able to collaborate on events with this organization.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

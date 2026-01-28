@@ -1,0 +1,110 @@
+{% extends "layouts/dashboard.html" %}
+{% load slippers %}
+
+{% block title %}Payments - Reckot{% endblock %}
+
+{% block header_title %}
+<div>
+    <h1 class="text-lg font-semibold">Payments</h1>
+    <p class="text-sm text-muted-foreground">View all payment transactions across your events</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="grid gap-4 sm:grid-cols-3">
+        <div class="stat-card">
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-muted-foreground">Total Revenue</p>
+                <i data-lucide="banknote" class="h-4 w-4 text-emerald-500"></i>
+            </div>
+            <p class="text-2xl font-bold mt-2 text-emerald-500">{{ stats.total_revenue|floatformat:0 }} XAF</p>
+        </div>
+        <div class="stat-card">
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-muted-foreground">Confirmed</p>
+                <i data-lucide="check-circle" class="h-4 w-4 text-emerald-500"></i>
+            </div>
+            <p class="text-2xl font-bold mt-2">{{ stats.confirmed }}</p>
+        </div>
+        <div class="stat-card">
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-muted-foreground">Pending</p>
+                <i data-lucide="clock" class="h-4 w-4 text-yellow-500"></i>
+            </div>
+            <p class="text-2xl font-bold mt-2 text-yellow-500">{{ stats.pending }}</p>
+        </div>
+    </div>
+
+    <div class="card">
+        {% if payments %}
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-border">
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Reference</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Event</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Customer</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Amount</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Method</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Status</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Date</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border">
+                    {% for payment in payments %}
+                    <tr class="hover:bg-muted/50 transition-colors">
+                        <td class="p-4">
+                            <code class="text-xs bg-muted px-2 py-1 rounded">{{ payment.reference|slice:":8" }}...</code>
+                        </td>
+                        <td class="p-4">
+                            <p class="text-sm font-medium">{{ payment.booking.event.title }}</p>
+                        </td>
+                        <td class="p-4">
+                            <p class="text-sm">{{ payment.booking.user.email }}</p>
+                            {% if payment.phone_number %}
+                            <p class="text-xs text-muted-foreground">{{ payment.phone_number }}</p>
+                            {% endif %}
+                        </td>
+                        <td class="p-4">
+                            <p class="text-sm font-medium">{{ payment.amount|floatformat:0 }} {{ payment.currency }}</p>
+                            {% if payment.service_fee %}
+                            <p class="text-xs text-muted-foreground">+{{ payment.service_fee|floatformat:0 }} fee</p>
+                            {% endif %}
+                        </td>
+                        <td class="p-4">
+                            <span class="text-sm">{{ payment.get_provider_display }}</span>
+                        </td>
+                        <td class="p-4">
+                            {% if payment.status == 'CONFIRMED' %}
+                                <span class="badge badge-success">Confirmed</span>
+                            {% elif payment.status == 'PENDING' %}
+                                <span class="badge badge-warning">Pending</span>
+                            {% elif payment.status == 'FAILED' %}
+                                <span class="badge badge-destructive">Failed</span>
+                            {% elif payment.status == 'EXPIRED' %}
+                                <span class="badge">Expired</span>
+                            {% else %}
+                                <span class="badge">{{ payment.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-4">
+                            <p class="text-sm text-muted-foreground">{{ payment.created_at|date:"M d, Y H:i" }}</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-12">
+            <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
+                <i data-lucide="credit-card" class="h-8 w-8 text-muted-foreground"></i>
+            </div>
+            <h3 class="text-lg font-semibold mb-2">No payments yet</h3>
+            <p class="text-muted-foreground">Payments will appear here when attendees book your events.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

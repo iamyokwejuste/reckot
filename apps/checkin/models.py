@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.conf import settings
 from apps.tickets.models import Ticket
@@ -28,6 +29,7 @@ class SwagItem(models.Model):
 
 
 class CheckIn(models.Model):
+    reference = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     ticket = models.OneToOneField(
         Ticket,
         on_delete=models.CASCADE,

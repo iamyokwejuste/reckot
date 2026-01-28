@@ -1,6 +1,6 @@
 from django.db.models import Count, Q
 from apps.tickets.models import Ticket
-from .models import CheckIn, SwagItem
+from apps.checkin.models import CheckIn, SwagItem
 
 
 def get_ticket_by_code(code: str):

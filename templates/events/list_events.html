@@ -1,86 +1,83 @@
-{% extends 'base.html' %}
+{% extends 'layouts/dashboard.html' %}
 {% load slippers %}
 
 {% block title %}My Events - Reckot{% endblock %}
 
+{% block header_title %}
+<div>
+    <h1 class="text-lg font-semibold">Your Events</h1>
+    <p class="text-sm text-muted-foreground">Manage your events and tickets</p>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'events:create' %}" class="btn btn-primary btn-sm">
+    <i data-lucide="plus" class="w-4 h-4"></i>
+    Create Event
+</a>
+{% endblock %}
+
 {% block content %}
-<div class="container py-8">
-    {% #breadcrumb %}
-        {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
-        {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-        {% #breadcrumb_item %}Events{% /breadcrumb_item %}
-    {% /breadcrumb %}
-
-    <div class="mt-6 flex items-center justify-between" data-animate="fade-up">
-        <div>
-            <h1 class="text-2xl font-bold">Your Events</h1>
-            <p class="text-muted-foreground">Manage your events and tickets</p>
-        </div>
-        <a href="{% url 'events:create' %}">
-            {% #button variant="gradient" %}
-                <i data-lucide="plus" class="mr-2 h-4 w-4"></i>
-                Create Event
-            {% /button %}
-        </a>
-    </div>
-
+<div>
     {% if events %}
-    <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-stagger>
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {% for event in events %}
-        <a href="{% url 'events:detail' event.id %}" class="group">
-            {% #card class="h-full" interactive=True %}
-                <div class="flex items-start justify-between mb-3">
-                    <div>
-                        <h3 class="text-lg font-semibold group-hover:text-primary transition-colors">{{ event.title }}</h3>
-                        <p class="text-sm text-muted-foreground">{{ event.organization.name }}</p>
-                    </div>
-                    {% #status_pill variant="{% if event.state == 'PUBLISHED' %}success{% elif event.state == 'DRAFT' %}default{% else %}warning{% endif %}" %}
-                        {{ event.state }}
-                    {% /status_pill %}
-                </div>
-
-                <p class="text-sm text-muted-foreground line-clamp-2">{{ event.description|truncatewords:20 }}</p>
-
-                <div class="mt-4 flex items-center gap-4 text-sm text-muted-foreground">
-                    <span class="flex items-center gap-1">
-                        <i data-lucide="calendar" class="h-4 w-4"></i>
-                        {{ event.start_at|date:"M d, Y" }}
-                    </span>
-                    <span class="flex items-center gap-1">
-                        <i data-lucide="map-pin" class="h-4 w-4"></i>
-                        {{ event.location|truncatewords:3 }}
-                    </span>
-                </div>
-
-                <div class="mt-4 pt-4 border-t border-border flex gap-2">
-                    <a href="{% url 'checkin:dashboard' event.id %}" onclick="event.stopPropagation()">
-                        {% #button variant="outline" size="sm" %}
-                            <i data-lucide="scan" class="mr-1 h-3 w-3"></i>
-                            Check-in
-                        {% /button %}
+        {% #card interactive=True class="!p-4" %}
+            <div class="flex items-start justify-between mb-3">
+                <div class="flex-1 min-w-0">
+                    <a href="{% url 'events:dashboard' event.organization.slug event.slug %}" class="text-base font-semibold hover:text-primary transition-colors line-clamp-1">
+                        {{ event.title }}
                     </a>
-                    <a href="{% url 'reports:dashboard' event.id %}" onclick="event.stopPropagation()">
-                        {% #button variant="outline" size="sm" %}
-                            <i data-lucide="bar-chart-2" class="mr-1 h-3 w-3"></i>
-                            Reports
-                        {% /button %}
-                    </a>
+                    <p class="text-sm text-muted-foreground">{{ event.organization.name }}</p>
                 </div>
-            {% /card %}
-        </a>
+                {% if event.state == 'PUBLISHED' %}
+                {% #badge variant="success" %}Live{% /badge %}
+                {% elif event.state == 'DRAFT' %}
+                {% #badge %}Draft{% /badge %}
+                {% else %}
+                {% #badge variant="warning" %}{{ event.state }}{% /badge %}
+                {% endif %}
+            </div>
+
+            <p class="text-sm text-muted-foreground line-clamp-2 mb-3">{{ event.description|truncatewords:15 }}</p>
+
+            <div class="flex items-center gap-3 text-xs text-muted-foreground mb-4">
+                <span class="flex items-center gap-1">
+                    <i data-lucide="calendar" class="h-3.5 w-3.5"></i>
+                    {{ event.start_at|date:"M d, Y" }}
+                </span>
+                {% if event.location %}
+                <span class="flex items-center gap-1">
+                    <i data-lucide="map-pin" class="h-3.5 w-3.5"></i>
+                    {{ event.location|truncatewords:2 }}
+                </span>
+                {% endif %}
+            </div>
+
+            <div class="pt-3 border-t border-border flex flex-wrap gap-2">
+                <a href="{% url 'events:dashboard' event.organization.slug event.slug %}" class="btn btn-outline btn-sm">
+                    <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+                    Manage
+                </a>
+                <a href="{% url 'checkin:dashboard' event.organization.slug event.slug %}" class="btn btn-outline btn-sm">
+                    <i data-lucide="scan" class="w-3.5 h-3.5"></i>
+                    Check-in
+                </a>
+                <a href="{% url 'reports:export_center' event.organization.slug event.slug %}" class="btn btn-outline btn-sm">
+                    <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                    Export
+                </a>
+            </div>
+        {% /card %}
         {% endfor %}
     </div>
     {% else %}
-    <div class="mt-12" data-animate="fade-up">
-        {% #empty_state icon="calendar" title="No events yet" description="Get started by creating your first event." %}
-            <a href="{% url 'events:create' %}" class="mt-4 inline-block">
-                {% #button variant="gradient" %}
-                    <i data-lucide="plus" class="mr-2 h-4 w-4"></i>
-                    Create Event
-                {% /button %}
-            </a>
-        {% /empty_state %}
-    </div>
+    {% #empty_state icon="calendar" title="No events yet" description="Get started by creating your first event" %}
+        <a href="{% url 'events:create' %}" class="btn btn-primary btn-md">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            Create Event
+        </a>
+    {% /empty_state %}
     {% endif %}
 </div>
 {% endblock %}

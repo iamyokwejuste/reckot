@@ -16,6 +16,8 @@
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <script src="https://unpkg.com/motion@10.18.0/dist/motion.min.js"></script>
+    <script defer src="{% static 'js/offline.js' %}"></script>
+    <script defer src="{% static 'js/components.js' %}"></script>
     <script>
         function themeHandler() {
             return {
@@ -74,17 +76,26 @@
                ]"
                class="fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border flex flex-col transition-all duration-200 ease-in-out">
 
-            <div class="flex h-14 items-center border-b border-border px-4" :class="collapsed ? 'justify-center' : 'justify-between'">
-                <a href="{% url 'home' %}" class="flex items-center gap-2" :class="collapsed && 'justify-center'">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-foreground shrink-0">
-                        <i data-lucide="calendar" class="h-4 w-4 text-background"></i>
-                    </div>
-                    <span class="font-semibold text-lg" x-show="!collapsed" x-transition>Reckot</span>
+            <div class="flex h-14 items-center border-b border-border px-4 gap-2">
+                <a href="{% url 'home' %}" hx-boost="false" class="flex items-center flex-1 min-w-0" :class="collapsed && 'justify-center'">
+                    <template x-if="!collapsed">
+                        <div>
+                            <img x-show="isDark" src="{% static 'images/logo/logo_dark_mode.png' %}" alt="Reckot" class="h-8 w-auto">
+                            <img x-show="!isDark" x-cloak src="{% static 'images/logo/logo_light_mode.png' %}" alt="Reckot" class="h-8 w-auto">
+                        </div>
+                    </template>
+                    <template x-if="collapsed">
+                        <div class="flex h-8 w-8 items-center justify-center">
+                            <img x-show="isDark" src="{% static 'images/logo/reckto_logo_dark_mode.png' %}" alt="Reckot" class="h-7 w-7">
+                            <img x-show="!isDark" x-cloak src="{% static 'images/logo/reckto_logo_light_mode.png' %}" alt="Reckot" class="h-7 w-7">
+                        </div>
+                    </template>
                 </a>
                 <button @click="collapsed = !collapsed"
-                        class="hidden lg:flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted transition-colors"
-                        x-show="!collapsed">
-                    <i data-lucide="chevrons-left" class="h-4 w-4"></i>
+                        class="hidden lg:flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted transition-colors shrink-0"
+                        :title="collapsed ? 'Expand sidebar' : 'Collapse sidebar'">
+                    <i x-show="!collapsed" data-lucide="panel-left-close" class="h-4 w-4"></i>
+                    <i x-show="collapsed" x-cloak data-lucide="panel-left-open" class="h-4 w-4"></i>
                 </button>
             </div>
 
@@ -105,7 +116,7 @@
                         <span x-show="!collapsed" x-transition class="truncate">Events</span>
                     </a>
 
-                    <a href="#"
+                    <a href="{% url 'orgs:list' %}"
                        class="sidebar-item {% if 'orgs' in request.path %}sidebar-item-active{% endif %}">
                         <i data-lucide="building-2" class="h-5 w-5 shrink-0"></i>
                         <span x-show="!collapsed" x-transition class="truncate">Organizations</span>
@@ -115,31 +126,34 @@
                 <div class="pt-4 space-y-1">
                     <p class="px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider" x-show="!collapsed">Operations</p>
 
-                    <a href="#" class="sidebar-item">
+                    <a href="{% url 'tickets:list' %}"
+                       class="sidebar-item {% if request.resolver_match.url_name == 'list' and 'tickets' in request.path %}sidebar-item-active{% endif %}">
                         <i data-lucide="ticket" class="h-5 w-5 shrink-0"></i>
                         <span x-show="!collapsed" x-transition class="truncate">Tickets</span>
                     </a>
 
-                    <a href="#" class="sidebar-item">
+                    <a href="{% url 'checkin:list' %}"
+                       class="sidebar-item {% if request.resolver_match.url_name == 'list' and 'checkin' in request.path %}sidebar-item-active{% endif %}">
                         <i data-lucide="scan-line" class="h-5 w-5 shrink-0"></i>
                         <span x-show="!collapsed" x-transition class="truncate">Check-in</span>
                     </a>
 
-                    <a href="#" class="sidebar-item">
+                    <a href="{% url 'payments:list' %}"
+                       class="sidebar-item {% if request.resolver_match.url_name == 'list' and 'payments' in request.path %}sidebar-item-active{% endif %}">
                         <i data-lucide="credit-card" class="h-5 w-5 shrink-0"></i>
                         <span x-show="!collapsed" x-transition class="truncate">Payments</span>
+                    </a>
+
+                    <a href="{% url 'events:coupons' %}"
+                       class="sidebar-item {% if 'coupons' in request.path %}sidebar-item-active{% endif %}">
+                        <i data-lucide="tag" class="h-5 w-5 shrink-0"></i>
+                        <span x-show="!collapsed" x-transition class="truncate">Coupons</span>
                     </a>
                 </div>
                 {% endblock %}
             </nav>
 
             <div class="border-t border-border p-3">
-                <button @click="collapsed = !collapsed"
-                        class="hidden lg:flex w-full items-center justify-center h-9 rounded-md hover:bg-muted transition-colors"
-                        x-show="collapsed">
-                    <i data-lucide="chevrons-right" class="h-4 w-4"></i>
-                </button>
-
                 <div x-show="!collapsed" x-transition class="space-y-1">
                     <button @click="setMode(isDark ? 'light' : 'dark')"
                             class="sidebar-item w-full text-left">
@@ -148,7 +162,7 @@
                         <span class="truncate" x-text="isDark ? 'Light mode' : 'Dark mode'"></span>
                     </button>
 
-                    <a href="{% url 'account_logout' %}" class="sidebar-item text-red-500 hover:text-red-600 hover:bg-red-500/10">
+                    <a href="{% url 'account_logout' %}" hx-boost="false" class="sidebar-item text-red-500 hover:text-red-600 hover:bg-red-500/10">
                         <i data-lucide="log-out" class="h-5 w-5 shrink-0"></i>
                         <span class="truncate">Sign out</span>
                     </a>
@@ -194,11 +208,11 @@
                                     <p class="text-xs text-muted-foreground">{{ user.get_full_name|default:"User" }}</p>
                                 </div>
                                 <div class="h-px bg-border my-1"></div>
-                                <a href="#" class="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-muted transition-colors">
+                                <a href="{% url 'core:settings' %}" class="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-muted transition-colors">
                                     <i data-lucide="settings" class="h-4 w-4"></i>
                                     Settings
                                 </a>
-                                <a href="{% url 'account_logout' %}" class="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-red-500 hover:bg-red-500/10 transition-colors">
+                                <a href="{% url 'account_logout' %}" hx-boost="false" class="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-red-500 hover:bg-red-500/10 transition-colors">
                                     <i data-lucide="log-out" class="h-4 w-4"></i>
                                     Sign out
                                 </a>

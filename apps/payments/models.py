@@ -19,6 +19,9 @@ class Currency(models.TextChoices):
 
 
 class PaymentProvider(models.TextChoices):
+    CAMPAY = 'CAMPAY', 'Campay'
+    PAWAPAY = 'PAWAPAY', 'PawaPay'
+    FLUTTERWAVE = 'FLUTTERWAVE', 'Flutterwave'
     MTN_MOMO = 'MTN_MOMO', 'MTN Mobile Money'
     ORANGE_MONEY = 'ORANGE_MONEY', 'Orange Money'
     STRIPE = 'STRIPE', 'Stripe'
@@ -143,9 +146,43 @@ class Payment(models.Model):
         return self.amount + self.service_fee
 
 
-class Refund(models.Model):
-    """Model for tracking refund requests and their status."""
+class OfflinePayment(models.Model):
+    class VerificationStatus(models.TextChoices):
+        PENDING = 'PENDING', 'Pending Verification'
+        VERIFIED = 'VERIFIED', 'Verified'
+        REJECTED = 'REJECTED', 'Rejected'
 
+    payment = models.OneToOneField(
+        Payment,
+        on_delete=models.CASCADE,
+        related_name='offline_details'
+    )
+    method_description = models.CharField(max_length=255)
+    instructions = models.TextField(blank=True)
+    proof_file = models.FileField(upload_to='payment_proofs/', blank=True)
+    proof_notes = models.TextField(blank=True)
+    verification_status = models.CharField(
+        max_length=20,
+        choices=VerificationStatus.choices,
+        default=VerificationStatus.PENDING
+    )
+    verified_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='verified_payments'
+    )
+    verified_at = models.DateTimeField(null=True, blank=True)
+    rejection_reason = models.TextField(blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['verification_status']),
+        ]
+
+
+class Refund(models.Model):
     class Status(models.TextChoices):
         PENDING = 'PENDING', 'Pending Review'
         APPROVED = 'APPROVED', 'Approved'
@@ -210,20 +247,17 @@ class Refund(models.Model):
         return f"Refund {self.reference} - {self.status}"
 
     def approve(self, processed_by=None):
-        """Approve the refund request."""
         self.status = self.Status.APPROVED
         self.processed_by = processed_by
         self.save(update_fields=['status', 'processed_by', 'updated_at'])
 
     def process(self, processed_by=None):
-        """Mark refund as processed (money sent)."""
         self.status = self.Status.PROCESSED
         self.processed_by = processed_by
         self.processed_at = timezone.now()
         self.save(update_fields=['status', 'processed_by', 'processed_at', 'updated_at'])
 
     def reject(self, reason: str, processed_by=None):
-        """Reject the refund request."""
         self.status = self.Status.REJECTED
         self.rejection_reason = reason
         self.processed_by = processed_by
@@ -231,8 +265,6 @@ class Refund(models.Model):
 
 
 class RefundAuditLog(models.Model):
-    """Audit log for refund status changes."""
-
     refund = models.ForeignKey(
         Refund,
         on_delete=models.CASCADE,

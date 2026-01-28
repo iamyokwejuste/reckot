@@ -1,7 +1,7 @@
 from django.db import transaction
 from django.utils import timezone
 from apps.tickets.models import Ticket
-from .models import CheckIn, SwagCollection, SwagItem
+from apps.checkin.models import CheckIn, SwagCollection, SwagItem
 
 
 def verify_and_checkin(code: str, staff_user) -> dict:

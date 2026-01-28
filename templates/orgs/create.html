@@ -1,0 +1,110 @@
+{% extends "layouts/dashboard.html" %}
+{% load slippers %}
+
+{% block title %}Create Organization - Reckot{% endblock %}
+
+{% block header_title %}
+<div>
+    <h1 class="text-lg font-semibold">Create Organization</h1>
+    <p class="text-sm text-muted-foreground">Set up a new organization to manage events</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto" x-data="{
+    logoPreview: null,
+    handleLogoUpload(e) {
+        const file = e.target.files[0];
+        if (file) {
+            this.logoPreview = URL.createObjectURL(file);
+        }
+    }
+}">
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
+        {% csrf_token %}
+
+        {% if error %}
+        <div class="rounded-lg bg-red-500/10 border border-red-500/20 p-4 text-sm text-red-500">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <div class="card p-6 space-y-4">
+            <div>
+                <label class="block text-sm font-medium mb-2">Organization Logo</label>
+                <div class="flex items-center gap-4">
+                    <div class="relative h-16 w-16 rounded-lg bg-muted flex items-center justify-center overflow-hidden cursor-pointer group"
+                         @click="$refs.logoInput.click()">
+                        <template x-if="!logoPreview">
+                            <i data-lucide="building-2" class="h-8 w-8 text-muted-foreground"></i>
+                        </template>
+                        <template x-if="logoPreview">
+                            <img :src="logoPreview" class="h-full w-full object-cover">
+                        </template>
+                        <div x-show="logoPreview" x-cloak
+                             class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <i data-lucide="pencil" class="h-4 w-4 text-white"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <button type="button" @click="$refs.logoInput.click()" class="btn btn-outline btn-sm">
+                                <span x-text="logoPreview ? 'Change' : 'Upload'"></span>
+                            </button>
+                            <button type="button" x-show="logoPreview" x-cloak
+                                    @click.stop="logoPreview = null; $refs.logoInput.value = ''"
+                                    class="btn btn-outline btn-sm text-red-500 hover:bg-red-500/10">
+                                Remove
+                            </button>
+                        </div>
+                        <p class="text-xs text-muted-foreground mt-1">PNG, JPG up to 2MB</p>
+                    </div>
+                </div>
+                <input type="file" name="logo" accept="image/*" x-ref="logoInput"
+                       @change="handleLogoUpload($event)" class="hidden">
+            </div>
+
+            <div>
+                <label for="name" class="block text-sm font-medium mb-2">Organization Name <span class="text-red-500">*</span></label>
+                <input type="text" name="name" id="name" required placeholder="e.g., Tech Events Cameroon" class="input">
+            </div>
+
+            <div>
+                <label for="description" class="block text-sm font-medium mb-2">Description</label>
+                <textarea name="description" id="description" rows="3"
+                          placeholder="What does your organization do?" class="input resize-none"></textarea>
+            </div>
+
+            <div>
+                <label for="website" class="block text-sm font-medium mb-2">Website</label>
+                <input type="url" name="website" id="website" placeholder="https://your-organization.com" class="input">
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <button type="submit" class="btn btn-primary btn-md">
+                Create Organization
+                <i data-lucide="plus" class="w-4 h-4"></i>
+            </button>
+            <a href="{% url 'orgs:list' %}" class="btn btn-outline btn-md">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    if (form && window.FormPersistence) {
+        const formId = 'org_create';
+        FormPersistence.restore(formId, form);
+        const persistence = FormPersistence.autoSave(formId, form);
+        form.addEventListener('submit', function() {
+            FormPersistence.clear(formId);
+            persistence.stop();
+        });
+    }
+});
+</script>
+{% endblock %}

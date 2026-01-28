@@ -1,4 +1,4 @@
-from .models import Payment
+from apps.payments.models import Payment
 
 
 def get_payment_by_reference(reference: str):

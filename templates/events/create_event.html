@@ -1,65 +1,409 @@
-{% extends 'base.html' %}
+{% extends 'layouts/dashboard.html' %}
 {% load slippers %}
+{% load static %}
+
+{% block title %}Create Event - Reckot{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+{% endblock %}
+
+{% block header_title %}
+<div>
+    <h1 class="text-lg font-semibold">Create Event</h1>
+    <p class="text-sm text-muted-foreground">Set up your event in a few simple steps</p>
+</div>
+{% endblock %}
 
 {% block content %}
-<div class="max-w-xl mx-auto py-12">
-    <h1 class="text-2xl font-bold">Create a new event</h1>
-    <form method="post" class="mt-8 space-y-6">
+<div class="max-w-2xl mx-auto" x-data="{
+    step: 1,
+    totalSteps: 4,
+    eventType: 'IN_PERSON',
+    coverPreview: null,
+    contactEmail: '',
+    contactPhone: '',
+    contactError: false,
+    handleCoverUpload(e) {
+        const file = e.target.files[0];
+        if (file) {
+            this.coverPreview = URL.createObjectURL(file);
+        }
+    },
+    validateContact() {
+        this.contactError = !this.contactEmail && !this.contactPhone;
+        return !this.contactError;
+    },
+    nextStep() {
+        if (this.step < this.totalSteps) this.step++;
+    },
+    prevStep() {
+        if (this.step > 1) this.step--;
+    },
+    submitForm(e) {
+        if (!this.validateContact()) {
+            e.preventDefault();
+            this.step = 4;
+        }
+    }
+}" x-init="$nextTick(() => { window.initDatePickers && window.initDatePickers(); })">
+    <div class="mb-8">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-sm font-medium">Step <span x-text="step"></span> of <span x-text="totalSteps"></span></span>
+            <span class="text-sm text-muted-foreground" x-text="['Basic Info', 'Date & Time', 'Location', 'Details'][step-1]"></span>
+        </div>
+        <div class="h-2 bg-muted rounded-full overflow-hidden">
+            <div class="h-full bg-primary transition-all duration-300 rounded-full"
+                 :style="'width: ' + (step / totalSteps * 100) + '%'"></div>
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" @submit="submitForm($event)">
         {% csrf_token %}
-        
-        <div>
-            <label for="id_title" class="block text-sm font-medium text-gray-700">Title</label>
-            <div class="mt-1">
-                {% #input type='text' name='title' id='id_title' value=form.title.value|default:'' class='w-full' required=True %}
-            </div>
-        </div>
-
-        <div>
-            <label for="id_description" class="block text-sm font-medium text-gray-700">Description</label>
-            <div class="mt-1">
-                 <textarea name="description" id="id_description" rows="4" class="flex w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" required>{{ form.description.value|default:'' }}</textarea>
-            </div>
-        </div>
-
-        <div>
-            <label for="id_start_at" class="block text-sm font-medium text-gray-700">Start Date and Time</label>
-            <div class="mt-1">
-                {% #input type='datetime-local' name='start_at' id='id_start_at' value=form.start_at.value|default:'' class='w-full' required=True %}
-            </div>
-        </div>
-
-        <div>
-            <label for="id_end_at" class="block text-sm font-medium text-gray-700">End Date and Time</label>
-            <div class="mt-1">
-                {% #input type='datetime-local' name='end_at' id='id_end_at' value=form.end_at.value|default:'' class='w-full' required=True %}
-            </div>
-        </div>
-
-        <div>
-            <label for="id_location" class="block text-sm font-medium text-gray-700">Location</label>
-            <div class="mt-1">
-                {% #input type='text' name='location' id='id_location' value=form.location.value|default:'' class='w-full' required=True %}
-            </div>
-        </div>
-
-        <div>
-            <label for="id_capacity" class="block text-sm font-medium text-gray-700">Capacity</label>
-            <div class="mt-1">
-                {% #input type='number' name='capacity' id='id_capacity' value=form.capacity.value|default:0 class='w-full' required=True %}
-            </div>
-        </div>
 
         {% if errors %}
-            <div class="mt-4 text-sm text-red-600">
-                {{ errors }}
-            </div>
+        <div class="rounded-lg bg-red-500/10 border border-red-500/20 p-4 text-sm text-red-500 mb-6">
+            {% for field, error_list in errors.items %}
+                {% for error in error_list %}
+                    {% if field == '__all__' %}
+                        <p>{{ error }}</p>
+                    {% else %}
+                        <p><strong>{{ field }}:</strong> {{ error }}</p>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+        </div>
         {% endif %}
 
-        <div class="pt-4">
-            {% #button type='submit' %}
+        <div x-show="step === 1" x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
+            <div class="card p-6 space-y-4">
+                <h2 class="text-lg font-semibold">Basic Information</h2>
+
+                <div>
+                    <label class="block text-sm font-medium mb-2">Organization</label>
+                    <div class="custom-select-wrapper" x-data="{
+                        open: false,
+                        value: '',
+                        label: '',
+                        search: '',
+                        options: [{% for org in organizations %}{ id: '{{ org.id }}', name: '{{ org.name|escapejs }}' }{% if not forloop.last %},{% endif %}{% endfor %}],
+                        get filteredOptions() {
+                            if (!this.search) return this.options;
+                            return this.options.filter(o => o.name.toLowerCase().includes(this.search.toLowerCase()));
+                        }
+                    }">
+                        <input type="hidden" name="organization" :value="value" required>
+                        <button type="button" @click="open = !open" @click.outside="open = false"
+                                class="custom-select-trigger" :class="{ 'custom-select-trigger-active': open }">
+                            <span class="custom-select-value" :class="{ 'custom-select-placeholder': !label }" x-text="label || 'Select organization'"></span>
+                            <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4" :class="{ 'rotate-180': open }"></i>
+                        </button>
+                        <div x-show="open" x-transition @click.outside="open = false" class="custom-select-dropdown" x-cloak>
+                            <div class="custom-select-search">
+                                <i data-lucide="search" class="custom-select-search-icon w-3.5 h-3.5"></i>
+                                <input type="text" x-model="search" placeholder="Search organizations..." class="custom-select-search-input" @click.stop>
+                            </div>
+                            <div class="custom-select-options">
+                                <template x-for="org in filteredOptions" :key="org.id">
+                                    <button type="button" @click="value = org.id; label = org.name; open = false; search = ''"
+                                            class="custom-select-option" :class="{ 'custom-select-option-selected': value === org.id }">
+                                        <span x-text="org.name"></span>
+                                        <i x-show="value === org.id" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                                    </button>
+                                </template>
+                                <div x-show="filteredOptions.length === 0" class="custom-select-empty">
+                                    <span x-text="search ? 'No organizations match \"' + search + '\"' : 'No organizations available'"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-muted-foreground mt-1">
+                        <a href="{% url 'orgs:create' %}" class="text-primary hover:underline">Create a new organization</a>
+                    </p>
+                </div>
+
+                <div>
+                    <label for="id_title" class="block text-sm font-medium mb-2">Event Title</label>
+                    <input type="text" name="title" id="id_title" required placeholder="e.g., Tech Conference 2026" class="input">
+                </div>
+
+                <div>
+                    <label for="id_short_description" class="block text-sm font-medium mb-2">Tagline</label>
+                    <input type="text" name="short_description" id="id_short_description"
+                           placeholder="A brief description (max 300 chars)" maxlength="300" class="input">
+                </div>
+
+                <div>
+                    <label for="id_description" class="block text-sm font-medium mb-2">Full Description</label>
+                    <textarea name="description" id="id_description" rows="4" required
+                              placeholder="Tell attendees what to expect..." class="input resize-none"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-2">Cover Image</label>
+                    <div class="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-muted-foreground/50 transition-colors cursor-pointer"
+                         @click="$refs.coverInput.click()">
+                        <template x-if="!coverPreview">
+                            <div>
+                                <i data-lucide="image-plus" class="h-10 w-10 mx-auto text-muted-foreground mb-2"></i>
+                                <p class="text-sm font-medium">Click to upload</p>
+                                <p class="text-xs text-muted-foreground mt-1">PNG, JPG. Recommended: 1200x630px</p>
+                            </div>
+                        </template>
+                        <template x-if="coverPreview">
+                            <div class="relative inline-block">
+                                <img :src="coverPreview" class="max-h-40 rounded-lg object-cover">
+                                <button type="button" @click.stop="coverPreview = null; $refs.coverInput.value = ''"
+                                        class="absolute -top-2 -right-2 w-6 h-6 flex items-center justify-center bg-red-500 rounded-full text-white hover:bg-red-600 shadow-lg transition-colors"
+                                        title="Remove image">
+                                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                    <input type="file" name="cover_image" accept="image/*" x-ref="coverInput"
+                           @change="handleCoverUpload($event)" class="hidden">
+                </div>
+            </div>
+        </div>
+
+        <div x-show="step === 2" x-cloak x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
+            <div class="card p-6 space-y-4">
+                <h2 class="text-lg font-semibold">Date & Time</h2>
+
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <label for="id_start_at" class="block text-sm font-medium mb-2">Start</label>
+                        <input type="text" name="start_at" id="id_start_at" required
+                               placeholder="Select date and time" class="input flatpickr-datetime">
+                    </div>
+                    <div>
+                        <label for="id_end_at" class="block text-sm font-medium mb-2">End</label>
+                        <input type="text" name="end_at" id="id_end_at" required
+                               placeholder="Select date and time" class="input flatpickr-datetime">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-2">Timezone</label>
+                    <div class="custom-select-wrapper" x-data="{ open: false, value: 'Africa/Douala', label: 'Africa/Douala (WAT)' }">
+                        <input type="hidden" name="timezone" :value="value">
+                        <button type="button" @click="open = !open" @click.outside="open = false"
+                                class="custom-select-trigger" :class="{ 'custom-select-trigger-active': open }">
+                            <span class="custom-select-value" x-text="label"></span>
+                            <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4" :class="{ 'rotate-180': open }"></i>
+                        </button>
+                        <div x-show="open" x-transition @click.outside="open = false" class="custom-select-dropdown" x-cloak>
+                            <div class="custom-select-options">
+                                <button type="button" @click="value = 'Africa/Douala'; label = 'Africa/Douala (WAT)'; open = false" class="custom-select-option" :class="{ 'custom-select-option-selected': value === 'Africa/Douala' }">
+                                    <span>Africa/Douala (WAT)</span>
+                                    <i x-show="value === 'Africa/Douala'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                                </button>
+                                <button type="button" @click="value = 'Africa/Lagos'; label = 'Africa/Lagos (WAT)'; open = false" class="custom-select-option" :class="{ 'custom-select-option-selected': value === 'Africa/Lagos' }">
+                                    <span>Africa/Lagos (WAT)</span>
+                                    <i x-show="value === 'Africa/Lagos'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                                </button>
+                                <button type="button" @click="value = 'Europe/London'; label = 'Europe/London (GMT)'; open = false" class="custom-select-option" :class="{ 'custom-select-option-selected': value === 'Europe/London' }">
+                                    <span>Europe/London (GMT)</span>
+                                    <i x-show="value === 'Europe/London'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                                </button>
+                                <button type="button" @click="value = 'America/New_York'; label = 'America/New_York (EST)'; open = false" class="custom-select-option" :class="{ 'custom-select-option-selected': value === 'America/New_York' }">
+                                    <span>America/New_York (EST)</span>
+                                    <i x-show="value === 'America/New_York'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                                </button>
+                                <button type="button" @click="value = 'UTC'; label = 'UTC'; open = false" class="custom-select-option" :class="{ 'custom-select-option-selected': value === 'UTC' }">
+                                    <span>UTC</span>
+                                    <i x-show="value === 'UTC'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="step === 3" x-cloak x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
+            <div class="card p-6 space-y-4">
+                <h2 class="text-lg font-semibold">Location</h2>
+
+                <div>
+                    <label for="id_event_type" class="block text-sm font-medium mb-2">Event Type</label>
+                    <select name="event_type" id="id_event_type" required class="input" x-model="eventType">
+                        <option value="IN_PERSON">In Person</option>
+                        <option value="ONLINE">Online</option>
+                        <option value="HYBRID">Hybrid</option>
+                    </select>
+                </div>
+
+                <div x-show="eventType !== 'ONLINE'" class="space-y-4">
+                    <div>
+                        <label for="id_venue_name" class="block text-sm font-medium mb-2">Venue Name</label>
+                        <input type="text" name="venue_name" id="id_venue_name" placeholder="e.g., Convention Center" class="input">
+                    </div>
+
+                    <div>
+                        <label for="id_location" class="block text-sm font-medium mb-2">Address</label>
+                        <input type="text" name="location" id="id_location" placeholder="Street address" class="input"
+                               :required="eventType !== 'ONLINE'">
+                    </div>
+
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div>
+                            <label for="id_city" class="block text-sm font-medium mb-2">City</label>
+                            <input type="text" name="city" id="id_city" placeholder="e.g., Yaounde" class="input">
+                        </div>
+                        <div>
+                            <label for="id_country" class="block text-sm font-medium mb-2">Country</label>
+                            <input type="text" name="country" id="id_country" value="Cameroon" class="input">
+                        </div>
+                    </div>
+                </div>
+
+                <div x-show="eventType !== 'IN_PERSON'" class="space-y-4">
+                    <div>
+                        <label for="id_online_url" class="block text-sm font-medium mb-2">Meeting Link</label>
+                        <input type="url" name="online_url" id="id_online_url" placeholder="https://zoom.us/j/..." class="input">
+                        <p class="text-xs text-muted-foreground mt-1">Zoom, Google Meet, etc.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="step === 4" x-cloak x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
+            <div class="card p-6 space-y-4">
+                <h2 class="text-lg font-semibold">Additional Details</h2>
+
+                <div>
+                    <label for="id_capacity" class="block text-sm font-medium mb-2">Capacity</label>
+                    <input type="number" name="capacity" id="id_capacity" value="100" min="0" required class="input">
+                    <p class="text-xs text-muted-foreground mt-1">0 for unlimited</p>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <input type="checkbox" name="is_free" id="id_is_free" class="h-4 w-4 rounded border-border">
+                    <label for="id_is_free" class="text-sm font-medium">This is a free event</label>
+                </div>
+
+                <div>
+                    <label for="id_website" class="block text-sm font-medium mb-2">Event Website</label>
+                    <input type="url" name="website" id="id_website" placeholder="https://event.com" class="input">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-2">Contact Information <span class="text-red-500">*</span></label>
+                    <p class="text-xs text-muted-foreground mb-3">At least one contact method is required</p>
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div>
+                            <label for="id_contact_email" class="block text-xs text-muted-foreground mb-1">Email</label>
+                            <input type="email" name="contact_email" id="id_contact_email" placeholder="contact@event.com"
+                                   class="input" x-model="contactEmail" @input="contactError = false"
+                                   :class="contactError && 'border-red-500 focus:ring-red-500'">
+                        </div>
+                        <div>
+                            <label for="id_contact_phone" class="block text-xs text-muted-foreground mb-1">Phone</label>
+                            <input type="tel" name="contact_phone" id="id_contact_phone" placeholder="+237 6XX XXX XXX"
+                                   class="input" x-model="contactPhone" @input="contactError = false"
+                                   :class="contactError && 'border-red-500 focus:ring-red-500'">
+                        </div>
+                    </div>
+                    <p x-show="contactError" x-cloak class="text-sm text-red-500 mt-2">Please provide at least one contact method (email or phone)</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between mt-6">
+            <button type="button" @click="prevStep()" x-show="step > 1"
+                    class="btn btn-outline btn-md">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                Back
+            </button>
+            <div x-show="step === 1"></div>
+
+            <button type="button" @click="nextStep()" x-show="step < totalSteps"
+                    class="btn btn-primary btn-md">
+                Next
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+
+            <button type="submit" x-show="step === totalSteps" x-cloak
+                    class="btn btn-primary btn-md">
                 Create Event
-            {% /button %}
+                <i data-lucide="check" class="w-4 h-4"></i>
+            </button>
         </div>
     </form>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+let startPicker, endPicker;
+
+window.initDatePickers = function() {
+    if (startPicker) return;
+
+    const commonConfig = {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        altInput: true,
+        altFormat: "F j, Y \\a\\t h:i K",
+        time_24hr: false,
+        minuteIncrement: 15,
+        disableMobile: true,
+        allowInput: true,
+    };
+
+    startPicker = flatpickr("#id_start_at", {
+        ...commonConfig,
+        minDate: "today",
+        onChange: function(selectedDates) {
+            if (selectedDates[0]) {
+                endPicker.set('minDate', selectedDates[0]);
+                if (!endPicker.selectedDates.length) {
+                    const defaultEnd = new Date(selectedDates[0]);
+                    defaultEnd.setHours(defaultEnd.getHours() + 2);
+                    endPicker.setDate(defaultEnd);
+                }
+            }
+        }
+    });
+
+    endPicker = flatpickr("#id_end_at", {
+        ...commonConfig,
+        minDate: "today",
+    });
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    window.initDatePickers();
+
+    const form = document.querySelector('form');
+    if (form && window.FormPersistence) {
+        const formId = 'event_create';
+
+        const restored = FormPersistence.restore(formId, form);
+        if (restored) {
+            const notice = document.createElement('div');
+            notice.className = 'rounded-lg bg-blue-500/10 border border-blue-500/20 p-4 text-sm text-blue-500 mb-6 flex items-center justify-between';
+            notice.innerHTML = `
+                <span>Draft restored from your previous session</span>
+                <button type="button" onclick="FormPersistence.clear('${formId}'); this.parentElement.remove();" class="text-xs underline hover:no-underline">Dismiss</button>
+            `;
+            form.insertBefore(notice, form.firstChild.nextSibling);
+        }
+
+        const persistence = FormPersistence.autoSave(formId, form);
+
+        form.addEventListener('submit', function() {
+            FormPersistence.clear(formId);
+            persistence.stop();
+        });
+    }
+});
+</script>
 {% endblock %}

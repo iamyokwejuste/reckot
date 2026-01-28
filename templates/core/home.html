@@ -118,6 +118,87 @@
     </div>
 </section>
 
+{% if featured_events %}
+<section id="featured" class="py-20 md:py-28">
+    <div class="container">
+        <div class="flex items-center justify-between mb-10" x-data x-intersect.once="$el.classList.add('animate-in')">
+            <div>
+                <h2 class="text-2xl md:text-3xl font-semibold tracking-tight">Featured Events</h2>
+                <p class="text-muted-foreground mt-2">Discover upcoming events handpicked by our team</p>
+            </div>
+            <a href="{% url 'events:discover' %}" class="btn btn-outline btn-sm hidden sm:inline-flex">
+                View all events
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </a>
+        </div>
+
+        <div class="relative" x-data x-intersect.once="$el.classList.add('animate-in', 'delay-1')">
+            <div class="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0 lg:grid lg:grid-cols-5 lg:overflow-visible lg:gap-0">
+                {% for event in featured_events %}
+                <div class="snap-start shrink-0 w-72 lg:w-auto featured-card-{{ forloop.counter }}">
+                    {% #card interactive=True class="group relative overflow-hidden h-64 !p-0" %}
+                        <a href="{% url 'events:public_detail' event.organization.slug event.slug %}" class="absolute inset-0 z-10"></a>
+                        {% if event.cover_image %}
+                        <div class="absolute inset-0">
+                            <img src="{{ event.cover_image.url }}" alt="{{ event.title }}" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+                        </div>
+                        {% else %}
+                        <div class="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5"></div>
+                        {% endif %}
+
+                        <div class="relative h-full flex flex-col justify-end p-5 pointer-events-none">
+                            {% #badge variant="warning" class="absolute top-4 left-4 !bg-amber-500 !text-white !border-transparent" %}
+                                <i data-lucide="star" class="h-3 w-3 mr-1"></i>
+                                Featured
+                            {% /badge %}
+
+                            <div class="{% if event.cover_image %}text-white{% endif %}">
+                                <p class="text-xs {% if event.cover_image %}text-white/80{% else %}text-muted-foreground{% endif %} mb-1">{{ event.organization.name }}</p>
+                                <h3 class="font-semibold text-base line-clamp-2 mb-2">
+                                    {{ event.title }}
+                                </h3>
+                                <div class="flex items-center gap-3 text-xs {% if event.cover_image %}text-white/70{% else %}text-muted-foreground{% endif %}">
+                                    <span class="flex items-center gap-1">
+                                        <i data-lucide="calendar" class="h-3.5 w-3.5"></i>
+                                        {{ event.start_at|date:"M d, Y" }}
+                                    </span>
+                                    {% if event.location %}
+                                    <span class="flex items-center gap-1">
+                                        <i data-lucide="map-pin" class="h-3.5 w-3.5"></i>
+                                        {{ event.location|truncatewords:2 }}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% /card %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="absolute left-0 top-0 bottom-4 w-8 bg-gradient-to-r from-background to-transparent pointer-events-none lg:hidden"></div>
+            <div class="absolute right-0 top-0 bottom-4 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none lg:hidden"></div>
+        </div>
+
+        <a href="{% url 'events:discover' %}" class="btn btn-outline btn-sm w-full mt-6 sm:hidden">
+            View all events
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+    </div>
+</section>
+
+<style>
+@media (min-width: 1024px) {
+    .featured-card-1 { margin-right: -1rem; z-index: 50; }
+    .featured-card-2 { margin-left: -0.5rem; margin-right: -0.5rem; z-index: 40; transform: scale(0.95); }
+    .featured-card-3 { z-index: 30; transform: scale(0.9); }
+    .featured-card-4 { margin-left: -0.5rem; margin-right: -0.5rem; z-index: 20; transform: scale(0.95); }
+    .featured-card-5 { margin-left: -1rem; z-index: 10; }
+}
+</style>
+{% endif %}
+
 <section id="features" class="py-20 md:py-28">
     <div class="container">
         <div class="text-center max-w-2xl mx-auto mb-16" x-data x-intersect.once="$el.classList.add('animate-in')">
@@ -156,9 +237,9 @@
                 </div>
             </div>
             <div class="card p-6 lg:p-8 bg-foreground text-background" x-data x-intersect.once="$el.classList.add('animate-scale', 'delay-1')">
-                <div class="text-4xl lg:text-5xl font-semibold">5%</div>
+                <div class="text-4xl lg:text-5xl font-semibold">2-5%</div>
                 <p class="mt-2 text-background/70">per paid ticket</p>
-                <p class="text-sm text-background/50 mt-4">Free events are always free</p>
+                <p class="text-sm text-background/50 mt-4">Choose your plan, pay only when you sell</p>
             </div>
             <div class="card p-6 lg:p-8" x-data x-intersect.once="$el.classList.add('animate-scale', 'delay-2')">
                 <div class="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4">
@@ -187,6 +268,16 @@
                 </div>
                 <h3 class="font-semibold">Swag tracking</h3>
                 <p class="text-muted-foreground text-sm mt-2">Manage giveaways at check-in.</p>
+            </div>
+            <div class="card p-6 lg:p-8 border-2 border-primary/20 bg-primary/5" x-data x-intersect.once="$el.classList.add('animate-scale', 'delay-6')">
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <i data-lucide="sparkles" class="w-5 h-5 text-primary"></i>
+                    </div>
+                    <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">Starter+</span>
+                </div>
+                <h3 class="font-semibold">I Will Be There</h3>
+                <p class="text-muted-foreground text-sm mt-2">Let attendees create personalized flyers to share on social media.</p>
             </div>
         </div>
     </div>
@@ -275,18 +366,22 @@
             <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">Simple, transparent pricing</h2>
             <p class="text-muted-foreground mt-4 text-lg">No monthly fees. No hidden costs. Pay only when you sell.</p>
         </div>
-        <div class="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             <div class="card p-6 lg:p-8" x-data x-intersect.once="$el.classList.add('animate-scale')">
-                <h3 class="text-lg font-semibold">Free events</h3>
+                <h3 class="text-lg font-semibold">Free</h3>
                 <div class="mt-4">
-                    <span class="text-4xl lg:text-5xl font-semibold">0</span>
-                    <span class="text-muted-foreground ml-1">XAF</span>
+                    <span class="text-4xl lg:text-5xl font-semibold">2%</span>
+                    <span class="text-muted-foreground ml-1">per ticket</span>
                 </div>
-                <p class="text-muted-foreground mt-2 text-sm">Forever free for free events</p>
+                <p class="text-muted-foreground mt-2 text-sm">Perfect for getting started</p>
                 <ul class="mt-8 space-y-3 text-sm">
                     <li class="flex gap-3 items-center">
                         <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0"></i>
-                        Unlimited free tickets
+                        2 events per month
+                    </li>
+                    <li class="flex gap-3 items-center">
+                        <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0"></i>
+                        Up to 100 tickets per event
                     </li>
                     <li class="flex gap-3 items-center">
                         <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0"></i>
@@ -298,23 +393,31 @@
                     </li>
                     <li class="flex gap-3 items-center">
                         <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0"></i>
-                        Email support
+                        CSV exports
+                    </li>
+                    <li class="flex gap-3 items-center text-muted-foreground">
+                        <i data-lucide="x" class="w-4 h-4 shrink-0"></i>
+                        I Will Be There flyers
                     </li>
                 </ul>
                 <a href="{% url 'account_signup' %}" class="btn btn-outline btn-md w-full mt-8">Get started</a>
             </div>
             <div class="card p-6 lg:p-8 border-2 border-foreground relative mt-4 md:mt-0" x-data x-intersect.once="$el.classList.add('animate-scale', 'delay-1')">
                 <span class="absolute -top-3 left-6 px-3 py-1 text-xs font-medium rounded-full bg-foreground text-background">Most popular</span>
-                <h3 class="text-lg font-semibold">Paid events</h3>
+                <h3 class="text-lg font-semibold">Starter</h3>
                 <div class="mt-4">
                     <span class="text-4xl lg:text-5xl font-semibold">5%</span>
                     <span class="text-muted-foreground ml-1">per ticket</span>
                 </div>
-                <p class="text-muted-foreground mt-2 text-sm">Only charged when you make money</p>
+                <p class="text-muted-foreground mt-2 text-sm">For growing organizers</p>
                 <ul class="mt-8 space-y-3 text-sm">
                     <li class="flex gap-3 items-center">
                         <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0"></i>
-                        Everything in Free
+                        10 events per month
+                    </li>
+                    <li class="flex gap-3 items-center">
+                        <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0"></i>
+                        Up to 500 tickets per event
                     </li>
                     <li class="flex gap-3 items-center">
                         <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0"></i>
@@ -322,38 +425,68 @@
                     </li>
                     <li class="flex gap-3 items-center">
                         <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0"></i>
-                        24-hour payouts
+                        Advanced analytics
                     </li>
                     <li class="flex gap-3 items-center">
                         <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0"></i>
-                        Team collaboration
+                        CSV, Excel & PDF exports
                     </li>
-                    <li class="flex gap-3 items-center">
-                        <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0"></i>
-                        Advanced analytics & exports
-                    </li>
-                    <li class="flex gap-3 items-center">
-                        <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0"></i>
-                        Priority support
+                    <li class="flex gap-3 items-center font-medium text-primary">
+                        <i data-lucide="sparkles" class="w-4 h-4 shrink-0"></i>
+                        I Will Be There flyers
                     </li>
                 </ul>
                 <a href="{% url 'account_signup' %}" class="btn btn-primary btn-md w-full mt-8">Get started</a>
             </div>
             <div class="card p-6 lg:p-8 mt-4 md:mt-0" x-data x-intersect.once="$el.classList.add('animate-scale', 'delay-2')">
-                <h3 class="text-lg font-semibold">Customize your plan</h3>
+                <h3 class="text-lg font-semibold">Pro</h3>
                 <div class="mt-4">
-                    <span class="text-4xl lg:text-5xl font-semibold">500+</span>
-                    <span class="text-muted-foreground ml-1">attendees</span>
+                    <span class="text-4xl lg:text-5xl font-semibold">3%</span>
+                    <span class="text-muted-foreground ml-1">per ticket</span>
                 </div>
-                <p class="text-muted-foreground mt-2 text-sm">Tailored solutions for large events</p>
+                <p class="text-muted-foreground mt-2 text-sm">For professional organizers</p>
                 <ul class="mt-8 space-y-3 text-sm">
                     <li class="flex gap-3 items-center">
                         <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0"></i>
-                        Everything in Paid
+                        Unlimited events
                     </li>
                     <li class="flex gap-3 items-center">
                         <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0"></i>
-                        Volume discounts
+                        Unlimited tickets
+                    </li>
+                    <li class="flex gap-3 items-center">
+                        <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0"></i>
+                        Custom branding
+                    </li>
+                    <li class="flex gap-3 items-center">
+                        <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0"></i>
+                        Priority support
+                    </li>
+                    <li class="flex gap-3 items-center">
+                        <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0"></i>
+                        All export formats
+                    </li>
+                    <li class="flex gap-3 items-center">
+                        <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0"></i>
+                        I Will Be There flyers
+                    </li>
+                </ul>
+                <a href="{% url 'account_signup' %}" class="btn btn-outline btn-md w-full mt-8">Get started</a>
+            </div>
+            <div class="card p-6 lg:p-8 mt-4 lg:mt-0 bg-gradient-to-br from-foreground/5 to-foreground/10" x-data x-intersect.once="$el.classList.add('animate-scale', 'delay-3')">
+                <h3 class="text-lg font-semibold">Enterprise</h3>
+                <div class="mt-4">
+                    <span class="text-4xl lg:text-5xl font-semibold">Custom</span>
+                </div>
+                <p class="text-muted-foreground mt-2 text-sm">For large organizations</p>
+                <ul class="mt-8 space-y-3 text-sm">
+                    <li class="flex gap-3 items-center">
+                        <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0"></i>
+                        Everything in Pro
+                    </li>
+                    <li class="flex gap-3 items-center">
+                        <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0"></i>
+                        Custom service fee
                     </li>
                     <li class="flex gap-3 items-center">
                         <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0"></i>
@@ -365,7 +498,7 @@
                     </li>
                     <li class="flex gap-3 items-center">
                         <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0"></i>
-                        On-site support available
+                        On-site support
                     </li>
                     <li class="flex gap-3 items-center">
                         <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0"></i>
@@ -378,6 +511,7 @@
                 </a>
             </div>
         </div>
+        <p class="text-center text-sm text-muted-foreground mt-8">All plans include: Team collaboration, 24-hour payouts, QR check-in</p>
     </div>
 </section>
 

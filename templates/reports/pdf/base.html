@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{{ report_title }} - {{ event.title }}</title>
+</head>
+<body>
+    <div class="cover-page">
+        {% if organization.logo %}
+        <img src="{{ organization.logo.url }}" alt="{{ organization.name }}" class="cover-logo">
+        {% endif %}
+        <div class="cover-title">{{ report_title }}</div>
+        <div class="cover-subtitle">{{ event.title }}</div>
+        <div class="cover-subtitle text-muted">{{ organization.name }}</div>
+        <div class="cover-date">Generated on {{ generated_at|date:"F j, Y" }} at {{ generated_at|time:"g:i A" }}</div>
+    </div>
+
+    {% block content %}{% endblock %}
+</body>
+</html>

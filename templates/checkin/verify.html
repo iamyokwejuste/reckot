@@ -5,10 +5,11 @@
 
 {% block content %}
 <div class="container py-8">
+    {% url 'checkin:dashboard' org_slug=event.organization.slug event_slug=event.slug as checkin_url %}
     {% #breadcrumb %}
         {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
         {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-        {% #breadcrumb_item href="{% url 'checkin:dashboard' event.id %}" %}Check-in{% /breadcrumb_item %}
+        {% #breadcrumb_item :href="checkin_url" %}Check-in{% /breadcrumb_item %}
         {% #breadcrumb_separator %}{% /breadcrumb_separator %}
         {% #breadcrumb_item %}Scan{% /breadcrumb_item %}
     {% /breadcrumb %}
@@ -26,20 +27,22 @@
                     <p class="text-sm text-muted-foreground mb-4">Enter ticket code or scan QR</p>
 
                     <form
-                        hx-post="{% url 'checkin:verify' event.id %}"
+                        hx-post="{% url 'checkin:verify' org_slug=event.organization.slug event_slug=event.slug %}"
                         hx-target="#checkin-result"
                         hx-swap="innerHTML"
                         class="space-y-4"
                     >
                         {% csrf_token %}
                         <div class="space-y-2">
-                            {% #label for="code" %}Ticket Code{% /label %}
-                            {% #input name="code" placeholder="Enter ticket code or UUID" required=True class="font-mono" %}{% /input %}
+                            <label for="code" class="block text-sm font-medium">Ticket Code</label>
+                            <input type="text" name="code" id="code"
+                                   placeholder="Enter ticket code or UUID" required
+                                   class="input w-full font-mono">
                         </div>
-                        {% #button type="submit" class="w-full" variant="gradient" %}
+                        <button type="submit" class="btn btn-primary btn-md w-full">
                             <i data-lucide="check" class="mr-2 h-4 w-4"></i>
                             Check In
-                        {% /button %}
+                        </button>
                     </form>
 
                     <div id="checkin-result" class="mt-6"></div>
@@ -67,12 +70,15 @@
                 <h2 class="text-lg font-semibold">Search Attendees</h2>
                 <p class="text-sm text-muted-foreground mb-4">Find by name or email</p>
 
-                {% #input
+                <input
                     type="search"
                     name="q"
                     placeholder="Search by name, email, or code..."
-                    attrs='hx-get="{% url "checkin:search" event.id %}" hx-trigger="keyup changed delay:300ms" hx-target="#search-results"'
-                %}{% /input %}
+                    class="input w-full"
+                    hx-get="{% url 'checkin:search' org_slug=event.organization.slug event_slug=event.slug %}"
+                    hx-trigger="keyup changed delay:300ms"
+                    hx-target="#search-results"
+                >
 
                 <div id="search-results" class="mt-4"></div>
             {% /card %}

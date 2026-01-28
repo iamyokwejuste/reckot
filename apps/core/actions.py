@@ -1,16 +1,57 @@
+import os
+
 from django.shortcuts import render, redirect
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
+from django.conf import settings
 
-from .models import OTPVerification
-from .tasks import resend_otp_task
+from apps.core.models import OTPVerification
+from apps.core.tasks import resend_otp_task
+
+
+def robots_txt(request):
+    scheme = 'https' if request.is_secure() else 'http'
+    host = request.get_host()
+    sitemap_url = f"{scheme}://{host}/sitemap.xml"
+    content = f"""# Reckot Robots.txt
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /accounts/
+Disallow: /payments/
+Disallow: /checkin/
+
+Sitemap: {sitemap_url}
+"""
+    return HttpResponse(content, content_type="text/plain")
+
+
+def service_worker(request):
+    sw_path = os.path.join(settings.STATIC_ROOT or settings.STATICFILES_DIRS[0], 'sw.js')
+    if not os.path.exists(sw_path):
+        sw_path = os.path.join(settings.BASE_DIR, 'static', 'sw.js')
+    try:
+        with open(sw_path, 'r') as f:
+            content = f.read()
+        return HttpResponse(content, content_type='application/javascript')
+    except FileNotFoundError:
+        return HttpResponse('', content_type='application/javascript', status=404)
 
 
 class HomeView(View):
     def get(self, request):
-        return render(request, 'core/home.html')
+        from apps.events.models import Event
+        featured_events = Event.objects.filter(
+            is_featured=True,
+            is_public=True,
+            state=Event.State.PUBLISHED
+        ).select_related('organization').order_by('feature_order', '-feature_approved_at')[:5]
+
+        return render(request, 'core/home.html', {
+            'featured_events': featured_events,
+        })
 
 
 class WhyUsView(View):
@@ -80,3 +121,27 @@ class ResendOTPView(LoginRequiredMixin, View):
 
         resend_otp_task(request.user.id, OTPVerification.Type.EMAIL)
         return JsonResponse({'success': True, 'message': 'New code sent to your email'})
+
+
+class SettingsView(LoginRequiredMixin, View):
+    def get(self, request):
+        return render(request, 'core/settings.html', {
+            'user': request.user,
+        })
+
+    def post(self, request):
+        user = request.user
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        phone = request.POST.get('phone', '').strip()
+
+        if first_name:
+            user.first_name = first_name
+        if last_name:
+            user.last_name = last_name
+        if phone:
+            user.phone = phone
+
+        user.save()
+        messages.success(request, 'Settings updated successfully.')
+        return redirect('core:settings')

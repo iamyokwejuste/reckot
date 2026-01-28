@@ -1,0 +1,9 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Message{% endblock %}
+
+{% block content %}
+{{ body|safe }}
+
+<img src="{{ site_url }}{% url 'messaging:track_open' tracking_id %}" width="1" height="1" alt="" style="display:none;" />
+{% endblock %}

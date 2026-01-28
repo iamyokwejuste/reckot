@@ -2,9 +2,12 @@ from django.views import View
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
+from django.db.models import Count
+from django.utils import timezone
 from apps.events.models import Event
-from .services import verify_and_checkin, collect_swag
-from .queries import (
+from apps.checkin.models import CheckIn
+from apps.checkin.services import verify_and_checkin, collect_swag
+from apps.checkin.queries import (
     search_tickets,
     get_event_checkin_stats,
     get_event_swag_items,
@@ -13,12 +16,39 @@ from .queries import (
 )
 
 
+class CheckInListView(LoginRequiredMixin, View):
+    def get(self, request):
+        checkins = CheckIn.objects.filter(
+            ticket__booking__event__organization__members=request.user
+        ).select_related(
+            'ticket__booking__user',
+            'ticket__booking__event',
+            'ticket__ticket_type',
+            'checked_in_by'
+        ).order_by('-checked_in_at')[:100]
+
+        stats = {
+            'today': CheckIn.objects.filter(
+                ticket__booking__event__organization__members=request.user,
+                checked_in_at__date=timezone.now().date()
+            ).count(),
+            'total': CheckIn.objects.filter(
+                ticket__booking__event__organization__members=request.user
+            ).count(),
+        }
+
+        return render(request, 'checkin/list.html', {
+            'checkins': checkins,
+            'stats': stats,
+        })
+
+
 class CheckInDashboardView(LoginRequiredMixin, View):
-    def get(self, request, event_id):
-        event = get_object_or_404(Event, pk=event_id)
-        stats = get_event_checkin_stats(event_id)
-        recent = get_recent_checkins(event_id)
-        swag_items = get_event_swag_items(event_id)
+    def get(self, request, org_slug, event_slug):
+        event = get_object_or_404(Event, organization__slug=org_slug, slug=event_slug)
+        stats = get_event_checkin_stats(event.id)
+        recent = get_recent_checkins(event.id)
+        swag_items = get_event_swag_items(event.id)
         return render(request, 'checkin/dashboard.html', {
             'event': event,
             'stats': stats,
@@ -28,15 +58,15 @@ class CheckInDashboardView(LoginRequiredMixin, View):
 
 
 class CheckInVerifyView(LoginRequiredMixin, View):
-    def get(self, request, event_id):
-        event = get_object_or_404(Event, pk=event_id)
-        stats = get_event_checkin_stats(event_id)
+    def get(self, request, org_slug, event_slug):
+        event = get_object_or_404(Event, organization__slug=org_slug, slug=event_slug)
+        stats = get_event_checkin_stats(event.id)
         return render(request, 'checkin/verify.html', {
             'event': event,
             'stats': stats,
         })
 
-    def post(self, request, event_id):
+    def post(self, request, org_slug, event_slug):
         code = request.POST.get('code', '').strip()
         if not code:
             return render(request, 'checkin/_result_error.html', {
@@ -53,14 +83,15 @@ class CheckInVerifyView(LoginRequiredMixin, View):
 
 
 class CheckInSearchView(LoginRequiredMixin, View):
-    def get(self, request, event_id):
+    def get(self, request, org_slug, event_slug):
+        event = get_object_or_404(Event, organization__slug=org_slug, slug=event_slug)
         query = request.GET.get('q', '').strip()
         if len(query) < 2:
             return HttpResponse('')
-        results = search_tickets(event_id, query)
+        results = search_tickets(event.id, query)
         return render(request, 'checkin/_search_results.html', {
             'results': results,
-            'event_id': event_id,
+            'event': event,
         })
 
 
@@ -77,8 +108,9 @@ class CheckInTicketView(LoginRequiredMixin, View):
 
 
 class CollectSwagView(LoginRequiredMixin, View):
-    def post(self, request, checkin_id, item_id):
-        result = collect_swag(checkin_id, item_id)
+    def post(self, request, checkin_ref, item_id):
+        checkin = get_object_or_404(CheckIn, reference=checkin_ref)
+        result = collect_swag(checkin.id, item_id)
         if result['success']:
             return render(request, 'checkin/_swag_collected.html', {
                 'collection': result['collection']
@@ -87,6 +119,7 @@ class CollectSwagView(LoginRequiredMixin, View):
 
 
 class CheckInStatsView(LoginRequiredMixin, View):
-    def get(self, request, event_id):
-        stats = get_event_checkin_stats(event_id)
+    def get(self, request, org_slug, event_slug):
+        event = get_object_or_404(Event, organization__slug=org_slug, slug=event_slug)
+        stats = get_event_checkin_stats(event.id)
         return render(request, 'checkin/_stats.html', {'stats': stats})

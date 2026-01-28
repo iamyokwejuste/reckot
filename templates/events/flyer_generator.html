@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}I Will Be There - {{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold mb-2">I Will Be There!</h1>
+            <p class="text-muted-foreground">Create your personalized flyer for {{ event.title }}</p>
+        </div>
+
+        <div class="card p-6">
+            <form id="flyer-form" method="post" enctype="multipart/form-data" class="space-y-6">
+                {% csrf_token %}
+
+                <div>
+                    <label class="block text-sm font-medium mb-2">Your Photo</label>
+                    <div class="border-2 border-dashed border-border rounded-lg p-6 text-center"
+                         x-data="{ preview: null, dragging: false }"
+                         @dragover.prevent="dragging = true"
+                         @dragleave.prevent="dragging = false"
+                         @drop.prevent="dragging = false; const file = $event.dataTransfer.files[0]; if (file) { $refs.photoInput.files = $event.dataTransfer.files; preview = URL.createObjectURL(file); }"
+                         :class="{ 'border-primary bg-primary/5': dragging }">
+                        <input type="file" name="photo" accept="image/*" required
+                               class="hidden" x-ref="photoInput"
+                               @change="preview = URL.createObjectURL($event.target.files[0])">
+                        <div x-show="!preview" class="space-y-2">
+                            <i data-lucide="upload" class="w-10 h-10 mx-auto text-muted-foreground"></i>
+                            <p class="text-sm text-muted-foreground">Drag & drop or click to upload</p>
+                            <button type="button" class="btn btn-outline btn-sm" @click="$refs.photoInput.click()">
+                                Choose Photo
+                            </button>
+                        </div>
+                        <div x-show="preview" class="space-y-2">
+                            <img :src="preview" class="w-32 h-32 mx-auto object-cover rounded-full">
+                            <button type="button" class="btn btn-outline btn-sm" @click="$refs.photoInput.click()">
+                                Change Photo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {% for field in text_fields %}
+                <div>
+                    <label class="block text-sm font-medium mb-2">
+                        {{ field.label }}
+                        {% if field.is_required %}<span class="text-red-500">*</span>{% endif %}
+                    </label>
+                    <input type="text" name="field_{{ field.id }}"
+                           placeholder="{{ field.placeholder }}"
+                           class="input w-full"
+                           {% if field.is_required %}required{% endif %}>
+                </div>
+                {% endfor %}
+
+                <div class="pt-4">
+                    <button type="submit" class="btn btn-primary w-full" id="generate-btn">
+                        <i data-lucide="image" class="w-4 h-4 mr-2"></i>
+                        Generate My Flyer
+                    </button>
+                </div>
+            </form>
+
+            <div id="result" class="hidden mt-6">
+                <div class="border border-border rounded-lg overflow-hidden">
+                    <img id="flyer-result" class="w-full" alt="Your flyer">
+                </div>
+                <div class="flex gap-3 mt-4">
+                    <a id="download-btn" download="{{ event.slug }}-flyer.jpg" class="btn btn-primary flex-1">
+                        <i data-lucide="download" class="w-4 h-4 mr-2"></i>
+                        Download
+                    </a>
+                    <button type="button" onclick="shareFlyer()" class="btn btn-outline flex-1">
+                        <i data-lucide="share-2" class="w-4 h-4 mr-2"></i>
+                        Share
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-6">
+            <a href="{% url 'events:public_detail' org_slug=event.organization.slug event_slug=event.slug %}" class="text-sm text-muted-foreground hover:text-foreground">
+                <i data-lucide="arrow-left" class="w-4 h-4 inline"></i>
+                Back to event
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('flyer-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('generate-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 mr-2 animate-spin"></i>Generating...';
+
+    const formData = new FormData(this);
+
+    try {
+        const response = await fetch(window.location.href, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            document.getElementById('flyer-result').src = url;
+            document.getElementById('download-btn').href = url;
+            document.getElementById('result').classList.remove('hidden');
+        } else {
+            alert('Error generating flyer. Please try again.');
+        }
+    } catch (error) {
+        alert('Error generating flyer. Please try again.');
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<i data-lucide="image" class="w-4 h-4 mr-2"></i>Generate My Flyer';
+    if (window.lucide) lucide.createIcons();
+});
+
+async function shareFlyer() {
+    const img = document.getElementById('flyer-result');
+    if (navigator.share) {
+        try {
+            const response = await fetch(img.src);
+            const blob = await response.blob();
+            const file = new File([blob], '{{ event.slug }}-flyer.jpg', { type: 'image/jpeg' });
+            await navigator.share({
+                title: 'I Will Be There - {{ event.title }}',
+                text: "I'm attending {{ event.title }}!",
+                files: [file]
+            });
+        } catch (err) {
+            copyEventLink();
+        }
+    } else {
+        copyEventLink();
+    }
+}
+
+function copyEventLink() {
+    const url = '{{ request.build_absolute_uri }}';
+    navigator.clipboard.writeText(url);
+    alert('Link copied to clipboard!');
+}
+</script>
+{% endblock %}

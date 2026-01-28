@@ -1,0 +1,214 @@
+{% extends "layouts/dashboard.html" %}
+{% load slippers %}
+
+{% block title %}Create Coupon - Reckot{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+{% endblock %}
+
+{% block header_title %}
+<div>
+    <h1 class="text-lg font-semibold">Create Coupon</h1>
+    <p class="text-sm text-muted-foreground">Create a new discount code</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <form method="post" class="space-y-6" x-data="{
+        assignmentType: 'PUBLIC',
+        selectedEvent: '',
+        eventDates: {
+            {% for event in events %}
+            '{{ event.id }}': '{{ event.end_at|date:'Y-m-d H:i' }}',
+            {% endfor %}
+        },
+        getMaxDate() {
+            if (this.selectedEvent && this.eventDates[this.selectedEvent]) {
+                return this.eventDates[this.selectedEvent];
+            }
+            return null;
+        }
+    }">
+        {% csrf_token %}
+
+        {% if error %}
+        <div class="rounded-lg bg-red-500/10 border border-red-500/20 p-4 text-sm text-red-500">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <div class="card p-6 space-y-4">
+            <h2 class="text-lg font-semibold">Basic Information</h2>
+
+            <div>
+                <label for="organization" class="block text-sm font-medium mb-2">Organization</label>
+                <select name="organization" id="organization" required class="input">
+                    <option value="">Select organization</option>
+                    {% for org in organizations %}
+                    <option value="{{ org.id }}">{{ org.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="event" class="block text-sm font-medium mb-2">Event (optional)</label>
+                <select name="event" id="event" class="input" x-model="selectedEvent" @change="updateValidUntilMax()">
+                    <option value="">All events in organization</option>
+                    {% for event in events %}
+                    <option value="{{ event.id }}" data-end="{{ event.end_at|date:'Y-m-d H:i' }}">{{ event.title }} ({{ event.organization.name }})</option>
+                    {% endfor %}
+                </select>
+                <p class="text-xs text-muted-foreground mt-1">Leave empty to apply to all events in the organization</p>
+            </div>
+
+            <div>
+                <label for="code" class="block text-sm font-medium mb-2">Coupon Code</label>
+                <input type="text" name="code" id="code" placeholder="SAVE20 (leave empty to auto-generate)" class="input font-mono uppercase">
+                <p class="text-xs text-muted-foreground mt-1">Letters and numbers only, will be auto-generated if empty</p>
+            </div>
+
+            <div>
+                <label for="description" class="block text-sm font-medium mb-2">Description (optional)</label>
+                <input type="text" name="description" id="description" placeholder="Early bird discount" class="input">
+            </div>
+        </div>
+
+        <div class="card p-6 space-y-4">
+            <h2 class="text-lg font-semibold">Discount Settings</h2>
+
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                    <label for="discount_type" class="block text-sm font-medium mb-2">Discount Type</label>
+                    <select name="discount_type" id="discount_type" required class="input">
+                        <option value="PERCENTAGE">Percentage</option>
+                        <option value="FIXED">Fixed Amount</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="discount_value" class="block text-sm font-medium mb-2">Discount Value</label>
+                    <input type="number" name="discount_value" id="discount_value" required min="0" step="0.01" placeholder="10" class="input">
+                </div>
+            </div>
+
+            <div>
+                <label for="max_uses" class="block text-sm font-medium mb-2">Maximum Uses</label>
+                <input type="number" name="max_uses" id="max_uses" min="0" value="1" placeholder="1" class="input">
+                <p class="text-xs text-muted-foreground mt-1">Set to 0 for unlimited uses</p>
+            </div>
+        </div>
+
+        <div class="card p-6 space-y-4">
+            <h2 class="text-lg font-semibold">Assignment</h2>
+
+            <div>
+                <label for="assignment_type" class="block text-sm font-medium mb-2">Who can use this coupon?</label>
+                <select name="assignment_type" id="assignment_type" required class="input" x-model="assignmentType">
+                    <option value="PUBLIC">Anyone (Public)</option>
+                    <option value="INDIVIDUAL">Specific person</option>
+                    <option value="GROUP">Group of people</option>
+                </select>
+            </div>
+
+            <div x-show="assignmentType === 'INDIVIDUAL'" x-cloak>
+                <label for="assigned_email" class="block text-sm font-medium mb-2">Assigned Email</label>
+                <input type="email" name="assigned_email" id="assigned_email" placeholder="user@example.com" class="input">
+                <p class="text-xs text-muted-foreground mt-1">Only this email address can use the coupon</p>
+            </div>
+
+            <div x-show="assignmentType === 'GROUP'" x-cloak>
+                <label for="assigned_emails" class="block text-sm font-medium mb-2">Assigned Emails</label>
+                <textarea name="assigned_emails" id="assigned_emails" rows="3" placeholder="user1@example.com, user2@example.com, user3@example.com" class="input"></textarea>
+                <p class="text-xs text-muted-foreground mt-1">Comma-separated list of email addresses</p>
+            </div>
+        </div>
+
+        <div class="card p-6 space-y-4">
+            <h2 class="text-lg font-semibold">Validity Period</h2>
+            <p class="text-sm text-muted-foreground -mt-2">Both fields are optional. Defaults to starting today with no end date.</p>
+
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                    <label for="valid_from" class="block text-sm font-medium mb-2">Valid From</label>
+                    <input type="text" name="valid_from" id="valid_from" placeholder="Starts today by default" class="input flatpickr-datetime">
+                </div>
+                <div>
+                    <label for="valid_until" class="block text-sm font-medium mb-2">Valid Until</label>
+                    <input type="text" name="valid_until" id="valid_until" placeholder="No end date" class="input flatpickr-datetime-until">
+                    <p class="text-xs text-muted-foreground mt-1" x-show="selectedEvent" x-cloak>Cannot be after the event end date</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <button type="submit" class="btn btn-primary btn-md">
+                Create Coupon
+                <i data-lucide="check" class="w-4 h-4"></i>
+            </button>
+            <a href="{% url 'events:coupons' %}" class="btn btn-outline btn-md">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const eventDates = {
+        {% for event in events %}
+        '{{ event.id }}': '{{ event.end_at|date:"Y-m-d H:i" }}',
+        {% endfor %}
+    };
+
+    const commonConfig = {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        altInput: true,
+        altFormat: "F j, Y at h:i K",
+        time_24hr: false,
+        minuteIncrement: 15,
+    };
+
+    const validFromPicker = flatpickr("#valid_from", {
+        ...commonConfig,
+        defaultDate: new Date(),
+        onChange: function(selectedDates) {
+            if (selectedDates[0]) {
+                validUntilPicker.set('minDate', selectedDates[0]);
+            }
+        }
+    });
+
+    const validUntilPicker = flatpickr("#valid_until", {
+        ...commonConfig,
+        minDate: new Date(),
+    });
+
+    const eventSelect = document.getElementById('event');
+    window.updateValidUntilMax = function() {
+        const selectedEventId = eventSelect.value;
+        if (selectedEventId && eventDates[selectedEventId]) {
+            const eventEndDate = new Date(eventDates[selectedEventId]);
+            validUntilPicker.set('maxDate', eventEndDate);
+        } else {
+            validUntilPicker.set('maxDate', null);
+        }
+    };
+
+    eventSelect.addEventListener('change', updateValidUntilMax);
+
+    const form = document.querySelector('form');
+    if (form && window.FormPersistence) {
+        const formId = 'coupon_create';
+        FormPersistence.restore(formId, form);
+        const persistence = FormPersistence.autoSave(formId, form);
+        form.addEventListener('submit', function() {
+            FormPersistence.clear(formId);
+            persistence.stop();
+        });
+    }
+});
+</script>
+{% endblock %}

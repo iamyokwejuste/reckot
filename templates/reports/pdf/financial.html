@@ -1,0 +1,78 @@
+{% extends "reports/pdf/base.html" %}
+
+{% block content %}
+<h1>Financial Summary Report</h1>
+
+<div class="summary-section">
+    <div class="stat-card">
+        <div class="stat-value">{{ total_revenue|floatformat:0 }} XAF</div>
+        <div class="stat-label">Total Revenue</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ total_transactions }}</div>
+        <div class="stat-label">Transactions</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ tickets_sold }}</div>
+        <div class="stat-label">Tickets Sold</div>
+    </div>
+</div>
+
+<h2>Revenue by Ticket Type</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Ticket Type</th>
+            <th class="text-right">Price (XAF)</th>
+            <th class="text-right">Quantity Sold</th>
+            <th class="text-right">Revenue (XAF)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in ticket_breakdown %}
+        <tr>
+            <td>{{ item.ticket_type__name }}</td>
+            <td class="text-right">{{ item.ticket_type__price|floatformat:0 }}</td>
+            <td class="text-right">{{ item.count }}</td>
+            <td class="text-right">{{ item.revenue|floatformat:0 }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4" class="text-muted">No ticket sales recorded</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="3" class="font-bold">Total</td>
+            <td class="text-right font-bold">{{ total_revenue|floatformat:0 }} XAF</td>
+        </tr>
+    </tfoot>
+</table>
+
+{% if payment_methods %}
+<h2>Revenue by Payment Method</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Payment Method</th>
+            <th class="text-right">Transactions</th>
+            <th class="text-right">Amount (XAF)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for method in payment_methods %}
+        <tr>
+            <td>{{ method.method|default:"Unknown" }}</td>
+            <td class="text-right">{{ method.count }}</td>
+            <td class="text-right">{{ method.total|floatformat:0 }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+<div class="summary-section text-muted" style="margin-top: 40px; font-size: 10px;">
+    <p>This report was generated automatically by Reckot. Data is accurate as of {{ generated_at|date:"F j, Y" }} at {{ generated_at|time:"g:i A" }}.</p>
+</div>
+{% endblock %}

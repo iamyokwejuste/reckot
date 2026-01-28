@@ -1,6 +1,6 @@
 from django.urls import reverse
 from django.contrib.sites.models import Site
-from .models import Invitation, Organization, Membership, Role
+from apps.orgs.models import Invitation, Organization, Membership, Role
 
 def send_invitation(organization: Organization, invited_by, email: str, role: Role):
     invitation = Invitation.objects.create(

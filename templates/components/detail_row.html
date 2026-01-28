@@ -1,0 +1,6 @@
+{% with border=border|default:True %}
+<div class="flex justify-between py-2 {% if border %}border-b border-border{% endif %} {{ class }}" {{ attrs }}>
+    <dt class="text-muted-foreground">{{ label }}</dt>
+    <dd class="font-medium">{{ value }}</dd>
+</div>
+{% endwith %}

@@ -1,0 +1,124 @@
+{% extends "layouts/dashboard.html" %}
+{% load slippers %}
+
+{% block title %}Coupons - Reckot{% endblock %}
+
+{% block header_title %}
+<div>
+    <h1 class="text-lg font-semibold">Coupon Codes</h1>
+    <p class="text-sm text-muted-foreground">Manage discount codes for your events</p>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'events:coupon_create' %}" class="btn btn-primary btn-sm">
+    <i data-lucide="plus" class="w-4 h-4"></i>
+    Create Coupon
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="grid gap-4 sm:grid-cols-2">
+        <div class="stat-card">
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-muted-foreground">Total Coupons</p>
+                <i data-lucide="tag" class="h-4 w-4 text-muted-foreground"></i>
+            </div>
+            <p class="text-2xl font-bold mt-2">{{ stats.total }}</p>
+        </div>
+        <div class="stat-card">
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-muted-foreground">Active</p>
+                <i data-lucide="check-circle" class="h-4 w-4 text-emerald-500"></i>
+            </div>
+            <p class="text-2xl font-bold mt-2 text-emerald-500">{{ stats.active }}</p>
+        </div>
+    </div>
+
+    <div class="card">
+        {% if coupons %}
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-border">
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Code</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Organization</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Event</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Discount</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Assignment</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Usage</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Status</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border">
+                    {% for coupon in coupons %}
+                    <tr class="hover:bg-muted/50 transition-colors">
+                        <td class="p-4">
+                            <code class="text-sm bg-muted px-2 py-1 rounded font-mono">{{ coupon.code }}</code>
+                        </td>
+                        <td class="p-4">
+                            <p class="text-sm">{{ coupon.organization.name }}</p>
+                        </td>
+                        <td class="p-4">
+                            {% if coupon.event %}
+                            <p class="text-sm">{{ coupon.event.title }}</p>
+                            {% else %}
+                            <span class="text-sm text-muted-foreground">All events</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-4">
+                            {% if coupon.discount_type == 'PERCENTAGE' %}
+                            <span class="text-sm font-medium">{{ coupon.discount_value|floatformat:0 }}%</span>
+                            {% else %}
+                            <span class="text-sm font-medium">{{ coupon.discount_value|floatformat:0 }} XAF</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-4">
+                            {% if coupon.assignment_type == 'PUBLIC' %}
+                            <span class="badge badge-default">Public</span>
+                            {% elif coupon.assignment_type == 'INDIVIDUAL' %}
+                            <span class="badge badge-info">Individual</span>
+                            {% else %}
+                            <span class="badge badge-info">Group</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-4">
+                            <p class="text-sm">{{ coupon.use_count }} / {% if coupon.max_uses > 0 %}{{ coupon.max_uses }}{% else %}Unlimited{% endif %}</p>
+                        </td>
+                        <td class="p-4">
+                            {% if coupon.is_active and coupon.is_valid %}
+                            <span class="badge badge-success">Active</span>
+                            {% elif coupon.is_active %}
+                            <span class="badge badge-warning">Exhausted</span>
+                            {% else %}
+                            <span class="badge">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-4">
+                            <a href="{% url 'events:coupon_detail' coupon_id=coupon.id %}" class="text-sm text-foreground hover:underline">
+                                View
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-12">
+            <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
+                <i data-lucide="tag" class="h-8 w-8 text-muted-foreground"></i>
+            </div>
+            <h3 class="text-lg font-semibold mb-2">No coupons yet</h3>
+            <p class="text-muted-foreground mb-6">Create discount codes to offer special pricing for your events.</p>
+            <a href="{% url 'events:coupon_create' %}" class="btn btn-primary btn-md">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                Create Coupon
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

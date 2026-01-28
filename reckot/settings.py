@@ -36,6 +36,9 @@ INSTALLED_APPS = [
     'apps.payments',
     'apps.checkin',
     'apps.reports',
+    'apps.messaging',
+    'apps.widgets',
+    'apps.marketing',
 ]
 
 MIDDLEWARE = [
@@ -134,22 +137,20 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
 
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
+SOCIALACCOUNT_PROVIDERS = {}
+
+_google_client_id = os.getenv('GOOGLE_CLIENT_ID', '')
+_google_client_secret = os.getenv('GOOGLE_CLIENT_SECRET', '')
+if _google_client_id and _google_client_secret:
+    SOCIALACCOUNT_PROVIDERS['google'] = {
         'APPS': [{
-            'client_id': os.getenv('GOOGLE_CLIENT_ID', ''),
-            'secret': os.getenv('GOOGLE_CLIENT_SECRET', ''),
+            'client_id': _google_client_id,
+            'secret': _google_client_secret,
             'key': '',
         }],
-        'SCOPE': [
-            'profile',
-            'email',
-        ],
-        'AUTH_PARAMS': {
-            'access_type': 'online',
-        }
+        'SCOPE': ['profile', 'email'],
+        'AUTH_PARAMS': {'access_type': 'online'},
     }
-}
 
 ACCOUNT_FORMS = {
     'signup': 'apps.core.forms.CustomSignupForm',
@@ -158,6 +159,7 @@ ACCOUNT_FORMS = {
 ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 ACCOUNT_EMAIL_VERIFICATION = os.getenv('ACCOUNT_EMAIL_VERIFICATION', 'optional')
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 
 EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
 EMAIL_HOST = os.getenv('EMAIL_HOST', '')
@@ -166,3 +168,28 @@ EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() in ('true', '1', 'yes
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@reckot.com')
+
+PAYMENT_GATEWAYS = {
+    'PRIMARY': os.getenv('PAYMENT_PRIMARY_GATEWAY', 'CAMPAY'),
+    'FALLBACKS': os.getenv('PAYMENT_FALLBACK_GATEWAYS', 'PAWAPAY,FLUTTERWAVE').split(','),
+
+    'CREDENTIALS': {
+        'CAMPAY': {
+            'username': os.getenv('CAMPAY_USERNAME', ''),
+            'password': os.getenv('CAMPAY_PASSWORD', ''),
+            'is_production': os.getenv('CAMPAY_PRODUCTION', 'False').lower() in ('true', '1', 'yes'),
+        },
+        'PAWAPAY': {
+            'api_token': os.getenv('PAWAPAY_API_TOKEN', ''),
+            'is_production': os.getenv('PAWAPAY_PRODUCTION', 'False').lower() in ('true', '1', 'yes'),
+        },
+        'FLUTTERWAVE': {
+            'secret_key': os.getenv('FLUTTERWAVE_SECRET_KEY', ''),
+            'public_key': os.getenv('FLUTTERWAVE_PUBLIC_KEY', ''),
+            'encryption_key': os.getenv('FLUTTERWAVE_ENCRYPTION_KEY', ''),
+        },
+    },
+
+    'CALLBACK_BASE_URL': os.getenv('PAYMENT_CALLBACK_URL', 'https://reckot.com'),
+    'DEFAULT_CURRENCY': os.getenv('DEFAULT_CURRENCY', 'XAF'),
+}

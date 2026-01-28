@@ -1,0 +1,33 @@
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="card p-4">
+        <div class="text-sm text-muted-foreground">Total Tickets</div>
+        <div class="text-2xl font-bold">{{ total_tickets }}</div>
+    </div>
+    <div class="card p-4">
+        <div class="text-sm text-muted-foreground">Checked In</div>
+        <div class="text-2xl font-bold">{{ checked_in }}</div>
+        <div class="text-sm text-muted-foreground">{{ check_in_rate|floatformat:1 }}%</div>
+    </div>
+    <div class="card p-4">
+        <div class="text-sm text-muted-foreground">Revenue</div>
+        <div class="text-2xl font-bold">{{ total_revenue|floatformat:0 }} XAF</div>
+    </div>
+    <div class="card p-4">
+        <div class="text-sm text-muted-foreground">Pending</div>
+        <div class="text-2xl font-bold">{{ pending_payments }}</div>
+    </div>
+</div>
+
+{% if ticket_breakdown %}
+<div class="mt-6">
+    <h4 class="font-medium mb-3">Ticket Breakdown</h4>
+    <div class="space-y-2">
+        {% for item in ticket_breakdown %}
+        <div class="flex justify-between items-center">
+            <span>{{ item.ticket_type__name }}</span>
+            <span class="font-medium">{{ item.count }}</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}

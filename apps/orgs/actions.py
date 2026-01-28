@@ -1,12 +1,416 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .services import accept_invitation
+from django.contrib import messages
+from django.db.models import Count, Sum
+from django.http import JsonResponse, Http404
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.conf import settings
+from apps.orgs.models import Organization, Membership, Invitation, MemberRole
+from apps.payments.models import Payment
+from apps.core.models import User
+
+
+class OrgPermissionMixin:
+    """Mixin to check organization permissions"""
+    required_permission = None
+
+    def get_organization(self, slug):
+        return get_object_or_404(Organization, slug=slug)
+
+    def check_permission(self, request, organization):
+        if self.required_permission:
+            if not organization.user_can(request.user, self.required_permission):
+                return False
+        return organization.members.filter(id=request.user.id).exists()
+
+    def dispatch(self, request, *args, **kwargs):
+        slug = kwargs.get('slug')
+        if slug:
+            organization = self.get_organization(slug)
+            if not self.check_permission(request, organization):
+                messages.error(request, "You don't have permission to perform this action.")
+                return redirect('orgs:list')
+            self.organization = organization
+        return super().dispatch(request, *args, **kwargs)
+
+
+class OrganizationListView(LoginRequiredMixin, View):
+    def get(self, request):
+        organizations = Organization.objects.filter(
+            members=request.user
+        ).annotate(
+            event_count=Count('events'),
+            member_count=Count('members', distinct=True)
+        ).order_by('name')
+
+        return render(request, 'orgs/list.html', {
+            'organizations': organizations,
+        })
+
+
+class OrganizationCreateView(LoginRequiredMixin, View):
+    def get(self, request):
+        return render(request, 'orgs/create.html')
+
+    def post(self, request):
+        name = request.POST.get('name', '').strip()
+        description = request.POST.get('description', '').strip()
+        website = request.POST.get('website', '').strip()
+
+        if not name:
+            return render(request, 'orgs/create.html', {
+                'error': 'Organization name is required.',
+            })
+
+        organization = Organization.objects.create(
+            name=name,
+            description=description,
+            website=website,
+            owner=request.user,
+        )
+
+        if request.FILES.get('logo'):
+            organization.logo = request.FILES['logo']
+            organization.save()
+
+        Membership.objects.create(
+            organization=organization,
+            user=request.user,
+            role=MemberRole.OWNER,
+        )
+
+        messages.success(request, f'Organization "{name}" created successfully!')
+        return redirect('orgs:detail', slug=organization.slug)
+
+
+class OrganizationDetailView(LoginRequiredMixin, OrgPermissionMixin, View):
+    def get(self, request, slug):
+        organization = self.organization
+        events = organization.events.all().order_by('-start_at')[:10]
+        memberships = Membership.objects.filter(
+            organization=organization
+        ).select_related('user').order_by('role', 'created_at')
+
+        total_revenue = Payment.objects.filter(
+            booking__event__organization=organization,
+            status=Payment.Status.CONFIRMED
+        ).aggregate(total=Sum('amount'))['total'] or 0
+
+        user_membership = Membership.objects.filter(
+            organization=organization,
+            user=request.user
+        ).first()
+
+        can_manage_members = organization.user_can(request.user, 'manage_members')
+        can_invite = organization.user_can(request.user, 'invite_members')
+
+        return render(request, 'orgs/detail.html', {
+            'organization': organization,
+            'events': events,
+            'memberships': memberships,
+            'total_revenue': total_revenue,
+            'user_membership': user_membership,
+            'can_manage_members': can_manage_members,
+            'can_invite': can_invite,
+        })
+
+
+class OrganizationMembersView(LoginRequiredMixin, OrgPermissionMixin, View):
+    required_permission = 'manage_members'
+
+    def get(self, request, slug):
+        organization = self.organization
+        memberships = Membership.objects.filter(
+            organization=organization
+        ).select_related('user', 'invited_by').order_by('role', 'created_at')
+
+        pending_invitations = Invitation.objects.filter(
+            organization=organization,
+            status=Invitation.Status.PENDING
+        ).select_related('invited_by').order_by('-created_at')
+
+        return render(request, 'orgs/members.html', {
+            'organization': organization,
+            'memberships': memberships,
+            'pending_invitations': pending_invitations,
+            'roles': MemberRole.choices,
+        })
+
+
+class InviteMemberView(LoginRequiredMixin, OrgPermissionMixin, View):
+    required_permission = 'invite_members'
+
+    def get(self, request, slug):
+        organization = self.organization
+        return render(request, 'orgs/invite_member.html', {
+            'organization': organization,
+            'roles': [r for r in MemberRole.choices if r[0] != MemberRole.OWNER],
+        })
+
+    def post(self, request, slug):
+        organization = self.organization
+        email = request.POST.get('email', '').strip().lower()
+        role = request.POST.get('role', MemberRole.MEMBER)
+        message_text = request.POST.get('message', '').strip()
+
+        if not email:
+            messages.error(request, 'Email is required.')
+            return redirect('orgs:invite_member', slug=slug)
+
+        if role == MemberRole.OWNER:
+            messages.error(request, 'Cannot invite someone as Owner.')
+            return redirect('orgs:invite_member', slug=slug)
+
+        existing_user = User.objects.filter(email=email).first()
+        if existing_user and organization.members.filter(id=existing_user.id).exists():
+            messages.warning(request, f'{email} is already a member of this organization.')
+            return redirect('orgs:members', slug=slug)
+
+        existing_invitation = Invitation.objects.filter(
+            organization=organization,
+            email=email,
+            status=Invitation.Status.PENDING
+        ).first()
+
+        if existing_invitation:
+            messages.warning(request, f'An invitation has already been sent to {email}.')
+            return redirect('orgs:members', slug=slug)
+
+        invitation = Invitation.objects.create(
+            organization=organization,
+            email=email,
+            role=role,
+            message=message_text,
+            invited_by=request.user,
+        )
+
+        # Send invitation email
+        try:
+            invite_url = request.build_absolute_uri(f'/orgs/invite/{invitation.token}/')
+            subject = f"You're invited to join {organization.name} on Reckot"
+            html_message = render_to_string('emails/invitation.html', {
+                'organization': organization,
+                'invitation': invitation,
+                'invite_url': invite_url,
+                'inviter': request.user,
+            })
+            send_mail(
+                subject,
+                f"You've been invited to join {organization.name}. Visit: {invite_url}",
+                settings.DEFAULT_FROM_EMAIL,
+                [email],
+                html_message=html_message,
+                fail_silently=True,
+            )
+        except Exception:
+            pass
+
+        messages.success(request, f'Invitation sent to {email}.')
+        return redirect('orgs:members', slug=slug)
+
+
+class UpdateMemberRoleView(LoginRequiredMixin, OrgPermissionMixin, View):
+    required_permission = 'manage_members'
+
+    def post(self, request, slug, user_id):
+        organization = self.organization
+        new_role = request.POST.get('role')
+
+        if new_role not in [r[0] for r in MemberRole.choices]:
+            messages.error(request, 'Invalid role.')
+            return redirect('orgs:members', slug=slug)
+
+        membership = get_object_or_404(
+            Membership,
+            organization=organization,
+            user_id=user_id
+        )
+
+        if membership.role == MemberRole.OWNER:
+            messages.error(request, 'Cannot change the role of the organization owner.')
+            return redirect('orgs:members', slug=slug)
+
+        if new_role == MemberRole.OWNER:
+            messages.error(request, 'Cannot assign Owner role. Transfer ownership instead.')
+            return redirect('orgs:members', slug=slug)
+
+        membership.role = new_role
+        membership.save()
+
+        messages.success(request, f"Updated {membership.user.email}'s role to {membership.get_role_display()}.")
+        return redirect('orgs:members', slug=slug)
+
+
+class RemoveMemberView(LoginRequiredMixin, OrgPermissionMixin, View):
+    required_permission = 'remove_members'
+
+    def post(self, request, slug, user_id):
+        organization = self.organization
+
+        membership = get_object_or_404(
+            Membership,
+            organization=organization,
+            user_id=user_id
+        )
+
+        if membership.role == MemberRole.OWNER:
+            messages.error(request, 'Cannot remove the organization owner.')
+            return redirect('orgs:members', slug=slug)
+
+        if membership.user == request.user:
+            messages.error(request, 'You cannot remove yourself. Leave the organization instead.')
+            return redirect('orgs:members', slug=slug)
+
+        user_email = membership.user.email
+        membership.delete()
+
+        messages.success(request, f'Removed {user_email} from the organization.')
+        return redirect('orgs:members', slug=slug)
+
+
+class LeaveOrganizationView(LoginRequiredMixin, View):
+    def post(self, request, slug):
+        organization = get_object_or_404(Organization, slug=slug)
+
+        if organization.owner == request.user:
+            messages.error(request, 'As the owner, you cannot leave the organization. Transfer ownership first.')
+            return redirect('orgs:detail', slug=slug)
+
+        membership = Membership.objects.filter(
+            organization=organization,
+            user=request.user
+        ).first()
+
+        if membership:
+            membership.delete()
+            messages.success(request, f'You have left {organization.name}.')
+
+        return redirect('orgs:list')
+
+
+class CancelInvitationView(LoginRequiredMixin, OrgPermissionMixin, View):
+    required_permission = 'invite_members'
+
+    def post(self, request, slug, invitation_id):
+        organization = self.organization
+
+        invitation = get_object_or_404(
+            Invitation,
+            id=invitation_id,
+            organization=organization,
+            status=Invitation.Status.PENDING
+        )
+
+        invitation.cancel()
+        messages.success(request, f'Cancelled invitation to {invitation.email}.')
+        return redirect('orgs:members', slug=slug)
+
+
+class ResendInvitationView(LoginRequiredMixin, OrgPermissionMixin, View):
+    required_permission = 'invite_members'
+
+    def post(self, request, slug, invitation_id):
+        organization = self.organization
+
+        invitation = get_object_or_404(
+            Invitation,
+            id=invitation_id,
+            organization=organization,
+            status=Invitation.Status.PENDING
+        )
+
+        try:
+            invite_url = request.build_absolute_uri(f'/orgs/invite/{invitation.token}/')
+            subject = f"Reminder: You're invited to join {organization.name} on Reckot"
+            html_message = render_to_string('emails/invitation.html', {
+                'organization': organization,
+                'invitation': invitation,
+                'invite_url': invite_url,
+                'inviter': request.user,
+            })
+            send_mail(
+                subject,
+                f"Reminder: You've been invited to join {organization.name}. Visit: {invite_url}",
+                settings.DEFAULT_FROM_EMAIL,
+                [invitation.email],
+                html_message=html_message,
+                fail_silently=True,
+            )
+            messages.success(request, f'Invitation resent to {invitation.email}.')
+        except Exception:
+            messages.error(request, 'Failed to resend invitation.')
+
+        return redirect('orgs:members', slug=slug)
+
 
 class AcceptInvitationView(LoginRequiredMixin, View):
     def get(self, request, token):
-        success, message = accept_invitation(token, request.user)
-        if success:
-            return redirect('events:list')
+        invitation = get_object_or_404(Invitation, token=token)
+
+        if invitation.status != Invitation.Status.PENDING:
+            return render(request, 'orgs/invitation_error.html', {
+                'message': 'This invitation has already been used or cancelled.'
+            })
+
+        if invitation.is_expired:
+            invitation.status = Invitation.Status.EXPIRED
+            invitation.save()
+            return render(request, 'orgs/invitation_error.html', {
+                'message': 'This invitation has expired.'
+            })
+
+        return render(request, 'orgs/accept_invitation.html', {
+            'invitation': invitation,
+        })
+
+    def post(self, request, token):
+        invitation = get_object_or_404(Invitation, token=token)
+
+        if not invitation.is_valid:
+            return render(request, 'orgs/invitation_error.html', {
+                'message': 'This invitation is no longer valid.'
+            })
+
+        membership = invitation.accept(request.user)
+
+        if membership:
+            messages.success(request, f'Welcome to {invitation.organization.name}!')
+            return redirect('orgs:detail', slug=invitation.organization.slug)
         else:
-            return render(request, 'orgs/invitation_error.html', {'message': message})
+            return render(request, 'orgs/invitation_error.html', {
+                'message': 'Failed to accept invitation.'
+            })
+
+
+class TransferOwnershipView(LoginRequiredMixin, View):
+    def post(self, request, slug):
+        organization = get_object_or_404(Organization, slug=slug, owner=request.user)
+        new_owner_id = request.POST.get('new_owner_id')
+
+        if not new_owner_id:
+            messages.error(request, 'Please select a new owner.')
+            return redirect('orgs:members', slug=slug)
+
+        new_owner_membership = get_object_or_404(
+            Membership,
+            organization=organization,
+            user_id=new_owner_id
+        )
+
+        old_owner_membership = Membership.objects.get(
+            organization=organization,
+            user=request.user
+        )
+        old_owner_membership.role = MemberRole.ADMIN
+        old_owner_membership.save()
+
+        new_owner_membership.role = MemberRole.OWNER
+        new_owner_membership.save()
+
+        organization.owner = new_owner_membership.user
+        organization.save()
+
+        messages.success(request, f'Ownership transferred to {new_owner_membership.user.email}.')
+        return redirect('orgs:detail', slug=slug)

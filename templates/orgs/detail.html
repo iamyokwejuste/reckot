@@ -1,0 +1,159 @@
+{% extends "layouts/dashboard.html" %}
+{% load slippers %}
+
+{% block title %}{{ organization.name }} - Reckot{% endblock %}
+
+{% block header_title %}
+<div class="flex items-center gap-4">
+    {% if organization.logo %}
+    <img src="{{ organization.logo.url }}" alt="{{ organization.name }}" class="h-10 w-10 rounded-lg object-cover">
+    {% else %}
+    <div class="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
+        <i data-lucide="building-2" class="h-5 w-5 text-muted-foreground"></i>
+    </div>
+    {% endif %}
+    <div>
+        <h1 class="text-lg font-semibold">{{ organization.name }}</h1>
+        <p class="text-sm text-muted-foreground">{{ memberships.count }} member{{ memberships.count|pluralize }}</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'events:create' %}" class="btn btn-primary btn-sm">
+    <i data-lucide="plus" class="w-4 h-4"></i>
+    New Event
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="grid gap-4 sm:grid-cols-3">
+        <div class="stat-card">
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-muted-foreground">Total Events</p>
+                <i data-lucide="calendar" class="h-4 w-4 text-muted-foreground"></i>
+            </div>
+            <p class="text-2xl font-bold mt-2">{{ events|length }}</p>
+        </div>
+        <div class="stat-card">
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-muted-foreground">Members</p>
+                <i data-lucide="users" class="h-4 w-4 text-muted-foreground"></i>
+            </div>
+            <p class="text-2xl font-bold mt-2">{{ memberships.count }}</p>
+        </div>
+        <div class="stat-card">
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-muted-foreground">Total Revenue</p>
+                <i data-lucide="banknote" class="h-4 w-4 text-emerald-500"></i>
+            </div>
+            <p class="text-2xl font-bold mt-2 text-emerald-500">{{ total_revenue|floatformat:0 }} XAF</p>
+        </div>
+    </div>
+
+    {% if organization.description %}
+    <div class="card p-6">
+        <h2 class="font-semibold mb-2">About</h2>
+        <p class="text-muted-foreground">{{ organization.description }}</p>
+        {% if organization.website %}
+        <a href="{{ organization.website }}" target="_blank" class="inline-flex items-center gap-1 text-sm text-primary hover:underline mt-3">
+            <i data-lucide="external-link" class="h-4 w-4"></i>
+            {{ organization.website }}
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="grid gap-6 lg:grid-cols-2">
+        <div class="card">
+            <div class="p-6 border-b border-border flex items-center justify-between">
+                <h2 class="font-semibold">Recent Events</h2>
+                <a href="{% url 'events:list' %}" class="text-sm text-primary hover:underline">View all</a>
+            </div>
+            {% if events %}
+            <div class="divide-y divide-border">
+                {% for event in events %}
+                <a href="{% url 'events:detail' org_slug=organization.slug event_slug=event.slug %}"
+                   class="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors">
+                    <div class="h-12 w-12 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                        <i data-lucide="calendar" class="h-6 w-6 text-muted-foreground"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-medium truncate">{{ event.title }}</p>
+                        <p class="text-sm text-muted-foreground">{{ event.start_at|date:"M d, Y" }}</p>
+                    </div>
+                    {% if event.state == 'PUBLISHED' %}
+                    <span class="badge badge-success">Published</span>
+                    {% elif event.state == 'DRAFT' %}
+                    <span class="badge">Draft</span>
+                    {% endif %}
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="p-6 text-center">
+                <p class="text-muted-foreground">No events yet</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <div class="p-6 border-b border-border flex items-center justify-between">
+                <h2 class="font-semibold">Team Members</h2>
+                <div class="flex items-center gap-2">
+                    {% if can_invite %}
+                    <a href="{% url 'orgs:invite_member' organization.slug %}" class="btn btn-outline btn-sm">
+                        <i data-lucide="user-plus" class="w-4 h-4"></i>
+                        Invite
+                    </a>
+                    {% endif %}
+                    {% if can_manage_members %}
+                    <a href="{% url 'orgs:members' organization.slug %}" class="text-sm text-primary hover:underline">Manage team</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="divide-y divide-border">
+                {% for membership in memberships|slice:":5" %}
+                <div class="flex items-center gap-4 p-4">
+                    <div class="h-10 w-10 rounded-full bg-muted flex items-center justify-center shrink-0">
+                        <span class="text-sm font-medium">{{ membership.user.email|slice:":1"|upper }}</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-medium truncate">
+                            {{ membership.user.get_full_name|default:membership.user.email }}
+                            {% if membership.user == request.user %}
+                            <span class="text-xs text-muted-foreground">(you)</span>
+                            {% endif %}
+                        </p>
+                        <p class="text-sm text-muted-foreground">{{ membership.user.email }}</p>
+                    </div>
+                    {% if membership.role == 'OWNER' %}
+                    <span class="badge badge-default">Owner</span>
+                    {% elif membership.role == 'ADMIN' %}
+                    <span class="badge badge-secondary">Admin</span>
+                    {% elif membership.role == 'MANAGER' %}
+                    <span class="badge">Manager</span>
+                    {% elif membership.role == 'MEMBER' %}
+                    <span class="badge">Member</span>
+                    {% else %}
+                    <span class="badge">Viewer</span>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <div class="p-6 text-center">
+                    <p class="text-muted-foreground">No members yet</p>
+                </div>
+                {% endfor %}
+                {% if memberships.count > 5 %}
+                <div class="p-4 text-center">
+                    <a href="{% url 'orgs:members' organization.slug %}" class="text-sm text-primary hover:underline">
+                        View all {{ memberships.count }} members
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

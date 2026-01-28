@@ -5,6 +5,42 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
+def send_email_task(
+    to_email: str,
+    subject: str,
+    template_name: str,
+    context: dict,
+    attachments: list = None,
+    inline_images: dict = None,
+):
+    from .services.notifications import NotificationService
+    try:
+        NotificationService.send_email(
+            to_email=to_email,
+            subject=subject,
+            template_name=template_name,
+            context=context or {},
+            attachments=attachments,
+            inline_images=inline_images,
+        )
+        logger.info(f"Email sent to {to_email}: {subject}")
+    except Exception as e:
+        logger.error(f"Failed to send email to {to_email}: {e}")
+
+
+def send_sms_task(phone_number: str, template_name: str, context: dict):
+    from .services.notifications import NotificationService
+    try:
+        NotificationService.send_sms(
+            phone_number=phone_number,
+            template_name=template_name,
+            context=context or {},
+        )
+        logger.info(f"SMS sent to {phone_number}")
+    except Exception as e:
+        logger.error(f"Failed to send SMS to {phone_number}: {e}")
+
+
 def send_otp_verification_task(user_id: int, otp_id: int):
     from .models import OTPVerification
     from .services.notifications import NotificationService

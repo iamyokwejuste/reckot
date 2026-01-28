@@ -44,7 +44,7 @@
                 <p class="text-sm text-muted-foreground mb-4">Export data for this event</p>
 
                 <form
-                    hx-post="{% url 'reports:generate' event.id %}"
+                    hx-post="{% url 'reports:generate' org_slug=event.organization.slug event_slug=event.slug %}"
                     hx-target="#export-result"
                     hx-swap="innerHTML"
                     class="space-y-4"
@@ -106,7 +106,7 @@
                             </p>
                         </div>
                         {% if export.file %}
-                        <a href="{% url 'reports:download' export.id %}">
+                        <a href="{% url 'reports:download' export.reference %}">
                             {% #button variant="outline" size="icon" %}
                                 <i data-lucide="download" class="h-4 w-4"></i>
                             {% /button %}

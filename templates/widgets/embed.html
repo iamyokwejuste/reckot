@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" class="{% if widget.theme == 'DARK' %}dark{% endif %}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ event.title }} - Tickets</title>
+    <link rel="stylesheet" href="/static/css/output.css">
+    <style>
+        body { margin: 0; padding: 16px; font-family: system-ui, sans-serif; }
+        {% if widget.theme == 'AUTO' %}
+        @media (prefers-color-scheme: dark) {
+            html { color-scheme: dark; }
+            body { background: #0a0a0a; color: #fafafa; }
+            .card { background: #171717; border-color: #262626; }
+        }
+        @media (prefers-color-scheme: light) {
+            body { background: #ffffff; color: #0a0a0a; }
+            .card { background: #ffffff; border-color: #e5e5e5; }
+        }
+        {% elif widget.theme == 'DARK' %}
+        body { background: #0a0a0a; color: #fafafa; }
+        .card { background: #171717; border-color: #262626; }
+        {% else %}
+        body { background: #ffffff; color: #0a0a0a; }
+        .card { background: #ffffff; border-color: #e5e5e5; }
+        {% endif %}
+        .card { border: 1px solid; border-radius: 8px; padding: 16px; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; padding: 10px 20px; border-radius: 6px; font-weight: 500; text-decoration: none; cursor: pointer; border: none; }
+        .btn-primary { background: {{ widget.button_color }}; color: #fff; }
+        .ticket-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #e5e5e5; }
+        .ticket-item:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2 style="margin: 0 0 8px 0; font-size: 1.25rem; font-weight: 600;">{{ event.title }}</h2>
+        <p style="margin: 0 0 16px 0; font-size: 0.875rem; opacity: 0.7;">
+            {{ event.start_at|date:"F j, Y" }} at {{ event.start_at|time:"g:i A" }}
+        </p>
+
+        {% if widget.show_description and event.description %}
+        <p style="margin: 0 0 16px 0; font-size: 0.875rem;">{{ event.description|truncatewords:30 }}</p>
+        {% endif %}
+
+        <div style="margin-bottom: 16px;">
+            {% for ticket_type in ticket_types %}
+            <div class="ticket-item">
+                <div>
+                    <div style="font-weight: 500;">{{ ticket_type.name }}</div>
+                    {% if ticket_type.description %}
+                    <div style="font-size: 0.75rem; opacity: 0.7;">{{ ticket_type.description|truncatewords:10 }}</div>
+                    {% endif %}
+                </div>
+                {% if widget.show_price %}
+                <div style="font-weight: 600;">{{ ticket_type.price }} XAF</div>
+                {% endif %}
+            </div>
+            {% empty %}
+            <p style="font-size: 0.875rem; opacity: 0.7;">No tickets available</p>
+            {% endfor %}
+        </div>
+
+        <a href="/events/{{ event.organization.slug }}/{{ event.slug }}/" target="_blank" class="btn btn-primary" style="width: 100%;">
+            {{ widget.button_text }}
+        </a>
+    </div>
+
+    <script>
+        function sendHeight() {
+            var height = document.body.scrollHeight;
+            parent.postMessage({ type: 'reckot-resize', height: height }, '*');
+        }
+        window.addEventListener('load', sendHeight);
+        window.addEventListener('resize', sendHeight);
+    </script>
+</body>
+</html>

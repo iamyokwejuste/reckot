@@ -5,10 +5,11 @@
 
 {% block content %}
 <div class="container py-8">
+    {% url 'events:list' as events_url %}
     {% #breadcrumb %}
         {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
         {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-        {% #breadcrumb_item href="{% url 'events:list' %}" %}Events{% /breadcrumb_item %}
+        {% #breadcrumb_item :href="events_url" %}Events{% /breadcrumb_item %}
         {% #breadcrumb_separator %}{% /breadcrumb_separator %}
         {% #breadcrumb_item %}{{ event.title }}{% /breadcrumb_item %}
     {% /breadcrumb %}
@@ -17,26 +18,30 @@
         <div>
             <div class="flex items-center gap-3">
                 <h1 class="text-3xl font-bold">{{ event.title }}</h1>
-                {% #status_pill variant="{% if event.state == 'PUBLISHED' %}success{% elif event.state == 'DRAFT' %}default{% else %}warning{% endif %}" dot=True %}
-                    {{ event.state }}
-                {% /status_pill %}
+                {% if event.state == 'PUBLISHED' %}
+                    {% #status_pill variant="success" dot=True %}{{ event.state }}{% /status_pill %}
+                {% elif event.state == 'DRAFT' %}
+                    {% #status_pill variant="default" dot=True %}{{ event.state }}{% /status_pill %}
+                {% else %}
+                    {% #status_pill variant="warning" dot=True %}{{ event.state }}{% /status_pill %}
+                {% endif %}
             </div>
             <p class="mt-1 text-muted-foreground">{{ event.organization.name }}</p>
         </div>
         <div class="flex flex-wrap gap-2">
-            <a href="{% url 'checkin:dashboard' event.id %}">
+            <a href="{% url 'checkin:dashboard' org_slug=event.organization.slug event_slug=event.slug %}">
                 {% #button variant="outline" %}
                     <i data-lucide="scan" class="mr-2 h-4 w-4"></i>
                     Check-in
                 {% /button %}
             </a>
-            <a href="{% url 'reports:dashboard' event.id %}">
+            <a href="{% url 'reports:dashboard' org_slug=event.organization.slug event_slug=event.slug %}">
                 {% #button variant="outline" %}
                     <i data-lucide="bar-chart-2" class="mr-2 h-4 w-4"></i>
                     Reports
                 {% /button %}
             </a>
-            <a href="{% url 'events:manage_ticket_types' event.id %}">
+            <a href="{% url 'events:manage_ticket_types' org_slug=event.organization.slug event_slug=event.slug %}">
                 {% #button variant="outline" %}
                     <i data-lucide="ticket" class="mr-2 h-4 w-4"></i>
                     Manage Tickets

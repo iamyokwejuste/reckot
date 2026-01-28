@@ -16,7 +16,7 @@
             <div class="flex items-center justify-between">
                 <span class="text-sm">{{ item.name }}</span>
                 <button
-                    hx-post="{% url 'checkin:collect_swag' checkin.id item.id %}"
+                    hx-post="{% url 'checkin:collect_swag' checkin_ref=checkin.reference item_id=item.id %}"
                     hx-target="closest div"
                     hx-swap="outerHTML"
                     class="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground hover:bg-secondary/80"

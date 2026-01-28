@@ -1,0 +1,130 @@
+{% extends 'layouts/dashboard.html' %}
+{% load slippers %}
+
+{% block title %}{{ event.title }} - Dashboard - Reckot{% endblock %}
+
+{% block header_title %}
+<div>
+    <h1 class="text-lg font-semibold line-clamp-1">{{ event.title }}</h1>
+    <p class="text-sm text-muted-foreground">{{ event.organization.name }}</p>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<div class="flex items-center gap-2">
+    {% if event.state == 'PUBLISHED' %}
+    {% #badge variant="success" %}Live{% /badge %}
+    {% elif event.state == 'DRAFT' %}
+    {% #badge %}Draft{% /badge %}
+    {% else %}
+    {% #badge variant="warning" %}{{ event.state }}{% /badge %}
+    {% endif %}
+
+    <a href="{% url 'events:public_detail' event.organization.slug event.slug %}" target="_blank" class="btn btn-outline btn-sm">
+        <i data-lucide="external-link" class="w-4 h-4"></i>
+        View Public
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {% #stat_card icon="ticket" value=stats.tickets_sold label="Tickets Sold" color="blue" /%}
+        {% #stat_card icon="wallet" value=stats.revenue|floatformat:0 suffix="XAF" label="Revenue" color="emerald" /%}
+        {% #stat_card icon="users" value=stats.checked_in label="Checked In" color="purple" /%}
+        {% #stat_card icon="percent" value=stats.checkin_rate|floatformat:0 suffix="%" label="Check-in Rate" color="amber" /%}
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-3">
+        <div class="lg:col-span-2 space-y-6">
+            <div class="card p-6">
+                <h2 class="text-lg font-semibold mb-4">Quick Actions</h2>
+                <div class="grid gap-3 sm:grid-cols-2">
+                    {% #quick_action href=manage_tickets_url icon="ticket" title="Manage Tickets" description="Add or edit ticket types" /%}
+                    {% #quick_action href=checkin_url icon="scan" title="Check-in" description="Scan tickets at the door" /%}
+                    {% #quick_action href=export_url icon="download" title="Export Data" description="Download reports (PDF, CSV)" /%}
+                    {% #quick_action href=analytics_url icon="bar-chart-3" title="Analytics" description="View detailed reports" /%}
+                    {% #quick_action href=flyer_config_url icon="image" title="I Will Be There" description="Flyer generator for attendees" /%}
+                </div>
+            </div>
+
+            <div class="card p-6">
+                <h2 class="text-lg font-semibold mb-4">Event Details</h2>
+                <dl class="space-y-3 text-sm">
+                    <div class="flex justify-between py-2 border-b border-border">
+                        <dt class="text-muted-foreground">Date</dt>
+                        <dd class="font-medium">{{ event.start_at|date:"F j, Y" }} at {{ event.start_at|time:"g:i A" }}</dd>
+                    </div>
+                    {% #detail_row label="Location" value=event.venue_name|default:event.location /%}
+                    {% #detail_row label="Type" value=event.get_event_type_display /%}
+                    <div class="flex justify-between py-2 border-b border-border">
+                        <dt class="text-muted-foreground">Capacity</dt>
+                        <dd class="font-medium">{% if event.capacity %}{{ event.capacity }}{% else %}Unlimited{% endif %}</dd>
+                    </div>
+                    <div class="flex justify-between py-2">
+                        <dt class="text-muted-foreground">Visibility</dt>
+                        <dd class="font-medium">{% if event.is_public %}Public{% else %}Private{% endif %}</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            <div class="card p-6">
+                <h2 class="text-lg font-semibold mb-4">Event Status</h2>
+                <div class="space-y-4">
+                    {% #status_indicator label="Published" active=is_published /%}
+                    {% #status_indicator label="Public" active=event.is_public /%}
+                    {% #status_indicator label="Featured" active=event.is_featured /%}
+                </div>
+            </div>
+
+            {% if event.is_public and not event.is_featured %}
+            <div class="card p-6">
+                <h2 class="text-lg font-semibold mb-2">Get Featured</h2>
+                <p class="text-sm text-muted-foreground mb-4">Apply to have your event featured on the Reckot homepage for maximum visibility.</p>
+
+                {% if event.feature_requested_at and not event.feature_rejection_reason %}
+                {% #alert variant="warning" icon="clock" %}
+                    Feature request pending review
+                {% /alert %}
+                {% elif event.feature_rejection_reason %}
+                {% #alert variant="destructive" title="Request declined" %}
+                    {{ event.feature_rejection_reason }}
+                {% /alert %}
+                <form method="post" action="{% url 'events:apply_feature' event.organization.slug event.slug %}" class="mt-3">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary btn-sm w-full">
+                        <i data-lucide="star" class="w-4 h-4"></i>
+                        Re-apply for Feature
+                    </button>
+                </form>
+                {% else %}
+                <form method="post" action="{% url 'events:apply_feature' event.organization.slug event.slug %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary btn-sm w-full">
+                        <i data-lucide="star" class="w-4 h-4"></i>
+                        Apply for Feature
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% if event.is_featured %}
+            <div class="card p-6 border-amber-500/50 bg-amber-500/5">
+                <div class="flex items-center gap-2 mb-2">
+                    <i data-lucide="star" class="w-5 h-5 text-amber-500"></i>
+                    <h2 class="text-lg font-semibold">Featured Event</h2>
+                </div>
+                <p class="text-sm text-muted-foreground">Your event is currently featured on the homepage!</p>
+                {% if event.feature_expires_at %}
+                <p class="text-xs text-muted-foreground mt-2">Expires: {{ event.feature_expires_at|date:"M j, Y" }}</p>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load slippers %}
 {% load socialaccount %}
+{% load static %}
 
 {% block title %}Sign Up - Reckot{% endblock %}
 
@@ -10,13 +11,17 @@
         <div class="card p-6 sm:p-8">
             <div class="text-center mb-8">
                 <div class="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-foreground mb-4">
-                    <i data-lucide="user-plus" class="h-7 w-7 text-background"></i>
+                    <img x-show="isDark" x-cloak src="{% static 'images/logo/reckto_logo_light_mode.png' %}" alt="" class="h-8 w-8">
+                    <img x-show="!isDark" src="{% static 'images/logo/reckto_logo_dark_mode.png' %}" alt="" class="h-8 w-8">
                 </div>
                 <h1 class="text-2xl font-bold">Create an account</h1>
                 <p class="text-muted-foreground mt-1">Get started with Reckot</p>
             </div>
 
-            <form method="POST" action="{% provider_login_url 'google' %}" class="w-full mb-6">
+            {% get_providers as socialaccount_providers %}
+            {% for provider in socialaccount_providers %}
+            {% if provider.id == 'google' %}
+            <form method="POST" action="{% provider_login_url provider.id %}" class="w-full mb-6" hx-boost="false">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-outline btn-md w-full">
                     <svg class="w-5 h-5" viewBox="0 0 24 24">
@@ -37,8 +42,10 @@
                     <span class="bg-card px-2 text-muted-foreground">Or continue with email</span>
                 </div>
             </div>
+            {% endif %}
+            {% endfor %}
 
-            <form method="post" action="{% url 'account_signup' %}" class="space-y-4">
+            <form method="post" action="{% url 'account_signup' %}" class="space-y-4" hx-boost="false">
                 {% csrf_token %}
 
                 <div>

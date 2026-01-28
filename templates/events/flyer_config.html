@@ -1,0 +1,249 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}Flyer Configuration - {{ event.title }}{% endblock %}
+
+{% block dashboard_content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold">I Will Be There - Flyer Setup</h1>
+            <p class="text-muted-foreground">Configure personalized flyers for attendees</p>
+        </div>
+        {% if config and config.is_enabled and has_feature %}
+        <a href="{% url 'events:flyer_generator' org_slug=event.organization.slug event_slug=event.slug %}"
+           target="_blank" class="btn btn-outline btn-sm">
+            <i data-lucide="external-link" class="w-4 h-4 mr-2"></i>
+            Preview
+        </a>
+        {% endif %}
+    </div>
+
+    {% if not has_feature %}
+    <div class="card p-6 border-amber-500/50 bg-amber-500/5">
+        <div class="flex items-start gap-4">
+            <div class="flex-shrink-0">
+                <i data-lucide="sparkles" class="w-8 h-8 text-amber-500"></i>
+            </div>
+            <div>
+                <h3 class="font-semibold mb-1">Upgrade to Enable This Feature</h3>
+                <p class="text-sm text-muted-foreground mb-3">
+                    The "I Will Be There" flyer generator is available on the Starter plan (5% fee) and above.
+                    Your current plan: <strong>{{ current_plan }}</strong>
+                </p>
+                <p class="text-sm text-muted-foreground">
+                    Contact us to upgrade your organization's plan.
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" class="space-y-6" x-data="flyerConfig()" {% if not has_feature %}style="opacity: 0.5; pointer-events: none;"{% endif %}>
+        {% csrf_token %}
+
+        <div class="card p-6">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h3 class="font-semibold">Enable Flyer Generator</h3>
+                    <p class="text-sm text-muted-foreground">Allow attendees to create personalized flyers</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" name="is_enabled" class="sr-only peer"
+                           {% if config and config.is_enabled %}checked{% endif %}>
+                    <div class="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                </label>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Template Image</label>
+                    {% if config and config.template_image %}
+                    <div class="mb-2">
+                        <img src="{{ config.template_image.url }}" class="w-48 h-48 object-cover rounded border">
+                    </div>
+                    {% endif %}
+                    <input type="file" name="template_image" accept="image/*" class="input w-full"
+                           {% if not config %}required{% endif %}>
+                    <p class="text-xs text-muted-foreground mt-1">Recommended size: 1080x1080 pixels</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card p-6">
+            <h3 class="font-semibold mb-4">Photo Placement</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">X Position</label>
+                    <input type="number" name="photo_x" value="{{ config.photo_x|default:50 }}" class="input w-full">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Y Position</label>
+                    <input type="number" name="photo_y" value="{{ config.photo_y|default:50 }}" class="input w-full">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Width</label>
+                    <input type="number" name="photo_width" value="{{ config.photo_width|default:200 }}" class="input w-full">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Height</label>
+                    <input type="number" name="photo_height" value="{{ config.photo_height|default:200 }}" class="input w-full">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Shape</label>
+                    <select name="photo_shape" class="input w-full">
+                        <option value="CIRCLE" {% if config.photo_shape == 'CIRCLE' %}selected{% endif %}>Circle</option>
+                        <option value="SQUARE" {% if config.photo_shape == 'SQUARE' %}selected{% endif %}>Square</option>
+                        <option value="ROUNDED" {% if config.photo_shape == 'ROUNDED' %}selected{% endif %}>Rounded</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Border Width</label>
+                    <input type="number" name="photo_border_width" value="{{ config.photo_border_width|default:0 }}" class="input w-full">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Border Color</label>
+                    <input type="color" name="photo_border_color" value="{{ config.photo_border_color|default:'#ffffff' }}" class="w-full h-10 rounded cursor-pointer">
+                </div>
+            </div>
+        </div>
+
+        <div class="card p-6">
+            <h3 class="font-semibold mb-4">Output Settings</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Width (px)</label>
+                    <input type="number" name="output_width" value="{{ config.output_width|default:1080 }}" class="input w-full">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Height (px)</label>
+                    <input type="number" name="output_height" value="{{ config.output_height|default:1080 }}" class="input w-full">
+                </div>
+            </div>
+        </div>
+
+        <div class="card p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-semibold">Text Fields</h3>
+                <button type="button" @click="addField()" class="btn btn-outline btn-sm">
+                    <i data-lucide="plus" class="w-4 h-4 mr-1"></i>
+                    Add Field
+                </button>
+            </div>
+
+            <div class="space-y-4" id="text-fields">
+                <template x-for="(field, index) in fields" :key="index">
+                    <div class="border border-border rounded-lg p-4 relative">
+                        <button type="button" @click="removeField(index)"
+                                class="absolute top-2 right-2 text-muted-foreground hover:text-destructive">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div class="col-span-2">
+                                <label class="block text-xs font-medium mb-1">Label</label>
+                                <input type="text" name="field_label" x-model="field.label"
+                                       placeholder="e.g., Your Name" class="input w-full text-sm" required>
+                            </div>
+                            <div class="col-span-2">
+                                <label class="block text-xs font-medium mb-1">Placeholder</label>
+                                <input type="text" name="field_placeholder" x-model="field.placeholder"
+                                       placeholder="e.g., John Doe" class="input w-full text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium mb-1">X Position</label>
+                                <input type="number" name="field_x" x-model="field.x" class="input w-full text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium mb-1">Y Position</label>
+                                <input type="number" name="field_y" x-model="field.y" class="input w-full text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium mb-1">Font Size</label>
+                                <input type="number" name="field_font_size" x-model="field.font_size" class="input w-full text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium mb-1">Font Color</label>
+                                <input type="color" name="field_font_color" x-model="field.font_color" class="w-full h-8 rounded cursor-pointer">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium mb-1">Max Width</label>
+                                <input type="number" name="field_max_width" x-model="field.max_width" class="input w-full text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium mb-1">Align</label>
+                                <select name="field_text_align" x-model="field.text_align" class="input w-full text-sm">
+                                    <option value="LEFT">Left</option>
+                                    <option value="CENTER">Center</option>
+                                    <option value="RIGHT">Right</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center">
+                                <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                    <input type="checkbox" :name="'field_required_' + index" x-model="field.required" class="rounded">
+                                    Required
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <p x-show="fields.length === 0" class="text-sm text-muted-foreground text-center py-4">
+                No text fields added yet. Click "Add Field" to add name, profession, etc.
+            </p>
+        </div>
+
+        <div class="flex justify-end gap-3">
+            <a href="{% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug %}" class="btn btn-outline">
+                Cancel
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i data-lucide="save" class="w-4 h-4 mr-2"></i>
+                Save Configuration
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+function flyerConfig() {
+    return {
+        fields: [
+            {% if config %}
+            {% for field in config.text_fields.all %}
+            {
+                label: '{{ field.label|escapejs }}',
+                placeholder: '{{ field.placeholder|escapejs }}',
+                x: {{ field.x }},
+                y: {{ field.y }},
+                font_size: {{ field.font_size }},
+                font_color: '{{ field.font_color }}',
+                max_width: {{ field.max_width }},
+                text_align: '{{ field.text_align }}',
+                required: {{ field.is_required|yesno:"true,false" }}
+            },
+            {% endfor %}
+            {% endif %}
+        ],
+        addField() {
+            this.fields.push({
+                label: '',
+                placeholder: '',
+                x: 540,
+                y: 800,
+                font_size: 32,
+                font_color: '#ffffff',
+                max_width: 400,
+                text_align: 'CENTER',
+                required: true
+            });
+            this.$nextTick(() => { if (window.lucide) lucide.createIcons(); });
+        },
+        removeField(index) {
+            this.fields.splice(index, 1);
+        }
+    }
+}
+</script>
+{% endblock %}

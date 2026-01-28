@@ -1,77 +1,115 @@
 {% extends 'base.html' %}
 {% load slippers %}
 
+{% block title %}Manage Tickets - {{ event.title }} - Reckot{% endblock %}
+
 {% block content %}
-<div class="max-w-4xl mx-auto py-12">
-    <div class="flex justify-between items-center">
-        <h1 class="text-2xl font-bold">Manage Ticket Types for {{ event.title }}</h1>
-        <a href="{% url 'events:list' %}" class="text-primary hover:text-primary/90">Back to Events</a>
+<div class="max-w-4xl mx-auto py-12 px-4">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-bold">Manage Ticket Types</h1>
+            <p class="text-muted-foreground mt-1">{{ event.title }}</p>
+        </div>
+        <a href="{% url 'events:detail' org_slug=event.organization.slug event_slug=event.slug %}">
+            {% #button variant="outline" %}
+                <i data-lucide="arrow-left" class="mr-2 h-4 w-4"></i>
+                Back to Event
+            {% /button %}
+        </a>
     </div>
 
     <div class="mt-8">
         <h2 class="text-xl font-semibold">Existing Ticket Types</h2>
         {% if ticket_types %}
-            <div class="mt-4 border rounded-md">
-                {% #table %}
-                    <thead>
-                        <tr class="border-b">
-                            <th class="text-left p-4">Name</th>
-                            <th class="text-left p-4">Price</th>
-                            <th class="text-left p-4">Quantity</th>
+            <div class="mt-4 card overflow-hidden">
+                <table class="w-full">
+                    <thead class="bg-muted/50">
+                        <tr>
+                            <th class="text-left p-4 font-medium">Name</th>
+                            <th class="text-left p-4 font-medium">Price</th>
+                            <th class="text-left p-4 font-medium">Available</th>
+                            <th class="text-left p-4 font-medium">Sold</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="divide-y divide-border">
                         {% for tt in ticket_types %}
-                            <tr class="border-b last:border-b-0">
-                                <td class="p-4">{{ tt.name }}</td>
-                                <td class="p-4">${{ tt.price }}</td>
+                            <tr class="hover:bg-muted/30 transition-colors">
+                                <td class="p-4 font-medium">{{ tt.name }}</td>
+                                <td class="p-4">
+                                    {% if tt.price == 0 %}
+                                        <span class="text-success font-medium">Free</span>
+                                    {% else %}
+                                        {{ tt.price }} XAF
+                                    {% endif %}
+                                </td>
                                 <td class="p-4">{{ tt.quantity }}</td>
+                                <td class="p-4 text-muted-foreground">{{ tt.sold|default:0 }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
-                {% /table %}
+                </table>
             </div>
         {% else %}
             <div class="mt-4">
-                {% #empty_state title="No Ticket Types Yet" description="Add your first ticket type for this event." %}
+                {% #empty_state icon="ticket" title="No Ticket Types Yet" description="Add your first ticket type for this event." %}
                 {% /empty_state %}
             </div>
         {% endif %}
     </div>
 
-    <div class="mt-8">
-        <h2 class="text-xl font-semibold">Add New Ticket Type</h2>
-        <form method="post" class="mt-4 space-y-6">
-            {% csrf_token %}
-            <div>
-                <label for="id_name" class="block text-sm font-medium text-gray-700">Name</label>
-                <div class="mt-1">
-                    {% #input type='text' name='name' id='id_name' value=form.name.value|default:'' class='w-full' required=True %}
+    <div class="mt-12">
+        <div class="card p-6 sm:p-8">
+            <h2 class="text-xl font-semibold">Add New Ticket Type</h2>
+            <p class="text-muted-foreground mt-1">Create a new ticket option for attendees</p>
+
+            <form method="post" class="mt-6 space-y-6">
+                {% csrf_token %}
+
+                <div>
+                    <label for="id_name" class="block text-sm font-medium mb-2">Ticket Name</label>
+                    <input type="text" name="name" id="id_name" value="{{ form.name.value|default:'' }}"
+                           placeholder="e.g., General Admission, VIP, Early Bird" required
+                           class="input w-full">
                 </div>
-            </div>
-            <div>
-                <label for="id_price" class="block text-sm font-medium text-gray-700">Price</label>
-                <div class="mt-1">
-                    {% #input type='number' name='price' id='id_price' value=form.price.value|default:'' step='0.01' class='w-full' required=True %}
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label for="id_price" class="block text-sm font-medium mb-2">Price (XAF)</label>
+                        <input type="number" name="price" id="id_price" value="{{ form.price.value|default:'0' }}"
+                               step="100" min="0" placeholder="0 for free tickets" required
+                               class="input w-full">
+                        <p class="text-xs text-muted-foreground mt-1">Set to 0 for free tickets</p>
+                    </div>
+
+                    <div>
+                        <label for="id_quantity" class="block text-sm font-medium mb-2">Quantity Available</label>
+                        <input type="number" name="quantity" id="id_quantity" value="{{ form.quantity.value|default:'' }}"
+                               min="1" placeholder="100" required
+                               class="input w-full">
+                    </div>
                 </div>
-            </div>
-            <div>
-                <label for="id_quantity" class="block text-sm font-medium text-gray-700">Quantity</label>
-                <div class="mt-1">
-                    {% #input type='number' name='quantity' id='id_quantity' value=form.quantity.value|default:'' class='w-full' required=True %}
+
+                {% if form.errors %}
+                    <div class="rounded-lg bg-red-500/10 border border-red-500/20 p-4 text-sm text-red-500">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <p>{{ field.label }}: {{ error }}</p>
+                            {% endfor %}
+                        {% endfor %}
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="pt-2">
+                    {% #button type='submit' variant="primary" %}
+                        <i data-lucide="plus" class="mr-2 h-4 w-4"></i>
+                        Add Ticket Type
+                    {% /button %}
                 </div>
-            </div>
-            {% if form.errors %}
-                <div class="mt-4 text-sm text-red-600">
-                    {{ form.errors.as_ul }}
-                </div>
-            {% endif %}
-            <div class="pt-4">
-                {% #button type='submit' %}
-                    Add Ticket Type
-                {% /button %}
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}

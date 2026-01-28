@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from allauth.account.signals import user_signed_up
 from allauth.socialaccount.signals import social_account_added
 
-from .models import OTPVerification
+from apps.core.models import OTPVerification
 
 User = get_user_model()
 

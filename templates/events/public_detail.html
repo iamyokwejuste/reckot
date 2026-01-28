@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% load slippers %}
+
+{% block title %}{{ event.title }} - Reckot{% endblock %}
+
+{% block meta_description %}{{ event.description|truncatewords:30 }}{% endblock %}
+{% block og_title %}{{ event.title }}{% endblock %}
+{% block og_description %}{{ event.description|truncatewords:30 }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="mb-6">
+            <a href="{% url 'events:discover' %}" class="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                Back to events
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2">
+                <div class="card p-6 mb-6">
+                    <div class="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+                        <span class="px-2 py-1 rounded bg-foreground/5">{{ event.organization.name }}</span>
+                    </div>
+                    <h1 class="text-3xl font-bold mb-4">{{ event.title }}</h1>
+
+                    <div class="flex flex-wrap gap-4 mb-6 text-sm">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="calendar" class="w-5 h-5 text-muted-foreground"></i>
+                            <div>
+                                <div class="font-medium">{{ event.start_at|date:"l, F j, Y" }}</div>
+                                <div class="text-muted-foreground">{{ event.start_at|time:"g:i A" }} - {{ event.end_at|time:"g:i A" }}</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="map-pin" class="w-5 h-5 text-muted-foreground"></i>
+                            <div>
+                                <div class="font-medium">{{ event.location }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="prose prose-sm max-w-none">
+                        {{ event.description|linebreaks }}
+                    </div>
+                </div>
+
+                <div class="card p-6" x-data="{ shareOpen: false }">
+                    <h3 class="font-semibold mb-4">Share this event</h3>
+                    <div class="flex flex-wrap gap-2">
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank" class="btn btn-outline btn-sm" @click="$refs.shareTrack.submit()">
+                            <i data-lucide="facebook" class="w-4 h-4"></i>
+                        </a>
+                        <a href="https://twitter.com/intent/tweet?text={{ event.title|urlencode }}&url={{ request.build_absolute_uri }}" target="_blank" class="btn btn-outline btn-sm">
+                            <i data-lucide="twitter" class="w-4 h-4"></i>
+                        </a>
+                        <a href="https://wa.me/?text={{ event.title|urlencode }}%20{{ request.build_absolute_uri }}" target="_blank" class="btn btn-outline btn-sm">
+                            <i data-lucide="message-circle" class="w-4 h-4"></i>
+                        </a>
+                        <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.build_absolute_uri }}" target="_blank" class="btn btn-outline btn-sm">
+                            <i data-lucide="linkedin" class="w-4 h-4"></i>
+                        </a>
+                        <button type="button" class="btn btn-outline btn-sm" @click="navigator.clipboard.writeText('{{ request.build_absolute_uri }}'); $dispatch('notice', {type: 'success', text: 'Link copied!'})">
+                            <i data-lucide="link" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                {% if event.flyer_config.is_enabled %}
+                <div class="card p-6 mt-6 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
+                    <h3 class="font-semibold mb-2">I Will Be There!</h3>
+                    <p class="text-sm text-muted-foreground mb-4">Create your personalized flyer to share</p>
+                    <a href="{% url 'events:flyer_generator' org_slug=event.organization.slug event_slug=event.slug %}" class="btn btn-primary btn-sm">
+                        <i data-lucide="image" class="w-4 h-4 mr-2"></i>
+                        Create My Flyer
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="lg:col-span-1">
+                <div class="card p-6 sticky top-24">
+                    <h3 class="font-semibold mb-4">Tickets</h3>
+
+                    {% if ticket_types %}
+                    <form method="post" action="{% url 'payments:checkout' %}" class="space-y-4" hx-boost="false">
+                        {% csrf_token %}
+                        <input type="hidden" name="event_id" value="{{ event.id }}">
+                        {% if affiliate_code %}
+                        <input type="hidden" name="affiliate_code" value="{{ affiliate_code }}">
+                        {% endif %}
+
+                        {% for ticket_type in ticket_types %}
+                        <div class="border border-border rounded-lg p-4">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <div class="font-medium">{{ ticket_type.name }}</div>
+                                    {% if ticket_type.description %}
+                                    <div class="text-sm text-muted-foreground">{{ ticket_type.description|truncatewords:10 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="text-lg font-bold">{{ ticket_type.price }} XAF</div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <label class="text-sm text-muted-foreground">Qty:</label>
+                                <select name="ticket_{{ ticket_type.id }}" class="input w-20">
+                                    {% for i in "0123456789"|make_list %}
+                                    {% if forloop.counter0 <= ticket_type.max_per_order %}
+                                    <option value="{{ forloop.counter0 }}">{{ forloop.counter0 }}</option>
+                                    {% endif %}
+                                    {% endfor %}
+                                </select>
+                                {% if ticket_type.available_quantity < 10 %}
+                                <span class="text-sm text-red-500">{{ ticket_type.available_quantity }} left</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        {% if checkout_questions %}
+                        <div class="border-t border-border pt-4 mt-4">
+                            <h4 class="text-sm font-medium mb-3">Additional Information</h4>
+                            {% for question in checkout_questions %}
+                            <div class="mb-3">
+                                <label class="block text-sm font-medium mb-1">
+                                    {{ question.question }}
+                                    {% if question.is_required %}<span class="text-red-500">*</span>{% endif %}
+                                </label>
+                                {% if question.field_type == 'TEXT' %}
+                                <input type="text" name="question_{{ question.id }}" class="input w-full" {% if question.is_required %}required{% endif %}>
+                                {% elif question.field_type == 'TEXTAREA' %}
+                                <textarea name="question_{{ question.id }}" rows="3" class="input w-full" {% if question.is_required %}required{% endif %}></textarea>
+                                {% elif question.field_type == 'SELECT' %}
+                                <select name="question_{{ question.id }}" class="input w-full" {% if question.is_required %}required{% endif %}>
+                                    <option value="">Select...</option>
+                                    {% for option in question.options %}
+                                    <option value="{{ option }}">{{ option }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% elif question.field_type == 'EMAIL' %}
+                                <input type="email" name="question_{{ question.id }}" class="input w-full" {% if question.is_required %}required{% endif %}>
+                                {% elif question.field_type == 'PHONE' %}
+                                <input type="tel" name="question_{{ question.id }}" class="input w-full" {% if question.is_required %}required{% endif %}>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <button type="submit" class="btn btn-primary w-full">
+                            Get Tickets
+                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                    </form>
+                    {% else %}
+                    <p class="text-muted-foreground text-sm">No tickets available at this time.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

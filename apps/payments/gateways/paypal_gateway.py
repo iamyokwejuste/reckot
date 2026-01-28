@@ -1,7 +1,7 @@
 from decimal import Decimal
 from typing import Optional
 from django.conf import settings
-from .base import PaymentGateway, PaymentResult, RefundResult
+from apps.payments.gateways.base import PaymentGateway, PaymentResult, RefundResult
 import logging
 import requests
 

@@ -1,6 +1,6 @@
 from decimal import Decimal
 from typing import Optional
-from .base import PaymentGateway, PaymentResult, RefundResult
+from apps.payments.gateways.base import PaymentGateway, PaymentResult, RefundResult
 import uuid
 
 

@@ -1,0 +1,13 @@
+{% with color=color|default:"blue" %}
+<div class="stat-card {{ class }}" {{ attrs }}>
+    <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-lg bg-{{ color }}-500/10 flex items-center justify-center">
+            <i data-lucide="{{ icon }}" class="h-5 w-5 text-{{ color }}-500"></i>
+        </div>
+        <div>
+            <p class="text-2xl font-bold">{{ value }}{% if suffix %} {{ suffix }}{% endif %}</p>
+            <p class="text-xs text-muted-foreground">{{ label }}</p>
+        </div>
+    </div>
+</div>
+{% endwith %}

@@ -25,7 +25,7 @@
     {% /alert %}
 
     <div class="flex flex-col gap-2">
-        <a href="{% url 'payments:select' payment.booking_id %}" class="w-full">
+        <a href="{% url 'payments:select' booking_ref=payment.booking.reference %}" class="w-full">
             {% #button variant="default" class="w-full" %}
                 <i data-lucide="refresh-cw" class="mr-2 h-4 w-4"></i>
                 Try Again

@@ -1,0 +1,44 @@
+{% extends "reports/pdf/base.html" %}
+
+{% block content %}
+<h1>Registered Attendees</h1>
+
+<div class="summary-section">
+    <div class="stat-card">
+        <div class="stat-value">{{ data|length }}</div>
+        <div class="stat-label">Total Attendees</div>
+    </div>
+</div>
+
+<h2>Attendee List</h2>
+<table>
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Ticket Type</th>
+            <th>Registration Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for attendee in data %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ attendee.name }}</td>
+            <td>{{ attendee.email }}</td>
+            <td>{{ attendee.ticket_type }}</td>
+            <td>{{ attendee.registered_at }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" class="text-muted">No attendees registered</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="summary-section text-muted" style="margin-top: 40px; font-size: 10px;">
+    <p>This report was generated automatically by Reckot. Data is accurate as of {{ generated_at|date:"F j, Y" }} at {{ generated_at|time:"g:i A" }}.</p>
+</div>
+{% endblock %}

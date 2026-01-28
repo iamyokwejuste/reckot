@@ -1,9 +1,16 @@
+import logging
 from django.db import transaction
 from django.utils import timezone
+from django.conf import settings
 from datetime import timedelta
 from decimal import Decimal
-from .models import Payment
+from apps.payments.models import Payment, PaymentProvider
+from apps.payments.gateways import GatewayManager
+from apps.payments.gateways.base import PaymentStatus
 from apps.tickets.models import Booking
+
+logger = logging.getLogger(__name__)
+gateway_manager = GatewayManager()
 
 
 def calculate_booking_amount(booking: Booking) -> Decimal:
@@ -12,17 +19,88 @@ def calculate_booking_amount(booking: Booking) -> Decimal:
     )
 
 
-def initiate_payment(booking: Booking, method: str, phone: str) -> Payment:
+def initiate_payment(booking: Booking, provider: str, phone: str, **kwargs) -> tuple[Payment, dict]:
     with transaction.atomic():
         amount = calculate_booking_amount(booking)
+        currency = kwargs.get('currency', settings.PAYMENT_GATEWAYS.get('DEFAULT_CURRENCY', 'XAF'))
+
         payment = Payment.objects.create(
             booking=booking,
             amount=amount,
-            method=method,
+            currency=currency,
+            provider=provider,
             phone_number=phone,
+            customer_email=kwargs.get('email', booking.user.email),
             expires_at=timezone.now() + timedelta(minutes=30)
         )
-        return payment
+
+        callback_base = settings.PAYMENT_GATEWAYS.get('CALLBACK_BASE_URL', '')
+        if provider == 'CAMPAY':
+            callback_url = f"{callback_base}/payments/webhook/campay/"
+        else:
+            callback_url = f"{callback_base}/payments/webhook/"
+
+        result, used_provider = gateway_manager.initiate_payment(
+            amount=amount,
+            currency=currency,
+            phone_number=phone,
+            reference=str(payment.reference),
+            description=f'Tickets for {booking.event.title}',
+            callback_url=callback_url,
+            preferred_provider=provider,
+            email=payment.customer_email,
+            **kwargs
+        )
+
+        if result.success:
+            payment.external_reference = result.external_reference or ''
+            payment.redirect_url = result.redirect_url or ''
+            payment.provider = used_provider
+            payment.metadata = {
+                'gateway_response': result.raw_response,
+                'transaction_id': result.transaction_id
+            }
+            payment.save()
+
+            return payment, {
+                'success': True,
+                'redirect_url': result.redirect_url,
+                'message': result.message,
+                'provider': used_provider
+            }
+        else:
+            payment.status = Payment.Status.FAILED
+            payment.metadata = {'error': result.message, 'raw': result.raw_response}
+            payment.save()
+
+            return payment, {
+                'success': False,
+                'message': result.message,
+                'provider': used_provider
+            }
+
+
+def verify_and_confirm_payment(payment: Payment) -> dict:
+    if payment.status == Payment.Status.CONFIRMED:
+        return {'success': True, 'message': 'Payment already confirmed'}
+
+    if payment.status == Payment.Status.EXPIRED:
+        return {'success': False, 'message': 'Payment expired'}
+
+    result = gateway_manager.verify_payment(
+        str(payment.reference),
+        payment.provider
+    )
+
+    if result.status == PaymentStatus.SUCCESS:
+        confirm_payment(payment, result.external_reference or result.transaction_id)
+        return {'success': True, 'message': 'Payment confirmed'}
+
+    elif result.status == PaymentStatus.FAILED:
+        fail_payment(payment, result.message)
+        return {'success': False, 'message': result.message}
+
+    return {'success': False, 'message': 'Payment still pending', 'status': 'PENDING'}
 
 
 def confirm_payment(payment: Payment, external_ref: str = '') -> Payment:
