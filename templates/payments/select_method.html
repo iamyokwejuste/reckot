@@ -37,29 +37,43 @@
                     <div class="space-y-3">
                         <p class="text-sm font-medium">Payment Method</p>
                         <div class="grid gap-3">
-                            {% for value, label in methods %}
                             <label class="flex cursor-pointer items-center space-x-3 rounded-xl border-2 border-input p-4 hover:bg-accent hover:border-primary/30 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/5">
                                 <input
                                     type="radio"
                                     name="method"
-                                    value="{{ value }}"
+                                    value="CAMPAY"
                                     class="h-4 w-4 border-2 border-input text-primary focus:ring-primary"
                                     required
+                                    checked
+                                />
+                                <div class="flex items-center gap-3 flex-1">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10">
+                                        <i data-lucide="smartphone" class="h-5 w-5 text-emerald-600"></i>
+                                    </div>
+                                    <div>
+                                        <span class="font-medium block">Mobile Money (MTN / Orange)</span>
+                                        <span class="text-xs text-muted-foreground">Powered by Campay</span>
+                                    </div>
+                                </div>
+                                <span class="text-xs bg-emerald-500/10 text-emerald-600 px-2 py-1 rounded-full">Recommended</span>
+                            </label>
+                            <label class="flex cursor-pointer items-center space-x-3 rounded-xl border-2 border-input p-4 hover:bg-accent hover:border-primary/30 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+                                <input
+                                    type="radio"
+                                    name="method"
+                                    value="OFFLINE"
+                                    class="h-4 w-4 border-2 border-input text-primary focus:ring-primary"
                                 />
                                 <div class="flex items-center gap-3">
-                                    {% if value == 'MTN_MOMO' %}
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-warning/10">
-                                        <i data-lucide="smartphone" class="h-5 w-5 text-warning"></i>
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+                                        <i data-lucide="banknote" class="h-5 w-5 text-muted-foreground"></i>
                                     </div>
-                                    {% else %}
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-500/10">
-                                        <i data-lucide="smartphone" class="h-5 w-5 text-orange-500"></i>
+                                    <div>
+                                        <span class="font-medium block">Pay at Event</span>
+                                        <span class="text-xs text-muted-foreground">Cash or bank transfer</span>
                                     </div>
-                                    {% endif %}
-                                    <span class="font-medium">{{ label }}</span>
                                 </div>
                             </label>
-                            {% endfor %}
                         </div>
                     </div>
 

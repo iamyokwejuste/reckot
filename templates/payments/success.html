@@ -23,12 +23,20 @@
                     <span class="font-mono text-sm">{{ payment.reference }}</span>
                 </div>
                 <div class="flex justify-between">
+                    <span class="text-sm text-muted-foreground">Event</span>
+                    <span class="font-medium text-sm">{{ payment.booking.event.title }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-sm text-muted-foreground">Tickets</span>
+                    <span class="text-sm">{{ payment.booking.tickets.count }} ticket{{ payment.booking.tickets.count|pluralize }}</span>
+                </div>
+                <div class="flex justify-between">
                     <span class="text-sm text-muted-foreground">Amount</span>
                     <span class="font-semibold">{{ payment.amount }} XAF</span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-sm text-muted-foreground">Method</span>
-                    <span class="text-sm">{{ payment.get_method_display }}</span>
+                    <span class="text-sm">{{ payment.get_provider_display }}</span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-sm text-muted-foreground">Date</span>
@@ -36,16 +44,27 @@
                 </div>
             </div>
 
+            <div class="rounded-xl bg-primary/5 border border-primary/20 p-4 mt-4">
+                <div class="flex items-start gap-3">
+                    <i data-lucide="mail" class="h-5 w-5 text-primary mt-0.5"></i>
+                    <div>
+                        <p class="text-sm font-medium">Confirmation email sent</p>
+                        <p class="text-xs text-muted-foreground">Check your inbox for your ticket with QR code</p>
+                    </div>
+                </div>
+            </div>
+
             <div class="flex flex-col gap-3 mt-6">
-                <a href="{% url 'events:list' %}">
+                <a href="{% url 'tickets:list' %}">
                     {% #button class="w-full" variant="gradient" %}
-                        <i data-lucide="calendar" class="mr-2 h-4 w-4"></i>
-                        View My Events
+                        <i data-lucide="ticket" class="mr-2 h-4 w-4"></i>
+                        View My Tickets
                     {% /button %}
                 </a>
-                <a href="{% url 'home' %}">
+                <a href="{% url 'events:public_detail' org_slug=payment.booking.event.organization.slug event_slug=payment.booking.event.slug %}">
                     {% #button variant="outline" class="w-full" %}
-                        Back to Home
+                        <i data-lucide="arrow-left" class="mr-2 h-4 w-4"></i>
+                        Back to Event
                     {% /button %}
                 </a>
             </div>

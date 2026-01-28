@@ -1,0 +1,10 @@
+<li class="flex gap-3 items-center {% if disabled %}text-muted-foreground{% elif highlight %}font-medium text-primary{% endif %}">
+    {% if disabled %}
+    <i data-lucide="x" class="w-4 h-4 shrink-0"></i>
+    {% elif highlight %}
+    <i data-lucide="sparkles" class="w-4 h-4 shrink-0"></i>
+    {% else %}
+    <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0"></i>
+    {% endif %}
+    {{ children }}
+</li>

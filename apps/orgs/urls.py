@@ -8,6 +8,7 @@ urlpatterns = [
     path('create/', actions.OrganizationCreateView.as_view(), name='create'),
     path('invite/<uuid:token>/', actions.AcceptInvitationView.as_view(), name='accept_invitation'),
     path('<slug:slug>/', actions.OrganizationDetailView.as_view(), name='detail'),
+    path('<slug:slug>/edit/', actions.OrganizationEditView.as_view(), name='edit'),
     path('<slug:slug>/members/', actions.OrganizationMembersView.as_view(), name='members'),
     path('<slug:slug>/members/invite/', actions.InviteMemberView.as_view(), name='invite_member'),
     path('<slug:slug>/members/<int:user_id>/role/', actions.UpdateMemberRoleView.as_view(), name='update_member_role'),

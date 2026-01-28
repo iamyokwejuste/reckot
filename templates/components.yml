@@ -32,3 +32,5 @@ components:
   loading_state: components/loading_state.html
   separator: components/separator.html
   avatar: components/avatar.html
+  pricing_card: components/pricing_card.html
+  pricing_feature: components/pricing_feature.html

@@ -20,10 +20,18 @@
 {% endblock %}
 
 {% block header_actions %}
-<a href="{% url 'events:create' %}" class="btn btn-primary btn-sm">
-    <i data-lucide="plus" class="w-4 h-4"></i>
-    New Event
-</a>
+<div class="flex items-center gap-2">
+    {% if can_manage_members %}
+    <a href="{% url 'orgs:edit' organization.slug %}" class="btn btn-outline btn-sm">
+        <i data-lucide="settings" class="w-4 h-4"></i>
+        Settings
+    </a>
+    {% endif %}
+    <a href="{% url 'events:create' %}" class="btn btn-primary btn-sm">
+        <i data-lucide="plus" class="w-4 h-4"></i>
+        New Event
+    </a>
+</div>
 {% endblock %}
 
 {% block content %}

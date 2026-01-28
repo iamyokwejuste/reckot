@@ -414,3 +414,40 @@ class TransferOwnershipView(LoginRequiredMixin, View):
 
         messages.success(request, f'Ownership transferred to {new_owner_membership.user.email}.')
         return redirect('orgs:detail', slug=slug)
+
+
+class OrganizationEditView(LoginRequiredMixin, OrgPermissionMixin, View):
+    required_permission = 'manage_organization'
+
+    def get(self, request, slug):
+        organization = self.organization
+        return render(request, 'orgs/edit.html', {
+            'organization': organization,
+        })
+
+    def post(self, request, slug):
+        organization = self.organization
+        name = request.POST.get('name', '').strip()
+        description = request.POST.get('description', '').strip()
+        website = request.POST.get('website', '').strip()
+
+        if not name:
+            return render(request, 'orgs/edit.html', {
+                'organization': organization,
+                'error': 'Organization name is required.',
+            })
+
+        organization.name = name
+        organization.description = description
+        organization.website = website
+
+        if request.FILES.get('logo'):
+            organization.logo = request.FILES['logo']
+
+        if request.POST.get('remove_logo') == 'true':
+            organization.logo = None
+
+        organization.save()
+
+        messages.success(request, 'Organization updated successfully!')
+        return redirect('orgs:detail', slug=organization.slug)
