@@ -568,12 +568,14 @@ class FlyerGeneratorView(View):
         )
 
         has_feature = event.organization.has_feature('flyer_generator')
+        has_paid_tickets = TicketType.objects.filter(event=event, price__gt=0).exists()
+        flyer_free = has_feature or has_paid_tickets
 
         try:
             config = event.flyer_config
             if not config.is_enabled:
                 return render(request, 'events/flyer_disabled.html', {'event': event})
-            if not has_feature and not config.pay_per_use_accepted:
+            if not flyer_free and not config.pay_per_use_accepted:
                 return render(request, 'events/flyer_upgrade.html', {'event': event})
         except EventFlyerConfig.DoesNotExist:
             return render(request, 'events/flyer_disabled.html', {'event': event})
@@ -584,7 +586,7 @@ class FlyerGeneratorView(View):
             'event': event,
             'config': config,
             'text_fields': text_fields,
-            'has_feature': has_feature,
+            'has_feature': flyer_free,
             'pay_per_use_price': FLYER_PAY_PER_USE_PRICE,
         })
 
@@ -597,6 +599,8 @@ class FlyerGeneratorView(View):
         )
 
         has_feature = event.organization.has_feature('flyer_generator')
+        has_paid_tickets = TicketType.objects.filter(event=event, price__gt=0).exists()
+        flyer_free = has_feature or has_paid_tickets
 
         try:
             config = event.flyer_config
@@ -615,7 +619,7 @@ class FlyerGeneratorView(View):
         try:
             flyer_image = generate_flyer(config, user_photo, text_values)
 
-            if not has_feature and config.pay_per_use_accepted:
+            if not flyer_free and config.pay_per_use_accepted:
                 FlyerGeneration.objects.create(
                     event=event,
                     ip_address=request.META.get('REMOTE_ADDR'),
@@ -644,6 +648,8 @@ class FlyerConfigView(LoginRequiredMixin, View):
         )
 
         has_feature = event.organization.has_feature('flyer_generator')
+        has_paid_tickets = TicketType.objects.filter(event=event, price__gt=0).exists()
+        flyer_free = has_feature or has_paid_tickets
 
         try:
             config = event.flyer_config
@@ -653,7 +659,8 @@ class FlyerConfigView(LoginRequiredMixin, View):
         return render(request, 'events/flyer_config.html', {
             'event': event,
             'config': config,
-            'has_feature': has_feature,
+            'has_feature': flyer_free,
+            'has_paid_tickets': has_paid_tickets,
             'current_plan': event.organization.current_plan,
         })
 

@@ -9,42 +9,34 @@
         <div class="mb-6">
             <i data-lucide="sparkles" class="w-16 h-16 mx-auto text-primary"></i>
         </div>
-        <h1 class="text-2xl font-bold mb-2">Premium Feature</h1>
+        <h1 class="text-2xl font-bold mb-2">Pay-Per-Use Feature</h1>
         <p class="text-muted-foreground mb-6">
-            The "I Will Be There" flyer generator is available on the Starter plan ({{ PLATFORM_FEE_PERCENTAGE }}% fee) and above.
+            The "I Will Be There" flyer generator costs 25 XAF per flyer for free events.
         </p>
 
         <div class="card p-6 text-left mb-6">
-            <h3 class="font-semibold mb-3">Starter Plan includes:</h3>
+            <h3 class="font-semibold mb-3">Get it free:</h3>
             <ul class="space-y-2 text-sm">
                 <li class="flex items-center gap-2">
                     <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
-                    I Will Be There flyer generator
+                    Add paid tickets to your event
                 </li>
                 <li class="flex items-center gap-2">
                     <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
-                    Up to 10 events per month
-                </li>
-                <li class="flex items-center gap-2">
-                    <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
-                    Up to 500 tickets per event
-                </li>
-                <li class="flex items-center gap-2">
-                    <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
-                    Advanced analytics
-                </li>
-                <li class="flex items-center gap-2">
-                    <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
-                    CSV, Excel & PDF exports
+                    Flyers become free for paid events
                 </li>
             </ul>
+            <div class="mt-4 pt-4 border-t border-border">
+                <h4 class="font-medium mb-2">Or pay-per-use:</h4>
+                <p class="text-sm text-muted-foreground">25 XAF per flyer generated</p>
+            </div>
         </div>
 
         <div class="flex flex-col gap-3">
-            <a href="mailto:support@reckot.com?subject=Upgrade%20Request%20-%20{{ event.organization.name|urlencode }}&body=Hi%2C%0A%0AI%20would%20like%20to%20upgrade%20my%20organization%20%22{{ event.organization.name|urlencode }}%22%20to%20the%20Starter%20plan%20to%20access%20the%20flyer%20generator%20feature.%0A%0AThank%20you!">
+            <a href="{% url 'events:flyer_config' org_slug=event.organization.slug event_slug=event.slug %}">
                 {% #button variant="default" %}
-                    <i data-lucide="sparkles" class="w-4 h-4 mr-2"></i>
-                    Request Upgrade
+                    <i data-lucide="settings" class="w-4 h-4 mr-2"></i>
+                    Configure & Accept Pay-Per-Use
                 {% /button %}
             </a>
             <a href="{% url 'events:public_detail' org_slug=event.organization.slug event_slug=event.slug %}">
