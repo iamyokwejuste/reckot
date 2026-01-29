@@ -1,21 +1,28 @@
-from django.template.loader import render_to_string
 from django.core.files.base import ContentFile
-from weasyprint import HTML, CSS
+from django.template.loader import render_to_string
+from weasyprint import CSS, HTML
 from weasyprint.text.fonts import FontConfiguration
+
 from apps.payments.models import Invoice, Payment
 
 
 def create_invoice(payment: Payment) -> Invoice:
-    if hasattr(payment, 'invoice'):
+    if hasattr(payment, "invoice"):
         return payment.invoice
 
     booking = payment.booking
     event = booking.event
     organization = event.organization
     user = booking.user
-
-    tickets = booking.tickets.select_related('ticket_type')
+    tickets = booking.tickets.select_related("ticket_type")
     subtotal = sum(t.ticket_type.price for t in tickets)
+
+    if user:
+        billing_name = user.get_full_name() or user.email
+        billing_email = user.email
+    else:
+        billing_name = booking.guest_name or booking.guest_email
+        billing_email = booking.guest_email
 
     invoice = Invoice.objects.create(
         payment=payment,
@@ -24,11 +31,11 @@ def create_invoice(payment: Payment) -> Invoice:
         service_fee=payment.service_fee,
         total_amount=payment.amount + payment.service_fee,
         currency=payment.currency,
-        billing_name=user.get_full_name() or user.email,
-        billing_email=user.email,
+        billing_name=billing_name,
+        billing_email=billing_email,
         organization_name=organization.name,
-        organization_email=organization.owner.email if organization.owner else '',
-        organization_logo=organization.logo.url if organization.logo else '',
+        organization_email=organization.owner.email if organization.owner else "",
+        organization_logo=organization.logo.url if organization.logo else "",
     )
 
     generate_invoice_pdf(invoice)
@@ -38,30 +45,33 @@ def create_invoice(payment: Payment) -> Invoice:
 def generate_invoice_pdf(invoice: Invoice) -> None:
     payment = invoice.payment
     booking = payment.booking
-    tickets = booking.tickets.select_related('ticket_type')
+    tickets = booking.tickets.select_related("ticket_type")
 
     ticket_items = []
     for ticket in tickets:
-        ticket_items.append({
-            'description': f"{ticket.ticket_type.name} - {booking.event.title}",
-            'quantity': 1,
-            'unit_price': ticket.ticket_type.price,
-            'total': ticket.ticket_type.price,
-        })
+        ticket_items.append(
+            {
+                "description": f"{ticket.ticket_type.name} - {booking.event.title}",
+                "quantity": 1,
+                "unit_price": ticket.ticket_type.price,
+                "total": ticket.ticket_type.price,
+            }
+        )
 
     context = {
-        'invoice': invoice,
-        'payment': payment,
-        'booking': booking,
-        'event': booking.event,
-        'ticket_items': ticket_items,
-        'organization': booking.event.organization,
+        "invoice": invoice,
+        "payment": payment,
+        "booking": booking,
+        "event": booking.event,
+        "ticket_items": ticket_items,
+        "organization": booking.event.organization,
     }
 
-    html_content = render_to_string('payments/invoice_pdf.html', context)
+    html_content = render_to_string("payments/invoice_pdf.html", context)
     font_config = FontConfiguration()
 
-    css = CSS(string='''
+    css = CSS(
+        string="""
         @page { size: A4; margin: 1.5cm; }
         body { font-family: sans-serif; font-size: 12px; line-height: 1.5; color: #1a1a1a; }
         .invoice-header { display: flex; justify-content: space-between; margin-bottom: 30px; }
@@ -82,7 +92,9 @@ def generate_invoice_pdf(invoice: Invoice) -> None:
         .total-final { font-size: 16px; font-weight: bold; border-top: 2px solid #111; padding-top: 10px; margin-top: 10px; }
         .status-paid { display: inline-block; background: #22c55e; color: white; padding: 4px 12px; border-radius: 4px; font-size: 11px; font-weight: 600; }
         .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; font-size: 11px; color: #666; text-align: center; }
-    ''', font_config=font_config)
+    """,
+        font_config=font_config,
+    )
 
     html = HTML(string=html_content)
     pdf_bytes = html.write_pdf(stylesheets=[css], font_config=font_config)
@@ -93,16 +105,16 @@ def generate_invoice_pdf(invoice: Invoice) -> None:
 
 def get_invoice_pdf(invoice: Invoice) -> bytes:
     if invoice.pdf_file:
-        invoice.pdf_file.open('rb')
+        invoice.pdf_file.open("rb")
         content = invoice.pdf_file.read()
         invoice.pdf_file.close()
         return content
 
     generate_invoice_pdf(invoice)
     if invoice.pdf_file:
-        invoice.pdf_file.open('rb')
+        invoice.pdf_file.open("rb")
         content = invoice.pdf_file.read()
         invoice.pdf_file.close()
         return content
 
-    return b''
+    return b""
