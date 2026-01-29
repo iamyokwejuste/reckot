@@ -17,7 +17,7 @@ from apps.events.flyer_service import generate_flyer
 from apps.orgs.models import Organization
 from apps.tickets.forms import BookingForm
 from apps.tickets.services import create_booking
-from apps.tickets.models import Ticket, Booking
+from apps.tickets.models import Ticket, Booking, TicketType
 from apps.payments.models import Payment
 
 
@@ -182,6 +182,41 @@ class TicketTypeManageView(LoginRequiredMixin, View):
             return redirect('events:manage_ticket_types', org_slug=org_slug, event_slug=event_slug)
         ticket_types = event.ticket_types.all()
         return render(request, 'events/manage_ticket_types.html', {'event': event, 'ticket_types': ticket_types, 'form': form})
+
+
+class TicketTypeEditView(LoginRequiredMixin, View):
+    def get(self, request, org_slug, event_slug, ticket_type_id):
+        event = get_object_or_404(Event, organization__slug=org_slug, slug=event_slug)
+        ticket_type = get_object_or_404(TicketType, id=ticket_type_id, event=event)
+        form = TicketTypeForm(instance=ticket_type)
+        return render(request, 'events/edit_ticket_type.html', {
+            'event': event,
+            'ticket_type': ticket_type,
+            'form': form
+        })
+
+    def post(self, request, org_slug, event_slug, ticket_type_id):
+        event = get_object_or_404(Event, organization__slug=org_slug, slug=event_slug)
+        ticket_type = get_object_or_404(TicketType, id=ticket_type_id, event=event)
+        form = TicketTypeForm(request.POST, instance=ticket_type)
+        if form.is_valid():
+            form.save()
+            return redirect('events:manage_ticket_types', org_slug=org_slug, event_slug=event_slug)
+        return render(request, 'events/edit_ticket_type.html', {
+            'event': event,
+            'ticket_type': ticket_type,
+            'form': form
+        })
+
+
+class TicketTypeDeleteView(LoginRequiredMixin, View):
+    def post(self, request, org_slug, event_slug, ticket_type_id):
+        event = get_object_or_404(Event, organization__slug=org_slug, slug=event_slug)
+        ticket_type = get_object_or_404(TicketType, id=ticket_type_id, event=event)
+        if ticket_type.tickets.exists():
+            return JsonResponse({'error': 'Cannot delete ticket type with existing tickets'}, status=400)
+        ticket_type.delete()
+        return redirect('events:manage_ticket_types', org_slug=org_slug, event_slug=event_slug)
 
 
 class EventDetailView(LoginRequiredMixin, View):

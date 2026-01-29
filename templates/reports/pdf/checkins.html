@@ -1,0 +1,44 @@
+{% extends "reports/pdf/base.html" %}
+
+{% block content %}
+<h1>Check-in Report</h1>
+
+<div class="summary-section">
+    <div class="stat-card">
+        <div class="stat-value">{{ data|length }}</div>
+        <div class="stat-label">Total Check-ins</div>
+    </div>
+</div>
+
+<h2>Check-in Details</h2>
+<table>
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Ticket Type</th>
+            <th>Checked In At</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for checkin in data %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ checkin.name }}</td>
+            <td>{{ checkin.email }}</td>
+            <td>{{ checkin.ticket_type }}</td>
+            <td>{{ checkin.checked_in_at }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" class="text-muted">No check-ins recorded</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="summary-section text-muted" style="margin-top: 40px; font-size: 10px;">
+    <p>This report was generated automatically by Reckot. Data is accurate as of {{ generated_at|date:"F j, Y" }} at {{ generated_at|time:"g:i A" }}.</p>
+</div>
+{% endblock %}

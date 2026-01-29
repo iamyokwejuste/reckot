@@ -7,6 +7,7 @@ from decimal import Decimal
 from apps.payments.models import Payment, PaymentProvider
 from apps.payments.gateways import GatewayManager
 from apps.payments.gateways.base import PaymentStatus
+from apps.payments.invoice_service import create_invoice
 from apps.tickets.models import Booking
 
 logger = logging.getLogger(__name__)
@@ -104,8 +105,6 @@ def verify_and_confirm_payment(payment: Payment) -> dict:
 
 
 def confirm_payment(payment: Payment, external_ref: str = '') -> Payment:
-    from apps.payments.invoice_service import create_invoice
-
     with transaction.atomic():
         payment = Payment.objects.select_for_update().get(pk=payment.pk)
         if payment.status != Payment.Status.PENDING:

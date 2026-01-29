@@ -1,6 +1,6 @@
 from django.db.models import Sum
 from apps.events.models import Event
-from apps.tickets.models import Ticket
+from apps.tickets.models import Ticket, Booking
 from apps.checkin.models import CheckIn, SwagCollection
 from apps.payments.models import Payment
 
@@ -38,7 +38,8 @@ def get_event_summary(event_id: int) -> dict:
 
 def get_rsvp_data(event_id: int, mask_emails: bool = True):
     tickets = Ticket.objects.filter(
-        ticket_type__event_id=event_id
+        booking__event_id=event_id,
+        booking__status=Booking.Status.CONFIRMED
     ).select_related(
         'booking__user', 'ticket_type'
     ).values(
@@ -47,20 +48,22 @@ def get_rsvp_data(event_id: int, mask_emails: bool = True):
         'booking__user__first_name',
         'booking__user__last_name',
         'ticket_type__name',
+        'attendee_name',
+        'attendee_email',
         'is_checked_in',
         'checked_in_at',
         'booking__created_at'
     )
     result = []
     for row in tickets:
-        email = row['booking__user__email']
-        if mask_emails:
+        email = row['attendee_email'] or row['booking__user__email']
+        name = row['attendee_name'] or f"{row['booking__user__first_name'] or ''} {row['booking__user__last_name'] or ''}".strip()
+        if mask_emails and email:
             email = mask_email(email)
         result.append({
-            'code': str(row['code']),
-            'email': email,
-            'first_name': row['booking__user__first_name'] or '',
-            'last_name': row['booking__user__last_name'] or '',
+            'code': str(row['code'])[:8],
+            'name': name or 'N/A',
+            'email': email or 'N/A',
             'ticket_type': row['ticket_type__name'],
             'checked_in': 'Yes' if row['is_checked_in'] else 'No',
             'checked_in_at': str(row['checked_in_at'] or ''),

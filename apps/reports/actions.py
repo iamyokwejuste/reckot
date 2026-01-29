@@ -1,8 +1,9 @@
 from django.views import View
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
 from django.http import FileResponse, Http404
-from django.db.models import Sum, Count, Q, F
+from django.db.models import Sum, Count, Q
 from django.db.models.functions import TruncDate
 from django.utils import timezone
 from django.utils.timesince import timesince
@@ -288,6 +289,47 @@ class GenerateReportView(LoginRequiredMixin, View):
             return render(request, 'reports/_error.html', {'error': str(e)})
 
 
+class SalesTimelineView(LoginRequiredMixin, View):
+    def get(self, request, org_slug, event_slug):
+        event = get_object_or_404(Event, organization__slug=org_slug, slug=event_slug)
+        period = request.GET.get('period', '7d')
+
+        if period == '30d':
+            days = 30
+        elif period == 'all':
+            days = 365
+        else:
+            days = 7
+
+        start_date = timezone.now() - timedelta(days=days)
+
+        sales_timeline = Ticket.objects.filter(
+            booking__event=event,
+            booking__status=Booking.Status.CONFIRMED,
+            booking__created_at__gte=start_date
+        ).annotate(
+            date=TruncDate('booking__created_at')
+        ).values('date').annotate(
+            count=Count('id')
+        ).order_by('date')
+
+        timeline_dict = {item['date']: item['count'] for item in sales_timeline}
+        sales_timeline_filled = []
+        max_daily_sales = 0
+
+        for i in range(days):
+            date = (start_date + timedelta(days=i)).date()
+            count = timeline_dict.get(date, 0)
+            sales_timeline_filled.append({'date': date, 'count': count})
+            if count > max_daily_sales:
+                max_daily_sales = count
+
+        return render(request, 'reports/_sales_timeline.html', {
+            'sales_timeline': sales_timeline_filled,
+            'max_daily_sales': max_daily_sales,
+        })
+
+
 class DownloadReportView(LoginRequiredMixin, View):
     def get(self, request, export_ref):
         export = get_object_or_404(ReportExport, reference=export_ref)
@@ -385,18 +427,14 @@ class ExportCenterView(LoginRequiredMixin, View):
 
 class ExportGenerateView(LoginRequiredMixin, View):
     def post(self, request, org_slug, event_slug):
-        from django.http import HttpResponseRedirect
         event = get_object_or_404(Event, organization__slug=org_slug, slug=event_slug)
         report_type = request.POST.get('report_type')
         format_type = request.POST.get('format', 'PDF')
         mask_emails = request.POST.get('mask_emails', 'on') == 'on'
 
         if report_type not in dict(ReportExport.Type.choices):
-            return render(request, 'reports/export_center.html', {
-                'event': event,
-                'error': 'Invalid report type',
-                'recent_exports': get_recent_exports(event.id),
-            })
+            messages.error(request, 'Invalid report type')
+            return redirect('reports:export_center', org_slug=org_slug, event_slug=event_slug)
 
         try:
             if format_type == 'PDF':
@@ -408,10 +446,7 @@ class ExportGenerateView(LoginRequiredMixin, View):
             else:
                 export = generate_csv_export(event, report_type, request.user, mask_emails)
 
-            return HttpResponseRedirect(f'/reports/download/{export.reference}/')
+            return redirect('reports:download', export_ref=export.reference)
         except Exception as e:
-            return render(request, 'reports/export_center.html', {
-                'event': event,
-                'error': str(e),
-                'recent_exports': get_recent_exports(event.id),
-            })
+            messages.error(request, f'Export failed: {str(e)}')
+            return redirect('reports:export_center', org_slug=org_slug, event_slug=event_slug)

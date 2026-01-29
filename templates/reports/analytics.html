@@ -19,7 +19,7 @@
 {% endblock %}
 
 {% block header_actions %}
-<div class="flex items-center gap-2" x-data="{ showExportModal: false }">
+<div class="flex items-center gap-2">
     <div class="custom-select-wrapper w-40" x-data="{ open: false, value: '30d', label: 'Last 30 days' }">
         <input type="hidden" name="date_range" :value="value">
         <button type="button" @click="open = !open" @click.outside="open = false"
@@ -48,11 +48,15 @@
             </div>
         </div>
     </div>
-    {% #button variant="default" size="sm" attrs='@click="showExportModal = true"' %}
+    {% #button variant="default" size="sm" attrs='@click="$dispatch(\'open-export-modal\')"' %}
         <i data-lucide="download" class="h-4 w-4"></i>
         <span class="hidden sm:inline">Export</span>
     {% /button %}
+</div>
+{% endblock %}
 
+{% block content %}
+<div class="space-y-6" x-data="{ showExportModal: false }" @open-export-modal.window="showExportModal = true">
     {% #modal trigger="showExportModal" title="Export Event Data" description="Select an event to export data from" size="md" %}
         {% if all_events %}
         <div class="space-y-2 max-h-80 overflow-y-auto">
@@ -79,11 +83,6 @@
         </div>
         {% endif %}
     {% /modal %}
-</div>
-{% endblock %}
-
-{% block content %}
-<div class="space-y-6">
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div class="stat-card">
             <div class="flex items-center justify-between">

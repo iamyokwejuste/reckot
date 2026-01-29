@@ -5,7 +5,7 @@ from django.views import View
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -56,7 +56,6 @@ class CheckoutView(LoginRequiredMixin, View):
         coupon_code = request.POST.get('coupon_code', '').strip().upper()
         coupon = None
         if coupon_code:
-            from django.db.models import Q
             coupon = Coupon.objects.filter(
                 Q(code=coupon_code),
                 Q(event=event) | Q(event__isnull=True, organization=event.organization),

@@ -4,6 +4,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.db.models import Count
 from apps.tickets.models import Ticket, Booking
+from apps.tickets.services import generate_ticket_pdf, generate_booking_tickets_pdf
 
 
 class TicketListView(LoginRequiredMixin, View):
@@ -45,7 +46,6 @@ class TicketPDFView(LoginRequiredMixin, View):
             booking__user=request.user
         )
 
-        from apps.tickets.services import generate_ticket_pdf
         pdf_content = generate_ticket_pdf(ticket)
 
         response = HttpResponse(pdf_content, content_type='application/pdf')
@@ -61,7 +61,6 @@ class BookingTicketsPDFView(LoginRequiredMixin, View):
             user=request.user
         )
 
-        from apps.tickets.services import generate_booking_tickets_pdf
         pdf_content = generate_booking_tickets_pdf(booking)
 
         response = HttpResponse(pdf_content, content_type='application/pdf')

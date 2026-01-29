@@ -43,34 +43,32 @@
                    {% else %}max-w-md{% endif %}
                    {{ class }}"
         >
-            {# Header #}
-            {% if title or show_close|default:True %}
-            <div class="flex items-center justify-between p-4 {% if title %}border-b border-border{% endif %}">
+            {# Header with close button #}
+            <div class="flex items-start justify-between p-4 {% if title %}border-b border-border{% endif %}">
                 {% if title %}
-                <div>
+                <div class="flex-1 pr-4">
                     <h3 class="text-lg font-semibold">{{ title }}</h3>
                     {% if description %}
                     <p class="text-sm text-muted-foreground mt-0.5">{{ description }}</p>
                     {% endif %}
                 </div>
                 {% else %}
-                <div></div>
+                <div class="flex-1"></div>
                 {% endif %}
                 {% if show_close|default:True %}
                 <button
                     type="button"
                     @click="{{ trigger|default:'open' }} = false"
-                    class="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                    class="shrink-0 p-2 -mr-2 -mt-1 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
                     aria-label="Close"
                 >
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
                 {% endif %}
             </div>
-            {% endif %}
 
             {# Content #}
-            <div class="p-4 {% if title %}pt-4{% else %}pt-6{% endif %}">
+            <div class="p-4 {% if not title %}pt-0{% endif %}">
                 {{ children }}
             </div>
 

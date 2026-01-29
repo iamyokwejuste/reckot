@@ -1,10 +1,14 @@
 from django.db import transaction
 from django.template.loader import render_to_string
+from django.utils import timezone
 from decimal import Decimal
 from io import BytesIO
 import qrcode
 import base64
+from weasyprint import HTML, CSS
+from weasyprint.text.fonts import FontConfiguration
 from apps.tickets.models import TicketType, Booking, Ticket, TicketQuestionAnswer
+from apps.events.models import CouponUsage, CheckoutQuestion
 
 
 def create_booking(user, ticket_type: TicketType, quantity: int):
@@ -22,21 +26,6 @@ def create_booking(user, ticket_type: TicketType, quantity: int):
 
 
 def create_multi_ticket_booking(user, event, ticket_selections: dict, question_answers: dict = None, coupon=None):
-    """
-    Create a booking with multiple ticket types.
-
-    Args:
-        user: The user making the booking
-        event: The event being booked
-        ticket_selections: Dict of {ticket_type_id: quantity}
-        question_answers: Dict of {question_id: answer}
-        coupon: Optional Coupon object to apply discount
-
-    Returns:
-        tuple: (booking, error_message)
-    """
-    from django.utils import timezone
-
     with transaction.atomic():
         total_tickets = sum(ticket_selections.values())
         if total_tickets == 0:
@@ -91,7 +80,6 @@ def create_multi_ticket_booking(user, event, ticket_selections: dict, question_a
         )
 
         if coupon and discount_amount > 0:
-            from apps.events.models import CouponUsage
             CouponUsage.objects.create(
                 coupon=coupon,
                 booking=booking,
@@ -109,7 +97,6 @@ def create_multi_ticket_booking(user, event, ticket_selections: dict, question_a
             created_tickets.append(ticket)
 
         if question_answers:
-            from apps.events.models import CheckoutQuestion
             for question_id, answer in question_answers.items():
                 if not answer:
                     continue
@@ -130,7 +117,6 @@ def create_multi_ticket_booking(user, event, ticket_selections: dict, question_a
 
 
 def generate_ticket_qr_code(ticket):
-    """Generate a QR code for a ticket."""
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_M,
@@ -148,13 +134,6 @@ def generate_ticket_qr_code(ticket):
 
 
 def generate_ticket_pdf(ticket):
-    """Generate a PDF for a single ticket."""
-    try:
-        from weasyprint import HTML, CSS
-        from weasyprint.text.fonts import FontConfiguration
-    except ImportError:
-        raise ImportError('weasyprint is required for PDF tickets. Install with: pip install weasyprint')
-
     qr_code_data = generate_ticket_qr_code(ticket)
     event = ticket.ticket_type.event
     org = event.organization
@@ -265,13 +244,6 @@ def generate_ticket_pdf(ticket):
 
 
 def generate_booking_tickets_pdf(booking):
-    """Generate a PDF with all tickets from a booking."""
-    try:
-        from weasyprint import HTML, CSS
-        from weasyprint.text.fonts import FontConfiguration
-    except ImportError:
-        raise ImportError('weasyprint is required for PDF tickets. Install with: pip install weasyprint')
-
     tickets = booking.tickets.select_related('ticket_type', 'ticket_type__event', 'ticket_type__event__organization')
     event = booking.event
     org = event.organization

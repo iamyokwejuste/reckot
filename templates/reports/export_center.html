@@ -3,6 +3,22 @@
 
 {% block title %}Export Center - {{ event.title }} - Reckot{% endblock %}
 
+{% block breadcrumbs %}
+{% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug as event_dashboard_url %}
+{% url 'reports:dashboard' org_slug=event.organization.slug event_slug=event.slug as reports_url %}
+{% #breadcrumb class="mb-4" %}
+    {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item href="/events/" %}Events{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item :href="event_dashboard_url" %}{{ event.title|truncatewords:3 }}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item :href="reports_url" %}Reports{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item %}Export Center{% /breadcrumb_item %}
+{% /breadcrumb %}
+{% endblock %}
+
 {% block header_title %}
 <div>
     <h1 class="text-lg font-semibold">Export Center</h1>
@@ -146,7 +162,7 @@
     </div>
 
     <form method="post" action="{% url 'reports:export_generate' event.organization.slug event.slug %}"
-          @submit="generating = true" x-show="selectedType" x-cloak>
+          @submit="generating = true" x-show="selectedType" x-cloak hx-boost="false">
         {% csrf_token %}
         <input type="hidden" name="report_type" :value="selectedType">
         <input type="hidden" name="format" :value="selectedFormat">
@@ -184,7 +200,7 @@
                         <p class="text-xs text-muted-foreground">{{ export.created_at|date:"M j, Y g:i A" }}</p>
                     </div>
                 </div>
-                <a href="{% url 'reports:download' export.reference %}">
+                <a href="{% url 'reports:download' export.reference %}" hx-boost="false">
                     {% #button variant="outline" size="sm" %}
                         <i data-lucide="download" class="w-4 h-4"></i>
                         Download

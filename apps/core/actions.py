@@ -1,14 +1,18 @@
 import os
+import re
 
 from django.shortcuts import render, redirect
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import login
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
 from django.conf import settings
 
-from apps.core.models import OTPVerification
+from apps.core.models import OTPVerification, User
 from apps.core.tasks import resend_otp_task
+from apps.core.services.notifications import NotificationService
+from apps.events.models import Event
 
 
 def robots_txt(request):
@@ -42,15 +46,21 @@ def service_worker(request):
 
 class HomeView(View):
     def get(self, request):
-        from apps.events.models import Event
         featured_events = Event.objects.filter(
             is_featured=True,
             is_public=True,
             state=Event.State.PUBLISHED
         ).select_related('organization').order_by('feature_order', '-feature_approved_at')[:5]
 
+        user_has_events = False
+        if request.user.is_authenticated:
+            user_has_events = Event.objects.filter(
+                organization__members=request.user
+            ).exists()
+
         return render(request, 'core/home.html', {
             'featured_events': featured_events,
+            'user_has_events': user_has_events,
         })
 
 
@@ -149,7 +159,6 @@ class SettingsView(LoginRequiredMixin, View):
 
 class PhoneLoginRequestView(View):
     def post(self, request):
-        from apps.core.models import User
         phone = request.POST.get('phone_number', '').strip()
         if not phone:
             return HttpResponse(
@@ -172,18 +181,14 @@ class PhoneLoginRequestView(View):
         )
 
     def _normalize_phone(self, phone):
-        import re
         return re.sub(r'[\s\-\(\)]', '', phone)
 
     def _send_otp_sms(self, phone, code):
-        from apps.core.services.notifications import NotificationService
         NotificationService.send_otp_sms(phone, code)
 
 
 class PhoneLoginVerifyView(View):
     def post(self, request):
-        from django.contrib.auth import login
-        from apps.core.models import User
         phone = request.POST.get('phone_number', '').strip()
         code = request.POST.get('otp_code', '').strip()
 
@@ -223,13 +228,11 @@ class PhoneLoginVerifyView(View):
         return redirect('account_login')
 
     def _normalize_phone(self, phone):
-        import re
         return re.sub(r'[\s\-\(\)]', '', phone)
 
 
 class PhoneSignupRequestView(View):
     def post(self, request):
-        from apps.core.models import User
         phone = request.POST.get('phone_number', '').strip()
         if not phone:
             return HttpResponse(
@@ -252,18 +255,14 @@ class PhoneSignupRequestView(View):
         )
 
     def _normalize_phone(self, phone):
-        import re
         return re.sub(r'[\s\-\(\)]', '', phone)
 
     def _send_otp_sms(self, phone, code):
-        from apps.core.services.notifications import NotificationService
         NotificationService.send_otp_sms(phone, code)
 
 
 class PhoneSignupVerifyView(View):
     def post(self, request):
-        from django.contrib.auth import login
-        from apps.core.models import User
         phone = request.POST.get('phone_number', '').strip()
         code = request.POST.get('otp_code', '').strip()
         password1 = request.POST.get('password1', '')
@@ -304,5 +303,4 @@ class PhoneSignupVerifyView(View):
         return redirect('home')
 
     def _normalize_phone(self, phone):
-        import re
         return re.sub(r'[\s\-\(\)]', '', phone)

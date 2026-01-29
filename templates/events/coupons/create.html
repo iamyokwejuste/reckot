@@ -216,12 +216,10 @@
             <p class="text-sm text-muted-foreground -mt-2">Both fields are optional. Defaults to starting today with no end date.</p>
 
             <div class="grid gap-4 sm:grid-cols-2">
-                {% #datepicker name="valid_from" id="valid_from" label="Valid From" placeholder="Starts today by default" enable_time=True %}
-                {% /datepicker %}
+                {% #datepicker name="valid_from" id="valid_from" label="Valid From" placeholder="Starts today by default" enable_time=True %}{% /datepicker %}
 
                 <div>
-                    {% #datepicker name="valid_until" id="valid_until" label="Valid Until" placeholder="No end date" enable_time=True %}
-                    {% /datepicker %}
+                    {% #datepicker name="valid_until" id="valid_until" label="Valid Until" placeholder="No end date" enable_time=True %}{% /datepicker %}
                     <p class="text-xs text-muted-foreground mt-1" x-show="selectedEvent" x-cloak>Cannot be after the event end date</p>
                 </div>
             </div>

@@ -50,6 +50,27 @@
 
 {% block content %}
 <div class="space-y-6">
+    {% if event.state != 'PUBLISHED' %}
+    <div class="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-start gap-3">
+                <i data-lucide="alert-circle" class="h-5 w-5 text-amber-500 shrink-0 mt-0.5"></i>
+                <div>
+                    <p class="font-medium text-amber-600">Your event is not published yet</p>
+                    <p class="text-sm text-muted-foreground">Publish your event to start selling tickets and allow attendees to view it.</p>
+                </div>
+            </div>
+            <form method="post" action="{% url 'events:toggle_publish' event.organization.slug event.slug %}">
+                {% csrf_token %}
+                {% #button type="submit" variant="default" size="sm" %}
+                    <i data-lucide="rocket" class="w-4 h-4 mr-1"></i>
+                    Publish Now
+                {% /button %}
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div class="stat-card">
             <div class="flex items-center gap-3">

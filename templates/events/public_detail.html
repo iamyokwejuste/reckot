@@ -90,8 +90,64 @@
             </div>
 
             <div class="lg:col-span-1">
-                <div class="card p-6 sticky top-24">
+                <div class="card p-6 sticky top-24"
+                     x-data="{
+                         eventDate: new Date('{{ event.start_at|date:'c' }}'),
+                         now: new Date(),
+                         days: 0,
+                         hours: 0,
+                         minutes: 0,
+                         seconds: 0,
+                         isPast: false,
+                         init() {
+                             this.updateCountdown();
+                             setInterval(() => this.updateCountdown(), 1000);
+                         },
+                         updateCountdown() {
+                             this.now = new Date();
+                             const diff = this.eventDate - this.now;
+                             if (diff <= 0) {
+                                 this.isPast = true;
+                                 this.days = 0;
+                                 this.hours = 0;
+                                 this.minutes = 0;
+                                 this.seconds = 0;
+                             } else {
+                                 this.isPast = false;
+                                 this.days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                                 this.hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                 this.minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                                 this.seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                             }
+                         }
+                     }">
                     <h3 class="font-semibold mb-4">Tickets</h3>
+
+                    <div class="mb-4 p-3 rounded-lg bg-muted/50 border border-border" x-show="!isPast">
+                        <div class="text-xs text-muted-foreground text-center mb-2">Event starts in</div>
+                        <div class="grid grid-cols-4 gap-2 text-center">
+                            <div>
+                                <div class="text-xl font-bold" x-text="days">0</div>
+                                <div class="text-xs text-muted-foreground">days</div>
+                            </div>
+                            <div>
+                                <div class="text-xl font-bold" x-text="hours">0</div>
+                                <div class="text-xs text-muted-foreground">hrs</div>
+                            </div>
+                            <div>
+                                <div class="text-xl font-bold" x-text="minutes">0</div>
+                                <div class="text-xs text-muted-foreground">min</div>
+                            </div>
+                            <div>
+                                <div class="text-xl font-bold" x-text="seconds">0</div>
+                                <div class="text-xs text-muted-foreground">sec</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4 p-3 rounded-lg bg-primary/10 border border-primary/20 text-center" x-show="isPast" x-cloak>
+                        <div class="text-sm font-medium text-primary">Event has started!</div>
+                    </div>
 
                     {% if ticket_types %}
                     <form method="post" action="{% url 'payments:checkout' %}" class="space-y-4" hx-boost="false"

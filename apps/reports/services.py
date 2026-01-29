@@ -1,12 +1,17 @@
 import csv
+import json
 from io import StringIO, BytesIO
 from datetime import datetime
 from django.core.files.base import ContentFile
 from django.template.loader import render_to_string
 from django.db.models import Sum, Count
 from openpyxl import Workbook
+from weasyprint import HTML, CSS
+from weasyprint.text.fonts import FontConfiguration
 from apps.reports.models import ReportExport
 from apps.reports.queries import get_rsvp_data, get_payment_data, get_checkin_data, get_swag_data
+from apps.payments.models import Payment
+from apps.tickets.models import Ticket, Booking
 
 
 DATA_FETCHERS = {
@@ -18,9 +23,6 @@ DATA_FETCHERS = {
 
 
 def get_financial_summary(event):
-    from apps.payments.models import Payment
-    from apps.tickets.models import Ticket, Booking
-
     payments = Payment.objects.filter(
         booking__event=event,
         status=Payment.Status.CONFIRMED
@@ -50,8 +52,6 @@ def get_financial_summary(event):
 
 
 def get_ticket_sales_data(event):
-    from apps.tickets.models import Ticket, Booking
-
     tickets = Ticket.objects.filter(
         booking__event=event,
         booking__status=Booking.Status.CONFIRMED
@@ -131,8 +131,6 @@ def get_recent_exports(event_id: int, limit: int = 10):
 
 
 def generate_json_export(event, report_type: str, user, mask_emails: bool = True) -> ReportExport:
-    import json
-
     if report_type == 'FINANCIAL':
         data = get_financial_summary(event)
         # Convert to JSON-serializable format
@@ -201,12 +199,6 @@ def generate_json_export(event, report_type: str, user, mask_emails: bool = True
 
 
 def generate_pdf_export(event, report_type: str, user, mask_emails: bool = True) -> ReportExport:
-    try:
-        from weasyprint import HTML, CSS
-        from weasyprint.text.fonts import FontConfiguration
-    except ImportError:
-        raise ImportError('weasyprint is required for PDF export. Install it with: pip install weasyprint')
-
     template_map = {
         'RSVP': 'reports/pdf/attendees.html',
         'PAYMENTS': 'reports/pdf/payments.html',

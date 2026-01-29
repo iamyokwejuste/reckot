@@ -100,13 +100,13 @@ class TicketTypeAdmin(admin.ModelAdmin):
 
 @admin.register(EventFlyerConfig)
 class EventFlyerConfigAdmin(admin.ModelAdmin):
-    list_display = ['event', 'is_enabled', 'flyers_generated', 'pay_per_use_accepted']
+    list_display = ['event', 'is_enabled', 'pay_per_use_accepted', 'template_change_count']
     list_filter = ['is_enabled', 'pay_per_use_accepted']
     search_fields = ['event__title']
 
 
 @admin.register(CheckoutQuestion)
 class CheckoutQuestionAdmin(admin.ModelAdmin):
-    list_display = ['label', 'event', 'question_type', 'is_required', 'order']
-    list_filter = ['question_type', 'is_required']
-    search_fields = ['label', 'event__title']
+    list_display = ['question', 'event', 'field_type', 'is_required', 'order']
+    list_filter = ['field_type', 'is_required']
+    search_fields = ['question', 'event__title']

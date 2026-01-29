@@ -8,12 +8,13 @@
 {% endblock %}
 
 {% block breadcrumbs %}
+{% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug as event_dashboard_url %}
 {% #breadcrumb class="mb-4" %}
     {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
     {% #breadcrumb_item href="/events/" %}Events{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item %}{{ event.title|truncatewords:3 }}{% /breadcrumb_item %}
+    {% #breadcrumb_item :href="event_dashboard_url" %}{{ event.title|truncatewords:3 }}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
     {% #breadcrumb_item %}Ticket Types{% /breadcrumb_item %}
 {% /breadcrumb %}
@@ -50,6 +51,7 @@
                             <th class="text-left p-4 font-medium">Sold</th>
                             <th class="text-left p-4 font-medium">Sales Window</th>
                             <th class="text-left p-4 font-medium">Status</th>
+                            <th class="text-right p-4 font-medium">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-border">
@@ -90,6 +92,13 @@
                                     {% else %}
                                         <span class="inline-flex items-center rounded-full border border-border bg-muted text-muted-foreground px-2 py-0.5 text-xs font-medium">Inactive</span>
                                     {% endif %}
+                                </td>
+                                <td class="p-4 text-right">
+                                    <a href="{% url 'events:edit_ticket_type' org_slug=event.organization.slug event_slug=event.slug ticket_type_id=tt.id %}">
+                                        {% #button variant="ghost" size="sm" %}
+                                            <i data-lucide="pencil" class="w-4 h-4"></i>
+                                        {% /button %}
+                                    </a>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -155,11 +164,9 @@
                     <h3 class="text-sm font-semibold mb-4">Sales Window (Early Bird / Limited Time)</h3>
                     <p class="text-xs text-muted-foreground mb-4">Leave empty for tickets to be always available. Set dates to create early bird or limited time offers.</p>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        {% #datepicker name="sales_start" id="id_sales_start" label="Sales Start" placeholder="Select date and time" value=form.sales_start.value|default:'' enable_time=True min_date="today" help_text="When ticket sales begin" %}
-                        {% /datepicker %}
+                        {% #datepicker name="sales_start" id="id_sales_start" label="Sales Start" placeholder="Select date and time" value=form.sales_start.value|default:'' enable_time=True min_date="today" help_text="When ticket sales begin" %}{% /datepicker %}
 
-                        {% #datepicker name="sales_end" id="id_sales_end" label="Sales End" placeholder="Select date and time" value=form.sales_end.value|default:'' enable_time=True min_date="today" help_text="When ticket sales end (e.g., early bird deadline)" %}
-                        {% /datepicker %}
+                        {% #datepicker name="sales_end" id="id_sales_end" label="Sales End" placeholder="Select date and time" value=form.sales_end.value|default:'' enable_time=True min_date="today" help_text="When ticket sales end (e.g., early bird deadline)" %}{% /datepicker %}
                     </div>
                 </div>
 

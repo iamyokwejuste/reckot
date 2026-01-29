@@ -1,7 +1,7 @@
-from io import BytesIO
 from django.template.loader import render_to_string
 from django.core.files.base import ContentFile
-from django.conf import settings
+from weasyprint import HTML, CSS
+from weasyprint.text.fonts import FontConfiguration
 from apps.payments.models import Invoice, Payment
 
 
@@ -36,12 +36,6 @@ def create_invoice(payment: Payment) -> Invoice:
 
 
 def generate_invoice_pdf(invoice: Invoice) -> None:
-    try:
-        from weasyprint import HTML, CSS
-        from weasyprint.text.fonts import FontConfiguration
-    except ImportError:
-        return
-
     payment = invoice.payment
     booking = payment.booking
     tickets = booking.tickets.select_related('ticket_type')

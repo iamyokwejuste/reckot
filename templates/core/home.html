@@ -378,7 +378,7 @@
         </div>
         {% url 'account_signup' as signup_url %}
         <div class="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            {% #pricing_card name="Free" fee="2%" description="Perfect for getting started" href=signup_url %}
+            {% #pricing_card name="Free" fee="0%" description="Free tickets, zero fees" href=signup_url %}
                 {% #pricing_feature %}2 events per month{% /pricing_feature %}
                 {% #pricing_feature %}Up to 100 tickets per event{% /pricing_feature %}
                 {% #pricing_feature %}QR code check-in{% /pricing_feature %}
@@ -393,7 +393,7 @@
                 {% #pricing_feature %}MTN MoMo & Orange Money{% /pricing_feature %}
                 {% #pricing_feature %}Advanced analytics{% /pricing_feature %}
                 {% #pricing_feature %}CSV, Excel & PDF exports{% /pricing_feature %}
-                {% #pricing_feature highlight=True %}I Will Be There flyers{% /pricing_feature %}
+                {% #pricing_feature highlight=True %}I Will Be There flyers (25 XAF/flyer){% /pricing_feature %}
             {% /pricing_card %}
 
             {% #pricing_card name="Enterprise" custom_price="Custom" description="For large organizations" contact_href="mailto:reckot@yokwejuste.me" highlight=True delay="2" offset_mobile=True %}
@@ -409,6 +409,7 @@
     </div>
 </section>
 
+{% if not user_has_events %}
 <section class="py-20 md:py-28">
     <div class="container">
         <div class="rounded-2xl border border-border bg-card p-8 md:p-12 lg:p-16 text-center" x-data x-intersect.once="$el.classList.add('animate-in')">
@@ -423,4 +424,5 @@
         </div>
     </div>
 </section>
+{% endif %}
 {% endblock %}

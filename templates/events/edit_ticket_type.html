@@ -1,0 +1,142 @@
+{% extends 'layouts/dashboard.html' %}
+{% load slippers %}
+
+{% block title %}Edit {{ ticket_type.name }} - {{ event.title }} - Reckot{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+{% endblock %}
+
+{% block breadcrumbs %}
+{% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug as event_dashboard_url %}
+{% url 'events:manage_ticket_types' org_slug=event.organization.slug event_slug=event.slug as tickets_url %}
+{% #breadcrumb class="mb-4" %}
+    {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item href="/events/" %}Events{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item :href="event_dashboard_url" %}{{ event.title|truncatewords:3 }}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item :href="tickets_url" %}Ticket Types{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item %}Edit{% /breadcrumb_item %}
+{% /breadcrumb %}
+{% endblock %}
+
+{% block header_title %}
+<div>
+    <h1 class="text-lg font-semibold">Edit Ticket Type</h1>
+    <p class="text-sm text-muted-foreground">{{ ticket_type.name }}</p>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'events:manage_ticket_types' org_slug=event.organization.slug event_slug=event.slug %}">
+    {% #button variant="outline" size="sm" %}
+        <i data-lucide="arrow-left" class="mr-2 h-4 w-4"></i>
+        Back
+    {% /button %}
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl">
+    <div class="card p-6 sm:p-8">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+
+            <div>
+                <label for="id_name" class="block text-sm font-medium mb-2">Ticket Name</label>
+                <input type="text" name="name" id="id_name" value="{{ form.name.value|default:'' }}"
+                       placeholder="e.g., General Admission, VIP, Early Bird" required
+                       class="input w-full">
+            </div>
+
+            <div>
+                <label for="id_description" class="block text-sm font-medium mb-2">Description (optional)</label>
+                <textarea name="description" id="id_description" rows="2"
+                          placeholder="Describe what's included with this ticket type"
+                          class="input w-full">{{ form.description.value|default:'' }}</textarea>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div>
+                    <label for="id_price" class="block text-sm font-medium mb-2">Price (XAF)</label>
+                    <input type="number" name="price" id="id_price" value="{{ form.price.value|default:'0' }}"
+                           step="100" min="0" placeholder="0 for free tickets" required
+                           class="input w-full">
+                    <p class="text-xs text-muted-foreground mt-1">Set to 0 for free tickets</p>
+                </div>
+
+                <div>
+                    <label for="id_quantity" class="block text-sm font-medium mb-2">Quantity Available</label>
+                    <input type="number" name="quantity" id="id_quantity" value="{{ form.quantity.value|default:'' }}"
+                           min="1" placeholder="100" required
+                           class="input w-full">
+                </div>
+
+                <div>
+                    <label for="id_max_per_order" class="block text-sm font-medium mb-2">Max Per Order</label>
+                    <input type="number" name="max_per_order" id="id_max_per_order" value="{{ form.max_per_order.value|default:'10' }}"
+                           min="1" max="100" placeholder="10"
+                           class="input w-full">
+                    <p class="text-xs text-muted-foreground mt-1">Limit per transaction</p>
+                </div>
+            </div>
+
+            <div class="border-t border-border pt-6">
+                <h3 class="text-sm font-semibold mb-4">Sales Window (Early Bird / Limited Time)</h3>
+                <p class="text-xs text-muted-foreground mb-4">Leave empty for tickets to be always available. Set dates to create early bird or limited time offers.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {% #datepicker name="sales_start" id="id_sales_start" label="Sales Start" placeholder="Select date and time" value=form.sales_start.value|default:'' enable_time=True help_text="When ticket sales begin" %}{% /datepicker %}
+
+                    {% #datepicker name="sales_end" id="id_sales_end" label="Sales End" placeholder="Select date and time" value=form.sales_end.value|default:'' enable_time=True help_text="When ticket sales end (e.g., early bird deadline)" %}{% /datepicker %}
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <input type="checkbox" name="is_active" id="id_is_active"
+                       {% if form.is_active.value != False %}checked{% endif %}
+                       class="h-4 w-4 rounded border-border">
+                <label for="id_is_active" class="text-sm font-medium">Active</label>
+                <span class="text-xs text-muted-foreground ml-2">Uncheck to hide this ticket type from buyers</span>
+            </div>
+
+            {% if form.errors %}
+                <div class="rounded-lg bg-destructive/10 border border-destructive/20 p-4 text-sm text-destructive">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <p>{{ field.label }}: {{ error }}</p>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="flex items-center justify-between pt-2">
+                <div>
+                    {% if not ticket_type.tickets.exists %}
+                    <form method="post" action="{% url 'events:delete_ticket_type' org_slug=event.organization.slug event_slug=event.slug ticket_type_id=ticket_type.id %}" class="inline" onsubmit="return confirm('Are you sure you want to delete this ticket type?');">
+                        {% csrf_token %}
+                        {% #button type="submit" variant="ghost" class="text-destructive hover:text-destructive hover:bg-destructive/10" %}
+                            <i data-lucide="trash-2" class="mr-2 h-4 w-4"></i>
+                            Delete
+                        {% /button %}
+                    </form>
+                    {% endif %}
+                </div>
+                {% #button type="submit" variant="default" %}
+                    <i data-lucide="check" class="mr-2 h-4 w-4"></i>
+                    Save Changes
+                {% /button %}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+{% include "partials/datepicker_init.html" %}
+{% endblock %}
