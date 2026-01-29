@@ -1,11 +1,11 @@
 {% extends 'layouts/dashboard.html' %}
-{% load slippers %}
+{% load slippers i18n %}
 
-{% block title %}Team Members - {{ organization.name }} - Reckot{% endblock %}
+{% block title %}{% trans "Team Members" %} - {{ organization.name }} - Reckot{% endblock %}
 
 {% block header_title %}
 <div>
-    <h1 class="text-lg font-semibold">Team Members</h1>
+    <h1 class="text-lg font-semibold">{% trans "Team Members" %}</h1>
     <p class="text-sm text-muted-foreground">{{ organization.name }}</p>
 </div>
 {% endblock %}
@@ -15,19 +15,19 @@
     <a href="{% url 'orgs:detail' organization.slug %}">
         {% #button variant="outline" size="sm" %}
             <i data-lucide="arrow-left" class="w-4 h-4"></i>
-            Back
+            {% trans "Back" %}
         {% /button %}
     </a>
     <a href="{% url 'orgs:bulk_invite' organization.slug %}">
         {% #button variant="outline" size="sm" %}
             <i data-lucide="users" class="w-4 h-4"></i>
-            Bulk Import
+            {% trans "Bulk Import" %}
         {% /button %}
     </a>
     <a href="{% url 'orgs:invite_member' organization.slug %}">
         {% #button variant="default" size="sm" %}
             <i data-lucide="user-plus" class="w-4 h-4"></i>
-            Invite
+            {% trans "Invite" %}
         {% /button %}
     </a>
 </div>
@@ -37,7 +37,7 @@
 <div class="space-y-6">
     <div class="card">
         <div class="p-4 border-b border-border">
-            <h2 class="font-semibold">Members ({{ memberships.count }})</h2>
+            <h2 class="font-semibold">{% blocktrans with count=memberships.count %}Members ({{ count }}){% endblocktrans %}</h2>
         </div>
         <div class="divide-y divide-border">
             {% for membership in memberships %}
@@ -50,7 +50,7 @@
                         <p class="font-medium truncate">
                             {{ membership.user.get_full_name|default:membership.user.email }}
                             {% if membership.user == request.user %}
-                            <span class="text-xs text-muted-foreground">(you)</span>
+                            <span class="text-xs text-muted-foreground">({% trans "you" %})</span>
                             {% endif %}
                         </p>
                         <p class="text-sm text-muted-foreground truncate">{{ membership.user.email }}</p>
@@ -59,15 +59,15 @@
 
                 <div class="flex items-center gap-2 shrink-0">
                     {% if membership.role == 'OWNER' %}
-                    {% #badge variant="default" %}Owner{% /badge %}
+                    {% #badge variant="default" %}{% trans "Owner" %}{% /badge %}
                     {% elif membership.role == 'ADMIN' %}
-                    {% #badge variant="secondary" %}Admin{% /badge %}
+                    {% #badge variant="secondary" %}{% trans "Admin" %}{% /badge %}
                     {% elif membership.role == 'MANAGER' %}
-                    {% #badge %}Manager{% /badge %}
+                    {% #badge %}{% trans "Manager" %}{% /badge %}
                     {% elif membership.role == 'MEMBER' %}
-                    {% #badge %}Member{% /badge %}
+                    {% #badge %}{% trans "Member" %}{% /badge %}
                     {% else %}
-                    {% #badge %}Viewer{% /badge %}
+                    {% #badge %}{% trans "Viewer" %}{% /badge %}
                     {% endif %}
 
                     {% if membership.role != 'OWNER' and membership.user != request.user %}
@@ -83,7 +83,7 @@
                              class="absolute right-0 mt-1 w-48 rounded-lg border border-border bg-card shadow-lg z-10"
                              x-cloak>
                             <div class="p-1">
-                                <p class="px-3 py-2 text-xs font-medium text-muted-foreground">Change Role</p>
+                                <p class="px-3 py-2 text-xs font-medium text-muted-foreground">{% trans "Change Role" %}</p>
                                 {% for role_value, role_label in roles %}
                                 {% if role_value != 'OWNER' %}
                                 <form method="post" action="{% url 'orgs:update_member_role' organization.slug membership.user.id %}">
@@ -102,10 +102,10 @@
                                 {% endfor %}
                                 <div class="h-px bg-border my-1"></div>
                                 <form method="post" action="{% url 'orgs:remove_member' organization.slug membership.user.id %}"
-                                      onsubmit="return confirm('Remove {{ membership.user.email }} from this organization?')">
+                                      onsubmit="return confirm('{% trans "Remove this member from the organization?" %}')">
                                     {% csrf_token %}
                                     <button type="submit" class="w-full px-3 py-2 text-sm text-left text-red-500 hover:bg-red-500/10 rounded-md">
-                                        Remove from organization
+                                        {% trans "Remove from organization" %}
                                     </button>
                                 </form>
                             </div>
@@ -116,7 +116,7 @@
             </div>
             {% empty %}
             <div class="p-8 text-center text-muted-foreground">
-                No members found.
+                {% trans "No members found." %}
             </div>
             {% endfor %}
         </div>
@@ -125,7 +125,7 @@
     {% if pending_invitations %}
     <div class="card">
         <div class="p-4 border-b border-border">
-            <h2 class="font-semibold">Pending Invitations ({{ pending_invitations.count }})</h2>
+            <h2 class="font-semibold">{% blocktrans with count=pending_invitations.count %}Pending Invitations ({{ count }}){% endblocktrans %}</h2>
         </div>
         <div class="divide-y divide-border">
             {% for invitation in pending_invitations %}
@@ -137,25 +137,25 @@
                     <div class="min-w-0">
                         <p class="font-medium truncate">{{ invitation.email }}</p>
                         <p class="text-sm text-muted-foreground">
-                            Invited as {{ invitation.get_role_display }} · {{ invitation.created_at|timesince }} ago
+                            {% blocktrans with role=invitation.get_role_display time=invitation.created_at|timesince %}Invited as {{ role }} - {{ time }} ago{% endblocktrans %}
                         </p>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-2 shrink-0">
-                    {% #badge variant="warning" %}Pending{% /badge %}
+                    {% #badge variant="warning" %}{% trans "Pending" %}{% /badge %}
 
                     <form method="post" action="{% url 'orgs:resend_invitation' organization.slug invitation.id %}" class="inline">
                         {% csrf_token %}
-                        <button type="submit" class="p-2 hover:bg-muted rounded-lg transition-colors" title="Resend invitation">
+                        <button type="submit" class="p-2 hover:bg-muted rounded-lg transition-colors" title="{% trans "Resend invitation" %}">
                             <i data-lucide="send" class="w-4 h-4"></i>
                         </button>
                     </form>
 
                     <form method="post" action="{% url 'orgs:cancel_invitation' organization.slug invitation.id %}" class="inline"
-                          onsubmit="return confirm('Cancel this invitation?')">
+                          onsubmit="return confirm('{% trans "Cancel this invitation?" %}')">
                         {% csrf_token %}
-                        <button type="submit" class="p-2 hover:bg-red-500/10 text-red-500 rounded-lg transition-colors" title="Cancel invitation">
+                        <button type="submit" class="p-2 hover:bg-red-500/10 text-red-500 rounded-lg transition-colors" title="{% trans "Cancel invitation" %}">
                             <i data-lucide="x" class="w-4 h-4"></i>
                         </button>
                     </form>
@@ -167,22 +167,22 @@
     {% endif %}
 
     <div class="card p-6">
-        <h3 class="font-semibold mb-4">Role Permissions</h3>
+        <h3 class="font-semibold mb-4">{% trans "Role Permissions" %}</h3>
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-border">
-                        <th class="text-left py-2 pr-4 font-medium">Permission</th>
-                        <th class="text-center py-2 px-2 font-medium">Owner</th>
-                        <th class="text-center py-2 px-2 font-medium">Admin</th>
-                        <th class="text-center py-2 px-2 font-medium">Manager</th>
-                        <th class="text-center py-2 px-2 font-medium">Member</th>
-                        <th class="text-center py-2 px-2 font-medium">Viewer</th>
+                        <th class="text-left py-2 pr-4 font-medium">{% trans "Permission" %}</th>
+                        <th class="text-center py-2 px-2 font-medium">{% trans "Owner" %}</th>
+                        <th class="text-center py-2 px-2 font-medium">{% trans "Admin" %}</th>
+                        <th class="text-center py-2 px-2 font-medium">{% trans "Manager" %}</th>
+                        <th class="text-center py-2 px-2 font-medium">{% trans "Member" %}</th>
+                        <th class="text-center py-2 px-2 font-medium">{% trans "Viewer" %}</th>
                     </tr>
                 </thead>
                 <tbody class="text-muted-foreground">
                     <tr class="border-b border-border">
-                        <td class="py-2 pr-4">Manage organization settings</td>
+                        <td class="py-2 pr-4">{% trans "Manage organization settings" %}</td>
                         <td class="text-center py-2 px-2"><i data-lucide="check" class="w-4 h-4 mx-auto text-emerald-500"></i></td>
                         <td class="text-center py-2 px-2"><i data-lucide="check" class="w-4 h-4 mx-auto text-emerald-500"></i></td>
                         <td class="text-center py-2 px-2"><i data-lucide="minus" class="w-4 h-4 mx-auto"></i></td>
@@ -190,7 +190,7 @@
                         <td class="text-center py-2 px-2"><i data-lucide="minus" class="w-4 h-4 mx-auto"></i></td>
                     </tr>
                     <tr class="border-b border-border">
-                        <td class="py-2 pr-4">Invite & remove members</td>
+                        <td class="py-2 pr-4">{% trans "Invite & remove members" %}</td>
                         <td class="text-center py-2 px-2"><i data-lucide="check" class="w-4 h-4 mx-auto text-emerald-500"></i></td>
                         <td class="text-center py-2 px-2"><i data-lucide="check" class="w-4 h-4 mx-auto text-emerald-500"></i></td>
                         <td class="text-center py-2 px-2"><i data-lucide="minus" class="w-4 h-4 mx-auto"></i></td>
@@ -198,7 +198,7 @@
                         <td class="text-center py-2 px-2"><i data-lucide="minus" class="w-4 h-4 mx-auto"></i></td>
                     </tr>
                     <tr class="border-b border-border">
-                        <td class="py-2 pr-4">Create & edit events</td>
+                        <td class="py-2 pr-4">{% trans "Create & edit events" %}</td>
                         <td class="text-center py-2 px-2"><i data-lucide="check" class="w-4 h-4 mx-auto text-emerald-500"></i></td>
                         <td class="text-center py-2 px-2"><i data-lucide="check" class="w-4 h-4 mx-auto text-emerald-500"></i></td>
                         <td class="text-center py-2 px-2"><i data-lucide="check" class="w-4 h-4 mx-auto text-emerald-500"></i></td>
@@ -206,7 +206,7 @@
                         <td class="text-center py-2 px-2"><i data-lucide="minus" class="w-4 h-4 mx-auto"></i></td>
                     </tr>
                     <tr class="border-b border-border">
-                        <td class="py-2 pr-4">Publish & delete events</td>
+                        <td class="py-2 pr-4">{% trans "Publish & delete events" %}</td>
                         <td class="text-center py-2 px-2"><i data-lucide="check" class="w-4 h-4 mx-auto text-emerald-500"></i></td>
                         <td class="text-center py-2 px-2"><i data-lucide="check" class="w-4 h-4 mx-auto text-emerald-500"></i></td>
                         <td class="text-center py-2 px-2"><i data-lucide="check" class="w-4 h-4 mx-auto text-emerald-500"></i></td>
@@ -214,7 +214,7 @@
                         <td class="text-center py-2 px-2"><i data-lucide="minus" class="w-4 h-4 mx-auto"></i></td>
                     </tr>
                     <tr class="border-b border-border">
-                        <td class="py-2 pr-4">Manage tickets & check-in</td>
+                        <td class="py-2 pr-4">{% trans "Manage tickets & check-in" %}</td>
                         <td class="text-center py-2 px-2"><i data-lucide="check" class="w-4 h-4 mx-auto text-emerald-500"></i></td>
                         <td class="text-center py-2 px-2"><i data-lucide="check" class="w-4 h-4 mx-auto text-emerald-500"></i></td>
                         <td class="text-center py-2 px-2"><i data-lucide="check" class="w-4 h-4 mx-auto text-emerald-500"></i></td>
@@ -222,7 +222,7 @@
                         <td class="text-center py-2 px-2"><i data-lucide="minus" class="w-4 h-4 mx-auto"></i></td>
                     </tr>
                     <tr class="border-b border-border">
-                        <td class="py-2 pr-4">View reports & analytics</td>
+                        <td class="py-2 pr-4">{% trans "View reports & analytics" %}</td>
                         <td class="text-center py-2 px-2"><i data-lucide="check" class="w-4 h-4 mx-auto text-emerald-500"></i></td>
                         <td class="text-center py-2 px-2"><i data-lucide="check" class="w-4 h-4 mx-auto text-emerald-500"></i></td>
                         <td class="text-center py-2 px-2"><i data-lucide="check" class="w-4 h-4 mx-auto text-emerald-500"></i></td>
@@ -230,7 +230,7 @@
                         <td class="text-center py-2 px-2"><i data-lucide="check" class="w-4 h-4 mx-auto text-emerald-500"></i></td>
                     </tr>
                     <tr>
-                        <td class="py-2 pr-4">Manage payments & refunds</td>
+                        <td class="py-2 pr-4">{% trans "Manage payments & refunds" %}</td>
                         <td class="text-center py-2 px-2"><i data-lucide="check" class="w-4 h-4 mx-auto text-emerald-500"></i></td>
                         <td class="text-center py-2 px-2"><i data-lucide="check" class="w-4 h-4 mx-auto text-emerald-500"></i></td>
                         <td class="text-center py-2 px-2"><i data-lucide="minus" class="w-4 h-4 mx-auto"></i></td>

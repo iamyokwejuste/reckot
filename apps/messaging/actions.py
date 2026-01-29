@@ -3,6 +3,7 @@ from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, JsonResponse
 from django.contrib import messages
+from django.utils.translation import gettext_lazy as _
 from apps.orgs.models import Organization, Membership
 from apps.events.models import Event
 from apps.messaging.models import MessageTemplate, MessageCampaign, MessageDelivery
@@ -56,9 +57,9 @@ class CampaignCreateView(LoginRequiredMixin, View):
         if request.POST.get('send_now'):
             prepare_campaign(campaign)
             send_campaign_task.enqueue(campaign.id)
-            messages.success(request, 'Campaign is being sent.')
+            messages.success(request, _('Campaign is being sent.'))
         else:
-            messages.success(request, 'Campaign saved as draft.')
+            messages.success(request, _('Campaign saved as draft.'))
 
         return redirect('messaging:campaign_detail', org_slug=org_slug, campaign_ref=campaign.reference)
 
@@ -84,9 +85,9 @@ class CampaignSendView(LoginRequiredMixin, View):
         if campaign.status == MessageCampaign.Status.DRAFT:
             prepare_campaign(campaign)
             send_campaign_task.enqueue(campaign.id)
-            messages.success(request, 'Campaign is being sent.')
+            messages.success(request, _('Campaign is being sent.'))
         else:
-            messages.error(request, 'Campaign cannot be sent.')
+            messages.error(request, _('Campaign cannot be sent.'))
 
         return redirect('messaging:campaign_detail', org_slug=org_slug, campaign_ref=campaign.reference)
 
@@ -121,7 +122,7 @@ class TemplateCreateView(LoginRequiredMixin, View):
             created_by=request.user,
         )
 
-        messages.success(request, 'Template created.')
+        messages.success(request, _('Template created.'))
         return redirect('messaging:template_list', org_slug=org_slug)
 
 

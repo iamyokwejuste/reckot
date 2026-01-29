@@ -13,21 +13,21 @@
 {% block content %}
 <div class="container mx-auto px-4 py-8">
     <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold mb-2">Discover Events</h1>
-        <p class="text-muted-foreground">Find amazing events happening near you</p>
+        <h1 class="text-3xl font-bold mb-2">{% trans "Discover Events" %}</h1>
+        <p class="text-muted-foreground">{% trans "Find amazing events happening near you" %}</p>
     </div>
 
     <form method="get" class="mb-8">
         <div class="flex flex-col md:flex-row gap-4 max-w-2xl mx-auto">
             <div class="flex-1">
-                <input type="text" name="q" value="{{ search }}" placeholder="Search events..." class="input w-full">
+                <input type="text" name="q" value="{{ search }}" placeholder="{% trans "Search events..." %}" class="input w-full">
             </div>
             <div class="flex-1">
-                <input type="text" name="location" value="{{ location }}" placeholder="Location..." class="input w-full">
+                <input type="text" name="location" value="{{ location }}" placeholder="{% trans "Location..." %}" class="input w-full">
             </div>
             {% #button type="submit" variant="default" %}
                 <i data-lucide="search" class="w-4 h-4 mr-2"></i>
-                Search
+                {% trans "Search" %}
             {% /button %}
         </div>
     </form>
@@ -66,13 +66,13 @@
     <div class="flex justify-center mt-8 gap-2">
         {% if events.has_previous %}
         <a href="?page={{ events.previous_page_number }}{% if search %}&q={{ search }}{% endif %}{% if location %}&location={{ location }}{% endif %}">
-            {% #button variant="outline" size="sm" %}Previous{% /button %}
+            {% #button variant="outline" size="sm" %}{% trans "Previous" %}{% /button %}
         </a>
         {% endif %}
-        {% #button variant="ghost" size="sm" %}Page {{ events.number }} of {{ events.paginator.num_pages }}{% /button %}
+        {% #button variant="ghost" size="sm" %}{% blocktrans with num=events.number total=events.paginator.num_pages %}Page {{ num }} of {{ total }}{% endblocktrans %}{% /button %}
         {% if events.has_next %}
         <a href="?page={{ events.next_page_number }}{% if search %}&q={{ search }}{% endif %}{% if location %}&location={{ location }}{% endif %}">
-            {% #button variant="outline" size="sm" %}Next{% /button %}
+            {% #button variant="outline" size="sm" %}{% trans "Next" %}{% /button %}
         </a>
         {% endif %}
     </div>
@@ -83,8 +83,8 @@
         <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-foreground/5 mb-4">
             <i data-lucide="calendar-x" class="w-8 h-8 text-muted-foreground"></i>
         </div>
-        <h3 class="font-semibold text-lg mb-2">No events found</h3>
-        <p class="text-muted-foreground">Try adjusting your search criteria</p>
+        <h3 class="font-semibold text-lg mb-2">{% trans "No events found" %}</h3>
+        <p class="text-muted-foreground">{% trans "Try adjusting your search criteria" %}</p>
     </div>
     {% endif %}
 </div>

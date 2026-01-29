@@ -8,9 +8,9 @@
 <div class="container py-8">
     {% url 'events:list' as events_url %}
     {% #breadcrumb %}
-        {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+        {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
         {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-        {% #breadcrumb_item href=events_url %}Events{% /breadcrumb_item %}
+        {% #breadcrumb_item href=events_url %}{% trans "Events" %}{% /breadcrumb_item %}
         {% #breadcrumb_separator %}{% /breadcrumb_separator %}
         {% #breadcrumb_item %}{{ event.title }}{% /breadcrumb_item %}
     {% /breadcrumb %}
@@ -33,19 +33,19 @@
             <a href="{% url 'checkin:dashboard' org_slug=event.organization.slug event_slug=event.slug %}">
                 {% #button variant="outline" %}
                     <i data-lucide="scan" class="mr-2 h-4 w-4"></i>
-                    Check-in
+                    {% trans "Check-in" %}
                 {% /button %}
             </a>
             <a href="{% url 'reports:dashboard' org_slug=event.organization.slug event_slug=event.slug %}">
                 {% #button variant="outline" %}
                     <i data-lucide="bar-chart-2" class="mr-2 h-4 w-4"></i>
-                    Reports
+                    {% trans "Reports" %}
                 {% /button %}
             </a>
             <a href="{% url 'events:manage_ticket_types' org_slug=event.organization.slug event_slug=event.slug %}">
                 {% #button variant="outline" %}
                     <i data-lucide="ticket" class="mr-2 h-4 w-4"></i>
-                    Manage Tickets
+                    {% trans "Manage Tickets" %}
                 {% /button %}
             </a>
         </div>
@@ -54,7 +54,7 @@
     <div class="mt-8 grid gap-8 lg:grid-cols-3">
         <div class="lg:col-span-2" data-animate="fade-up" data-delay="0.1">
             {% #card %}
-                <h2 class="text-lg font-semibold mb-4">Event Details</h2>
+                <h2 class="text-lg font-semibold mb-4">{% trans "Event Details" %}</h2>
 
                 <div class="prose prose-sm max-w-none text-muted-foreground">
                     <div class="prose prose-sm dark:prose-invert max-w-none">{{ event.description|safe }}</div>
@@ -66,7 +66,7 @@
                             <i data-lucide="calendar" class="h-5 w-5 text-primary"></i>
                         </div>
                         <div>
-                            <p class="text-sm font-medium">Date</p>
+                            <p class="text-sm font-medium">{% trans "Date" %}</p>
                             <p class="text-sm text-muted-foreground">{{ event.start_at|date:"D, M d, Y" }}</p>
                         </div>
                     </div>
@@ -75,7 +75,7 @@
                             <i data-lucide="clock" class="h-5 w-5 text-primary"></i>
                         </div>
                         <div>
-                            <p class="text-sm font-medium">Time</p>
+                            <p class="text-sm font-medium">{% trans "Time" %}</p>
                             <p class="text-sm text-muted-foreground">{{ event.start_at|date:"H:i" }} - {{ event.end_at|date:"H:i" }}</p>
                         </div>
                     </div>
@@ -84,7 +84,7 @@
                             <i data-lucide="map-pin" class="h-5 w-5 text-primary"></i>
                         </div>
                         <div>
-                            <p class="text-sm font-medium">Location</p>
+                            <p class="text-sm font-medium">{% trans "Location" %}</p>
                             <p class="text-sm text-muted-foreground">{{ event.location }}</p>
                         </div>
                     </div>
@@ -93,8 +93,8 @@
                             <i data-lucide="users" class="h-5 w-5 text-primary"></i>
                         </div>
                         <div>
-                            <p class="text-sm font-medium">Capacity</p>
-                            <p class="text-sm text-muted-foreground">{{ event.capacity }} attendees</p>
+                            <p class="text-sm font-medium">{% trans "Capacity" %}</p>
+                            <p class="text-sm text-muted-foreground">{% blocktrans with capacity=event.capacity %}{{ capacity }} attendees{% endblocktrans %}</p>
                         </div>
                     </div>
                 </div>
@@ -103,24 +103,24 @@
 
         <div data-animate="fade-up" data-delay="0.2">
             {% #card %}
-                <h2 class="text-lg font-semibold mb-4">Book Tickets</h2>
+                <h2 class="text-lg font-semibold mb-4">{% trans "Book Tickets" %}</h2>
 
                 {% if event.ticket_types.all %}
                 <form method="post" class="space-y-4">
                     {% csrf_token %}
                     <div class="space-y-2">
-                        {% #label for="ticket_type" %}Ticket Type{% /label %}
+                        {% #label for="ticket_type" %}{% trans "Ticket Type" %}{% /label %}
                         {% #select name="ticket_type" required=True %}
                             {% for tt in event.ticket_types.all %}
                             <option value="{{ tt.id }}" {% if booking_form.ticket_type.value == tt.id %}selected{% endif %}>
-                                {{ tt.name }} - {{ tt.price }} XAF ({{ tt.quantity }} left)
+                                {{ tt.name }} - {{ tt.price }} XAF ({{ tt.quantity }} {% trans "left" %})
                             </option>
                             {% endfor %}
                         {% /select %}
                     </div>
 
                     <div class="space-y-2">
-                        {% #label for="quantity" %}Quantity{% /label %}
+                        {% #label for="quantity" %}{% trans "Quantity" %}{% /label %}
                         {% #input type="number" name="quantity" value=booking_form.quantity.value|default:"1" min="1" required=True %}{% /input %}
                     </div>
 
@@ -138,11 +138,11 @@
 
                     {% #button type="submit" class="w-full" variant="gradient" %}
                         <i data-lucide="ticket" class="mr-2 h-4 w-4"></i>
-                        Book Now
+                        {% trans "Book Now" %}
                     {% /button %}
                 </form>
                 {% else %}
-                {% #empty_state icon="ticket" title="No Tickets Available" description="Ticket types have not been set up for this event yet." %}{% /empty_state %}
+                {% #empty_state icon="ticket" title=_("No Tickets Available") description=_("Ticket types have not been set up for this event yet.") %}{% /empty_state %}
                 {% endif %}
             {% /card %}
         </div>

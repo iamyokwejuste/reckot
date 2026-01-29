@@ -84,7 +84,7 @@
 
                 <div>
                     <label for="id_password" class="block text-sm font-medium mb-2">{% trans "Password" %}</label>
-                    <input type="password" name="password" id="id_password" placeholder="Enter your password" required autocomplete="current-password" class="input {% if form.password.errors %}border-red-500{% endif %}">
+                    <input type="password" name="password" id="id_password" placeholder="{% trans "Enter your password" %}" required autocomplete="current-password" class="input {% if form.password.errors %}border-red-500{% endif %}">
                     {% if form.password.errors %}
                     <p class="text-sm text-red-500 mt-1">{% for error in form.password.errors %}{{ error }}{% endfor %}</p>
                     {% endif %}
@@ -145,7 +145,7 @@
                     <input type="hidden" name="phone_number" :value="document.getElementById('phone_number')?.value">
                     <div>
                         <label for="otp_code" class="block text-sm font-medium mb-2">{% trans "Verification Code" %}</label>
-                        <input type="text" name="otp_code" id="otp_code" placeholder="Enter 6-digit code" required
+                        <input type="text" name="otp_code" id="otp_code" placeholder="{% trans "Enter 6-digit code" %}" required
                                maxlength="6" pattern="[0-9]{6}" inputmode="numeric" autocomplete="one-time-code"
                                class="input text-center text-lg tracking-widest font-mono">
                     </div>

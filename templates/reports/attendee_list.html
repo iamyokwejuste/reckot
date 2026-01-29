@@ -1,7 +1,7 @@
 {% extends "layouts/dashboard.html" %}
-{% load slippers %}
+{% load slippers i18n %}
 
-{% block title %}Attendee List - {{ event.title }}{% endblock %}
+{% block title %}{% trans "Attendee List" %} - {{ event.title }}{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -23,21 +23,21 @@
 {% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug as event_dashboard_url %}
 {% url 'reports:dashboard' org_slug=event.organization.slug event_slug=event.slug as reports_url %}
 {% #breadcrumb class="mb-4 no-print" %}
-    {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item href="/events/" %}Events{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/events/" %}{% trans "Events" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
     {% #breadcrumb_item href=event_dashboard_url %}{{ event.title|truncatewords:3 }}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item href=reports_url %}Reports{% /breadcrumb_item %}
+    {% #breadcrumb_item href=reports_url %}{% trans "Reports" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item %}Attendees{% /breadcrumb_item %}
+    {% #breadcrumb_item %}{% trans "Attendees" %}{% /breadcrumb_item %}
 {% /breadcrumb %}
 {% endblock %}
 
 {% block header_title %}
 <div>
-    <h1 class="text-lg font-semibold">Attendee List</h1>
+    <h1 class="text-lg font-semibold">{% trans "Attendee List" %}</h1>
     <p class="text-sm text-muted-foreground">{{ event.title }}</p>
 </div>
 {% endblock %}
@@ -46,12 +46,12 @@
 <div class="flex gap-2">
     {% #button variant="outline" size="sm" attrs='@click="$dispatch(\'open-export-modal\')"' %}
         <i data-lucide="download" class="w-4 h-4 mr-1"></i>
-        Download
+        {% trans "Download" %}
     {% /button %}
     <a href="{% url 'reports:dashboard' org_slug=event.organization.slug event_slug=event.slug %}">
         {% #button variant="outline" size="sm" %}
             <i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i>
-            Back
+            {% trans "Back" %}
         {% /button %}
     </a>
 </div>
@@ -59,7 +59,7 @@
 
 {% block content %}
 <div class="space-y-6" x-data="{ showExportModal: false }" @open-export-modal.window="showExportModal = true">
-    {% #modal trigger="showExportModal" title="Export Attendee List" description="Choose a format to download" size="sm" %}
+    {% #modal trigger="showExportModal" title=_("Export Attendee List") description=_("Choose a format to download") size="sm" %}
         <div class="space-y-2">
             <form method="post" action="{% url 'reports:export_generate' org_slug=event.organization.slug event_slug=event.slug %}">
                 {% csrf_token %}
@@ -70,8 +70,8 @@
                         <i data-lucide="table" class="w-4 h-4 text-green-500"></i>
                     </div>
                     <div>
-                        <p class="text-sm font-medium">Excel</p>
-                        <p class="text-xs text-muted-foreground">Microsoft Excel spreadsheet</p>
+                        <p class="text-sm font-medium">{% trans "Excel" %}</p>
+                        <p class="text-xs text-muted-foreground">{% trans "Microsoft Excel spreadsheet" %}</p>
                     </div>
                 </button>
             </form>
@@ -84,8 +84,8 @@
                         <i data-lucide="file-text" class="w-4 h-4 text-red-500"></i>
                     </div>
                     <div>
-                        <p class="text-sm font-medium">PDF</p>
-                        <p class="text-xs text-muted-foreground">Portable document format</p>
+                        <p class="text-sm font-medium">{% trans "PDF" %}</p>
+                        <p class="text-xs text-muted-foreground">{% trans "Portable document format" %}</p>
                     </div>
                 </button>
             </form>
@@ -95,8 +95,8 @@
                     <i data-lucide="printer" class="w-4 h-4 text-purple-500"></i>
                 </div>
                 <div>
-                    <p class="text-sm font-medium">Print</p>
-                    <p class="text-xs text-muted-foreground">Print directly from browser</p>
+                    <p class="text-sm font-medium">{% trans "Print" %}</p>
+                    <p class="text-xs text-muted-foreground">{% trans "Print directly from browser" %}</p>
                 </div>
             </button>
         </div>
@@ -105,9 +105,9 @@
     <div class="card mb-6">
         <div class="p-4 border-b border-border flex justify-between items-center">
             <div>
-                <span class="font-medium">{{ total_count }}</span> attendees
+                <span class="font-medium">{{ total_count }}</span> {% trans "attendees" %}
                 <span class="text-muted-foreground">|</span>
-                <span class="font-medium">{{ checked_in_count }}</span> checked in
+                <span class="font-medium">{{ checked_in_count }}</span> {% trans "checked in" %}
             </div>
             <div class="text-sm text-muted-foreground">
                 {{ event.start_at|date:"F j, Y" }}
@@ -119,14 +119,14 @@
                 <thead>
                     <tr class="border-b border-border bg-muted/30">
                         <th class="text-left p-3 text-sm font-medium">#</th>
-                        <th class="text-left p-3 text-sm font-medium">Name</th>
-                        <th class="text-left p-3 text-sm font-medium">Email</th>
-                        <th class="text-left p-3 text-sm font-medium">Ticket</th>
-                        <th class="text-left p-3 text-sm font-medium">Code</th>
+                        <th class="text-left p-3 text-sm font-medium">{% trans "Name" %}</th>
+                        <th class="text-left p-3 text-sm font-medium">{% trans "Email" %}</th>
+                        <th class="text-left p-3 text-sm font-medium">{% trans "Ticket" %}</th>
+                        <th class="text-left p-3 text-sm font-medium">{% trans "Code" %}</th>
                         {% for q in questions %}
                         <th class="text-left p-3 text-sm font-medium">{{ q.question|truncatewords:3 }}</th>
                         {% endfor %}
-                        <th class="text-center p-3 text-sm font-medium">Checked In</th>
+                        <th class="text-center p-3 text-sm font-medium">{% trans "Checked In" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -139,7 +139,7 @@
                             {% elif ticket.booking.user %}
                                 {{ ticket.booking.user.get_full_name|default:ticket.booking.user.email }}
                             {% else %}
-                                {{ ticket.booking.guest_name|default:"Guest" }}
+                                {{ ticket.booking.guest_name|default:_("Guest") }}
                             {% endif %}
                         </td>
                         <td class="p-3 text-sm">
@@ -175,7 +175,7 @@
                     {% empty %}
                     <tr>
                         <td colspan="{{ questions.count|add:6 }}" class="p-8 text-center text-muted-foreground">
-                            No attendees yet
+                            {% trans "No attendees yet" %}
                         </td>
                     </tr>
                     {% endfor %}

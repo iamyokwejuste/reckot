@@ -1,13 +1,13 @@
-{% load slippers %}
+{% load slippers i18n %}
 <div data-motion>
-    {% #alert variant="success" icon="check-circle" title="Report Ready" %}
-        <p class="text-sm">Your {{ export.get_report_type_display }} report has been generated.</p>
+    {% #alert variant="success" icon="check-circle" title=_("Report Ready") %}
+        <p class="text-sm">{% blocktrans with report_type=export.get_report_type_display %}Your {{ report_type }} report has been generated.{% endblocktrans %}</p>
     {% /alert %}
 
     <a href="{% url 'reports:download' export.reference %}" class="mt-4 block" hx-boost="false">
         {% #button variant="outline" class="w-full" %}
             <i data-lucide="download" class="mr-2 h-4 w-4"></i>
-            Download {{ export.get_format_display }}
+            {% blocktrans with format=export.get_format_display %}Download {{ format }}{% endblocktrans %}
         {% /button %}
     </a>
 </div>

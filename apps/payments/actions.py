@@ -12,6 +12,7 @@ from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from apps.payments.models import Payment, PaymentProvider, Invoice, Refund
 from apps.payments.services import initiate_payment, confirm_payment, fail_payment
@@ -26,7 +27,7 @@ class CheckoutView(View):
     def post(self, request):
         event_id = request.POST.get('event_id')
         if not event_id:
-            messages.error(request, 'Invalid event.')
+            messages.error(request, _('Invalid event.'))
             return redirect('events:discover')
 
         event = get_object_or_404(Event, id=event_id, state='PUBLISHED')
@@ -51,7 +52,7 @@ class CheckoutView(View):
                     continue
 
         if not ticket_selections:
-            messages.error(request, 'Please select at least one ticket.')
+            messages.error(request, _('Please select at least one ticket.'))
             return redirect('events:public_detail',
                           org_slug=event.organization.slug,
                           event_slug=event.slug)
@@ -83,13 +84,13 @@ class CheckoutView(View):
             guest_phone = request.POST.get('guest_phone', '').strip()
 
             if not guest_email:
-                messages.error(request, 'Please enter your email address.')
+                messages.error(request, _('Please enter your email address.'))
                 return redirect('events:public_detail',
                               org_slug=event.organization.slug,
                               event_slug=event.slug)
 
             if not guest_name:
-                messages.error(request, 'Please enter your name.')
+                messages.error(request, _('Please enter your name.'))
                 return redirect('events:public_detail',
                               org_slug=event.organization.slug,
                               event_slug=event.slug)
@@ -178,18 +179,31 @@ def get_booking_for_request(request, booking_ref):
 
 
 class PaymentSelectMethodView(View):
+    def _calculate_withdrawal_fee(self, amount):
+        from decimal import Decimal
+        fee = (Decimal(str(amount)) * Decimal('0.04')).quantize(Decimal('1'))
+        return max(fee, Decimal('100'))
+
     def get(self, request, booking_ref):
         booking, error = get_booking_for_request(request, booking_ref)
         if error:
-            messages.error(request, 'Booking not found.')
+            messages.error(request, _('Booking not found.'))
             return error
         existing_payment = get_booking_payment(booking.id)
         if existing_payment and existing_payment.status == Payment.Status.CONFIRMED:
             return redirect('payments:success', payment_ref=existing_payment.reference)
+
+        subtotal = booking.total_amount
+        withdrawal_fee = self._calculate_withdrawal_fee(subtotal)
+        total_with_fee = subtotal + withdrawal_fee
+
         return render(request, 'payments/select_method.html', {
             'booking': booking,
             'existing_payment': existing_payment,
             'methods': PaymentProvider.choices,
+            'subtotal': subtotal,
+            'withdrawal_fee': withdrawal_fee,
+            'total_with_fee': total_with_fee,
         })
 
 
@@ -197,17 +211,17 @@ class PaymentStartView(View):
     def post(self, request, booking_ref):
         booking, error = get_booking_for_request(request, booking_ref)
         if error:
-            return render(request, 'payments/_error.html', {'error': 'Booking not found.'})
+            return render(request, 'payments/_error.html', {'error': _('Booking not found.')})
         method = request.POST.get('method')
         phone = request.POST.get('phone')
         if not method or not phone:
             return render(request, 'payments/_error.html', {
-                'error': 'Please select a payment method and enter your phone number'
+                'error': _('Please select a payment method and enter your phone number')
             })
         payment, result = initiate_payment(booking, method, phone)
         if not result.get('success'):
             return render(request, 'payments/_error.html', {
-                'error': result.get('message', 'Payment initiation failed')
+                'error': result.get('message', _('Payment initiation failed'))
             })
         response = render(request, 'payments/_pending.html', {'payment': payment})
         response['HX-Trigger'] = 'payment-started'
@@ -236,7 +250,7 @@ class PaymentPollView(View):
     def get(self, request, payment_ref):
         payment, error = get_payment_for_request(request, payment_ref)
         if error:
-            return render(request, 'payments/_error.html', {'error': 'Payment not found.'})
+            return render(request, 'payments/_error.html', {'error': _('Payment not found.')})
         if payment.status == Payment.Status.CONFIRMED:
             return render(request, 'payments/_success.html', {'payment': payment})
         if payment.status in [Payment.Status.FAILED, Payment.Status.EXPIRED]:
@@ -252,7 +266,7 @@ class PaymentSuccessView(View):
     def get(self, request, payment_ref):
         payment, error = get_payment_for_request(request, payment_ref)
         if error:
-            messages.error(request, 'Payment not found.')
+            messages.error(request, _('Payment not found.'))
             return redirect('events:discover')
         return render(request, 'payments/success.html', {'payment': payment})
 
@@ -372,10 +386,10 @@ class InvoiceDownloadView(View):
     def get(self, request, payment_ref):
         payment, error = get_payment_for_request(request, payment_ref)
         if error:
-            messages.error(request, 'Payment not found.')
+            messages.error(request, _('Payment not found.'))
             return redirect('events:discover')
         if payment.status != Payment.Status.CONFIRMED:
-            messages.error(request, 'Invoice not available for unpaid orders.')
+            messages.error(request, _('Invoice not available for unpaid orders.'))
             return redirect('events:discover')
 
         try:
@@ -385,7 +399,7 @@ class InvoiceDownloadView(View):
 
         pdf_content = get_invoice_pdf(invoice)
         if not pdf_content:
-            messages.error(request, 'Failed to generate invoice.')
+            messages.error(request, _('Failed to generate invoice.'))
             return redirect('events:discover')
 
         response = HttpResponse(pdf_content, content_type='application/pdf')
@@ -440,7 +454,7 @@ class RefundRequestView(LoginRequiredMixin, View):
         ).exists()
 
         if existing_refund:
-            messages.warning(request, 'A refund request already exists for this payment.')
+            messages.warning(request, _('A refund request already exists for this payment.'))
             return redirect('payments:success', payment_ref=payment_ref)
 
         refund_type = request.POST.get('refund_type', 'FULL')
@@ -455,7 +469,7 @@ class RefundRequestView(LoginRequiredMixin, View):
             requested_by=request.user,
         )
 
-        messages.success(request, 'Refund request submitted successfully.')
+        messages.success(request, _('Refund request submitted successfully.'))
         return redirect('payments:success', payment_ref=payment_ref)
 
 
@@ -479,14 +493,14 @@ class RefundProcessView(LoginRequiredMixin, View):
 
         if action == 'approve':
             refund.approve(processed_by=request.user)
-            messages.success(request, 'Refund approved.')
+            messages.success(request, _('Refund approved.'))
         elif action == 'process':
             refund.process(processed_by=request.user)
-            messages.success(request, 'Refund marked as processed.')
+            messages.success(request, _('Refund marked as processed.'))
         elif action == 'reject':
             reason = request.POST.get('rejection_reason', '')
             refund.reject(reason, processed_by=request.user)
-            messages.success(request, 'Refund rejected.')
+            messages.success(request, _('Refund rejected.'))
 
         return redirect('payments:refunds')
 

@@ -1,7 +1,7 @@
 {% extends "layouts/dashboard.html" %}
-{% load static slippers %}
+{% load static slippers i18n %}
 
-{% block title %}Create Organization - Reckot{% endblock %}
+{% block title %}{% trans "Create Organization" %} - Reckot{% endblock %}
 
 {% block extra_head %}
 <link href="{% static 'css/richtext.css' %}" rel="stylesheet">
@@ -9,18 +9,18 @@
 
 {% block breadcrumbs %}
 {% #breadcrumb class="mb-4" %}
-    {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item href="/orgs/" %}Organizations{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/orgs/" %}{% trans "Organizations" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item %}Create{% /breadcrumb_item %}
+    {% #breadcrumb_item %}{% trans "Create" %}{% /breadcrumb_item %}
 {% /breadcrumb %}
 {% endblock %}
 
 {% block header_title %}
 <div>
-    <h1 class="text-lg font-semibold">Create Organization</h1>
-    <p class="text-sm text-muted-foreground">Set up a new organization to manage events</p>
+    <h1 class="text-lg font-semibold">{% trans "Create Organization" %}</h1>
+    <p class="text-sm text-muted-foreground">{% trans "Set up a new organization to manage events" %}</p>
 </div>
 {% endblock %}
 
@@ -48,7 +48,7 @@
 
         <div class="card p-6 space-y-4">
             <div>
-                <label class="block text-sm font-medium mb-2">Organization Logo</label>
+                <label class="block text-sm font-medium mb-2">{% trans "Organization Logo" %}</label>
                 <div class="flex items-center gap-4">
                     <div class="relative h-16 w-16 rounded-lg bg-muted flex items-center justify-center overflow-hidden cursor-pointer group"
                          @click="$refs.logoInput.click()">
@@ -66,13 +66,13 @@
                     <div>
                         <div class="flex items-center gap-2">
                             {% #button type="button" variant="outline" size="sm" attrs='@click="$refs.logoInput.click()"' %}
-                                <span x-text="logoPreview ? 'Change' : 'Upload'"></span>
+                                <span x-text="logoPreview ? '{% trans "Change" %}' : '{% trans "Upload" %}'"></span>
                             {% /button %}
                             {% #button type="button" variant="outline" size="sm" class="text-red-500 hover:bg-red-500/10" attrs='x-show="logoPreview" x-cloak @click.stop="logoPreview = null; $refs.logoInput.value = \'\'"' %}
-                                Remove
+                                {% trans "Remove" %}
                             {% /button %}
                         </div>
-                        <p class="text-xs text-muted-foreground mt-1">PNG, JPG up to 2MB</p>
+                        <p class="text-xs text-muted-foreground mt-1">{% trans "PNG, JPG up to 2MB" %}</p>
                     </div>
                 </div>
                 <input type="file" name="logo" accept="image/*" x-ref="logoInput"
@@ -80,29 +80,29 @@
             </div>
 
             <div>
-                <label for="name" class="block text-sm font-medium mb-2">Organization Name <span class="text-red-500">*</span></label>
-                <input type="text" name="name" id="name" required placeholder="e.g., Tech Events Cameroon" class="input" value="{{ name|default:'' }}">
+                <label for="name" class="block text-sm font-medium mb-2">{% trans "Organization Name" %} <span class="text-red-500">*</span></label>
+                <input type="text" name="name" id="name" required placeholder="{% trans "e.g., Tech Events Cameroon" %}" class="input" value="{{ name|default:'' }}">
             </div>
 
             <div>
-                <label for="description" class="block text-sm font-medium mb-2">Description</label>
+                <label for="description" class="block text-sm font-medium mb-2">{% trans "Description" %}</label>
                 <textarea name="description" id="description" rows="3"
-                          placeholder="What does your organization do?" class="hidden"
+                          placeholder="{% trans "What does your organization do?" %}" class="hidden"
                           data-richtext>{{ description|default:''|safe }}</textarea>
             </div>
 
             <div>
-                <label for="website" class="block text-sm font-medium mb-2">Website</label>
+                <label for="website" class="block text-sm font-medium mb-2">{% trans "Website" %}</label>
                 <input type="url" name="website" id="website" placeholder="https://your-organization.com" class="input" value="{{ website|default:'' }}">
             </div>
         </div>
 
         <div class="flex items-center gap-4">
             {% #button type="submit" variant="default" %}
-                Create Organization
+                {% trans "Create Organization" %}
                 <i data-lucide="plus" class="w-4 h-4"></i>
             {% /button %}
-            <a href="{% url 'orgs:list' %}">{% #button variant="outline" %}Cancel{% /button %}</a>
+            <a href="{% url 'orgs:list' %}">{% #button variant="outline" %}{% trans "Cancel" %}{% /button %}</a>
         </div>
     </form>
 </div>

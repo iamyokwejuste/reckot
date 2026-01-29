@@ -1,20 +1,21 @@
 from django.db import models
 from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
 from apps.orgs.models import Organization
 import uuid
 
 
 class Event(models.Model):
     class State(models.TextChoices):
-        DRAFT = 'DRAFT', 'Draft'
-        PUBLISHED = 'PUBLISHED', 'Published'
-        CLOSED = 'CLOSED', 'Closed'
-        ARCHIVED = 'ARCHIVED', 'Archived'
+        DRAFT = 'DRAFT', _('Draft')
+        PUBLISHED = 'PUBLISHED', _('Published')
+        CLOSED = 'CLOSED', _('Closed')
+        ARCHIVED = 'ARCHIVED', _('Archived')
 
     class EventType(models.TextChoices):
-        IN_PERSON = 'IN_PERSON', 'In Person'
-        ONLINE = 'ONLINE', 'Online'
-        HYBRID = 'HYBRID', 'Hybrid'
+        IN_PERSON = 'IN_PERSON', _('In Person')
+        ONLINE = 'ONLINE', _('Online')
+        HYBRID = 'HYBRID', _('Hybrid')
 
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='events')
     title = models.CharField(max_length=200)
@@ -84,10 +85,10 @@ class Event(models.Model):
 
 class EventCustomization(models.Model):
     class LayoutTemplate(models.TextChoices):
-        DEFAULT = 'DEFAULT', 'Default'
-        MINIMAL = 'MINIMAL', 'Minimal'
-        FULL_WIDTH = 'FULL_WIDTH', 'Full Width'
-        CENTERED = 'CENTERED', 'Centered'
+        DEFAULT = 'DEFAULT', _('Default')
+        MINIMAL = 'MINIMAL', _('Minimal')
+        FULL_WIDTH = 'FULL_WIDTH', _('Full Width')
+        CENTERED = 'CENTERED', _('Centered')
 
     event = models.OneToOneField(Event, on_delete=models.CASCADE, related_name='customization')
     primary_color = models.CharField(max_length=7, default='#000000')
@@ -111,15 +112,15 @@ class EventCustomization(models.Model):
 
 class CheckoutQuestion(models.Model):
     class FieldType(models.TextChoices):
-        TEXT = 'TEXT', 'Text'
-        TEXTAREA = 'TEXTAREA', 'Long Text'
-        SELECT = 'SELECT', 'Dropdown'
-        RADIO = 'RADIO', 'Radio Buttons'
-        CHECKBOX = 'CHECKBOX', 'Checkbox'
-        EMAIL = 'EMAIL', 'Email'
-        PHONE = 'PHONE', 'Phone Number'
-        DATE = 'DATE', 'Date'
-        NUMBER = 'NUMBER', 'Number'
+        TEXT = 'TEXT', _('Text')
+        TEXTAREA = 'TEXTAREA', _('Long Text')
+        SELECT = 'SELECT', _('Dropdown')
+        RADIO = 'RADIO', _('Radio Buttons')
+        CHECKBOX = 'CHECKBOX', _('Checkbox')
+        EMAIL = 'EMAIL', _('Email')
+        PHONE = 'PHONE', _('Phone Number')
+        DATE = 'DATE', _('Date')
+        NUMBER = 'NUMBER', _('Number')
 
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='checkout_questions')
     question = models.CharField(max_length=255)
@@ -142,13 +143,13 @@ class CheckoutQuestion(models.Model):
 
 class Coupon(models.Model):
     class DiscountType(models.TextChoices):
-        PERCENTAGE = 'PERCENTAGE', 'Percentage'
-        FIXED = 'FIXED', 'Fixed Amount'
+        PERCENTAGE = 'PERCENTAGE', _('Percentage')
+        FIXED = 'FIXED', _('Fixed Amount')
 
     class AssignmentType(models.TextChoices):
-        PUBLIC = 'PUBLIC', 'Public (Anyone)'
-        INDIVIDUAL = 'INDIVIDUAL', 'Assigned to Individual'
-        GROUP = 'GROUP', 'Assigned to Group'
+        PUBLIC = 'PUBLIC', _('Public (Anyone)')
+        INDIVIDUAL = 'INDIVIDUAL', _('Assigned to Individual')
+        GROUP = 'GROUP', _('Assigned to Group')
 
     organization = models.ForeignKey(
         Organization,
@@ -263,9 +264,9 @@ class CouponUsage(models.Model):
 
 class EventFlyerConfig(models.Model):
     class PhotoShape(models.TextChoices):
-        CIRCLE = 'CIRCLE', 'Circle'
-        SQUARE = 'SQUARE', 'Square'
-        ROUNDED = 'ROUNDED', 'Rounded Rectangle'
+        CIRCLE = 'CIRCLE', _('Circle')
+        SQUARE = 'SQUARE', _('Square')
+        ROUNDED = 'ROUNDED', _('Rounded Rectangle')
 
     event = models.OneToOneField(Event, on_delete=models.CASCADE, related_name='flyer_config')
     is_enabled = models.BooleanField(default=False)
@@ -292,9 +293,9 @@ class EventFlyerConfig(models.Model):
 
 class FlyerTextField(models.Model):
     class TextAlign(models.TextChoices):
-        LEFT = 'LEFT', 'Left'
-        CENTER = 'CENTER', 'Center'
-        RIGHT = 'RIGHT', 'Right'
+        LEFT = 'LEFT', _('Left')
+        CENTER = 'CENTER', _('Center')
+        RIGHT = 'RIGHT', _('Right')
 
     flyer_config = models.ForeignKey(EventFlyerConfig, on_delete=models.CASCADE, related_name='text_fields')
     label = models.CharField(max_length=50)
@@ -334,9 +335,9 @@ class FlyerGeneration(models.Model):
 
 class FlyerBilling(models.Model):
     class Status(models.TextChoices):
-        PENDING = 'PENDING', 'Pending'
-        INVOICED = 'INVOICED', 'Invoiced'
-        PAID = 'PAID', 'Paid'
+        PENDING = 'PENDING', _('Pending')
+        INVOICED = 'INVOICED', _('Invoiced')
+        PAID = 'PAID', _('Paid')
 
     event = models.OneToOneField(Event, on_delete=models.CASCADE, related_name='flyer_billing')
     generation_count = models.PositiveIntegerField(default=0)

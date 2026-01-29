@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
 import uuid
 from datetime import timedelta
 from django.utils import timezone
@@ -93,11 +94,11 @@ class Organization(models.Model):
 
 class MemberRole(models.TextChoices):
     """Role choices for organization members"""
-    OWNER = 'OWNER', 'Owner'
-    ADMIN = 'ADMIN', 'Admin'
-    MANAGER = 'MANAGER', 'Manager'
-    MEMBER = 'MEMBER', 'Member'
-    VIEWER = 'VIEWER', 'Viewer'
+    OWNER = 'OWNER', _('Owner')
+    ADMIN = 'ADMIN', _('Admin')
+    MANAGER = 'MANAGER', _('Manager')
+    MEMBER = 'MEMBER', _('Member')
+    VIEWER = 'VIEWER', _('Viewer')
 
 
 # Permission definitions for each role
@@ -188,11 +189,11 @@ class Membership(models.Model):
 
 class Invitation(models.Model):
     class Status(models.TextChoices):
-        PENDING = 'PENDING', 'Pending'
-        ACCEPTED = 'ACCEPTED', 'Accepted'
-        DECLINED = 'DECLINED', 'Declined'
-        EXPIRED = 'EXPIRED', 'Expired'
-        CANCELLED = 'CANCELLED', 'Cancelled'
+        PENDING = 'PENDING', _('Pending')
+        ACCEPTED = 'ACCEPTED', _('Accepted')
+        DECLINED = 'DECLINED', _('Declined')
+        EXPIRED = 'EXPIRED', _('Expired')
+        CANCELLED = 'CANCELLED', _('Cancelled')
 
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='invitations')
     email = models.EmailField()
@@ -200,7 +201,7 @@ class Invitation(models.Model):
     custom_role = models.ForeignKey(CustomRole, on_delete=models.SET_NULL, null=True, blank=True)
     token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
-    message = models.TextField(blank=True, help_text="Optional message to include in invitation email")
+    message = models.TextField(blank=True, help_text=_("Optional message to include in invitation email"))
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
     invited_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='sent_invitations')
@@ -261,10 +262,10 @@ class Invitation(models.Model):
 
 
 class OrganizationPlan(models.TextChoices):
-    FREE = 'FREE', 'Free (2% fee)'
-    STARTER = 'STARTER', 'Starter (5% fee)'
-    PRO = 'PRO', 'Pro (3% fee)'
-    ENTERPRISE = 'ENTERPRISE', 'Enterprise (Custom)'
+    FREE = 'FREE', _('Free (2% fee)')
+    STARTER = 'STARTER', _('Starter (5% fee)')
+    PRO = 'PRO', _('Pro (3% fee)')
+    ENTERPRISE = 'ENTERPRISE', _('Enterprise (Custom)')
 
 
 PLAN_FEATURES = {
@@ -313,10 +314,10 @@ PLAN_FEATURES = {
 
 class OrganizationSubscription(models.Model):
     class Status(models.TextChoices):
-        ACTIVE = 'ACTIVE', 'Active'
-        PAST_DUE = 'PAST_DUE', 'Past Due'
-        CANCELLED = 'CANCELLED', 'Cancelled'
-        EXPIRED = 'EXPIRED', 'Expired'
+        ACTIVE = 'ACTIVE', _('Active')
+        PAST_DUE = 'PAST_DUE', _('Past Due')
+        CANCELLED = 'CANCELLED', _('Cancelled')
+        EXPIRED = 'EXPIRED', _('Expired')
 
     organization = models.OneToOneField(Organization, on_delete=models.CASCADE, related_name='subscription')
     plan = models.CharField(max_length=20, choices=OrganizationPlan.choices, default=OrganizationPlan.FREE)

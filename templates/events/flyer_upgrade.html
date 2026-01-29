@@ -10,26 +10,26 @@
         <div class="mb-6">
             <i data-lucide="sparkles" class="w-16 h-16 mx-auto text-primary"></i>
         </div>
-        <h1 class="text-2xl font-bold mb-2">Pay-Per-Use Feature</h1>
+        <h1 class="text-2xl font-bold mb-2">{% trans "Pay-Per-Use Feature" %}</h1>
         <p class="text-muted-foreground mb-6">
-            The "I Will Be There" flyer generator costs 25 XAF per flyer for free events.
+            {% trans "The \"I Will Be There\" flyer generator costs 25 XAF per flyer for free events." %}
         </p>
 
         <div class="card p-6 text-left mb-6">
-            <h3 class="font-semibold mb-3">Get it free:</h3>
+            <h3 class="font-semibold mb-3">{% trans "Get it free:" %}</h3>
             <ul class="space-y-2 text-sm">
                 <li class="flex items-center gap-2">
                     <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
-                    Add paid tickets to your event
+                    {% trans "Add paid tickets to your event" %}
                 </li>
                 <li class="flex items-center gap-2">
                     <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
-                    Flyers become free for paid events
+                    {% trans "Flyers become free for paid events" %}
                 </li>
             </ul>
             <div class="mt-4 pt-4 border-t border-border">
-                <h4 class="font-medium mb-2">Or pay-per-use:</h4>
-                <p class="text-sm text-muted-foreground">25 XAF per flyer generated</p>
+                <h4 class="font-medium mb-2">{% trans "Or pay-per-use:" %}</h4>
+                <p class="text-sm text-muted-foreground">{% trans "25 XAF per flyer generated" %}</p>
             </div>
         </div>
 
@@ -37,13 +37,13 @@
             <a href="{% url 'events:flyer_config' org_slug=event.organization.slug event_slug=event.slug %}">
                 {% #button variant="default" %}
                     <i data-lucide="settings" class="w-4 h-4 mr-2"></i>
-                    Configure & Accept Pay-Per-Use
+                    {% trans "Configure & Accept Pay-Per-Use" %}
                 {% /button %}
             </a>
             <a href="{% url 'events:public_detail' org_slug=event.organization.slug event_slug=event.slug %}">
                 {% #button variant="outline" %}
                     <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i>
-                    Back to Event
+                    {% trans "Back to Event" %}
                 {% /button %}
             </a>
         </div>

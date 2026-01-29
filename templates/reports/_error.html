@@ -1,6 +1,6 @@
-{% load slippers %}
+{% load slippers i18n %}
 <div data-motion>
-    {% #alert variant="destructive" icon="alert-circle" title="Export Failed" %}
+    {% #alert variant="destructive" icon="alert-circle" title=_("Export Failed") %}
         <p class="text-sm">{{ error }}</p>
     {% /alert %}
 </div>

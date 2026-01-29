@@ -70,9 +70,8 @@ class CampayGateway(PaymentGateway):
         }
 
     def calculate_withdrawal_fee(self, amount: Decimal) -> Decimal:
-        if amount <= 1000:
-            return Decimal('50')
-        return (amount * Decimal('0.04')).quantize(Decimal('1'))
+        fee = (amount * Decimal('0.04')).quantize(Decimal('1'))
+        return max(fee, Decimal('100'))
 
     def calculate_platform_fee(self, amount: Decimal) -> Decimal:
         percentage = getattr(settings, 'RECKOT_PLATFORM_FEE_PERCENTAGE', Decimal('7'))

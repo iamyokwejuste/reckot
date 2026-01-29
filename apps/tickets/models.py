@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 from apps.events.models import Event, CheckoutQuestion
 import uuid
 
@@ -55,10 +56,10 @@ class GuestSession(models.Model):
 
 class Booking(models.Model):
     class Status(models.TextChoices):
-        PENDING = 'PENDING', 'Pending Payment'
-        CONFIRMED = 'CONFIRMED', 'Confirmed'
-        CANCELLED = 'CANCELLED', 'Cancelled'
-        REFUNDED = 'REFUNDED', 'Refunded'
+        PENDING = 'PENDING', _('Pending Payment')
+        CONFIRMED = 'CONFIRMED', _('Confirmed')
+        CANCELLED = 'CANCELLED', _('Cancelled')
+        REFUNDED = 'REFUNDED', _('Refunded')
 
     reference = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='bookings', null=True)

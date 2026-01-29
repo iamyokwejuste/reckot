@@ -6,16 +6,16 @@
 
 {% block breadcrumbs %}
 {% #breadcrumb class="mb-4" %}
-    {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item %}Events{% /breadcrumb_item %}
+    {% #breadcrumb_item %}{% trans "Events" %}{% /breadcrumb_item %}
 {% /breadcrumb %}
 {% endblock %}
 
 {% block header_title %}
 <div>
-    <h1 class="text-lg font-semibold">Your Events</h1>
-    <p class="text-sm text-muted-foreground">Manage your events and tickets</p>
+    <h1 class="text-lg font-semibold">{% trans "Your Events" %}</h1>
+    <p class="text-sm text-muted-foreground">{% trans "Manage your events and tickets" %}</p>
 </div>
 {% endblock %}
 
@@ -23,7 +23,7 @@
 <a href="{% url 'events:create' %}">
     {% #button variant="default" size="sm" %}
         <i data-lucide="plus" class="w-4 h-4"></i>
-        Create Event
+        {% trans "Create Event" %}
     {% /button %}
 </a>
 {% endblock %}
@@ -42,9 +42,9 @@
                     <p class="text-sm text-muted-foreground">{{ event.organization.name }}</p>
                 </div>
                 {% if event.state == 'PUBLISHED' %}
-                {% #badge variant="success" %}Live{% /badge %}
+                {% #badge variant="success" %}{% trans "Live" %}{% /badge %}
                 {% elif event.state == 'DRAFT' %}
-                {% #badge %}Draft{% /badge %}
+                {% #badge %}{% trans "Draft" %}{% /badge %}
                 {% else %}
                 {% #badge variant="warning" %}{{ event.state }}{% /badge %}
                 {% endif %}
@@ -69,19 +69,19 @@
                 <a href="{% url 'events:dashboard' event.organization.slug event.slug %}">
                     {% #button variant="outline" size="sm" %}
                         <i data-lucide="settings" class="w-3.5 h-3.5"></i>
-                        Manage
+                        {% trans "Manage" %}
                     {% /button %}
                 </a>
                 <a href="{% url 'checkin:dashboard' event.organization.slug event.slug %}">
                     {% #button variant="outline" size="sm" %}
                         <i data-lucide="scan" class="w-3.5 h-3.5"></i>
-                        Check-in
+                        {% trans "Check-in" %}
                     {% /button %}
                 </a>
                 <a href="{% url 'reports:export_center' event.organization.slug event.slug %}">
                     {% #button variant="outline" size="sm" %}
                         <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                        Export
+                        {% trans "Export" %}
                     {% /button %}
                 </a>
             </div>
@@ -89,11 +89,11 @@
         {% endfor %}
     </div>
     {% else %}
-    {% #empty_state icon="calendar" title="No events yet" description="Get started by creating your first event" %}
+    {% #empty_state icon="calendar" title=_("No events yet") description=_("Get started by creating your first event") %}
         <a href="{% url 'events:create' %}">
             {% #button variant="default" %}
                 <i data-lucide="plus" class="w-4 h-4"></i>
-                Create Event
+                {% trans "Create Event" %}
             {% /button %}
         </a>
     {% /empty_state %}

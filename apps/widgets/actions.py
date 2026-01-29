@@ -4,6 +4,7 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.utils.decorators import method_decorator
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.utils.translation import gettext_lazy as _
 from apps.widgets.models import EmbedWidget
 from apps.events.models import Event
 
@@ -22,7 +23,7 @@ class WidgetView(View):
                 for domain in widget.allowed_domains
             )
             if not allowed and origin:
-                return HttpResponse('Domain not allowed', status=403)
+                return HttpResponse(_('Domain not allowed'), status=403)
 
         ticket_types = event.ticket_types.filter(is_active=True)
 

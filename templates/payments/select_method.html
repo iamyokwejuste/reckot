@@ -93,9 +93,22 @@
                             <span>{{ ticket.ticket_type.price }} XAF</span>
                         </div>
                         {% endfor %}
-                        <div class="border-t border-border pt-3 flex items-center justify-between">
-                            <span class="font-medium">{% trans "Total Amount" %}</span>
-                            <span class="text-xl font-bold">{{ booking.total_amount }} XAF</span>
+                        <div class="border-t border-border pt-3 space-y-2">
+                            <div class="flex items-center justify-between text-sm">
+                                <span>{% trans "Subtotal" %}</span>
+                                <span>{{ subtotal }} XAF</span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm text-muted-foreground">
+                                <span class="flex items-center gap-1">
+                                    {% trans "Transaction Fee" %}
+                                    <i data-lucide="info" class="h-3 w-3" title="{% trans 'Mobile money withdrawal fee' %}"></i>
+                                </span>
+                                <span>{{ withdrawal_fee }} XAF</span>
+                            </div>
+                            <div class="border-t border-border pt-2 flex items-center justify-between">
+                                <span class="font-medium">{% trans "Total to Pay" %}</span>
+                                <span class="text-xl font-bold">{{ total_with_fee }} XAF</span>
+                            </div>
                         </div>
                     </div>
 

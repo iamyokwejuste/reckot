@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
-{% load slippers %}
+{% load slippers i18n %}
 
 {% block content %}
 <div class="max-w-md mx-auto py-12 text-center">
-    {% #empty_state title="Invitation Error" description=message %}
-        <p class="text-sm text-muted mt-4">Please contact the person who invited you.</p>
+    {% #empty_state title=_("Invitation Error") description=message %}
+        <p class="text-sm text-muted mt-4">{% trans "Please contact the person who invited you." %}</p>
     {% /empty_state %}
 </div>
 {% endblock %}

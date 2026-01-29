@@ -8,6 +8,7 @@ from django.contrib.auth import login
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 
 from apps.core.models import OTPVerification, User
 from apps.core.tasks import resend_otp_task, send_otp_sms_task
@@ -96,7 +97,7 @@ class OTPVerificationView(LoginRequiredMixin, View):
 
         code = request.POST.get('otp_code', '').strip()
         if not code or len(code) != 6:
-            messages.error(request, 'Please enter a valid 6-digit code.')
+            messages.error(request, _('Please enter a valid 6-digit code.'))
             return render(request, 'account/otp_verify.html')
 
         otp = OTPVerification.objects.filter(
@@ -106,20 +107,20 @@ class OTPVerificationView(LoginRequiredMixin, View):
         ).order_by('-created_at').first()
 
         if not otp:
-            messages.error(request, 'No verification code found. Please request a new one.')
+            messages.error(request, _('No verification code found. Please request a new one.'))
             return render(request, 'account/otp_verify.html')
 
         if otp.verify(code):
             request.user.email_verified = True
             request.user.save(update_fields=['email_verified'])
-            messages.success(request, 'Email verified successfully!')
+            messages.success(request, _('Email verified successfully!'))
             return redirect('home')
         elif otp.is_expired:
-            messages.error(request, 'Code expired. Please request a new one.')
+            messages.error(request, _('Code expired. Please request a new one.'))
         elif otp.attempts >= 5:
-            messages.error(request, 'Too many attempts. Please request a new code.')
+            messages.error(request, _('Too many attempts. Please request a new code.'))
         else:
-            messages.error(request, 'Invalid code. Please try again.')
+            messages.error(request, _('Invalid code. Please try again.'))
 
         return render(request, 'account/otp_verify.html')
 
@@ -127,15 +128,15 @@ class OTPVerificationView(LoginRequiredMixin, View):
 class ResendOTPView(LoginRequiredMixin, View):
     def post(self, request):
         if request.user.email_verified:
-            return JsonResponse({'success': False, 'message': 'Email already verified'})
+            return JsonResponse({'success': False, 'message': _('Email already verified')})
 
         try:
             resend_otp_task.enqueue(request.user.id, OTPVerification.Type.EMAIL)
         except Exception as e:
             import logging
             logging.getLogger(__name__).error(f"Failed to resend OTP: {e}")
-            return JsonResponse({'success': False, 'message': 'Failed to send code. Please try again.'})
-        return JsonResponse({'success': True, 'message': 'New code sent to your email'})
+            return JsonResponse({'success': False, 'message': _('Failed to send code. Please try again.')})
+        return JsonResponse({'success': True, 'message': _('New code sent to your email')})
 
 
 class SettingsView(LoginRequiredMixin, View):
@@ -158,7 +159,7 @@ class SettingsView(LoginRequiredMixin, View):
             user.phone_number = re.sub(r'[\s\-\(\)]', '', phone)
 
         user.save()
-        messages.success(request, 'Settings updated successfully.')
+        messages.success(request, _('Settings updated successfully.'))
         return redirect('core:settings')
 
 
@@ -170,7 +171,7 @@ class PhoneLoginRequestView(View):
         phone = request.POST.get('phone_number', '').strip()
         if not phone:
             return HttpResponse(
-                '<p class="text-sm text-red-500 mt-2">Please enter a phone number</p>',
+                '<p class="text-sm text-red-500 mt-2">' + str(_('Please enter a phone number')) + '</p>',
                 status=400
             )
 
@@ -178,7 +179,7 @@ class PhoneLoginRequestView(View):
         user = User.objects.filter(phone_number=phone).first()
         if not user:
             return HttpResponse(
-                '<p class="text-sm text-red-500 mt-2">No account found with this phone number</p>',
+                '<p class="text-sm text-red-500 mt-2">' + str(_('No account found with this phone number')) + '</p>',
                 status=400
             )
 
@@ -193,7 +194,7 @@ class PhoneLoginRequestView(View):
             import logging
             logging.getLogger(__name__).error(f"Failed to send OTP SMS: {e}")
         return HttpResponse(
-            '<p class="text-sm text-emerald-500 mt-2">Verification code sent!</p>'
+            '<p class="text-sm text-emerald-500 mt-2">' + str(_('Verification code sent!')) + '</p>'
         )
 
     def _normalize_phone(self, phone):
@@ -209,13 +210,13 @@ class PhoneLoginVerifyView(View):
         code = request.POST.get('otp_code', '').strip()
 
         if not phone or not code:
-            messages.error(request, 'Phone number and code are required')
+            messages.error(request, _('Phone number and code are required'))
             return redirect('account_login')
 
         phone = self._normalize_phone(phone)
         user = User.objects.filter(phone_number=phone).first()
         if not user:
-            messages.error(request, 'Invalid phone number')
+            messages.error(request, _('Invalid phone number'))
             return redirect('account_login')
 
         verified = False
@@ -229,26 +230,26 @@ class PhoneLoginVerifyView(View):
             ).order_by('-created_at').first()
 
             if not otp:
-                messages.error(request, 'No verification code found. Please request a new one.')
+                messages.error(request, _('No verification code found. Please request a new one.'))
                 return redirect('account_login')
 
             if otp.verify(code):
                 verified = True
             elif otp.is_expired:
-                messages.error(request, 'Code expired. Please request a new one.')
+                messages.error(request, _('Code expired. Please request a new one.'))
                 return redirect('account_login')
             elif otp.attempts >= 5:
-                messages.error(request, 'Too many attempts. Please request a new code.')
+                messages.error(request, _('Too many attempts. Please request a new code.'))
                 return redirect('account_login')
 
         if verified:
             user.phone_verified = True
             user.save(update_fields=['phone_verified'])
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            messages.success(request, 'Logged in successfully!')
+            messages.success(request, _('Logged in successfully!'))
             return redirect('home')
 
-        messages.error(request, 'Invalid code. Please try again.')
+        messages.error(request, _('Invalid code. Please try again.'))
         return redirect('account_login')
 
     def _normalize_phone(self, phone):
@@ -263,14 +264,14 @@ class PhoneSignupRequestView(View):
         phone = request.POST.get('phone_number', '').strip()
         if not phone:
             return HttpResponse(
-                '<p class="text-sm text-red-500 mt-2">Please enter a phone number</p>',
+                '<p class="text-sm text-red-500 mt-2">' + str(_('Please enter a phone number')) + '</p>',
                 status=400
             )
 
         phone = self._normalize_phone(phone)
         if User.objects.filter(phone_number=phone).exists():
             return HttpResponse(
-                '<p class="text-sm text-red-500 mt-2">An account with this phone number already exists</p>',
+                '<p class="text-sm text-red-500 mt-2">' + str(_('An account with this phone number already exists')) + '</p>',
                 status=400
             )
 
@@ -285,7 +286,7 @@ class PhoneSignupRequestView(View):
             import logging
             logging.getLogger(__name__).error(f"Failed to send OTP SMS: {e}")
         return HttpResponse(
-            '<p class="text-sm text-emerald-500 mt-2">Verification code sent!</p>'
+            '<p class="text-sm text-emerald-500 mt-2">' + str(_('Verification code sent!')) + '</p>'
         )
 
     def _normalize_phone(self, phone):
@@ -306,7 +307,7 @@ class PhoneSignupVerifyView(View):
         stored_phone = request.session.get('signup_phone')
 
         if phone != stored_phone:
-            messages.error(request, 'Phone number mismatch. Please start over.')
+            messages.error(request, _('Phone number mismatch. Please start over.'))
             return redirect('account_signup')
 
         verified = False
@@ -318,15 +319,15 @@ class PhoneSignupVerifyView(View):
                 verified = True
 
         if not verified:
-            messages.error(request, 'Invalid verification code')
+            messages.error(request, _('Invalid verification code'))
             return redirect('account_signup')
 
         if not password1 or password1 != password2:
-            messages.error(request, 'Passwords do not match')
+            messages.error(request, _('Passwords do not match'))
             return redirect('account_signup')
 
         if len(password1) < 8:
-            messages.error(request, 'Password must be at least 8 characters')
+            messages.error(request, _('Password must be at least 8 characters'))
             return redirect('account_signup')
 
         user = User.objects.create_user(
@@ -342,7 +343,7 @@ class PhoneSignupVerifyView(View):
             del request.session['signup_otp']
 
         login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-        messages.success(request, 'Account created successfully!')
+        messages.success(request, _('Account created successfully!'))
         return redirect('home')
 
     def _normalize_phone(self, phone):

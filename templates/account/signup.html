@@ -86,7 +86,7 @@
                 </div>
                 <div>
                     <label for="id_password2" class="block text-sm font-medium mb-2">{% trans "Confirm Password" %}</label>
-                    <input type="password" name="password2" id="id_password2" placeholder="Confirm your password" required autocomplete="new-password" class="input">
+                    <input type="password" name="password2" id="id_password2" placeholder="{% trans "Confirm your password" %}" required autocomplete="new-password" class="input">
                 </div>
 
                 {% if form.errors %}
@@ -136,7 +136,7 @@
 
                     <div>
                         <label for="signup_otp" class="block text-sm font-medium mb-2">{% trans "Verification Code" %}</label>
-                        <input type="text" name="otp_code" id="signup_otp" placeholder="Enter 6-digit code" required
+                        <input type="text" name="otp_code" id="signup_otp" placeholder="{% trans "Enter 6-digit code" %}" required
                                maxlength="6" pattern="[0-9]{6}" inputmode="numeric" autocomplete="one-time-code"
                                class="input text-center text-lg tracking-widest font-mono">
                     </div>
@@ -147,7 +147,7 @@
                     </div>
                     <div>
                         <label for="phone_password2" class="block text-sm font-medium mb-2">{% trans "Confirm Password" %}</label>
-                        <input type="password" name="password2" id="phone_password2" placeholder="Confirm your password" required autocomplete="new-password" class="input">
+                        <input type="password" name="password2" id="phone_password2" placeholder="{% trans "Confirm your password" %}" required autocomplete="new-password" class="input">
                     </div>
 
                     {% #button type="submit" variant="default" class="w-full" %}

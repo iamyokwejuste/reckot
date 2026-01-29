@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.translation import gettext_lazy as _
 from apps.tickets.models import TicketType
 
 class BookingForm(forms.Form):

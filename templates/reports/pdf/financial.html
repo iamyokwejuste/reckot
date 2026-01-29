@@ -1,31 +1,32 @@
 {% extends "reports/pdf/base.html" %}
+{% load i18n %}
 
 {% block content %}
-<h1>Financial Summary Report</h1>
+<h1>{% trans "Financial Summary Report" %}</h1>
 
 <div class="summary-section">
     <div class="stat-card">
         <div class="stat-value">{{ total_revenue|floatformat:0 }} XAF</div>
-        <div class="stat-label">Total Revenue</div>
+        <div class="stat-label">{% trans "Total Revenue" %}</div>
     </div>
     <div class="stat-card">
         <div class="stat-value">{{ total_transactions }}</div>
-        <div class="stat-label">Transactions</div>
+        <div class="stat-label">{% trans "Transactions" %}</div>
     </div>
     <div class="stat-card">
         <div class="stat-value">{{ tickets_sold }}</div>
-        <div class="stat-label">Tickets Sold</div>
+        <div class="stat-label">{% trans "Tickets Sold" %}</div>
     </div>
 </div>
 
-<h2>Revenue by Ticket Type</h2>
+<h2>{% trans "Revenue by Ticket Type" %}</h2>
 <table>
     <thead>
         <tr>
-            <th>Ticket Type</th>
-            <th class="text-right">Price (XAF)</th>
-            <th class="text-right">Quantity Sold</th>
-            <th class="text-right">Revenue (XAF)</th>
+            <th>{% trans "Ticket Type" %}</th>
+            <th class="text-right">{% trans "Price (XAF)" %}</th>
+            <th class="text-right">{% trans "Quantity Sold" %}</th>
+            <th class="text-right">{% trans "Revenue (XAF)" %}</th>
         </tr>
     </thead>
     <tbody>
@@ -38,32 +39,32 @@
         </tr>
         {% empty %}
         <tr>
-            <td colspan="4" class="text-muted">No ticket sales recorded</td>
+            <td colspan="4" class="text-muted">{% trans "No ticket sales recorded" %}</td>
         </tr>
         {% endfor %}
     </tbody>
     <tfoot>
         <tr>
-            <td colspan="3" class="font-bold">Total</td>
+            <td colspan="3" class="font-bold">{% trans "Total" %}</td>
             <td class="text-right font-bold">{{ total_revenue|floatformat:0 }} XAF</td>
         </tr>
     </tfoot>
 </table>
 
 {% if payment_methods %}
-<h2>Revenue by Payment Method</h2>
+<h2>{% trans "Revenue by Payment Method" %}</h2>
 <table>
     <thead>
         <tr>
-            <th>Payment Method</th>
-            <th class="text-right">Transactions</th>
-            <th class="text-right">Amount (XAF)</th>
+            <th>{% trans "Payment Method" %}</th>
+            <th class="text-right">{% trans "Transactions" %}</th>
+            <th class="text-right">{% trans "Amount (XAF)" %}</th>
         </tr>
     </thead>
     <tbody>
         {% for method in payment_methods %}
         <tr>
-            <td>{{ method.method|default:"Unknown" }}</td>
+            <td>{{ method.method|default:_("Unknown") }}</td>
             <td class="text-right">{{ method.count }}</td>
             <td class="text-right">{{ method.total|floatformat:0 }}</td>
         </tr>
@@ -73,6 +74,6 @@
 {% endif %}
 
 <div class="summary-section text-muted" style="margin-top: 40px; font-size: 10px;">
-    <p>This report was generated automatically by Reckot. Data is accurate as of {{ generated_at|date:"F j, Y" }} at {{ generated_at|time:"g:i A" }}.</p>
+    <p>{% blocktrans with date=generated_at|date:"F j, Y" time=generated_at|time:"g:i A" %}This report was generated automatically by Reckot. Data is accurate as of {{ date }} at {{ time }}.{% endblocktrans %}</p>
 </div>
 {% endblock %}

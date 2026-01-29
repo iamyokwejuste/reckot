@@ -8,6 +8,7 @@ from django.db.models import Sum, Count, Q
 from django.db.models.functions import TruncDate
 from django.utils import timezone
 from django.utils.timesince import timesince
+from django.utils.translation import gettext_lazy as _
 from datetime import timedelta
 from apps.events.models import Event
 from apps.reports.models import ReportExport
@@ -301,7 +302,7 @@ class GenerateReportView(LoginRequiredMixin, View):
         format_type = request.POST.get('format', 'CSV')
         mask_emails = request.POST.get('mask_emails', 'on') == 'on'
         if report_type not in dict(ReportExport.Type.choices):
-            return render(request, 'reports/_error.html', {'error': 'Invalid report type'})
+            return render(request, 'reports/_error.html', {'error': _('Invalid report type')})
         try:
             if format_type == 'EXCEL':
                 export = generate_excel_export(event, report_type, request.user, mask_emails)
@@ -461,7 +462,7 @@ class ExportGenerateView(LoginRequiredMixin, View):
         mask_emails = request.POST.get('mask_emails', 'on') == 'on'
 
         if report_type not in dict(ReportExport.Type.choices):
-            messages.error(request, 'Invalid report type')
+            messages.error(request, _('Invalid report type'))
             return redirect('reports:export_center', org_slug=org_slug, event_slug=event_slug)
 
         try:
@@ -476,7 +477,7 @@ class ExportGenerateView(LoginRequiredMixin, View):
 
             return redirect('reports:download', export_ref=export.reference)
         except Exception as e:
-            messages.error(request, f'Export failed: {str(e)}')
+            messages.error(request, _('Export failed: %(error)s') % {'error': str(e)})
             return redirect('reports:export_center', org_slug=org_slug, event_slug=event_slug)
 
 

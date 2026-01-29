@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -12,7 +13,7 @@
         <div class="cover-title">{{ report_title }}</div>
         <div class="cover-subtitle">{{ event.title }}</div>
         <div class="cover-subtitle text-muted">{{ organization.name }}</div>
-        <div class="cover-date">Generated on {{ generated_at|date:"F j, Y" }} at {{ generated_at|time:"g:i A" }}</div>
+        <div class="cover-date">{% blocktrans with date=generated_at|date:"F j, Y" time=generated_at|time:"g:i A" %}Generated on {{ date }} at {{ time }}{% endblocktrans %}</div>
     </div>
 
     {% block content %}{% endblock %}

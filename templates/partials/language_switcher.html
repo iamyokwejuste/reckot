@@ -1,5 +1,5 @@
 {% load i18n %}
-<!-- Language Switcher Dropdown -->
+{% get_current_language as current_language %}
 <div x-data="{ langOpen: false }" class="relative">
     <button @click="langOpen = !langOpen"
             @click.outside="langOpen = false"
@@ -8,7 +8,7 @@
             aria-haspopup="true"
             :aria-expanded="langOpen.toString()">
         <i data-lucide="globe" class="h-4 w-4" aria-hidden="true"></i>
-        <span class="hidden sm:inline">{% if LANGUAGE_CODE == 'fr' %}FR{% else %}EN{% endif %}</span>
+        <span class="hidden sm:inline">{{ current_language|upper }}</span>
         <i data-lucide="chevron-down" class="h-3 w-3 text-muted-foreground transition-transform" :class="langOpen && 'rotate-180'" aria-hidden="true"></i>
     </button>
 
@@ -23,33 +23,30 @@
          x-cloak
          role="menu">
         <div class="p-1">
-            <!-- English -->
             <form action="{% url 'set_language' %}" method="post" class="m-0">
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{{ request.path }}">
                 <input type="hidden" name="language" value="en">
                 <button type="submit"
-                        class="flex items-center gap-3 w-full rounded-md px-3 py-2 text-sm hover:bg-muted transition-colors {% if LANGUAGE_CODE == 'en' %}bg-muted{% endif %}"
+                        class="flex items-center gap-3 w-full rounded-md px-3 py-2 text-sm hover:bg-muted transition-colors {% if current_language == 'en' %}bg-muted{% endif %}"
                         role="menuitem">
                     <span class="text-base">EN</span>
                     <span class="flex-1 text-left">English</span>
-                    {% if LANGUAGE_CODE == 'en' %}
+                    {% if current_language == 'en' %}
                     <i data-lucide="check" class="h-4 w-4 text-foreground" aria-hidden="true"></i>
                     {% endif %}
                 </button>
             </form>
-
-            <!-- French -->
             <form action="{% url 'set_language' %}" method="post" class="m-0">
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{{ request.path }}">
                 <input type="hidden" name="language" value="fr">
                 <button type="submit"
-                        class="flex items-center gap-3 w-full rounded-md px-3 py-2 text-sm hover:bg-muted transition-colors {% if LANGUAGE_CODE == 'fr' %}bg-muted{% endif %}"
+                        class="flex items-center gap-3 w-full rounded-md px-3 py-2 text-sm hover:bg-muted transition-colors {% if current_language == 'fr' %}bg-muted{% endif %}"
                         role="menuitem">
                     <span class="text-base">FR</span>
                     <span class="flex-1 text-left">Français</span>
-                    {% if LANGUAGE_CODE == 'fr' %}
+                    {% if current_language == 'fr' %}
                     <i data-lucide="check" class="h-4 w-4 text-foreground" aria-hidden="true"></i>
                     {% endif %}
                 </button>

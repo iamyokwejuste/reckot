@@ -1,3 +1,4 @@
+{% load i18n %}
 {% if sales_timeline %}
 <div class="h-48 flex items-end gap-1">
     {% for day in sales_timeline %}
@@ -6,7 +7,7 @@
              style="height: {% if max_daily_sales > 0 %}{% widthratio day.count max_daily_sales 100 %}{% else %}0{% endif %}%;">
             <div class="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity
                         bg-foreground text-background text-xs px-2 py-1 rounded whitespace-nowrap z-10">
-                {{ day.count }} ticket{{ day.count|pluralize }}
+                {% blocktrans count count=day.count %}{{ count }} ticket{% plural %}{{ count }} tickets{% endblocktrans %}
             </div>
         </div>
         <span class="text-[10px] text-muted-foreground">{{ day.date|date:"d" }}</span>
@@ -17,7 +18,7 @@
 <div class="h-48 flex items-center justify-center text-muted-foreground">
     <div class="text-center">
         <i data-lucide="bar-chart-3" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
-        <p class="text-sm">No sales data yet</p>
+        <p class="text-sm">{% trans "No sales data yet" %}</p>
     </div>
 </div>
 {% endif %}

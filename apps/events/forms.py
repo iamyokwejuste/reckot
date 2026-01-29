@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.translation import gettext_lazy as _
 from apps.events.models import Event
 from apps.tickets.models import TicketType
 
@@ -37,11 +38,11 @@ class EventForm(forms.ModelForm):
 
         if not contact_email and not contact_phone:
             raise forms.ValidationError(
-                'At least one contact method (email or phone) is required.'
+                _('At least one contact method (email or phone) is required.')
             )
 
         if event_type in ['IN_PERSON', 'HYBRID'] and not location:
-            self.add_error('location', 'Location is required for in-person and hybrid events.')
+            self.add_error('location', _('Location is required for in-person and hybrid events.'))
 
         return cleaned_data
 
@@ -50,12 +51,12 @@ class TicketTypeForm(forms.ModelForm):
     sales_start = forms.DateTimeField(
         required=False,
         widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
-        help_text='Leave empty to start sales immediately'
+        help_text=_('Leave empty to start sales immediately')
     )
     sales_end = forms.DateTimeField(
         required=False,
         widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
-        help_text='Leave empty for no end date'
+        help_text=_('Leave empty for no end date')
     )
 
     class Meta:
@@ -68,6 +69,6 @@ class TicketTypeForm(forms.ModelForm):
         sales_end = cleaned_data.get('sales_end')
 
         if sales_start and sales_end and sales_start >= sales_end:
-            raise forms.ValidationError('Sales end date must be after sales start date.')
+            raise forms.ValidationError(_('Sales end date must be after sales start date.'))
 
         return cleaned_data

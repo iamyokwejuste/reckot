@@ -1,11 +1,11 @@
 {% extends 'layouts/dashboard.html' %}
-{% load slippers %}
+{% load slippers i18n %}
 
-{% block title %}Invite Member - {{ organization.name }} - Reckot{% endblock %}
+{% block title %}{% trans "Invite Member" %} - {{ organization.name }} - Reckot{% endblock %}
 
 {% block header_title %}
 <div>
-    <h1 class="text-lg font-semibold">Invite Team Member</h1>
+    <h1 class="text-lg font-semibold">{% trans "Invite Team Member" %}</h1>
     <p class="text-sm text-muted-foreground">{{ organization.name }}</p>
 </div>
 {% endblock %}
@@ -14,7 +14,7 @@
 <a href="{% url 'orgs:members' organization.slug %}">
     {% #button variant="outline" size="sm" %}
         <i data-lucide="arrow-left" class="w-4 h-4"></i>
-        Back
+        {% trans "Back" %}
     {% /button %}
 </a>
 {% endblock %}
@@ -27,21 +27,21 @@
 
             <div class="space-y-4">
                 <div>
-                    <label for="email" class="block text-sm font-medium mb-2">Email Address</label>
+                    <label for="email" class="block text-sm font-medium mb-2">{% trans "Email Address" %}</label>
                     <input type="email" name="email" id="email" required
                            placeholder="colleague@example.com" class="input">
-                    <p class="text-xs text-muted-foreground mt-1">They'll receive an invitation email</p>
+                    <p class="text-xs text-muted-foreground mt-1">{% trans "They'll receive an invitation email" %}</p>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium mb-2">Role</label>
-                    {% select name="role" options=roles value="MEMBER" label="Member" placeholder="Select a role" required=True %}
+                    <label class="block text-sm font-medium mb-2">{% trans "Role" %}</label>
+                    {% select name="role" options=roles value="MEMBER" label=_("Member") placeholder=_("Select a role") required=True %}
                 </div>
 
                 <div>
-                    <label for="message" class="block text-sm font-medium mb-2">Personal Message (optional)</label>
+                    <label for="message" class="block text-sm font-medium mb-2">{% trans "Personal Message (optional)" %}</label>
                     <textarea name="message" id="message" rows="3"
-                              placeholder="Add a personal note to the invitation..."
+                              placeholder="{% trans "Add a personal note to the invitation..." %}"
                               class="input resize-none"></textarea>
                 </div>
             </div>
@@ -49,30 +49,30 @@
             <div class="mt-6 flex gap-3">
                 {% #button variant="default" type="submit" class="flex-1" %}
                     <i data-lucide="send" class="w-4 h-4"></i>
-                    Send Invitation
+                    {% trans "Send Invitation" %}
                 {% /button %}
             </div>
         </form>
     </div>
 
     <div class="mt-6 card p-4">
-        <h3 class="text-sm font-medium mb-3">Role Descriptions</h3>
+        <h3 class="text-sm font-medium mb-3">{% trans "Role Descriptions" %}</h3>
         <div class="space-y-3 text-sm">
             <div class="flex gap-3">
-                {% #badge variant="secondary" %}Admin{% /badge %}
-                <p class="text-muted-foreground">Full access except deleting the organization</p>
+                {% #badge variant="secondary" %}{% trans "Admin" %}{% /badge %}
+                <p class="text-muted-foreground">{% trans "Full access except deleting the organization" %}</p>
             </div>
             <div class="flex gap-3">
-                {% #badge %}Manager{% /badge %}
-                <p class="text-muted-foreground">Create events, manage tickets, view reports</p>
+                {% #badge %}{% trans "Manager" %}{% /badge %}
+                <p class="text-muted-foreground">{% trans "Create events, manage tickets, view reports" %}</p>
             </div>
             <div class="flex gap-3">
-                {% #badge %}Member{% /badge %}
-                <p class="text-muted-foreground">Create events, manage tickets, check-in attendees</p>
+                {% #badge %}{% trans "Member" %}{% /badge %}
+                <p class="text-muted-foreground">{% trans "Create events, manage tickets, check-in attendees" %}</p>
             </div>
             <div class="flex gap-3">
-                {% #badge %}Viewer{% /badge %}
-                <p class="text-muted-foreground">View-only access to reports and analytics</p>
+                {% #badge %}{% trans "Viewer" %}{% /badge %}
+                <p class="text-muted-foreground">{% trans "View-only access to reports and analytics" %}</p>
             </div>
         </div>
     </div>

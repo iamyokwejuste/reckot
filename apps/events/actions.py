@@ -9,6 +9,7 @@ from django.db.models import Q, Count, Sum
 from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from apps.events.forms import EventForm, TicketTypeForm
 from apps.events.services import create_event
@@ -94,10 +95,10 @@ class PublicEventDetailView(View):
                     status_message = f"Sales start {sales_start.strftime('%b %d, %Y at %I:%M %p')}"
             elif sales_end and now_naive > sales_end:
                 is_available = False
-                status_message = "Sales ended"
+                status_message = _("Sales ended")
             elif tt.available_quantity <= 0:
                 is_available = False
-                status_message = "Sold out"
+                status_message = _("Sold out")
             else:
                 if sales_start and now_naive >= sales_start:
                     sales_started = True
@@ -177,11 +178,11 @@ class EventCreateView(LoginRequiredMixin, View):
 
         event, errors = create_event(request.user, organization, request.POST, request.FILES)
         if event:
-            messages.success(request, f'Event "{event.title}" created successfully!')
+            messages.success(request, _('Event "%(title)s" created successfully!') % {'title': event.title})
             return redirect('events:detail', org_slug=organization.slug, event_slug=event.slug)
         else:
             form = EventForm(request.POST, request.FILES)
-            messages.error(request, 'Failed to create event. Please check the errors below.')
+            messages.error(request, _('Failed to create event. Please check the errors below.'))
             return render(request, 'events/create_event.html', {
                 'form': form,
                 'organizations': organizations,
@@ -237,7 +238,7 @@ class TicketTypeDeleteView(LoginRequiredMixin, View):
         event = get_object_or_404(Event, organization__slug=org_slug, slug=event_slug)
         ticket_type = get_object_or_404(TicketType, id=ticket_type_id, event=event)
         if ticket_type.tickets.exists():
-            return JsonResponse({'error': 'Cannot delete ticket type with existing tickets'}, status=400)
+            return JsonResponse({'error': _('Cannot delete ticket type with existing tickets')}, status=400)
         ticket_type.delete()
         return redirect('events:manage_ticket_types', org_slug=org_slug, event_slug=event_slug)
 
@@ -457,7 +458,7 @@ class CouponCreateView(LoginRequiredMixin, View):
             return render(request, 'events/coupons/create.html', {
                 'organizations': organizations,
                 'events': events,
-                'error': 'A coupon with this code already exists in this organization.',
+                'error': _('A coupon with this code already exists in this organization.'),
             })
 
         discount_type = request.POST.get('discount_type', 'PERCENTAGE')
@@ -535,7 +536,7 @@ class ValidateCouponView(View):
         email = request.POST.get('email', '').strip()
 
         if not code:
-            return JsonResponse({'valid': False, 'error': 'Please enter a coupon code'})
+            return JsonResponse({'valid': False, 'error': _('Please enter a coupon code')})
 
         coupon = Coupon.objects.filter(
             Q(code=code),
@@ -543,13 +544,13 @@ class ValidateCouponView(View):
         ).first()
 
         if not coupon:
-            return JsonResponse({'valid': False, 'error': 'Invalid coupon code'})
+            return JsonResponse({'valid': False, 'error': _('Invalid coupon code')})
 
         if not coupon.is_valid:
-            return JsonResponse({'valid': False, 'error': 'This coupon is no longer valid'})
+            return JsonResponse({'valid': False, 'error': _('This coupon is no longer valid')})
 
         if email and not coupon.can_be_used_by(email):
-            return JsonResponse({'valid': False, 'error': 'This coupon cannot be used with your email'})
+            return JsonResponse({'valid': False, 'error': _('This coupon cannot be used with your email')})
 
         return JsonResponse({
             'valid': True,
@@ -608,9 +609,9 @@ class FlyerGeneratorView(View):
         try:
             config = event.flyer_config
             if not config.is_enabled:
-                return HttpResponse('Flyer generation not enabled', status=403)
+                return HttpResponse(_('Flyer generation not enabled'), status=403)
         except EventFlyerConfig.DoesNotExist:
-            return HttpResponse('Flyer not configured', status=404)
+            return HttpResponse(_('Flyer not configured'), status=404)
 
         user_photo = request.FILES.get('photo')
         text_values = {}

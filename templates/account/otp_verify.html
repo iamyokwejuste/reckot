@@ -75,7 +75,7 @@
                             setTimeout(() => resending = false, 30000);
                         })
                         .catch(() => {
-                            alert('Failed to resend. Please try again.');
+                            alert("{% trans 'Failed to resend. Please try again.' %}");
                             resending = false;
                         });
                     "

@@ -6,19 +6,19 @@
 
 {% block content %}
 <div class="max-w-xl mx-auto py-12 px-4 text-center">
-    {% #empty_state icon="building-2" title="No Organization Found" description="You need to create or be invited to an organization before you can create events." %}
-        <p class="text-sm text-muted-foreground mt-4">Create your organization to get started, or wait for an invitation from an existing organization.</p>
+    {% #empty_state icon="building-2" title=_("No Organization Found") description=_("You need to create or be invited to an organization before you can create events.") %}
+        <p class="text-sm text-muted-foreground mt-4">{% trans "Create your organization to get started, or wait for an invitation from an existing organization." %}</p>
         <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
             <a href="{% url 'orgs:create' %}">
                 {% #button variant="default" %}
                     <i data-lucide="plus" class="mr-2 h-4 w-4"></i>
-                    Create Organization
+                    {% trans "Create Organization" %}
                 {% /button %}
             </a>
             <a href="{% url 'home' %}">
                 {% #button variant="outline" %}
                     <i data-lucide="home" class="mr-2 h-4 w-4"></i>
-                    Back to Home
+                    {% trans "Back to Home" %}
                 {% /button %}
             </a>
         </div>

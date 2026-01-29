@@ -1,26 +1,26 @@
 {% extends "layouts/dashboard.html" %}
-{% load slippers %}
+{% load slippers i18n %}
 
-{% block title %}Analytics - Reckot{% endblock %}
+{% block title %}{% trans "Analytics" %} - Reckot{% endblock %}
 
 {% block breadcrumbs %}
 {% #breadcrumb class="mb-4" %}
-    {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item %}Analytics{% /breadcrumb_item %}
+    {% #breadcrumb_item %}{% trans "Analytics" %}{% /breadcrumb_item %}
 {% /breadcrumb %}
 {% endblock %}
 
 {% block header_title %}
 <div>
-    <h1 class="text-lg font-semibold">Analytics</h1>
-    <p class="text-sm text-muted-foreground">Track your event performance</p>
+    <h1 class="text-lg font-semibold">{% trans "Analytics" %}</h1>
+    <p class="text-sm text-muted-foreground">{% trans "Track your event performance" %}</p>
 </div>
 {% endblock %}
 
 {% block header_actions %}
 <div class="flex items-center gap-2">
-    <div class="custom-select-wrapper w-40" x-data="{ open: false, value: '30d', label: 'Last 30 days' }">
+    <div class="custom-select-wrapper w-40" x-data="{ open: false, value: '30d', label: '{% trans "Last 30 days" %}' }">
         <input type="hidden" name="date_range" :value="value">
         <button type="button" @click="open = !open" @click.outside="open = false"
                 class="custom-select-trigger" :class="{ 'custom-select-trigger-active': open }">
@@ -29,20 +29,20 @@
         </button>
         <div x-show="open" x-transition @click.outside="open = false" class="custom-select-dropdown" x-cloak>
             <div class="custom-select-options">
-                <button type="button" @click="value = '7d'; label = 'Last 7 days'; open = false" class="custom-select-option" :class="{ 'custom-select-option-selected': value === '7d' }">
-                    <span>Last 7 days</span>
+                <button type="button" @click="value = '7d'; label = '{% trans "Last 7 days" %}'; open = false" class="custom-select-option" :class="{ 'custom-select-option-selected': value === '7d' }">
+                    <span>{% trans "Last 7 days" %}</span>
                     <i x-show="value === '7d'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
                 </button>
-                <button type="button" @click="value = '30d'; label = 'Last 30 days'; open = false" class="custom-select-option" :class="{ 'custom-select-option-selected': value === '30d' }">
-                    <span>Last 30 days</span>
+                <button type="button" @click="value = '30d'; label = '{% trans "Last 30 days" %}'; open = false" class="custom-select-option" :class="{ 'custom-select-option-selected': value === '30d' }">
+                    <span>{% trans "Last 30 days" %}</span>
                     <i x-show="value === '30d'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
                 </button>
-                <button type="button" @click="value = '90d'; label = 'Last 90 days'; open = false" class="custom-select-option" :class="{ 'custom-select-option-selected': value === '90d' }">
-                    <span>Last 90 days</span>
+                <button type="button" @click="value = '90d'; label = '{% trans "Last 90 days" %}'; open = false" class="custom-select-option" :class="{ 'custom-select-option-selected': value === '90d' }">
+                    <span>{% trans "Last 90 days" %}</span>
                     <i x-show="value === '90d'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
                 </button>
-                <button type="button" @click="value = '1y'; label = 'Last year'; open = false" class="custom-select-option" :class="{ 'custom-select-option-selected': value === '1y' }">
-                    <span>Last year</span>
+                <button type="button" @click="value = '1y'; label = '{% trans "Last year" %}'; open = false" class="custom-select-option" :class="{ 'custom-select-option-selected': value === '1y' }">
+                    <span>{% trans "Last year" %}</span>
                     <i x-show="value === '1y'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
                 </button>
             </div>
@@ -50,14 +50,14 @@
     </div>
     {% #button variant="default" size="sm" attrs='@click="$dispatch(\'open-export-modal\')"' %}
         <i data-lucide="download" class="h-4 w-4"></i>
-        <span class="hidden sm:inline">Export</span>
+        <span class="hidden sm:inline">{% trans "Export" %}</span>
     {% /button %}
 </div>
 {% endblock %}
 
 {% block content %}
 <div class="space-y-6" x-data="{ showExportModal: false }" @open-export-modal.window="showExportModal = true">
-    {% #modal trigger="showExportModal" title="Export Event Data" description="Select an event to export data from" size="md" %}
+    {% #modal trigger="showExportModal" title=_("Export Event Data") description=_("Select an event to export data from") size="md" %}
         {% if all_events %}
         <div class="space-y-2 max-h-80 overflow-y-auto">
             {% for event in all_events %}
@@ -78,53 +78,53 @@
         {% else %}
         <div class="text-center py-8 text-muted-foreground">
             <i data-lucide="inbox" class="h-8 w-8 mx-auto mb-2 opacity-50"></i>
-            <p class="text-sm">No events available for export</p>
-            <a href="{% url 'events:create' %}" class="text-sm text-primary hover:underline mt-2 inline-block">Create an event</a>
+            <p class="text-sm">{% trans "No events available for export" %}</p>
+            <a href="{% url 'events:create' %}" class="text-sm text-primary hover:underline mt-2 inline-block">{% trans "Create an event" %}</a>
         </div>
         {% endif %}
     {% /modal %}
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div class="stat-card">
             <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-muted-foreground">Total Revenue</p>
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Total Revenue" %}</p>
                 <i data-lucide="banknote" class="h-4 w-4 text-muted-foreground"></i>
             </div>
             <div class="mt-2">
                 <p class="text-2xl font-bold">{{ total_revenue }} <span class="text-sm font-normal text-muted-foreground">XAF</span></p>
-                <p class="text-xs text-muted-foreground mt-1">All time revenue</p>
+                <p class="text-xs text-muted-foreground mt-1">{% trans "All time revenue" %}</p>
             </div>
         </div>
 
         <div class="stat-card">
             <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-muted-foreground">Tickets Sold</p>
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Tickets Sold" %}</p>
                 <i data-lucide="ticket" class="h-4 w-4 text-muted-foreground"></i>
             </div>
             <div class="mt-2">
                 <p class="text-2xl font-bold">{{ tickets_sold }}</p>
-                <p class="text-xs text-muted-foreground mt-1">Total confirmed tickets</p>
+                <p class="text-xs text-muted-foreground mt-1">{% trans "Total confirmed tickets" %}</p>
             </div>
         </div>
 
         <div class="stat-card">
             <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-muted-foreground">Check-in Rate</p>
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Check-in Rate" %}</p>
                 <i data-lucide="scan-line" class="h-4 w-4 text-muted-foreground"></i>
             </div>
             <div class="mt-2">
                 <p class="text-2xl font-bold">{{ checkin_rate }}%</p>
-                <p class="text-xs text-muted-foreground mt-1">Average attendance</p>
+                <p class="text-xs text-muted-foreground mt-1">{% trans "Average attendance" %}</p>
             </div>
         </div>
 
         <div class="stat-card">
             <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-muted-foreground">Active Events</p>
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Active Events" %}</p>
                 <i data-lucide="calendar" class="h-4 w-4 text-muted-foreground"></i>
             </div>
             <div class="mt-2">
                 <p class="text-2xl font-bold">{{ active_events }}</p>
-                <p class="text-xs text-muted-foreground mt-1">Published events</p>
+                <p class="text-xs text-muted-foreground mt-1">{% trans "Published events" %}</p>
             </div>
         </div>
     </div>
@@ -137,8 +137,8 @@
         <div class="card p-4 lg:p-6">
             <div class="flex items-center justify-between mb-6">
                 <div>
-                    <h3 class="font-semibold">Recent Sales</h3>
-                    <p class="text-sm text-muted-foreground">Latest ticket purchases</p>
+                    <h3 class="font-semibold">{% trans "Recent Sales" %}</h3>
+                    <p class="text-sm text-muted-foreground">{% trans "Latest ticket purchases" %}</p>
                 </div>
             </div>
             <div class="space-y-4">
@@ -158,7 +158,7 @@
                 {% else %}
                     <div class="text-center py-8 text-muted-foreground">
                         <i data-lucide="inbox" class="h-8 w-8 mx-auto mb-2 opacity-50"></i>
-                        <p class="text-sm">No sales yet</p>
+                        <p class="text-sm">{% trans "No sales yet" %}</p>
                     </div>
                 {% endif %}
             </div>
@@ -167,10 +167,10 @@
         <div class="card p-4 lg:p-6">
             <div class="flex items-center justify-between mb-6">
                 <div>
-                    <h3 class="font-semibold">Upcoming Events</h3>
-                    <p class="text-sm text-muted-foreground">Events in the next 7 days</p>
+                    <h3 class="font-semibold">{% trans "Upcoming Events" %}</h3>
+                    <p class="text-sm text-muted-foreground">{% trans "Events in the next 7 days" %}</p>
                 </div>
-                <a href="{% url 'events:list' %}" class="text-sm text-muted-foreground hover:text-foreground transition-colors">View all</a>
+                <a href="{% url 'events:list' %}" class="text-sm text-muted-foreground hover:text-foreground transition-colors">{% trans "View all" %}</a>
             </div>
             <div class="space-y-4">
                 {% if upcoming_events %}
@@ -185,9 +185,9 @@
                             <p class="text-xs text-muted-foreground">{{ event.location|truncatewords:4 }}</p>
                         </div>
                         {% if event.state == 'PUBLISHED' %}
-                            <span class="badge badge-success">Live</span>
+                            <span class="badge badge-success">{% trans "Live" %}</span>
                         {% elif event.state == 'DRAFT' %}
-                            <span class="badge badge-default">Draft</span>
+                            <span class="badge badge-default">{% trans "Draft" %}</span>
                         {% else %}
                             <span class="badge badge-warning">{{ event.state }}</span>
                         {% endif %}
@@ -196,8 +196,8 @@
                 {% else %}
                     <div class="text-center py-8 text-muted-foreground">
                         <i data-lucide="calendar-off" class="h-8 w-8 mx-auto mb-2 opacity-50"></i>
-                        <p class="text-sm">No upcoming events</p>
-                        <a href="{% url 'events:create' %}" class="text-sm text-primary hover:underline mt-2 inline-block">Create an event</a>
+                        <p class="text-sm">{% trans "No upcoming events" %}</p>
+                        <a href="{% url 'events:create' %}" class="text-sm text-primary hover:underline mt-2 inline-block">{% trans "Create an event" %}</a>
                     </div>
                 {% endif %}
             </div>
@@ -207,8 +207,8 @@
     <div class="card p-4 lg:p-6">
         <div class="flex items-center justify-between mb-6">
             <div>
-                <h3 class="font-semibold">Top Performing Events</h3>
-                <p class="text-sm text-muted-foreground">Events ranked by revenue</p>
+                <h3 class="font-semibold">{% trans "Top Performing Events" %}</h3>
+                <p class="text-sm text-muted-foreground">{% trans "Events ranked by revenue" %}</p>
             </div>
         </div>
         {% if top_events %}
@@ -217,12 +217,12 @@
                 <table class="w-full">
                     <thead>
                         <tr class="border-b border-border">
-                            <th class="text-left text-sm font-medium text-muted-foreground pb-3 pr-4">Event</th>
-                            <th class="text-left text-sm font-medium text-muted-foreground pb-3 pr-4">Date</th>
-                            <th class="text-left text-sm font-medium text-muted-foreground pb-3 pr-4">Tickets</th>
-                            <th class="text-left text-sm font-medium text-muted-foreground pb-3 pr-4">Revenue</th>
-                            <th class="text-left text-sm font-medium text-muted-foreground pb-3 pr-4">Check-in</th>
-                            <th class="text-right text-sm font-medium text-muted-foreground pb-3">Status</th>
+                            <th class="text-left text-sm font-medium text-muted-foreground pb-3 pr-4">{% trans "Event" %}</th>
+                            <th class="text-left text-sm font-medium text-muted-foreground pb-3 pr-4">{% trans "Date" %}</th>
+                            <th class="text-left text-sm font-medium text-muted-foreground pb-3 pr-4">{% trans "Tickets" %}</th>
+                            <th class="text-left text-sm font-medium text-muted-foreground pb-3 pr-4">{% trans "Revenue" %}</th>
+                            <th class="text-left text-sm font-medium text-muted-foreground pb-3 pr-4">{% trans "Check-in" %}</th>
+                            <th class="text-right text-sm font-medium text-muted-foreground pb-3">{% trans "Status" %}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-border">
@@ -255,12 +255,12 @@
                             <td class="py-3 text-right">
                                 {% if event.state == 'PUBLISHED' %}
                                     {% if event.end_at < now %}
-                                        <span class="badge badge-success">Completed</span>
+                                        <span class="badge badge-success">{% trans "Completed" %}</span>
                                     {% else %}
-                                        <span class="badge badge-warning">Live</span>
+                                        <span class="badge badge-warning">{% trans "Live" %}</span>
                                     {% endif %}
                                 {% elif event.state == 'DRAFT' %}
-                                    <span class="badge badge-default">Draft</span>
+                                    <span class="badge badge-default">{% trans "Draft" %}</span>
                                 {% else %}
                                     <span class="badge">{{ event.state }}</span>
                                 {% endif %}
@@ -274,12 +274,12 @@
         {% else %}
         <div class="text-center py-12 text-muted-foreground">
             <i data-lucide="bar-chart-3" class="h-12 w-12 mx-auto mb-4 opacity-50"></i>
-            <p class="text-lg font-medium mb-2">No events yet</p>
-            <p class="text-sm mb-4">Create your first event to start tracking analytics</p>
+            <p class="text-lg font-medium mb-2">{% trans "No events yet" %}</p>
+            <p class="text-sm mb-4">{% trans "Create your first event to start tracking analytics" %}</p>
             <a href="{% url 'events:create' %}">
                 {% #button variant="default" %}
                     <i data-lucide="plus" class="mr-2 h-4 w-4"></i>
-                    Create Event
+                    {% trans "Create Event" %}
                 {% /button %}
             </a>
         </div>

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% load slippers %}
+{% load slippers i18n %}
 
-{% block title %}Join {{ invitation.organization.name }} - Reckot{% endblock %}
+{% block title %}{% trans "Join" %} {{ invitation.organization.name }} - Reckot{% endblock %}
 
 {% block content %}
 <div class="min-h-[80vh] flex items-center justify-center py-12">
@@ -16,9 +16,9 @@
             </div>
             {% endif %}
 
-            <h1 class="text-xl font-semibold mb-2">Join {{ invitation.organization.name }}</h1>
+            <h1 class="text-xl font-semibold mb-2">{% trans "Join" %} {{ invitation.organization.name }}</h1>
             <p class="text-muted-foreground mb-6">
-                {{ invitation.invited_by.get_full_name|default:invitation.invited_by.email }} has invited you to join as a <strong>{{ invitation.get_role_display }}</strong>.
+                {% blocktrans with inviter=invitation.invited_by.get_full_name|default:invitation.invited_by.email role=invitation.get_role_display %}{{ inviter }} has invited you to join as a <strong>{{ role }}</strong>.{% endblocktrans %}
             </p>
 
             {% if invitation.message %}
@@ -31,12 +31,12 @@
                 {% csrf_token %}
                 {% #button variant="default" type="submit" size="lg" class="w-full" %}
                     <i data-lucide="check" class="w-5 h-5"></i>
-                    Accept Invitation
+                    {% trans "Accept Invitation" %}
                 {% /button %}
             </form>
 
             <p class="text-xs text-muted-foreground mt-4">
-                By accepting, you'll be able to collaborate on events with this organization.
+                {% trans "By accepting, you'll be able to collaborate on events with this organization." %}
             </p>
         </div>
     </div>

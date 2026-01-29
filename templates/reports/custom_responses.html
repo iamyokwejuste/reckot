@@ -1,27 +1,27 @@
 {% extends "layouts/dashboard.html" %}
-{% load slippers %}
+{% load slippers i18n %}
 
-{% block title %}Custom Responses - {{ event.title }}{% endblock %}
+{% block title %}{% trans "Custom Responses" %} - {{ event.title }}{% endblock %}
 
 {% block breadcrumbs %}
 {% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug as event_dashboard_url %}
 {% url 'reports:dashboard' org_slug=event.organization.slug event_slug=event.slug as reports_url %}
 {% #breadcrumb class="mb-4" %}
-    {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item href="/events/" %}Events{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/events/" %}{% trans "Events" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
     {% #breadcrumb_item href=event_dashboard_url %}{{ event.title|truncatewords:3 }}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item href=reports_url %}Reports{% /breadcrumb_item %}
+    {% #breadcrumb_item href=reports_url %}{% trans "Reports" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item %}Custom Responses{% /breadcrumb_item %}
+    {% #breadcrumb_item %}{% trans "Custom Responses" %}{% /breadcrumb_item %}
 {% /breadcrumb %}
 {% endblock %}
 
 {% block header_title %}
 <div>
-    <h1 class="text-lg font-semibold">Custom Field Responses</h1>
+    <h1 class="text-lg font-semibold">{% trans "Custom Field Responses" %}</h1>
     <p class="text-sm text-muted-foreground">{{ event.title }}</p>
 </div>
 {% endblock %}
@@ -31,13 +31,13 @@
     <a href="{% url 'events:checkout_questions' org_slug=event.organization.slug event_slug=event.slug %}">
         {% #button variant="outline" size="sm" %}
             <i data-lucide="settings" class="w-4 h-4 mr-1"></i>
-            Manage Questions
+            {% trans "Manage Questions" %}
         {% /button %}
     </a>
     <a href="{% url 'reports:dashboard' org_slug=event.organization.slug event_slug=event.slug %}">
         {% #button variant="outline" size="sm" %}
             <i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i>
-            Back
+            {% trans "Back" %}
         {% /button %}
     </a>
 </div>
@@ -54,16 +54,16 @@
                 <div class="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                     <span>{{ item.question.get_field_type_display }}</span>
                     {% if item.question.is_required %}
-                    <span class="badge badge-outline">Required</span>
+                    <span class="badge badge-outline">{% trans "Required" %}</span>
                     {% endif %}
                     {% if item.question.per_ticket %}
-                    <span class="badge badge-info">Per ticket</span>
+                    <span class="badge badge-info">{% trans "Per ticket" %}</span>
                     {% endif %}
                 </div>
             </div>
             <div class="text-right">
                 <div class="text-2xl font-bold">{{ item.answer_count }}</div>
-                <div class="text-xs text-muted-foreground">responses</div>
+                <div class="text-xs text-muted-foreground">{% trans "responses" %}</div>
             </div>
         </div>
 
@@ -89,7 +89,7 @@
         {% else %}
         <div class="p-4 text-sm text-muted-foreground">
             <i data-lucide="type" class="w-4 h-4 inline mr-1"></i>
-            Text responses - view in attendee export
+            {% trans "Text responses - view in attendee export" %}
         </div>
         {% endif %}
     </div>
@@ -97,12 +97,12 @@
     {% else %}
     <div class="card p-8 text-center">
         <i data-lucide="clipboard-list" class="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50"></i>
-        <h3 class="font-semibold mb-2">No Custom Questions</h3>
-        <p class="text-muted-foreground text-sm mb-4">Add custom questions to collect additional info from attendees</p>
+        <h3 class="font-semibold mb-2">{% trans "No Custom Questions" %}</h3>
+        <p class="text-muted-foreground text-sm mb-4">{% trans "Add custom questions to collect additional info from attendees" %}</p>
         <a href="{% url 'events:checkout_questions' org_slug=event.organization.slug event_slug=event.slug %}">
             {% #button variant="default" size="sm" %}
                 <i data-lucide="plus" class="w-4 h-4 mr-1"></i>
-                Add Questions
+                {% trans "Add Questions" %}
             {% /button %}
         </a>
     </div>

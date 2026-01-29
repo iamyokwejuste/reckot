@@ -9,6 +9,7 @@ from django.http import JsonResponse, Http404, HttpResponse
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 from apps.orgs.models import Organization, Membership, Invitation, MemberRole
 from apps.payments.models import Payment
 from apps.core.models import User
@@ -32,7 +33,7 @@ class OrgPermissionMixin:
         if slug:
             organization = self.get_organization(slug)
             if not self.check_permission(request, organization):
-                messages.error(request, "You don't have permission to perform this action.")
+                messages.error(request, _("You don't have permission to perform this action."))
                 return redirect('orgs:list')
             self.organization = organization
         return super().dispatch(request, *args, **kwargs)
@@ -63,7 +64,7 @@ class OrganizationCreateView(LoginRequiredMixin, View):
 
         if not name:
             return render(request, 'orgs/create.html', {
-                'error': 'Organization name is required.',
+                'error': _('Organization name is required.'),
             })
 
         try:
@@ -84,13 +85,13 @@ class OrganizationCreateView(LoginRequiredMixin, View):
                 role=MemberRole.OWNER,
             )
 
-            messages.success(request, f'Organization "{name}" created successfully!')
+            messages.success(request, _('Organization "%(name)s" created successfully!') % {'name': name})
             return redirect('orgs:detail', slug=organization.slug)
         except Exception as e:
             import logging
             logging.getLogger(__name__).error(f"Failed to create organization: {e}")
             return render(request, 'orgs/create.html', {
-                'error': f'Failed to create organization: {str(e)}',
+                'error': _('Failed to create organization: %(error)s') % {'error': str(e)},
                 'name': name,
                 'description': description,
                 'website': website,
@@ -168,16 +169,16 @@ class InviteMemberView(LoginRequiredMixin, OrgPermissionMixin, View):
         message_text = request.POST.get('message', '').strip()
 
         if not email:
-            messages.error(request, 'Email is required.')
+            messages.error(request, _('Email is required.'))
             return redirect('orgs:invite_member', slug=slug)
 
         if role == MemberRole.OWNER:
-            messages.error(request, 'Cannot invite someone as Owner.')
+            messages.error(request, _('Cannot invite someone as Owner.'))
             return redirect('orgs:invite_member', slug=slug)
 
         existing_user = User.objects.filter(email=email).first()
         if existing_user and organization.members.filter(id=existing_user.id).exists():
-            messages.warning(request, f'{email} is already a member of this organization.')
+            messages.warning(request, _('%(email)s is already a member of this organization.') % {'email': email})
             return redirect('orgs:members', slug=slug)
 
         existing_invitation = Invitation.objects.filter(
@@ -187,7 +188,7 @@ class InviteMemberView(LoginRequiredMixin, OrgPermissionMixin, View):
         ).first()
 
         if existing_invitation:
-            messages.warning(request, f'An invitation has already been sent to {email}.')
+            messages.warning(request, _('An invitation has already been sent to %(email)s.') % {'email': email})
             return redirect('orgs:members', slug=slug)
 
         invitation = Invitation.objects.create(
@@ -219,7 +220,7 @@ class InviteMemberView(LoginRequiredMixin, OrgPermissionMixin, View):
         except Exception:
             pass
 
-        messages.success(request, f'Invitation sent to {email}.')
+        messages.success(request, _('Invitation sent to %(email)s.') % {'email': email})
         return redirect('orgs:members', slug=slug)
 
 
@@ -231,7 +232,7 @@ class UpdateMemberRoleView(LoginRequiredMixin, OrgPermissionMixin, View):
         new_role = request.POST.get('role')
 
         if new_role not in [r[0] for r in MemberRole.choices]:
-            messages.error(request, 'Invalid role.')
+            messages.error(request, _('Invalid role.'))
             return redirect('orgs:members', slug=slug)
 
         membership = get_object_or_404(
@@ -241,17 +242,17 @@ class UpdateMemberRoleView(LoginRequiredMixin, OrgPermissionMixin, View):
         )
 
         if membership.role == MemberRole.OWNER:
-            messages.error(request, 'Cannot change the role of the organization owner.')
+            messages.error(request, _('Cannot change the role of the organization owner.'))
             return redirect('orgs:members', slug=slug)
 
         if new_role == MemberRole.OWNER:
-            messages.error(request, 'Cannot assign Owner role. Transfer ownership instead.')
+            messages.error(request, _('Cannot assign Owner role. Transfer ownership instead.'))
             return redirect('orgs:members', slug=slug)
 
         membership.role = new_role
         membership.save()
 
-        messages.success(request, f"Updated {membership.user.email}'s role to {membership.get_role_display()}.")
+        messages.success(request, _("Updated %(email)s's role to %(role)s.") % {'email': membership.user.email, 'role': membership.get_role_display()})
         return redirect('orgs:members', slug=slug)
 
 
@@ -268,17 +269,17 @@ class RemoveMemberView(LoginRequiredMixin, OrgPermissionMixin, View):
         )
 
         if membership.role == MemberRole.OWNER:
-            messages.error(request, 'Cannot remove the organization owner.')
+            messages.error(request, _('Cannot remove the organization owner.'))
             return redirect('orgs:members', slug=slug)
 
         if membership.user == request.user:
-            messages.error(request, 'You cannot remove yourself. Leave the organization instead.')
+            messages.error(request, _('You cannot remove yourself. Leave the organization instead.'))
             return redirect('orgs:members', slug=slug)
 
         user_email = membership.user.email
         membership.delete()
 
-        messages.success(request, f'Removed {user_email} from the organization.')
+        messages.success(request, _('Removed %(email)s from the organization.') % {'email': user_email})
         return redirect('orgs:members', slug=slug)
 
 
@@ -287,7 +288,7 @@ class LeaveOrganizationView(LoginRequiredMixin, View):
         organization = get_object_or_404(Organization, slug=slug)
 
         if organization.owner == request.user:
-            messages.error(request, 'As the owner, you cannot leave the organization. Transfer ownership first.')
+            messages.error(request, _('As the owner, you cannot leave the organization. Transfer ownership first.'))
             return redirect('orgs:detail', slug=slug)
 
         membership = Membership.objects.filter(
@@ -297,7 +298,7 @@ class LeaveOrganizationView(LoginRequiredMixin, View):
 
         if membership:
             membership.delete()
-            messages.success(request, f'You have left {organization.name}.')
+            messages.success(request, _('You have left %(name)s.') % {'name': organization.name})
 
         return redirect('orgs:list')
 
@@ -316,7 +317,7 @@ class CancelInvitationView(LoginRequiredMixin, OrgPermissionMixin, View):
         )
 
         invitation.cancel()
-        messages.success(request, f'Cancelled invitation to {invitation.email}.')
+        messages.success(request, _('Cancelled invitation to %(email)s.') % {'email': invitation.email})
         return redirect('orgs:members', slug=slug)
 
 
@@ -350,9 +351,9 @@ class ResendInvitationView(LoginRequiredMixin, OrgPermissionMixin, View):
                 html_message=html_message,
                 fail_silently=True,
             )
-            messages.success(request, f'Invitation resent to {invitation.email}.')
+            messages.success(request, _('Invitation resent to %(email)s.') % {'email': invitation.email})
         except Exception:
-            messages.error(request, 'Failed to resend invitation.')
+            messages.error(request, _('Failed to resend invitation.'))
 
         return redirect('orgs:members', slug=slug)
 
@@ -363,14 +364,14 @@ class AcceptInvitationView(LoginRequiredMixin, View):
 
         if invitation.status != Invitation.Status.PENDING:
             return render(request, 'orgs/invitation_error.html', {
-                'message': 'This invitation has already been used or cancelled.'
+                'message': _('This invitation has already been used or cancelled.')
             })
 
         if invitation.is_expired:
             invitation.status = Invitation.Status.EXPIRED
             invitation.save()
             return render(request, 'orgs/invitation_error.html', {
-                'message': 'This invitation has expired.'
+                'message': _('This invitation has expired.')
             })
 
         return render(request, 'orgs/accept_invitation.html', {
@@ -382,17 +383,17 @@ class AcceptInvitationView(LoginRequiredMixin, View):
 
         if not invitation.is_valid:
             return render(request, 'orgs/invitation_error.html', {
-                'message': 'This invitation is no longer valid.'
+                'message': _('This invitation is no longer valid.')
             })
 
         membership = invitation.accept(request.user)
 
         if membership:
-            messages.success(request, f'Welcome to {invitation.organization.name}!')
+            messages.success(request, _('Welcome to %(name)s!') % {'name': invitation.organization.name})
             return redirect('orgs:detail', slug=invitation.organization.slug)
         else:
             return render(request, 'orgs/invitation_error.html', {
-                'message': 'Failed to accept invitation.'
+                'message': _('Failed to accept invitation.')
             })
 
 
@@ -402,7 +403,7 @@ class TransferOwnershipView(LoginRequiredMixin, View):
         new_owner_id = request.POST.get('new_owner_id')
 
         if not new_owner_id:
-            messages.error(request, 'Please select a new owner.')
+            messages.error(request, _('Please select a new owner.'))
             return redirect('orgs:members', slug=slug)
 
         new_owner_membership = get_object_or_404(
@@ -424,7 +425,7 @@ class TransferOwnershipView(LoginRequiredMixin, View):
         organization.owner = new_owner_membership.user
         organization.save()
 
-        messages.success(request, f'Ownership transferred to {new_owner_membership.user.email}.')
+        messages.success(request, _('Ownership transferred to %(email)s.') % {'email': new_owner_membership.user.email})
         return redirect('orgs:detail', slug=slug)
 
 
@@ -446,7 +447,7 @@ class OrganizationEditView(LoginRequiredMixin, OrgPermissionMixin, View):
         if not name:
             return render(request, 'orgs/edit.html', {
                 'organization': organization,
-                'error': 'Organization name is required.',
+                'error': _('Organization name is required.'),
             })
 
         organization.name = name
@@ -461,7 +462,7 @@ class OrganizationEditView(LoginRequiredMixin, OrgPermissionMixin, View):
 
         organization.save()
 
-        messages.success(request, 'Organization updated successfully!')
+        messages.success(request, _('Organization updated successfully!'))
         return redirect('orgs:detail', slug=organization.slug)
 
 
@@ -481,7 +482,7 @@ class BulkInviteView(LoginRequiredMixin, OrgPermissionMixin, View):
         message_text = request.POST.get('message', '').strip()
 
         if role == MemberRole.OWNER:
-            messages.error(request, 'Cannot invite users as Owner.')
+            messages.error(request, _('Cannot invite users as Owner.'))
             return redirect('orgs:bulk_invite', slug=slug)
 
         csv_file = request.FILES.get('csv_file')
@@ -499,7 +500,7 @@ class BulkInviteView(LoginRequiredMixin, OrgPermissionMixin, View):
                         if '@' in email and email not in emails:
                             emails.append(email)
             except Exception:
-                messages.error(request, 'Failed to parse CSV file.')
+                messages.error(request, _('Failed to parse CSV file.'))
                 return redirect('orgs:bulk_invite', slug=slug)
 
         if emails_text:
@@ -509,7 +510,7 @@ class BulkInviteView(LoginRequiredMixin, OrgPermissionMixin, View):
                     emails.append(email)
 
         if not emails:
-            messages.error(request, 'No valid emails found.')
+            messages.error(request, _('No valid emails found.'))
             return redirect('orgs:bulk_invite', slug=slug)
 
         sent_count = 0
@@ -561,9 +562,9 @@ class BulkInviteView(LoginRequiredMixin, OrgPermissionMixin, View):
                 sent_count += 1
 
         if sent_count > 0:
-            messages.success(request, f'Sent {sent_count} invitation(s).')
+            messages.success(request, _('Sent %(count)d invitation(s).') % {'count': sent_count})
         if skipped_count > 0:
-            messages.info(request, f'Skipped {skipped_count} existing member(s) or pending invitation(s).')
+            messages.info(request, _('Skipped %(count)d existing member(s) or pending invitation(s).') % {'count': skipped_count})
 
         return redirect('orgs:members', slug=slug)
 

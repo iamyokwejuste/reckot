@@ -88,12 +88,12 @@
                 <div class="relative">
                     <div class="card p-6 h-full">
                         <div class="flex items-center justify-center h-14 w-14 rounded-2xl bg-foreground text-background text-xl font-semibold mb-4 relative z-10">3</div>
-                        <h3 class="font-semibold text-lg">Check-in</h3>
-                        <p class="text-muted-foreground text-sm mt-2">Scan QR codes at the venue. Works offline. Track swag distribution.</p>
+                        <h3 class="font-semibold text-lg">{% trans "Check-in" %}</h3>
+                        <p class="text-muted-foreground text-sm mt-2">{% trans "Scan QR codes at the venue. Works offline. Track swag distribution." %}</p>
                         <div class="mt-4 p-3 rounded-lg bg-muted text-xs">
                             <div class="flex items-center gap-2 text-muted-foreground">
                                 <i data-lucide="scan-line" class="w-3 h-3"></i>
-                                <span>Under 2 seconds</span>
+                                <span>{% trans "Under 2 seconds" %}</span>
                             </div>
                         </div>
                     </div>
@@ -104,12 +104,12 @@
                         <div class="flex items-center justify-center h-14 w-14 rounded-2xl bg-emerald-500 text-white text-xl font-semibold mb-4 relative z-10">
                             <i data-lucide="check" class="w-6 h-6"></i>
                         </div>
-                        <h3 class="font-semibold text-lg">Get Paid</h3>
-                        <p class="text-muted-foreground text-sm mt-2">Money lands in your mobile wallet within 24 hours. No bank needed.</p>
+                        <h3 class="font-semibold text-lg">{% trans "Get Paid" %}</h3>
+                        <p class="text-muted-foreground text-sm mt-2">{% trans "Money lands in your mobile wallet within 24 hours. No bank needed." %}</p>
                         <div class="mt-4 p-3 rounded-lg bg-emerald-500/10 text-xs">
                             <div class="flex items-center gap-2 text-emerald-600">
                                 <i data-lucide="wallet" class="w-3 h-3"></i>
-                                <span>24h payout</span>
+                                <span>{% trans "24h payout" %}</span>
                             </div>
                         </div>
                     </div>
@@ -123,8 +123,8 @@
     <div class="container">
         <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
             <div>
-                <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">Pricing Calculator</h2>
-                <p class="text-muted-foreground mt-4 text-lg">See exactly what you'll earn. No surprises, no hidden fees.</p>
+                <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">{% trans "Pricing Calculator" %}</h2>
+                <p class="text-muted-foreground mt-4 text-lg">{% trans "See exactly what you'll earn. No surprises, no hidden fees." %}</p>
 
                 <div class="mt-8 card p-6" x-data="{
                     ticketPrice: 5000,
@@ -137,11 +137,11 @@
                 }" x-init="reset()">
                     <div class="space-y-6">
                         <div>
-                            <label class="block text-sm font-medium mb-2">Ticket Price (XAF)</label>
+                            <label class="block text-sm font-medium mb-2">{% trans "Ticket Price (XAF)" %}</label>
                             <input type="number" x-model.number="ticketPrice" placeholder="5000" class="input" min="0">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-2">Number of Tickets</label>
+                            <label class="block text-sm font-medium mb-2">{% trans "Number of Tickets" %}</label>
                             <input type="number" x-model.number="ticketCount" placeholder="100" class="input" min="0">
                         </div>
 
@@ -149,16 +149,16 @@
 
                         <div class="space-y-3">
                             <div class="flex justify-between text-sm">
-                                <span class="text-muted-foreground">Gross Revenue</span>
+                                <span class="text-muted-foreground">{% trans "Gross Revenue" %}</span>
                                 <span class="font-medium" x-text="formatCurrency(grossRevenue)"></span>
                             </div>
                             <div class="flex justify-between text-sm">
-                                <span class="text-muted-foreground">Reckot Fee ({{ PLATFORM_FEE_PERCENTAGE }}%)</span>
+                                <span class="text-muted-foreground">{% blocktrans with fee=PLATFORM_FEE_PERCENTAGE %}Reckot Fee ({{ fee }}%){% endblocktrans %}</span>
                                 <span class="font-medium text-red-500" x-text="'-' + formatCurrency(reckotFee)"></span>
                             </div>
                             <div class="h-px bg-border"></div>
                             <div class="flex justify-between">
-                                <span class="font-semibold">You Receive</span>
+                                <span class="font-semibold">{% trans "You Receive" %}</span>
                                 <span class="text-2xl font-bold text-emerald-600" x-text="formatCurrency(netRevenue)"></span>
                             </div>
                         </div>
@@ -167,8 +167,8 @@
             </div>
 
             <div>
-                <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">Complete Transparency</h2>
-                <p class="text-muted-foreground mt-4 text-lg">We believe you should know exactly where your money goes.</p>
+                <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">{% trans "Complete Transparency" %}</h2>
+                <p class="text-muted-foreground mt-4 text-lg">{% trans "We believe you should know exactly where your money goes." %}</p>
 
                 <div class="mt-8 space-y-4">
                     <div class="card p-5">
@@ -177,8 +177,8 @@
                                 <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600"></i>
                             </div>
                             <div>
-                                <h3 class="font-semibold">No Setup Fees</h3>
-                                <p class="text-sm text-muted-foreground mt-1">Create unlimited events. We only earn when you do.</p>
+                                <h3 class="font-semibold">{% trans "No Setup Fees" %}</h3>
+                                <p class="text-sm text-muted-foreground mt-1">{% trans "Create unlimited events. We only earn when you do." %}</p>
                             </div>
                         </div>
                     </div>
@@ -189,8 +189,8 @@
                                 <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600"></i>
                             </div>
                             <div>
-                                <h3 class="font-semibold">No Monthly Fees</h3>
-                                <p class="text-sm text-muted-foreground mt-1">No subscriptions. No recurring charges. Pay per transaction only.</p>
+                                <h3 class="font-semibold">{% trans "No Monthly Fees" %}</h3>
+                                <p class="text-sm text-muted-foreground mt-1">{% trans "No subscriptions. No recurring charges. Pay per transaction only." %}</p>
                             </div>
                         </div>
                     </div>
@@ -201,8 +201,8 @@
                                 <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600"></i>
                             </div>
                             <div>
-                                <h3 class="font-semibold">Free Events = Free</h3>
-                                <p class="text-sm text-muted-foreground mt-1">Running a free event? You pay absolutely nothing.</p>
+                                <h3 class="font-semibold">{% trans "Free Events = Free" %}</h3>
+                                <p class="text-sm text-muted-foreground mt-1">{% trans "Running a free event? You pay absolutely nothing." %}</p>
                             </div>
                         </div>
                     </div>
@@ -213,8 +213,8 @@
                                 <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600"></i>
                             </div>
                             <div>
-                                <h3 class="font-semibold">Fast Payouts</h3>
-                                <p class="text-sm text-muted-foreground mt-1">Get your money within 24 hours to your mobile wallet.</p>
+                                <h3 class="font-semibold">{% trans "Fast Payouts" %}</h3>
+                                <p class="text-sm text-muted-foreground mt-1">{% trans "Get your money within 24 hours to your mobile wallet." %}</p>
                             </div>
                         </div>
                     </div>
@@ -227,8 +227,8 @@
 <section class="py-20 md:py-28">
     <div class="container">
         <div class="text-center max-w-2xl mx-auto mb-16">
-            <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">Built for African Events</h2>
-            <p class="text-muted-foreground mt-4 text-lg">We understand the unique challenges of running events in Africa</p>
+            <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">{% trans "Built for African Events" %}</h2>
+            <p class="text-muted-foreground mt-4 text-lg">{% trans "We understand the unique challenges of running events in Africa" %}</p>
         </div>
 
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -236,48 +236,48 @@
                 <div class="h-12 w-12 rounded-xl bg-yellow-500/10 flex items-center justify-center mb-4">
                     <span class="text-lg font-bold text-yellow-600">M</span>
                 </div>
-                <h3 class="font-semibold text-lg">MTN MoMo Integration</h3>
-                <p class="text-muted-foreground text-sm mt-2">Native integration with MTN Mobile Money. Your attendees pay the way they're used to.</p>
+                <h3 class="font-semibold text-lg">{% trans "MTN MoMo Integration" %}</h3>
+                <p class="text-muted-foreground text-sm mt-2">{% trans "Native integration with MTN Mobile Money. Your attendees pay the way they're used to." %}</p>
             </div>
 
             <div class="card p-6">
                 <div class="h-12 w-12 rounded-xl bg-orange-500/10 flex items-center justify-center mb-4">
                     <span class="text-lg font-bold text-orange-600">O</span>
                 </div>
-                <h3 class="font-semibold text-lg">Orange Money Integration</h3>
-                <p class="text-muted-foreground text-sm mt-2">Full Orange Money support. Cover all your potential attendees across Africa.</p>
+                <h3 class="font-semibold text-lg">{% trans "Orange Money Integration" %}</h3>
+                <p class="text-muted-foreground text-sm mt-2">{% trans "Full Orange Money support. Cover all your potential attendees across Africa." %}</p>
             </div>
 
             <div class="card p-6">
                 <div class="h-12 w-12 rounded-xl bg-foreground flex items-center justify-center mb-4">
                     <i data-lucide="wifi-off" class="w-6 h-6 text-background"></i>
                 </div>
-                <h3 class="font-semibold text-lg">Works Offline</h3>
-                <p class="text-muted-foreground text-sm mt-2">Check-in works without internet. Perfect for venues with poor connectivity.</p>
+                <h3 class="font-semibold text-lg">{% trans "Works Offline" %}</h3>
+                <p class="text-muted-foreground text-sm mt-2">{% trans "Check-in works without internet. Perfect for venues with poor connectivity." %}</p>
             </div>
 
             <div class="card p-6">
                 <div class="h-12 w-12 rounded-xl bg-foreground flex items-center justify-center mb-4">
                     <i data-lucide="globe" class="w-6 h-6 text-background"></i>
                 </div>
-                <h3 class="font-semibold text-lg">Multi-Currency Ready</h3>
-                <p class="text-muted-foreground text-sm mt-2">Support for XAF, XOF, and other African currencies. Expand beyond borders.</p>
+                <h3 class="font-semibold text-lg">{% trans "Multi-Currency Ready" %}</h3>
+                <p class="text-muted-foreground text-sm mt-2">{% trans "Support for XAF, XOF, and other African currencies. Expand beyond borders." %}</p>
             </div>
 
             <div class="card p-6">
                 <div class="h-12 w-12 rounded-xl bg-foreground flex items-center justify-center mb-4">
                     <i data-lucide="zap" class="w-6 h-6 text-background"></i>
                 </div>
-                <h3 class="font-semibold text-lg">Fast & Light</h3>
-                <p class="text-muted-foreground text-sm mt-2">Optimized for slower connections. Works great on 3G networks.</p>
+                <h3 class="font-semibold text-lg">{% trans "Fast & Light" %}</h3>
+                <p class="text-muted-foreground text-sm mt-2">{% trans "Optimized for slower connections. Works great on 3G networks." %}</p>
             </div>
 
             <div class="card p-6">
                 <div class="h-12 w-12 rounded-xl bg-foreground flex items-center justify-center mb-4">
                     <i data-lucide="shield-check" class="w-6 h-6 text-background"></i>
                 </div>
-                <h3 class="font-semibold text-lg">Secure Payments</h3>
-                <p class="text-muted-foreground text-sm mt-2">Bank-level security for all transactions. Your money is always safe.</p>
+                <h3 class="font-semibold text-lg">{% trans "Secure Payments" %}</h3>
+                <p class="text-muted-foreground text-sm mt-2">{% trans "Bank-level security for all transactions. Your money is always safe." %}</p>
             </div>
         </div>
     </div>
@@ -286,17 +286,17 @@
 <section class="py-20 md:py-28">
     <div class="container">
         <div class="rounded-2xl border border-border bg-card p-8 md:p-12 lg:p-16 text-center">
-            <h2 class="text-2xl md:text-3xl lg:text-4xl font-semibold tracking-tight max-w-xl mx-auto">Ready to run your next event?</h2>
-            <p class="mt-4 text-muted-foreground text-lg">Join hundreds of organizers across Africa using Reckot</p>
+            <h2 class="text-2xl md:text-3xl lg:text-4xl font-semibold tracking-tight max-w-xl mx-auto">{% trans "Ready to run your next event?" %}</h2>
+            <p class="mt-4 text-muted-foreground text-lg">{% trans "Join hundreds of organizers across Africa using Reckot" %}</p>
             <div class="flex flex-col sm:flex-row gap-3 justify-center mt-8">
                 <a href="{% url 'account_signup' %}">
                     {% #button variant="default" size="lg" %}
-                        Start free today
+                        {% trans "Start free today" %}
                         <i data-lucide="arrow-right" class="w-4 h-4"></i>
                     {% /button %}
                 </a>
                 <a href="{% url 'home' %}#pricing">
-                    {% #button variant="outline" size="lg" %}View pricing{% /button %}
+                    {% #button variant="outline" size="lg" %}{% trans "View pricing" %}{% /button %}
                 </a>
             </div>
         </div>

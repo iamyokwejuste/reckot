@@ -1,13 +1,13 @@
 {% extends "layouts/dashboard.html" %}
-{% load slippers %}
+{% load slippers i18n %}
 
 {% block title %}{{ organization.name }} - Reckot{% endblock %}
 
 {% block breadcrumbs %}
 {% #breadcrumb class="mb-4" %}
-    {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item href="/orgs/" %}Organizations{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/orgs/" %}{% trans "Organizations" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
     {% #breadcrumb_item %}{{ organization.name }}{% /breadcrumb_item %}
 {% /breadcrumb %}
@@ -24,7 +24,7 @@
     {% endif %}
     <div>
         <h1 class="text-lg font-semibold">{{ organization.name }}</h1>
-        <p class="text-sm text-muted-foreground">{{ memberships.count }} member{{ memberships.count|pluralize }}</p>
+        <p class="text-sm text-muted-foreground">{% blocktrans count counter=memberships.count %}{{ counter }} member{% plural %}{{ counter }} members{% endblocktrans %}</p>
     </div>
 </div>
 {% endblock %}
@@ -35,14 +35,14 @@
     <a href="{% url 'orgs:edit' organization.slug %}">
         {% #button variant="outline" size="sm" %}
             <i data-lucide="settings" class="w-4 h-4"></i>
-            Settings
+            {% trans "Settings" %}
         {% /button %}
     </a>
     {% endif %}
     <a href="{% url 'events:create' %}">
         {% #button variant="default" size="sm" %}
             <i data-lucide="plus" class="w-4 h-4"></i>
-            New Event
+            {% trans "New Event" %}
         {% /button %}
     </a>
 </div>
@@ -53,21 +53,21 @@
     <div class="grid gap-4 sm:grid-cols-3">
         <div class="stat-card">
             <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-muted-foreground">Total Events</p>
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Total Events" %}</p>
                 <i data-lucide="calendar" class="h-4 w-4 text-muted-foreground"></i>
             </div>
             <p class="text-2xl font-bold mt-2">{{ events|length }}</p>
         </div>
         <div class="stat-card">
             <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-muted-foreground">Members</p>
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Members" %}</p>
                 <i data-lucide="users" class="h-4 w-4 text-muted-foreground"></i>
             </div>
             <p class="text-2xl font-bold mt-2">{{ memberships.count }}</p>
         </div>
         <div class="stat-card">
             <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-muted-foreground">Total Revenue</p>
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Total Revenue" %}</p>
                 <i data-lucide="banknote" class="h-4 w-4 text-emerald-500"></i>
             </div>
             <p class="text-2xl font-bold mt-2 text-emerald-500">{{ total_revenue|floatformat:0 }} XAF</p>
@@ -76,7 +76,7 @@
 
     {% if organization.description %}
     <div class="card p-6">
-        <h2 class="font-semibold mb-2">About</h2>
+        <h2 class="font-semibold mb-2">{% trans "About" %}</h2>
         <div class="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">{{ organization.description|safe }}</div>
         {% if organization.website %}
         <a href="{{ organization.website }}" target="_blank" class="inline-flex items-center gap-1 text-sm text-primary hover:underline mt-3">
@@ -90,8 +90,8 @@
     <div class="grid gap-6 lg:grid-cols-2">
         <div class="card">
             <div class="p-6 border-b border-border flex items-center justify-between">
-                <h2 class="font-semibold">Recent Events</h2>
-                <a href="{% url 'events:list' %}" class="text-sm text-primary hover:underline">View all</a>
+                <h2 class="font-semibold">{% trans "Recent Events" %}</h2>
+                <a href="{% url 'events:list' %}" class="text-sm text-primary hover:underline">{% trans "View all" %}</a>
             </div>
             {% if events %}
             <div class="divide-y divide-border">
@@ -106,34 +106,34 @@
                         <p class="text-sm text-muted-foreground">{{ event.start_at|date:"M d, Y" }}</p>
                     </div>
                     {% if event.state == 'PUBLISHED' %}
-                    <span class="badge badge-success">Published</span>
+                    <span class="badge badge-success">{% trans "Published" %}</span>
                     {% elif event.state == 'DRAFT' %}
-                    <span class="badge">Draft</span>
+                    <span class="badge">{% trans "Draft" %}</span>
                     {% endif %}
                 </a>
                 {% endfor %}
             </div>
             {% else %}
             <div class="p-6 text-center">
-                <p class="text-muted-foreground">No events yet</p>
+                <p class="text-muted-foreground">{% trans "No events yet" %}</p>
             </div>
             {% endif %}
         </div>
 
         <div class="card">
             <div class="p-6 border-b border-border flex items-center justify-between">
-                <h2 class="font-semibold">Team Members</h2>
+                <h2 class="font-semibold">{% trans "Team Members" %}</h2>
                 <div class="flex items-center gap-2">
                     {% if can_invite %}
                     <a href="{% url 'orgs:invite_member' organization.slug %}">
                         {% #button variant="outline" size="sm" %}
                             <i data-lucide="user-plus" class="w-4 h-4"></i>
-                            Invite
+                            {% trans "Invite" %}
                         {% /button %}
                     </a>
                     {% endif %}
                     {% if can_manage_members %}
-                    <a href="{% url 'orgs:members' organization.slug %}" class="text-sm text-primary hover:underline">Manage team</a>
+                    <a href="{% url 'orgs:members' organization.slug %}" class="text-sm text-primary hover:underline">{% trans "Manage team" %}</a>
                     {% endif %}
                 </div>
             </div>
@@ -147,32 +147,32 @@
                         <p class="font-medium truncate">
                             {{ membership.user.get_full_name|default:membership.user.email }}
                             {% if membership.user == request.user %}
-                            <span class="text-xs text-muted-foreground">(you)</span>
+                            <span class="text-xs text-muted-foreground">({% trans "you" %})</span>
                             {% endif %}
                         </p>
                         <p class="text-sm text-muted-foreground">{{ membership.user.email }}</p>
                     </div>
                     {% if membership.role == 'OWNER' %}
-                    <span class="badge badge-default">Owner</span>
+                    <span class="badge badge-default">{% trans "Owner" %}</span>
                     {% elif membership.role == 'ADMIN' %}
-                    <span class="badge badge-secondary">Admin</span>
+                    <span class="badge badge-secondary">{% trans "Admin" %}</span>
                     {% elif membership.role == 'MANAGER' %}
-                    <span class="badge">Manager</span>
+                    <span class="badge">{% trans "Manager" %}</span>
                     {% elif membership.role == 'MEMBER' %}
-                    <span class="badge">Member</span>
+                    <span class="badge">{% trans "Member" %}</span>
                     {% else %}
-                    <span class="badge">Viewer</span>
+                    <span class="badge">{% trans "Viewer" %}</span>
                     {% endif %}
                 </div>
                 {% empty %}
                 <div class="p-6 text-center">
-                    <p class="text-muted-foreground">No members yet</p>
+                    <p class="text-muted-foreground">{% trans "No members yet" %}</p>
                 </div>
                 {% endfor %}
                 {% if memberships.count > 5 %}
                 <div class="p-4 text-center">
                     <a href="{% url 'orgs:members' organization.slug %}" class="text-sm text-primary hover:underline">
-                        View all {{ memberships.count }} members
+                        {% blocktrans with count=memberships.count %}View all {{ count }} members{% endblocktrans %}
                     </a>
                 </div>
                 {% endif %}

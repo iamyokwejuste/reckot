@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from datetime import timedelta
 import random
 import string
@@ -19,9 +20,9 @@ class OTPVerification(models.Model):
     """Model for storing OTP codes for email/phone verification."""
 
     class Type(models.TextChoices):
-        EMAIL = 'EMAIL', 'Email Verification'
-        PHONE = 'PHONE', 'Phone Verification'
-        PASSWORD_RESET = 'PASSWORD_RESET', 'Password Reset'
+        EMAIL = 'EMAIL', _('Email Verification')
+        PHONE = 'PHONE', _('Phone Verification')
+        PASSWORD_RESET = 'PASSWORD_RESET', _('Password Reset')
 
     user = models.ForeignKey(
         User,

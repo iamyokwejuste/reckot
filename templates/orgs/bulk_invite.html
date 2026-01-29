@@ -1,12 +1,12 @@
 {% extends "layouts/dashboard.html" %}
-{% load slippers %}
+{% load slippers i18n %}
 
-{% block title %}Bulk Invite - {{ organization.name }} - Reckot{% endblock %}
+{% block title %}{% trans "Bulk Invite" %} - {{ organization.name }} - Reckot{% endblock %}
 
 {% block header_title %}
 <div>
-    <h1 class="text-lg font-semibold">Bulk Invite Members</h1>
-    <p class="text-sm text-muted-foreground">Import multiple email addresses at once</p>
+    <h1 class="text-lg font-semibold">{% trans "Bulk Invite Members" %}</h1>
+    <p class="text-sm text-muted-foreground">{% trans "Import multiple email addresses at once" %}</p>
 </div>
 {% endblock %}
 
@@ -17,7 +17,7 @@
 
         <div class="card p-6 space-y-4">
             <div>
-                <label class="block text-sm font-medium mb-2">Upload CSV File</label>
+                <label class="block text-sm font-medium mb-2">{% trans "Upload CSV File" %}</label>
                 <div class="border-2 border-dashed border-border rounded-lg p-6 text-center"
                      x-data="{ fileName: null }"
                      @dragover.prevent="$el.classList.add('border-primary', 'bg-primary/5')"
@@ -29,8 +29,8 @@
                     <div x-show="!fileName">
                         <i data-lucide="upload" class="h-8 w-8 mx-auto text-muted-foreground"></i>
                         <p class="mt-2 text-sm text-muted-foreground">
-                            Drag & drop a CSV file or
-                            <button type="button" @click="$refs.fileInput.click()" class="text-primary hover:underline">browse</button>
+                            {% trans "Drag & drop a CSV file or" %}
+                            <button type="button" @click="$refs.fileInput.click()" class="text-primary hover:underline">{% trans "browse" %}</button>
                         </p>
                     </div>
                     <div x-show="fileName" x-cloak class="flex items-center justify-center gap-2">
@@ -45,7 +45,7 @@
                 <div class="flex items-center gap-2 mt-2">
                     <a href="{% url 'orgs:invite_template' %}" class="text-xs text-primary hover:underline">
                         <i data-lucide="download" class="h-3 w-3 inline"></i>
-                        Download CSV template
+                        {% trans "Download CSV template" %}
                     </a>
                 </div>
             </div>
@@ -55,20 +55,20 @@
                     <div class="w-full border-t border-border"></div>
                 </div>
                 <div class="relative flex justify-center text-xs uppercase">
-                    <span class="bg-card px-2 text-muted-foreground">or paste emails</span>
+                    <span class="bg-card px-2 text-muted-foreground">{% trans "or paste emails" %}</span>
                 </div>
             </div>
 
             <div>
-                <label for="emails" class="block text-sm font-medium mb-2">Email Addresses</label>
+                <label for="emails" class="block text-sm font-medium mb-2">{% trans "Email Addresses" %}</label>
                 <textarea name="emails" id="emails" rows="5"
-                          placeholder="Enter email addresses, one per line or comma-separated"
+                          placeholder="{% trans "Enter email addresses, one per line or comma-separated" %}"
                           class="input resize-none font-mono text-sm"></textarea>
-                <p class="text-xs text-muted-foreground mt-1">One email per line, or separated by commas</p>
+                <p class="text-xs text-muted-foreground mt-1">{% trans "One email per line, or separated by commas" %}</p>
             </div>
 
             <div>
-                <label for="role" class="block text-sm font-medium mb-2">Role for All Invitees</label>
+                <label for="role" class="block text-sm font-medium mb-2">{% trans "Role for All Invitees" %}</label>
                 <select name="role" id="role" class="input">
                     {% for value, label in roles %}
                     <option value="{{ value }}" {% if value == 'MEMBER' %}selected{% endif %}>{{ label }}</option>
@@ -77,9 +77,9 @@
             </div>
 
             <div>
-                <label for="message" class="block text-sm font-medium mb-2">Personal Message (optional)</label>
+                <label for="message" class="block text-sm font-medium mb-2">{% trans "Personal Message (optional)" %}</label>
                 <textarea name="message" id="message" rows="2"
-                          placeholder="Add a personal message to the invitation..."
+                          placeholder="{% trans "Add a personal message to the invitation..." %}"
                           class="input resize-none"></textarea>
             </div>
         </div>
@@ -87,10 +87,10 @@
         <div class="flex items-center gap-4">
             {% #button variant="default" type="submit" %}
                 <i data-lucide="send" class="w-4 h-4"></i>
-                Send Invitations
+                {% trans "Send Invitations" %}
             {% /button %}
             <a href="{% url 'orgs:members' organization.slug %}">
-                {% #button variant="outline" %}Cancel{% /button %}
+                {% #button variant="outline" %}{% trans "Cancel" %}{% /button %}
             </a>
         </div>
     </form>

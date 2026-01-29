@@ -4,6 +4,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.db.models import Count
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from apps.events.models import Event
 from apps.checkin.models import CheckIn
 from apps.checkin.services import verify_and_checkin, collect_swag
@@ -70,7 +71,7 @@ class CheckInVerifyView(LoginRequiredMixin, View):
         code = request.POST.get('code', '').strip()
         if not code:
             return render(request, 'checkin/_result_error.html', {
-                'error': 'Please enter a ticket code'
+                'error': _('Please enter a ticket code')
             })
         result = verify_and_checkin(code, request.user)
         if result['valid']:
