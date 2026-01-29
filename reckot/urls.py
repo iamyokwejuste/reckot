@@ -1,9 +1,10 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.sitemaps.views import sitemap
 from django.http import JsonResponse
+from django.views.static import serve
 from apps.core.actions import (
     HomeView, WhyUsView, PrivacyView, TermsView, FeaturesView,
     OTPVerificationView, ResendOTPView, robots_txt, service_worker,
@@ -50,4 +51,7 @@ urlpatterns = [
     path('accounts/phone/signup/verify/', PhoneSignupVerifyView.as_view(), name='phone_signup_verify'),
 ]
 
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Serve media files in all environments (Coolify handles reverse proxy)
+urlpatterns += [
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+]

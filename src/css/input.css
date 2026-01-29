@@ -38,6 +38,15 @@
     html { scroll-behavior: smooth; }
     body { -webkit-font-smoothing: antialiased; }
 
+    ::selection {
+        background: var(--color-foreground);
+        color: var(--color-background);
+    }
+    ::-moz-selection {
+        background: var(--color-foreground);
+        color: var(--color-background);
+    }
+
     .dark {
         --color-background: #09090b;
         --color-foreground: #fafafa;
