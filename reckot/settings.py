@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from decimal import Decimal
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -71,6 +72,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'apps.core.context_processors.platform_settings',
             ],
             'builtins': [
                 'slippers.templatetags.slippers',
@@ -188,15 +190,19 @@ TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN', '')
 TWILIO_PHONE_NUMBER = os.getenv('TWILIO_PHONE_NUMBER', '')
 TWILIO_VERIFY_SERVICE_SID = os.getenv('TWILIO_VERIFY_SERVICE_SID', '')
 
+RECKOT_PLATFORM_FEE_PERCENTAGE = Decimal(os.getenv('RECKOT_PLATFORM_FEE_PERCENTAGE', '7'))
+
 PAYMENT_GATEWAYS = {
     'PRIMARY': os.getenv('PAYMENT_PRIMARY_GATEWAY', 'CAMPAY'),
     'FALLBACKS': os.getenv('PAYMENT_FALLBACK_GATEWAYS', 'PAWAPAY,FLUTTERWAVE').split(','),
 
     'CREDENTIALS': {
         'CAMPAY': {
-            'username': os.getenv('CAMPAY_USERNAME', ''),
-            'password': os.getenv('CAMPAY_PASSWORD', ''),
-            'is_production': os.getenv('CAMPAY_PRODUCTION', 'False').lower() in ('true', '1', 'yes'),
+            'app_username': os.getenv('CAMPAY_APP_USERNAME', ''),
+            'app_password': os.getenv('CAMPAY_APP_PASSWORD', ''),
+            'permanent_token': os.getenv('CAMPAY_PERMANENT_TOKEN', ''),
+            'webhook_key': os.getenv('CAMPAY_WEBHOOK_KEY', ''),
+            'is_production': os.getenv('CAMPAY_IS_PRODUCTION', 'False').lower() in ('true', '1', 'yes'),
         },
         'PAWAPAY': {
             'api_token': os.getenv('PAWAPAY_API_TOKEN', ''),

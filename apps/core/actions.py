@@ -177,17 +177,18 @@ class PhoneLoginRequestView(View):
                 status=400
             )
 
-        otp = OTPVerification.create_for_user(user, OTPVerification.Type.PHONE)
-        self._send_otp_sms(phone, otp.code)
+        request.session['login_phone'] = phone
+        if settings.TWILIO_VERIFY_SERVICE_SID:
+            NotificationService.send_otp_sms(phone)
+        else:
+            otp = OTPVerification.create_for_user(user, OTPVerification.Type.PHONE)
+            NotificationService.send_otp_sms(phone, otp.code)
         return HttpResponse(
             '<p class="text-sm text-emerald-500 mt-2">Verification code sent!</p>'
         )
 
     def _normalize_phone(self, phone):
         return re.sub(r'[\s\-\(\)]', '', phone)
-
-    def _send_otp_sms(self, phone, code):
-        NotificationService.send_otp_sms(phone, code)
 
 
 class PhoneLoginVerifyView(View):
@@ -208,29 +209,37 @@ class PhoneLoginVerifyView(View):
             messages.error(request, 'Invalid phone number')
             return redirect('account_login')
 
-        otp = OTPVerification.objects.filter(
-            user=user,
-            otp_type=OTPVerification.Type.PHONE,
-            is_used=False
-        ).order_by('-created_at').first()
+        verified = False
+        if settings.TWILIO_VERIFY_SERVICE_SID:
+            verified = NotificationService.verify_otp_sms(phone, code)
+        else:
+            otp = OTPVerification.objects.filter(
+                user=user,
+                otp_type=OTPVerification.Type.PHONE,
+                is_used=False
+            ).order_by('-created_at').first()
 
-        if not otp:
-            messages.error(request, 'No verification code found. Please request a new one.')
-            return redirect('account_login')
+            if not otp:
+                messages.error(request, 'No verification code found. Please request a new one.')
+                return redirect('account_login')
 
-        if otp.verify(code):
+            if otp.verify(code):
+                verified = True
+            elif otp.is_expired:
+                messages.error(request, 'Code expired. Please request a new one.')
+                return redirect('account_login')
+            elif otp.attempts >= 5:
+                messages.error(request, 'Too many attempts. Please request a new code.')
+                return redirect('account_login')
+
+        if verified:
             user.phone_verified = True
             user.save(update_fields=['phone_verified'])
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             messages.success(request, 'Logged in successfully!')
             return redirect('home')
-        elif otp.is_expired:
-            messages.error(request, 'Code expired. Please request a new one.')
-        elif otp.attempts >= 5:
-            messages.error(request, 'Too many attempts. Please request a new code.')
-        else:
-            messages.error(request, 'Invalid code. Please try again.')
 
+        messages.error(request, 'Invalid code. Please try again.')
         return redirect('account_login')
 
     def _normalize_phone(self, phone):
@@ -257,17 +266,17 @@ class PhoneSignupRequestView(View):
             )
 
         request.session['signup_phone'] = phone
-        request.session['signup_otp'] = OTPVerification.generate_code()
-        self._send_otp_sms(phone, request.session['signup_otp'])
+        if settings.TWILIO_VERIFY_SERVICE_SID:
+            NotificationService.send_otp_sms(phone)
+        else:
+            request.session['signup_otp'] = OTPVerification.generate_code()
+            NotificationService.send_otp_sms(phone, request.session['signup_otp'])
         return HttpResponse(
             '<p class="text-sm text-emerald-500 mt-2">Verification code sent!</p>'
         )
 
     def _normalize_phone(self, phone):
         return re.sub(r'[\s\-\(\)]', '', phone)
-
-    def _send_otp_sms(self, phone, code):
-        NotificationService.send_otp_sms(phone, code)
 
 
 class PhoneSignupVerifyView(View):
@@ -282,13 +291,20 @@ class PhoneSignupVerifyView(View):
 
         phone = self._normalize_phone(phone)
         stored_phone = request.session.get('signup_phone')
-        stored_otp = request.session.get('signup_otp')
 
         if phone != stored_phone:
             messages.error(request, 'Phone number mismatch. Please start over.')
             return redirect('account_signup')
 
-        if code != stored_otp:
+        verified = False
+        if settings.TWILIO_VERIFY_SERVICE_SID:
+            verified = NotificationService.verify_otp_sms(phone, code)
+        else:
+            stored_otp = request.session.get('signup_otp')
+            if code == stored_otp:
+                verified = True
+
+        if not verified:
             messages.error(request, 'Invalid verification code')
             return redirect('account_signup')
 
@@ -307,8 +323,10 @@ class PhoneSignupVerifyView(View):
             password=password1
         )
 
-        del request.session['signup_phone']
-        del request.session['signup_otp']
+        if 'signup_phone' in request.session:
+            del request.session['signup_phone']
+        if 'signup_otp' in request.session:
+            del request.session['signup_otp']
 
         login(request, user, backend='django.contrib.auth.backends.ModelBackend')
         messages.success(request, 'Account created successfully!')

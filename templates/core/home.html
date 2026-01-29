@@ -245,7 +245,7 @@
                 </div>
             </div>
             <div class="card p-6 lg:p-8 bg-foreground text-background" x-data x-intersect.once="$el.classList.add('animate-scale', 'delay-1')">
-                <div class="text-4xl lg:text-5xl font-semibold">5%</div>
+                <div class="text-4xl lg:text-5xl font-semibold">{{ PLATFORM_FEE_PERCENTAGE }}%</div>
                 <p class="mt-2 text-background/70">per paid ticket</p>
                 <p class="text-sm text-background/50 mt-4">Choose your plan, pay only when you sell</p>
             </div>
@@ -384,16 +384,16 @@
                 {% #pricing_feature %}QR code check-in{% /pricing_feature %}
                 {% #pricing_feature %}Basic analytics{% /pricing_feature %}
                 {% #pricing_feature %}CSV exports{% /pricing_feature %}
-                {% #pricing_feature disabled=True %}I Will Be There flyers{% /pricing_feature %}
+                {% #pricing_feature %}I Will Be There flyers (25 XAF/flyer){% /pricing_feature %}
             {% /pricing_card %}
 
-            {% #pricing_card name="Starter" fee="5%" description="For growing organizers" href=signup_url popular=True delay="1" %}
+            {% #pricing_card name="Starter" fee=PLATFORM_FEE_PERCENTAGE|stringformat:"d%%"  description="For growing organizers" href=signup_url popular=True delay="1" %}
                 {% #pricing_feature %}10 events per month{% /pricing_feature %}
                 {% #pricing_feature %}Up to 500 tickets per event{% /pricing_feature %}
                 {% #pricing_feature %}MTN MoMo & Orange Money{% /pricing_feature %}
                 {% #pricing_feature %}Advanced analytics{% /pricing_feature %}
                 {% #pricing_feature %}CSV, Excel & PDF exports{% /pricing_feature %}
-                {% #pricing_feature highlight=True %}I Will Be There flyers (25 XAF/flyer){% /pricing_feature %}
+                {% #pricing_feature highlight=True %}I Will Be There flyers (Free){% /pricing_feature %}
             {% /pricing_card %}
 
             {% #pricing_card name="Enterprise" custom_price="Custom" description="For large organizations" contact_href="mailto:reckot@yokwejuste.me" highlight=True delay="2" offset_mobile=True %}

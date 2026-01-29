@@ -31,7 +31,7 @@
     <div class="container">
         <div class="grid md:grid-cols-3 gap-8 lg:gap-12">
             <div class="text-center">
-                <div class="text-4xl lg:text-5xl font-semibold">5%</div>
+                <div class="text-4xl lg:text-5xl font-semibold">{{ PLATFORM_FEE_PERCENTAGE }}%</div>
                 <p class="text-muted-foreground mt-2">Only fee we charge</p>
             </div>
             <div class="text-center">
@@ -129,7 +129,7 @@
                     ticketPrice: 5000,
                     ticketCount: 100,
                     get grossRevenue() { return (this.ticketPrice || 0) * (this.ticketCount || 0) },
-                    get reckotFee() { return Math.round(this.grossRevenue * 0.05) },
+                    get reckotFee() { return Math.round(this.grossRevenue * {{ PLATFORM_FEE_PERCENTAGE }} / 100) },
                     get netRevenue() { return this.grossRevenue - this.reckotFee },
                     formatCurrency(amount) { return new Intl.NumberFormat('fr-FR').format(amount) + ' XAF' },
                     reset() { this.ticketPrice = 5000; this.ticketCount = 100; }
@@ -152,7 +152,7 @@
                                 <span class="font-medium" x-text="formatCurrency(grossRevenue)"></span>
                             </div>
                             <div class="flex justify-between text-sm">
-                                <span class="text-muted-foreground">Reckot Fee (5%)</span>
+                                <span class="text-muted-foreground">Reckot Fee ({{ PLATFORM_FEE_PERCENTAGE }}%)</span>
                                 <span class="font-medium text-red-500" x-text="'-' + formatCurrency(reckotFee)"></span>
                             </div>
                             <div class="h-px bg-border"></div>

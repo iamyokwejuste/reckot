@@ -25,13 +25,18 @@ def initiate_payment(booking: Booking, provider: str, phone: str, **kwargs) -> t
         amount = calculate_booking_amount(booking)
         currency = kwargs.get('currency', settings.PAYMENT_GATEWAYS.get('DEFAULT_CURRENCY', 'XAF'))
 
+        if booking.user:
+            default_email = booking.user.email
+        else:
+            default_email = booking.guest_email or ''
+
         payment = Payment.objects.create(
             booking=booking,
             amount=amount,
             currency=currency,
             provider=provider,
             phone_number=phone,
-            customer_email=kwargs.get('email', booking.user.email),
+            customer_email=kwargs.get('email', default_email),
             expires_at=timezone.now() + timedelta(minutes=30)
         )
 

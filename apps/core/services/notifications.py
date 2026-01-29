@@ -8,11 +8,8 @@ logger = logging.getLogger(__name__)
 
 
 class NotificationService:
-    """Service for sending emails and SMS notifications."""
-
     @staticmethod
     def get_site_url() -> str:
-        """Get the site URL from settings or default."""
         return getattr(settings, 'SITE_URL', 'http://127.0.0.1:8000')
 
     @classmethod
@@ -25,32 +22,14 @@ class NotificationService:
         attachments: list = None,
         inline_images: dict = None,
     ) -> bool:
-        """
-        Send an HTML email using a template.
-
-        Args:
-            to_email: Recipient email address
-            subject: Email subject
-            template_name: Path to the email template (e.g., 'emails/welcome.html')
-            context: Template context dictionary
-            attachments: List of (filename, content, mimetype) tuples
-            inline_images: Dict of {cid: image_bytes} for inline images
-
-        Returns:
-            True if email was sent successfully
-        """
         try:
-            # Add site_url to context
             context['site_url'] = cls.get_site_url()
 
-            # Render HTML template
             html_content = render_to_string(template_name, context)
 
-            # Create plain text version (strip HTML)
             from django.utils.html import strip_tags
             text_content = strip_tags(html_content)
 
-            # Create email
             msg = EmailMultiAlternatives(
                 subject=subject,
                 body=text_content,
@@ -59,7 +38,6 @@ class NotificationService:
             )
             msg.attach_alternative(html_content, "text/html")
 
-            # Add inline images (for QR codes, etc.)
             if inline_images:
                 msg.mixed_subtype = 'related'
                 for cid, image_bytes in inline_images.items():
@@ -68,7 +46,6 @@ class NotificationService:
                     mime_image.add_header('Content-Disposition', 'inline', filename=f'{cid}.png')
                     msg.attach(mime_image)
 
-            # Add attachments
             if attachments:
                 for filename, content, mimetype in attachments:
                     msg.attach(filename, content, mimetype)
@@ -83,7 +60,6 @@ class NotificationService:
 
     @classmethod
     def send_otp_email(cls, to_email: str, otp_code: str, expiry_minutes: int = 10) -> bool:
-        """Send OTP verification email."""
         return cls.send_email(
             to_email=to_email,
             subject="Verify your email - Reckot",
@@ -96,7 +72,6 @@ class NotificationService:
 
     @classmethod
     def send_welcome_email(cls, user) -> bool:
-        """Send welcome email to new user."""
         return cls.send_email(
             to_email=user.email,
             subject="Welcome to Reckot!",
@@ -115,8 +90,6 @@ class NotificationService:
         event,
         qr_code_bytes: bytes = None,
     ) -> bool:
-        """Send ticket confirmation email with QR code."""
-        # Calculate total
         total_amount = sum(t.ticket_type.price for t in tickets)
 
         inline_images = {}
@@ -145,7 +118,6 @@ class NotificationService:
         original_amount,
         payment_method: str = None,
     ) -> bool:
-        """Send refund status notification email."""
         return cls.send_email(
             to_email=to_email,
             subject=f"Refund update for {event.title} - Reckot",
@@ -182,20 +154,51 @@ class NotificationService:
             return False
 
     @classmethod
-    def send_otp_sms(cls, phone_number: str, otp_code: str, expiry_minutes: int = 10) -> bool:
-        """Send OTP verification SMS."""
-        return cls.send_sms(
-            phone_number=phone_number,
-            template_name="sms/otp_verification.txt",
-            context={
-                'otp_code': otp_code,
-                'expiry_minutes': expiry_minutes,
-            }
-        )
+    def send_otp_sms(cls, phone_number: str, otp_code: str = None, expiry_minutes: int = 10) -> bool:
+        try:
+            if settings.TWILIO_VERIFY_SERVICE_SID and settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN:
+                from twilio.rest import Client
+                client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+                client.verify.v2.services(settings.TWILIO_VERIFY_SERVICE_SID).verifications.create(
+                    to=phone_number,
+                    channel='sms'
+                )
+                logger.info(f"Twilio Verify OTP sent to {phone_number}")
+                return True
+            elif otp_code:
+                return cls.send_sms(
+                    phone_number=phone_number,
+                    template_name="sms/otp_verification.txt",
+                    context={
+                        'otp_code': otp_code,
+                        'expiry_minutes': expiry_minutes,
+                    }
+                )
+            else:
+                logger.warning(f"Twilio Verify not configured, no OTP sent to {phone_number}")
+                return False
+        except Exception as e:
+            logger.error(f"Failed to send OTP to {phone_number}: {e}")
+            return False
+
+    @classmethod
+    def verify_otp_sms(cls, phone_number: str, code: str) -> bool:
+        try:
+            if settings.TWILIO_VERIFY_SERVICE_SID and settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN:
+                from twilio.rest import Client
+                client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+                verification_check = client.verify.v2.services(settings.TWILIO_VERIFY_SERVICE_SID).verification_checks.create(
+                    to=phone_number,
+                    code=code
+                )
+                return verification_check.status == 'approved'
+            return False
+        except Exception as e:
+            logger.error(f"Failed to verify OTP for {phone_number}: {e}")
+            return False
 
     @classmethod
     def send_ticket_sms(cls, phone_number: str, booking, tickets: list, event) -> bool:
-        """Send ticket confirmation SMS."""
         return cls.send_sms(
             phone_number=phone_number,
             template_name="sms/ticket_confirmation.txt",
@@ -208,7 +211,6 @@ class NotificationService:
 
     @classmethod
     def send_refund_sms(cls, phone_number: str, refund, event, payment_method: str = None) -> bool:
-        """Send refund notification SMS."""
         template = 'sms/refund_processed.txt' if refund.status == 'PROCESSED' else 'sms/refund_approved.txt'
         return cls.send_sms(
             phone_number=phone_number,
