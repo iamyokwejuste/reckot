@@ -21,7 +21,7 @@
     {% #alert variant="default" icon="info" %}
         <div class="space-y-2 text-sm">
             <p><strong>{% trans "Reference:" %}</strong> {{ payment.reference }}</p>
-            <p><strong>{% trans "Method:" %}</strong> {{ payment.get_method_display }}</p>
+            <p><strong>{% trans "Method:" %}</strong> {{ payment.get_provider_display }}</p>
             <p><strong>{% trans "Phone:" %}</strong> {{ payment.phone_number }}</p>
             <p><strong>{% trans "Amount:" %}</strong> {{ payment.amount }} XAF</p>
         </div>

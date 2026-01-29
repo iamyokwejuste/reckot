@@ -71,3 +71,40 @@ class PaymentGateway(ABC):
         if not phone.startswith(country_code):
             phone = country_code + phone
         return phone
+
+    @staticmethod
+    def detect_carrier(phone: str) -> str:
+        phone = ''.join(filter(str.isdigit, phone))
+        if phone.startswith('237'):
+            phone = phone[3:]
+
+        if len(phone) < 2:
+            return 'UNKNOWN'
+
+        mtn_prefixes = ['67', '650', '651', '652', '653', '654', '680', '681', '682', '683']
+        orange_prefixes = ['640', '655', '656', '657', '658', '659', '686', '687', '688', '689', '69']
+
+        for p in mtn_prefixes:
+            if phone.startswith(p):
+                return 'MTN'
+
+        for p in orange_prefixes:
+            if phone.startswith(p):
+                return 'ORANGE'
+
+        return 'UNKNOWN'
+
+    @staticmethod
+    def validate_cameroon_phone(phone: str) -> tuple[bool, str]:
+        import re
+        phone = ''.join(filter(str.isdigit, phone))
+
+        if phone.startswith('237'):
+            phone = phone[3:]
+
+        pattern = r'^6[4-9]\d{7}$'
+        if re.match(pattern, phone):
+            carrier = PaymentGateway.detect_carrier(phone)
+            return True, carrier
+
+        return False, 'INVALID'

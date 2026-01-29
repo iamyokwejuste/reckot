@@ -105,8 +105,15 @@ def verify_and_confirm_payment(payment: Payment) -> dict:
     if payment.status == Payment.Status.EXPIRED:
         return {'success': False, 'message': 'Payment expired'}
 
+    campay_reference = payment.metadata.get('transaction_id', '') if payment.metadata else ''
+    if not campay_reference:
+        campay_reference = payment.external_reference
+
+    if not campay_reference:
+        return {'success': False, 'message': 'No transaction reference available', 'status': 'PENDING'}
+
     result = gateway_manager.verify_payment(
-        str(payment.reference),
+        campay_reference,
         payment.provider
     )
 
