@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -18,29 +19,29 @@
             <div class="ticket-details">
                 <div class="detail-grid">
                     <div class="detail-item">
-                        <label>Date</label>
+                        <label>{% trans "Date" %}</label>
                         <span>{{ event.start_at|date:"F d, Y" }}</span>
                     </div>
                     <div class="detail-item">
-                        <label>Time</label>
+                        <label>{% trans "Time" %}</label>
                         <span>{{ event.start_at|date:"g:i A" }}</span>
                     </div>
                     <div class="detail-item">
-                        <label>Location</label>
+                        <label>{% trans "Location" %}</label>
                         <span>{{ event.location }}</span>
                     </div>
                     {% if item.ticket.attendee_name %}
                     <div class="detail-item">
-                        <label>Attendee</label>
+                        <label>{% trans "Attendee" %}</label>
                         <span>{{ item.ticket.attendee_name }}</span>
                     </div>
                     {% endif %}
                     <div class="detail-item">
-                        <label>Ticket #</label>
-                        <span>{{ forloop.counter }} of {{ tickets_data|length }}</span>
+                        <label>{% trans "Ticket #" %}</label>
+                        <span>{{ forloop.counter }} {% trans "of" %} {{ tickets_data|length }}</span>
                     </div>
                     <div class="detail-item">
-                        <label>Booking Ref</label>
+                        <label>{% trans "Booking Ref" %}</label>
                         <span>{{ booking.reference|slice:":8"|upper }}</span>
                     </div>
                 </div>
@@ -48,7 +49,7 @@
 
             <div class="qr-section">
                 <div class="qr-code">
-                    <img src="data:image/png;base64,{{ item.qr_code_data }}" alt="QR Code">
+                    <img src="data:image/png;base64,{{ item.qr_code_data }}" alt="{% trans "QR Code" %}">
                 </div>
                 <p class="ticket-code">{{ item.ticket.code|slice:":8" }}</p>
             </div>

@@ -1,7 +1,8 @@
 {% extends "layouts/dashboard.html" %}
 {% load slippers %}
+{% load i18n %}
 
-{% block title %}Flyer Configuration - {{ event.title }}{% endblock %}
+{% block title %}{% trans "Flyer Configuration" %} - {{ event.title }}{% endblock %}
 
 {% block breadcrumbs %}
 {% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug as event_dashboard_url %}

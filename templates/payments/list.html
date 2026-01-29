@@ -1,20 +1,21 @@
 {% extends "layouts/dashboard.html" %}
 {% load slippers %}
+{% load i18n %}
 
-{% block title %}Payments - Reckot{% endblock %}
+{% block title %}{% trans "Payments" %} - Reckot{% endblock %}
 
 {% block breadcrumbs %}
 {% #breadcrumb class="mb-4" %}
-    {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item %}Payments{% /breadcrumb_item %}
+    {% #breadcrumb_item %}{% trans "Payments" %}{% /breadcrumb_item %}
 {% /breadcrumb %}
 {% endblock %}
 
 {% block header_title %}
 <div>
-    <h1 class="text-lg font-semibold">Payments</h1>
-    <p class="text-sm text-muted-foreground">View all payment transactions across your events</p>
+    <h1 class="text-lg font-semibold">{% trans "Payments" %}</h1>
+    <p class="text-sm text-muted-foreground">{% trans "View all payment transactions across your events" %}</p>
 </div>
 {% endblock %}
 
@@ -23,21 +24,21 @@
     <div class="grid gap-4 sm:grid-cols-3">
         <div class="stat-card">
             <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-muted-foreground">Total Revenue</p>
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Total Revenue" %}</p>
                 <i data-lucide="banknote" class="h-4 w-4 text-emerald-500"></i>
             </div>
             <p class="text-2xl font-bold mt-2 text-emerald-500">{{ stats.total_revenue|floatformat:0 }} XAF</p>
         </div>
         <div class="stat-card">
             <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-muted-foreground">Confirmed</p>
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Confirmed" %}</p>
                 <i data-lucide="check-circle" class="h-4 w-4 text-emerald-500"></i>
             </div>
             <p class="text-2xl font-bold mt-2">{{ stats.confirmed }}</p>
         </div>
         <div class="stat-card">
             <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-muted-foreground">Pending</p>
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Pending" %}</p>
                 <i data-lucide="clock" class="h-4 w-4 text-yellow-500"></i>
             </div>
             <p class="text-2xl font-bold mt-2 text-yellow-500">{{ stats.pending }}</p>
@@ -50,13 +51,13 @@
             <table class="w-full">
                 <thead>
                     <tr class="border-b border-border">
-                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Reference</th>
-                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Event</th>
-                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Customer</th>
-                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Amount</th>
-                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Method</th>
-                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Status</th>
-                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Date</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Reference" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Event" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Customer" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Amount" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Method" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Status" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Date" %}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-border">
@@ -77,7 +78,7 @@
                         <td class="p-4">
                             <p class="text-sm font-medium">{{ payment.amount|floatformat:0 }} {{ payment.currency }}</p>
                             {% if payment.service_fee %}
-                            <p class="text-xs text-muted-foreground">+{{ payment.service_fee|floatformat:0 }} fee</p>
+                            <p class="text-xs text-muted-foreground">+{{ payment.service_fee|floatformat:0 }} {% trans "fee" %}</p>
                             {% endif %}
                         </td>
                         <td class="p-4">
@@ -85,13 +86,13 @@
                         </td>
                         <td class="p-4">
                             {% if payment.status == 'CONFIRMED' %}
-                                <span class="badge badge-success">Confirmed</span>
+                                <span class="badge badge-success">{% trans "Confirmed" %}</span>
                             {% elif payment.status == 'PENDING' %}
-                                <span class="badge badge-warning">Pending</span>
+                                <span class="badge badge-warning">{% trans "Pending" %}</span>
                             {% elif payment.status == 'FAILED' %}
-                                <span class="badge badge-destructive">Failed</span>
+                                <span class="badge badge-destructive">{% trans "Failed" %}</span>
                             {% elif payment.status == 'EXPIRED' %}
-                                <span class="badge">Expired</span>
+                                <span class="badge">{% trans "Expired" %}</span>
                             {% else %}
                                 <span class="badge">{{ payment.status }}</span>
                             {% endif %}
@@ -109,8 +110,8 @@
             <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
                 <i data-lucide="credit-card" class="h-8 w-8 text-muted-foreground"></i>
             </div>
-            <h3 class="text-lg font-semibold mb-2">No payments yet</h3>
-            <p class="text-muted-foreground">Payments will appear here when attendees book your events.</p>
+            <h3 class="text-lg font-semibold mb-2">{% trans "No payments yet" %}</h3>
+            <p class="text-muted-foreground">{% trans "Payments will appear here when attendees book your events." %}</p>
         </div>
         {% endif %}
     </div>

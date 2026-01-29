@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% load slippers %}
+{% load i18n %}
 
-{% block title %}Payment Successful - Reckot{% endblock %}
+{% block title %}{% trans "Payment Successful" %} - Reckot{% endblock %}
 
 {% block content %}
 <div class="container py-8">
@@ -11,35 +12,35 @@
                 <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-success/10 mb-4">
                     <i data-lucide="check-circle" class="h-8 w-8 text-success"></i>
                 </div>
-                <h1 class="text-2xl font-bold">Payment Successful</h1>
+                <h1 class="text-2xl font-bold">{% trans "Payment Successful" %}</h1>
                 <p class="text-muted-foreground mt-1">
-                    Thank you for your purchase. Your ticket has been confirmed.
+                    {% trans "Thank you for your purchase. Your ticket has been confirmed." %}
                 </p>
             </div>
 
             <div class="rounded-xl bg-muted p-4 space-y-3">
                 <div class="flex justify-between">
-                    <span class="text-sm text-muted-foreground">Reference</span>
+                    <span class="text-sm text-muted-foreground">{% trans "Reference" %}</span>
                     <span class="font-mono text-sm">{{ payment.reference }}</span>
                 </div>
                 <div class="flex justify-between">
-                    <span class="text-sm text-muted-foreground">Event</span>
+                    <span class="text-sm text-muted-foreground">{% trans "Event" %}</span>
                     <span class="font-medium text-sm">{{ payment.booking.event.title }}</span>
                 </div>
                 <div class="flex justify-between">
-                    <span class="text-sm text-muted-foreground">Tickets</span>
-                    <span class="text-sm">{{ payment.booking.tickets.count }} ticket{{ payment.booking.tickets.count|pluralize }}</span>
+                    <span class="text-sm text-muted-foreground">{% trans "Tickets" %}</span>
+                    <span class="text-sm">{% blocktrans count counter=payment.booking.tickets.count %}{{ counter }} ticket{% plural %}{{ counter }} tickets{% endblocktrans %}</span>
                 </div>
                 <div class="flex justify-between">
-                    <span class="text-sm text-muted-foreground">Amount</span>
+                    <span class="text-sm text-muted-foreground">{% trans "Amount" %}</span>
                     <span class="font-semibold">{{ payment.amount }} XAF</span>
                 </div>
                 <div class="flex justify-between">
-                    <span class="text-sm text-muted-foreground">Method</span>
+                    <span class="text-sm text-muted-foreground">{% trans "Method" %}</span>
                     <span class="text-sm">{{ payment.get_provider_display }}</span>
                 </div>
                 <div class="flex justify-between">
-                    <span class="text-sm text-muted-foreground">Date</span>
+                    <span class="text-sm text-muted-foreground">{% trans "Date" %}</span>
                     <span class="text-sm">{{ payment.confirmed_at|date:"M d, Y H:i" }}</span>
                 </div>
             </div>
@@ -48,8 +49,8 @@
                 <div class="flex items-start gap-3">
                     <i data-lucide="mail" class="h-5 w-5 text-primary mt-0.5"></i>
                     <div>
-                        <p class="text-sm font-medium">Confirmation email sent</p>
-                        <p class="text-xs text-muted-foreground">Check your inbox for your ticket with QR code</p>
+                        <p class="text-sm font-medium">{% trans "Confirmation email sent" %}</p>
+                        <p class="text-xs text-muted-foreground">{% trans "Check your inbox for your ticket with QR code" %}</p>
                     </div>
                 </div>
             </div>
@@ -59,18 +60,18 @@
                 <a href="{% url 'tickets:list' %}">
                     {% #button class="w-full" variant="gradient" %}
                         <i data-lucide="ticket" class="mr-2 h-4 w-4"></i>
-                        View My Tickets
+                        {% trans "View My Tickets" %}
                     {% /button %}
                 </a>
                 {% elif payment.booking.guest_session %}
                 <a href="{% url 'payments:track' token=payment.booking.guest_session.token %}">
                     {% #button class="w-full" variant="gradient" %}
                         <i data-lucide="bookmark" class="mr-2 h-4 w-4"></i>
-                        Save Tracking Link
+                        {% trans "Save Tracking Link" %}
                     {% /button %}
                 </a>
                 <div class="rounded-lg bg-muted/50 p-3 text-center">
-                    <p class="text-xs text-muted-foreground">Bookmark this link to track your order:</p>
+                    <p class="text-xs text-muted-foreground">{% trans "Bookmark this link to track your order:" %}</p>
                     <code class="text-xs break-all">{{ request.scheme }}://{{ request.get_host }}{% url 'payments:track' token=payment.booking.guest_session.token %}</code>
                 </div>
                 {% endif %}
@@ -78,14 +79,14 @@
                     <a href="{% url 'payments:invoice' payment_ref=payment.reference %}" target="_blank">
                         {% #button variant="outline" class="w-full" %}
                             <i data-lucide="file-text" class="mr-2 h-4 w-4"></i>
-                            Invoice
+                            {% trans "Invoice" %}
                         {% /button %}
                     </a>
                     {% if user.is_authenticated %}
                     <a href="{% url 'payments:refund_request' payment_ref=payment.reference %}">
                         {% #button variant="outline" class="w-full" %}
                             <i data-lucide="rotate-ccw" class="mr-2 h-4 w-4"></i>
-                            Refund
+                            {% trans "Refund" %}
                         {% /button %}
                     </a>
                     {% endif %}
@@ -93,7 +94,7 @@
                 <a href="{% url 'events:public_detail' org_slug=payment.booking.event.organization.slug event_slug=payment.booking.event.slug %}">
                     {% #button variant="outline" class="w-full" %}
                         <i data-lucide="arrow-left" class="mr-2 h-4 w-4"></i>
-                        Back to Event
+                        {% trans "Back to Event" %}
                     {% /button %}
                 </a>
             </div>

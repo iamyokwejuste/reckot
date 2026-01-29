@@ -1,8 +1,9 @@
 {% extends 'layouts/dashboard.html' %}
 {% load slippers %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}Edit {{ event.title }} - Reckot{% endblock %}
+{% block title %}{% trans "Edit" %} {{ event.title }} - Reckot{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">

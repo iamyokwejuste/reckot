@@ -1,15 +1,16 @@
 {% extends "base.html" %}
 {% load slippers %}
+{% load i18n %}
 
-{% block title %}My Tickets - Reckot{% endblock %}
+{% block title %}{% trans "My Tickets" %} - Reckot{% endblock %}
 
 {% block content %}
 <div class="py-8 md:py-12">
     <div class="container max-w-4xl">
         <div class="flex items-center justify-between mb-8">
             <div>
-                <h1 class="text-2xl font-semibold">My Tickets</h1>
-                <p class="text-muted-foreground mt-1">Your confirmed event tickets</p>
+                <h1 class="text-2xl font-semibold">{% trans "My Tickets" %}</h1>
+                <p class="text-muted-foreground mt-1">{% trans "Your confirmed event tickets" %}</p>
             </div>
         </div>
 
@@ -40,7 +41,7 @@
                         <a href="{% url 'tickets:booking_pdf' booking_ref=event.list.0.booking.reference %}" class="shrink-0">
                             {% #button variant="default" size="sm" %}
                                 <i data-lucide="download" class="w-4 h-4"></i>
-                                Download All
+                                {% trans "Download All" %}
                             {% /button %}
                         </a>
                     </div>
@@ -58,7 +59,7 @@
                                 <div class="flex items-center gap-3 mt-0.5 text-sm text-muted-foreground">
                                     <span class="font-mono">{{ ticket.code|slice:":8" }}</span>
                                     {% if ticket.is_checked_in %}
-                                    <span class="badge badge-success text-xs">Checked In</span>
+                                    <span class="badge badge-success text-xs">{% trans "Checked In" %}</span>
                                     {% endif %}
                                 </div>
                             </div>
@@ -82,12 +83,12 @@
             <div class="h-20 w-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
                 <i data-lucide="ticket" class="w-10 h-10 text-muted-foreground"></i>
             </div>
-            <h3 class="font-semibold text-lg">No tickets yet</h3>
-            <p class="text-muted-foreground mt-1">Your confirmed tickets will appear here</p>
+            <h3 class="font-semibold text-lg">{% trans "No tickets yet" %}</h3>
+            <p class="text-muted-foreground mt-1">{% trans "Your confirmed tickets will appear here" %}</p>
             <a href="{% url 'events:discover' %}" class="mt-6 inline-block">
                 {% #button variant="default" %}
                     <i data-lucide="search" class="w-4 h-4"></i>
-                    Discover Events
+                    {% trans "Discover Events" %}
                 {% /button %}
             </a>
         </div>

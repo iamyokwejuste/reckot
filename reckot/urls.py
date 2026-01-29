@@ -5,6 +5,7 @@ from django.conf.urls.static import static
 from django.contrib.sitemaps.views import sitemap
 from django.http import JsonResponse
 from django.views.static import serve
+from django.conf.urls.i18n import i18n_patterns
 from apps.core.actions import (
     HomeView, WhyUsView, PrivacyView, TermsView, FeaturesView,
     OTPVerificationView, ResendOTPView, robots_txt, service_worker,
@@ -22,6 +23,7 @@ def health_check(request):
     return JsonResponse({'status': 'ok'})
 
 urlpatterns = [
+    path('i18n/', include('django.conf.urls.i18n')),
     path('health/', health_check, name='health_check'),
     path('robots.txt', robots_txt, name='robots_txt'),
     path('sw.js', service_worker, name='service_worker'),

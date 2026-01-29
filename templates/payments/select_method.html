@@ -1,16 +1,17 @@
 {% extends "base.html" %}
 {% load slippers %}
+{% load i18n %}
 
-{% block title %}Select Payment Method - Reckot{% endblock %}
+{% block title %}{% trans "Select Payment Method" %} - Reckot{% endblock %}
 
 {% block content %}
 <div class="container py-8">
     {% #breadcrumb %}
-        {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+        {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
         {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-        {% #breadcrumb_item href="/events/" %}Events{% /breadcrumb_item %}
+        {% #breadcrumb_item href="/events/" %}{% trans "Events" %}{% /breadcrumb_item %}
         {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-        {% #breadcrumb_item %}Payment{% /breadcrumb_item %}
+        {% #breadcrumb_item %}{% trans "Payment" %}{% /breadcrumb_item %}
     {% /breadcrumb %}
 
     <div class="mx-auto mt-8 max-w-lg" data-animate="scale-in">
@@ -19,9 +20,9 @@
                 <div class="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-animated mb-4">
                     <i data-lucide="credit-card" class="h-7 w-7 text-white"></i>
                 </div>
-                <h1 class="text-2xl font-bold">Complete Payment</h1>
+                <h1 class="text-2xl font-bold">{% trans "Complete Payment" %}</h1>
                 <p class="text-sm text-muted-foreground mt-1">
-                    Select your preferred payment method
+                    {% trans "Select your preferred payment method" %}
                 </p>
             </div>
 
@@ -35,7 +36,7 @@
                     {% csrf_token %}
 
                     <div class="space-y-3">
-                        <p class="text-sm font-medium">Payment Method</p>
+                        <p class="text-sm font-medium">{% trans "Payment Method" %}</p>
                         <div class="grid gap-3">
                             <label class="flex cursor-pointer items-center space-x-3 rounded-xl border-2 border-input p-4 hover:bg-accent hover:border-primary/30 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/5">
                                 <input
@@ -51,11 +52,11 @@
                                         <i data-lucide="smartphone" class="h-5 w-5 text-emerald-600"></i>
                                     </div>
                                     <div>
-                                        <span class="font-medium block">Mobile Money (MTN / Orange)</span>
-                                        <span class="text-xs text-muted-foreground">Powered by Campay</span>
+                                        <span class="font-medium block">{% trans "Mobile Money (MTN / Orange)" %}</span>
+                                        <span class="text-xs text-muted-foreground">{% trans "Powered by Campay" %}</span>
                                     </div>
                                 </div>
-                                <span class="text-xs bg-emerald-500/10 text-emerald-600 px-2 py-1 rounded-full">Recommended</span>
+                                <span class="text-xs bg-emerald-500/10 text-emerald-600 px-2 py-1 rounded-full">{% trans "Recommended" %}</span>
                             </label>
                             <label class="flex cursor-pointer items-center space-x-3 rounded-xl border-2 border-input p-4 hover:bg-accent hover:border-primary/30 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/5">
                                 <input
@@ -69,8 +70,8 @@
                                         <i data-lucide="banknote" class="h-5 w-5 text-muted-foreground"></i>
                                     </div>
                                     <div>
-                                        <span class="font-medium block">Pay at Event</span>
-                                        <span class="text-xs text-muted-foreground">Cash or bank transfer</span>
+                                        <span class="font-medium block">{% trans "Pay at Event" %}</span>
+                                        <span class="text-xs text-muted-foreground">{% trans "Cash or bank transfer" %}</span>
                                     </div>
                                 </div>
                             </label>
@@ -78,14 +79,14 @@
                     </div>
 
                     <div class="space-y-2">
-                        <label for="phone" class="block text-sm font-medium">Phone Number</label>
+                        <label for="phone" class="block text-sm font-medium">{% trans "Phone Number" %}</label>
                         <input type="tel" name="phone" id="phone"
                                placeholder="+237 6XX XXX XXX" required
                                class="input w-full">
                     </div>
 
                     <div class="rounded-xl bg-muted p-4 space-y-3">
-                        <div class="text-sm text-muted-foreground mb-2">Order Summary</div>
+                        <div class="text-sm text-muted-foreground mb-2">{% trans "Order Summary" %}</div>
                         {% for ticket in booking.tickets.all %}
                         <div class="flex items-center justify-between text-sm">
                             <span>{{ ticket.ticket_type.name }}</span>
@@ -93,14 +94,14 @@
                         </div>
                         {% endfor %}
                         <div class="border-t border-border pt-3 flex items-center justify-between">
-                            <span class="font-medium">Total Amount</span>
+                            <span class="font-medium">{% trans "Total Amount" %}</span>
                             <span class="text-xl font-bold">{{ booking.total_amount }} XAF</span>
                         </div>
                     </div>
 
                     {% #button type="submit" variant="default" class="w-full" %}
                         <i data-lucide="credit-card" class="mr-2 h-4 w-4"></i>
-                        Pay Now
+                        {% trans "Pay Now" %}
                     {% /button %}
                 </form>
             </div>

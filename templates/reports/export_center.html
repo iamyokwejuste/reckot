@@ -1,28 +1,29 @@
 {% extends "layouts/dashboard.html" %}
 {% load slippers %}
+{% load i18n %}
 
-{% block title %}Export Center - {{ event.title }} - Reckot{% endblock %}
+{% block title %}{% trans "Export Center" %} - {{ event.title }} - Reckot{% endblock %}
 
 {% block breadcrumbs %}
 {% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug as event_dashboard_url %}
 {% url 'reports:dashboard' org_slug=event.organization.slug event_slug=event.slug as reports_url %}
 {% #breadcrumb class="mb-4" %}
-    {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item href="/events/" %}Events{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/events/" %}{% trans "Events" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
     {% #breadcrumb_item href=event_dashboard_url %}{{ event.title|truncatewords:3 }}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item href=reports_url %}Reports{% /breadcrumb_item %}
+    {% #breadcrumb_item href=reports_url %}{% trans "Reports" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item %}Export Center{% /breadcrumb_item %}
+    {% #breadcrumb_item %}{% trans "Export Center" %}{% /breadcrumb_item %}
 {% /breadcrumb %}
 {% endblock %}
 
 {% block header_title %}
 <div>
-    <h1 class="text-lg font-semibold">Export Center</h1>
-    <p class="text-sm text-muted-foreground">{{ event.title }} - Generate and download reports</p>
+    <h1 class="text-lg font-semibold">{% trans "Export Center" %}</h1>
+    <p class="text-sm text-muted-foreground">{{ event.title }} - {% trans "Generate and download reports" %}</p>
 </div>
 {% endblock %}
 
@@ -30,7 +31,7 @@
 <a href="{% url 'reports:dashboard' event.organization.slug event.slug %}">
     {% #button variant="outline" size="sm" %}
         <i data-lucide="arrow-left" class="w-4 h-4"></i>
-        Back to Reports
+        {% trans "Back to Reports" %}
     {% /button %}
 </a>
 {% endblock %}
@@ -44,7 +45,7 @@
     success: ''
 }">
     <div class="card p-6">
-        <h2 class="text-lg font-semibold mb-4">Select Report Type</h2>
+        <h2 class="text-lg font-semibold mb-4">{% trans "Select Report Type" %}</h2>
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <button type="button" @click="selectedType = 'FINANCIAL'"
                     class="p-4 rounded-lg border-2 text-left transition-all"
@@ -53,9 +54,9 @@
                     <div class="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
                         <i data-lucide="wallet" class="h-5 w-5 text-emerald-500"></i>
                     </div>
-                    <span class="font-medium">Financial Summary</span>
+                    <span class="font-medium">{% trans "Financial Summary" %}</span>
                 </div>
-                <p class="text-sm text-muted-foreground">Revenue breakdown, payment methods, and ticket sales summary</p>
+                <p class="text-sm text-muted-foreground">{% trans "Revenue breakdown, payment methods, and ticket sales summary" %}</p>
             </button>
 
             <button type="button" @click="selectedType = 'RSVP'"
@@ -65,9 +66,9 @@
                     <div class="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
                         <i data-lucide="users" class="h-5 w-5 text-blue-500"></i>
                     </div>
-                    <span class="font-medium">Registered Attendees</span>
+                    <span class="font-medium">{% trans "Registered Attendees" %}</span>
                 </div>
-                <p class="text-sm text-muted-foreground">List of all registered attendees with contact details</p>
+                <p class="text-sm text-muted-foreground">{% trans "List of all registered attendees with contact details" %}</p>
             </button>
 
             <button type="button" @click="selectedType = 'TICKET_SALES'"
@@ -77,9 +78,9 @@
                     <div class="h-10 w-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
                         <i data-lucide="ticket" class="h-5 w-5 text-purple-500"></i>
                     </div>
-                    <span class="font-medium">Ticket Sales</span>
+                    <span class="font-medium">{% trans "Ticket Sales" %}</span>
                 </div>
-                <p class="text-sm text-muted-foreground">Detailed ticket sales with buyer information</p>
+                <p class="text-sm text-muted-foreground">{% trans "Detailed ticket sales with buyer information" %}</p>
             </button>
 
             <button type="button" @click="selectedType = 'PAYMENTS'"
@@ -89,9 +90,9 @@
                     <div class="h-10 w-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
                         <i data-lucide="credit-card" class="h-5 w-5 text-amber-500"></i>
                     </div>
-                    <span class="font-medium">Payment Records</span>
+                    <span class="font-medium">{% trans "Payment Records" %}</span>
                 </div>
-                <p class="text-sm text-muted-foreground">All payment transactions and their status</p>
+                <p class="text-sm text-muted-foreground">{% trans "All payment transactions and their status" %}</p>
             </button>
 
             <button type="button" @click="selectedType = 'CHECKINS'"
@@ -101,39 +102,39 @@
                     <div class="h-10 w-10 rounded-lg bg-cyan-500/10 flex items-center justify-center">
                         <i data-lucide="check-circle" class="h-5 w-5 text-cyan-500"></i>
                     </div>
-                    <span class="font-medium">Check-in Report</span>
+                    <span class="font-medium">{% trans "Check-in Report" %}</span>
                 </div>
-                <p class="text-sm text-muted-foreground">Attendance data with check-in timestamps</p>
+                <p class="text-sm text-muted-foreground">{% trans "Attendance data with check-in timestamps" %}</p>
             </button>
         </div>
     </div>
 
     <div class="card p-6" x-show="selectedType" x-cloak x-transition>
-        <h2 class="text-lg font-semibold mb-4">Export Format</h2>
+        <h2 class="text-lg font-semibold mb-4">{% trans "Export Format" %}</h2>
         <div class="flex flex-wrap gap-3">
             <button type="button" @click="selectedFormat = 'PDF'"
                     class="px-4 py-2 rounded-lg border-2 font-medium transition-all flex items-center gap-2"
                     :class="selectedFormat === 'PDF' ? 'border-foreground bg-muted' : 'border-border hover:border-muted-foreground'">
                 <i data-lucide="file-text" class="w-4 h-4"></i>
-                PDF Report
+                {% trans "PDF Report" %}
             </button>
             <button type="button" @click="selectedFormat = 'EXCEL'"
                     class="px-4 py-2 rounded-lg border-2 font-medium transition-all flex items-center gap-2"
                     :class="selectedFormat === 'EXCEL' ? 'border-foreground bg-muted' : 'border-border hover:border-muted-foreground'">
                 <i data-lucide="table" class="w-4 h-4"></i>
-                Excel Spreadsheet
+                {% trans "Excel Spreadsheet" %}
             </button>
             <button type="button" @click="selectedFormat = 'CSV'"
                     class="px-4 py-2 rounded-lg border-2 font-medium transition-all flex items-center gap-2"
                     :class="selectedFormat === 'CSV' ? 'border-foreground bg-muted' : 'border-border hover:border-muted-foreground'">
                 <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
-                CSV File
+                {% trans "CSV File" %}
             </button>
             <button type="button" @click="selectedFormat = 'JSON'"
                     class="px-4 py-2 rounded-lg border-2 font-medium transition-all flex items-center gap-2"
                     :class="selectedFormat === 'JSON' ? 'border-foreground bg-muted' : 'border-border hover:border-muted-foreground'">
                 <i data-lucide="braces" class="w-4 h-4"></i>
-                JSON Data
+                {% trans "JSON Data" %}
             </button>
         </div>
 
@@ -141,12 +142,12 @@
             <div class="flex items-start gap-3">
                 <i data-lucide="info" class="w-5 h-5 text-muted-foreground mt-0.5"></i>
                 <div>
-                    <p class="text-sm font-medium">PDF reports include:</p>
+                    <p class="text-sm font-medium">{% trans "PDF reports include:" %}</p>
                     <ul class="text-sm text-muted-foreground mt-1 space-y-1">
-                        <li>• Cover page with organization logo</li>
-                        <li>• Professional formatting and styling</li>
-                        <li>• Summary statistics and charts</li>
-                        <li>• Page numbers and generation timestamp</li>
+                        <li>{% trans "Cover page with organization logo" %}</li>
+                        <li>{% trans "Professional formatting and styling" %}</li>
+                        <li>{% trans "Summary statistics and charts" %}</li>
+                        <li>{% trans "Page numbers and generation timestamp" %}</li>
                     </ul>
                 </div>
             </div>
@@ -174,14 +175,14 @@
                 <span x-text="generating ? 'Generating...' : 'Generate & Download'"></span>
             {% /button %}
             {% #button type="button" variant="outline" attrs="@click=\"selectedType = ''; selectedFormat = 'PDF'\"" %}
-                Reset Selection
+                {% trans "Reset Selection" %}
             {% /button %}
         </div>
     </form>
 
     {% if recent_exports %}
     <div class="card p-6">
-        <h2 class="text-lg font-semibold mb-4">Recent Exports</h2>
+        <h2 class="text-lg font-semibold mb-4">{% trans "Recent Exports" %}</h2>
         <div class="space-y-3">
             {% for export in recent_exports %}
             <div class="flex items-center justify-between py-3 border-b border-border last:border-0">
@@ -203,7 +204,7 @@
                 <a href="{% url 'reports:download' export.reference %}" hx-boost="false">
                     {% #button variant="outline" size="sm" %}
                         <i data-lucide="download" class="w-4 h-4"></i>
-                        Download
+                        {% trans "Download" %}
                     {% /button %}
                 </a>
             </div>

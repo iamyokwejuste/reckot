@@ -52,6 +52,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -113,11 +114,22 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en'
+
+LANGUAGES = [
+    ('en', 'English'),
+    ('fr', 'Français'),
+]
+
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
 
 TIME_ZONE = "Africa/Douala"
 
 USE_I18N = True
+
+USE_L10N = True
 
 USE_TZ = True
 
@@ -205,7 +217,6 @@ PAYMENT_GATEWAYS = {
 
     'CREDENTIALS': {
         'CAMPAY': {
-            'app_id': os.getenv('CAMPAY_APP_ID', ''),
             'app_username': os.getenv('CAMPAY_APP_USERNAME', ''),
             'app_password': os.getenv('CAMPAY_APP_PASSWORD', ''),
             'permanent_token': os.getenv('CAMPAY_PERMANENT_TOKEN', ''),

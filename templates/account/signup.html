@@ -2,8 +2,9 @@
 {% load slippers %}
 {% load socialaccount %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}Sign Up - Reckot{% endblock %}
+{% block title %}{% trans "Sign Up" %} - Reckot{% endblock %}
 
 {% block content %}
 <div class="min-h-[calc(100vh-4rem)] flex items-center justify-center py-12 px-4">
@@ -14,9 +15,9 @@
                     <img x-show="isDark" x-cloak src="{% static 'images/logo/reckto_logo_light_mode.png' %}" alt="" class="h-8 w-8">
                     <img x-show="!isDark" src="{% static 'images/logo/reckto_logo_dark_mode.png' %}" alt="" class="h-8 w-8">
                 </div>
-                <h1 class="text-2xl font-bold">Create an organizer account</h1>
-                <p class="text-muted-foreground mt-1">Start creating and managing your events</p>
-                <p class="text-xs text-muted-foreground mt-2">No account needed to purchase tickets</p>
+                <h1 class="text-2xl font-bold">{% trans "Create an organizer account" %}</h1>
+                <p class="text-muted-foreground mt-1">{% trans "Start creating and managing your events" %}</p>
+                <p class="text-xs text-muted-foreground mt-2">{% trans "No account needed to purchase tickets" %}</p>
             </div>
 
             {% get_providers as socialaccount_providers %}
@@ -32,7 +33,7 @@
                         <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                         <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                     </svg>
-                    Continue with Google
+                    {% trans "Continue with Google" %}
                 {% /button %}
             </form>
             <div class="relative my-6">
@@ -40,7 +41,7 @@
                     <div class="w-full border-t border-border"></div>
                 </div>
                 <div class="relative flex justify-center text-xs uppercase">
-                    <span class="bg-card px-2 text-muted-foreground">Or continue with</span>
+                    <span class="bg-card px-2 text-muted-foreground">{% trans "Or continue with" %}</span>
                 </div>
             </div>
             {% endif %}
@@ -52,13 +53,13 @@
                         class="flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm font-medium rounded-md transition-all"
                         :class="signupMethod === 'email' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'">
                     <i data-lucide="mail" class="w-4 h-4"></i>
-                    Email
+                    {% trans "Email" %}
                 </button>
                 <button type="button" @click="signupMethod = 'phone'; otpSent = false"
                         class="flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm font-medium rounded-md transition-all"
                         :class="signupMethod === 'phone' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'">
                     <i data-lucide="smartphone" class="w-4 h-4"></i>
-                    Phone
+                    {% trans "Phone" %}
                 </button>
             </div>
 
@@ -67,24 +68,24 @@
                 <input type="hidden" name="signup_method" value="email">
 
                 <div>
-                    <label for="id_email" class="block text-sm font-medium mb-2">Email</label>
+                    <label for="id_email" class="block text-sm font-medium mb-2">{% trans "Email" %}</label>
                     <input type="email" name="email" id="id_email" placeholder="you@example.com" required autocomplete="email" class="input">
                 </div>
 
                 <div>
                     <label for="id_phone_number" class="block text-sm font-medium mb-2">
-                        Phone Number
-                        <span class="text-muted-foreground font-normal">(optional)</span>
+                        {% trans "Phone Number" %}
+                        <span class="text-muted-foreground font-normal">{% trans "(optional)" %}</span>
                     </label>
                     <input type="tel" name="phone_number" id="id_phone_number" placeholder="+237 6XX XXX XXX" autocomplete="tel" class="input">
                 </div>
 
                 <div>
-                    <label for="id_password1" class="block text-sm font-medium mb-2">Password</label>
-                    <input type="password" name="password1" id="id_password1" placeholder="Create a password" required autocomplete="new-password" class="input">
+                    <label for="id_password1" class="block text-sm font-medium mb-2">{% trans "Password" %}</label>
+                    <input type="password" name="password1" id="id_password1" placeholder="{% trans "Create a password" %}" required autocomplete="new-password" class="input">
                 </div>
                 <div>
-                    <label for="id_password2" class="block text-sm font-medium mb-2">Confirm Password</label>
+                    <label for="id_password2" class="block text-sm font-medium mb-2">{% trans "Confirm Password" %}</label>
                     <input type="password" name="password2" id="id_password2" placeholder="Confirm your password" required autocomplete="new-password" class="input">
                 </div>
 
@@ -96,7 +97,7 @@
                 {% endif %}
 
                 {% #button type="submit" variant="default" class="w-full mt-2" %}
-                    Create Account
+                    {% trans "Create Account" %}
                     <i data-lucide="arrow-right" class="w-4 h-4"></i>
                 {% /button %}
             </form>
@@ -108,22 +109,22 @@
                       @submit="otpLoading = true">
                     {% csrf_token %}
                     <div>
-                        <label for="signup_phone" class="block text-sm font-medium mb-2">Phone Number</label>
+                        <label for="signup_phone" class="block text-sm font-medium mb-2">{% trans "Phone Number" %}</label>
                         <input type="tel" name="phone_number" id="signup_phone" placeholder="+237 6XX XXX XXX" required class="input">
-                        <p class="text-xs text-muted-foreground mt-1">We'll send you a verification code</p>
+                        <p class="text-xs text-muted-foreground mt-1">{% trans "We'll send you a verification code" %}</p>
                     </div>
                     <div id="phone-signup-result"></div>
                     {% #button type="submit" variant="default" class="w-full mt-4" attrs=':disabled="otpLoading"' %}
                         <template x-if="!otpLoading">
                             <span class="flex items-center gap-2">
-                                Send Code
+                                {% trans "Send Code" %}
                                 <i data-lucide="send" class="w-4 h-4"></i>
                             </span>
                         </template>
                         <template x-if="otpLoading">
                             <span class="flex items-center gap-2">
                                 <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
-                                Sending...
+                                {% trans "Sending..." %}
                             </span>
                         </template>
                     {% /button %}
@@ -134,38 +135,38 @@
                     <input type="hidden" name="phone_number" :value="document.getElementById('signup_phone')?.value">
 
                     <div>
-                        <label for="signup_otp" class="block text-sm font-medium mb-2">Verification Code</label>
+                        <label for="signup_otp" class="block text-sm font-medium mb-2">{% trans "Verification Code" %}</label>
                         <input type="text" name="otp_code" id="signup_otp" placeholder="Enter 6-digit code" required
                                maxlength="6" pattern="[0-9]{6}" inputmode="numeric" autocomplete="one-time-code"
                                class="input text-center text-lg tracking-widest font-mono">
                     </div>
 
                     <div>
-                        <label for="phone_password1" class="block text-sm font-medium mb-2">Password</label>
-                        <input type="password" name="password1" id="phone_password1" placeholder="Create a password" required autocomplete="new-password" class="input">
+                        <label for="phone_password1" class="block text-sm font-medium mb-2">{% trans "Password" %}</label>
+                        <input type="password" name="password1" id="phone_password1" placeholder="{% trans "Create a password" %}" required autocomplete="new-password" class="input">
                     </div>
                     <div>
-                        <label for="phone_password2" class="block text-sm font-medium mb-2">Confirm Password</label>
+                        <label for="phone_password2" class="block text-sm font-medium mb-2">{% trans "Confirm Password" %}</label>
                         <input type="password" name="password2" id="phone_password2" placeholder="Confirm your password" required autocomplete="new-password" class="input">
                     </div>
 
                     {% #button type="submit" variant="default" class="w-full" %}
-                        Create Account
+                        {% trans "Create Account" %}
                         <i data-lucide="check" class="w-4 h-4"></i>
                     {% /button %}
                     {% #button type="button" variant="outline" class="w-full" attrs='@click="otpSent = false"' %}
                         <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                        Change Phone Number
+                        {% trans "Change Phone Number" %}
                     {% /button %}
                 </form>
             </div>
 
             <p class="text-center text-sm text-muted-foreground mt-6">
-                Already have an account? <a href="{% url 'account_login' %}" class="text-foreground font-medium hover:underline">Log in</a>
+                {% trans "Already have an account?" %} <a href="{% url 'account_login' %}" class="text-foreground font-medium hover:underline">{% trans "Log in" %}</a>
             </p>
 
             <p class="text-center text-xs text-muted-foreground mt-4">
-                By signing up, you agree to our <a href="{% url 'terms' %}" class="underline hover:text-foreground">Terms</a> and <a href="{% url 'privacy' %}" class="underline hover:text-foreground">Privacy Policy</a>.
+                {% trans "By signing up, you agree to our" %} <a href="{% url 'terms' %}" class="underline hover:text-foreground">{% trans "Terms" %}</a> {% trans "and" %} <a href="{% url 'privacy' %}" class="underline hover:text-foreground">{% trans "Privacy Policy" %}</a>.
             </p>
         </div>
     </div>

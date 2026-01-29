@@ -1,11 +1,12 @@
 {% extends "layouts/dashboard.html" %}
 {% load slippers %}
+{% load i18n %}
 
-{% block title %}Checkout Questions - {{ event.title }} - Reckot{% endblock %}
+{% block title %}{% trans "Checkout Questions" %} - {{ event.title }} - Reckot{% endblock %}
 
 {% block header_title %}
 <div>
-    <h1 class="text-lg font-semibold">Checkout Questions</h1>
+    <h1 class="text-lg font-semibold">{% trans "Checkout Questions" %}</h1>
     <p class="text-sm text-muted-foreground">{{ event.title }}</p>
 </div>
 {% endblock %}
@@ -16,18 +17,18 @@
         <a href="{% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug %}">
             {% #button variant="outline" size="sm" %}
                 <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                Back to Event
+                {% trans "Back to Event" %}
             {% /button %}
         </a>
-        <span class="text-sm text-muted-foreground">{{ questions.count }} question{{ questions.count|pluralize }}</span>
+        <span class="text-sm text-muted-foreground">{% blocktrans count counter=questions.count %}{{ counter }} question{% plural %}{{ counter }} questions{% endblocktrans %}</span>
     </div>
 
     <div class="card p-6" x-data="{ showForm: false }">
         <div class="flex items-center justify-between mb-4">
-            <h2 class="font-semibold">Custom Questions</h2>
+            <h2 class="font-semibold">{% trans "Custom Questions" %}</h2>
             {% #button type="button" variant="default" size="sm" attrs='@click="showForm = !showForm"' %}
                 <i data-lucide="plus" class="w-4 h-4"></i>
-                Add Question
+                {% trans "Add Question" %}
             {% /button %}
         </div>
 
@@ -36,48 +37,48 @@
             <input type="hidden" name="action" value="add">
 
             <div>
-                <label for="question" class="block text-sm font-medium mb-2">Question</label>
-                <input type="text" name="question" id="question" required placeholder="e.g., What is your T-shirt size?" class="input">
+                <label for="question" class="block text-sm font-medium mb-2">{% trans "Question" %}</label>
+                <input type="text" name="question" id="question" required placeholder="{% trans "e.g., What is your T-shirt size?" %}" class="input">
             </div>
 
             <div class="grid sm:grid-cols-2 gap-4">
                 <div>
-                    <label for="field_type" class="block text-sm font-medium mb-2">Field Type</label>
+                    <label for="field_type" class="block text-sm font-medium mb-2">{% trans "Field Type" %}</label>
                     <select name="field_type" id="field_type" class="input" x-data x-ref="fieldType" @change="$refs.optionsGroup.style.display = ['SELECT', 'RADIO'].includes($refs.fieldType.value) ? 'block' : 'none'">
-                        <option value="TEXT">Text</option>
-                        <option value="TEXTAREA">Long Text</option>
-                        <option value="SELECT">Dropdown</option>
-                        <option value="RADIO">Radio Buttons</option>
-                        <option value="CHECKBOX">Checkbox</option>
-                        <option value="EMAIL">Email</option>
-                        <option value="PHONE">Phone Number</option>
-                        <option value="DATE">Date</option>
-                        <option value="NUMBER">Number</option>
+                        <option value="TEXT">{% trans "Text" %}</option>
+                        <option value="TEXTAREA">{% trans "Long Text" %}</option>
+                        <option value="SELECT">{% trans "Dropdown" %}</option>
+                        <option value="RADIO">{% trans "Radio Buttons" %}</option>
+                        <option value="CHECKBOX">{% trans "Checkbox" %}</option>
+                        <option value="EMAIL">{% trans "Email" %}</option>
+                        <option value="PHONE">{% trans "Phone Number" %}</option>
+                        <option value="DATE">{% trans "Date" %}</option>
+                        <option value="NUMBER">{% trans "Number" %}</option>
                     </select>
                 </div>
                 <div x-ref="optionsGroup" style="display: none;">
-                    <label for="options" class="block text-sm font-medium mb-2">Options (one per line)</label>
-                    <textarea name="options" id="options" rows="3" placeholder="Small&#10;Medium&#10;Large&#10;X-Large" class="input resize-none text-sm"></textarea>
+                    <label for="options" class="block text-sm font-medium mb-2">{% trans "Options (one per line)" %}</label>
+                    <textarea name="options" id="options" rows="3" placeholder="{% trans "Small" %}&#10;{% trans "Medium" %}&#10;{% trans "Large" %}&#10;{% trans "X-Large" %}" class="input resize-none text-sm"></textarea>
                 </div>
             </div>
 
             <div class="flex items-center gap-6">
                 <label class="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" name="is_required" class="h-4 w-4 rounded border-border">
-                    <span class="text-sm">Required</span>
+                    <span class="text-sm">{% trans "Required" %}</span>
                 </label>
                 <label class="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" name="per_ticket" class="h-4 w-4 rounded border-border">
-                    <span class="text-sm">Ask per ticket</span>
+                    <span class="text-sm">{% trans "Ask per ticket" %}</span>
                 </label>
             </div>
 
             <div class="flex items-center gap-3">
                 {% #button type="submit" variant="default" size="sm" %}
                     <i data-lucide="plus" class="w-4 h-4"></i>
-                    Add Question
+                    {% trans "Add Question" %}
                 {% /button %}
-                {% #button type="button" variant="outline" size="sm" attrs='@click="showForm = false"' %}Cancel{% /button %}
+                {% #button type="button" variant="outline" size="sm" attrs='@click="showForm = false"' %}{% trans "Cancel" %}{% /button %}
             </div>
         </form>
 
@@ -92,20 +93,20 @@
                     <div class="flex items-center gap-2">
                         <p class="font-medium text-sm truncate">{{ q.question }}</p>
                         {% if q.is_required %}
-                        <span class="badge badge-outline text-xs">Required</span>
+                        <span class="badge badge-outline text-xs">{% trans "Required" %}</span>
                         {% endif %}
                         {% if q.per_ticket %}
-                        <span class="badge badge-info text-xs">Per ticket</span>
+                        <span class="badge badge-info text-xs">{% trans "Per ticket" %}</span>
                         {% endif %}
                     </div>
                     <div class="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                         <span>{{ q.get_field_type_display }}</span>
                         {% if q.options %}
-                        <span>{{ q.options|length }} option{{ q.options|length|pluralize }}</span>
+                        <span>{% blocktrans count counter=q.options|length %}{{ counter }} option{% plural %}{{ counter }} options{% endblocktrans %}</span>
                         {% endif %}
                     </div>
                 </div>
-                <form method="post" onsubmit="return confirm('Delete this question?')">
+                <form method="post" onsubmit="return confirm('{% trans "Delete this question?" %}')">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="delete">
                     <input type="hidden" name="question_id" value="{{ q.id }}">
@@ -119,8 +120,8 @@
         {% else %}
         <div class="text-center py-8 text-muted-foreground">
             <i data-lucide="clipboard-list" class="w-10 h-10 mx-auto mb-3 opacity-50"></i>
-            <p>No custom questions yet</p>
-            <p class="text-sm mt-1">Add questions to collect additional info during checkout</p>
+            <p>{% trans "No custom questions yet" %}</p>
+            <p class="text-sm mt-1">{% trans "Add questions to collect additional info during checkout" %}</p>
         </div>
         {% endif %}
     </div>
@@ -128,20 +129,20 @@
     <div class="card p-6 bg-muted/30">
         <h3 class="font-semibold flex items-center gap-2 mb-3">
             <i data-lucide="info" class="w-4 h-4"></i>
-            How it works
+            {% trans "How it works" %}
         </h3>
         <ul class="text-sm text-muted-foreground space-y-2">
             <li class="flex items-start gap-2">
                 <i data-lucide="check" class="w-4 h-4 text-emerald-500 mt-0.5"></i>
-                <span>Questions appear during checkout after ticket selection</span>
+                <span>{% trans "Questions appear during checkout after ticket selection" %}</span>
             </li>
             <li class="flex items-start gap-2">
                 <i data-lucide="check" class="w-4 h-4 text-emerald-500 mt-0.5"></i>
-                <span>"Per ticket" questions are asked for each ticket purchased</span>
+                <span>{% trans "\"Per ticket\" questions are asked for each ticket purchased" %}</span>
             </li>
             <li class="flex items-start gap-2">
                 <i data-lucide="check" class="w-4 h-4 text-emerald-500 mt-0.5"></i>
-                <span>Responses are saved with the booking and exportable in reports</span>
+                <span>{% trans "Responses are saved with the booking and exportable in reports" %}</span>
             </li>
         </ul>
     </div>

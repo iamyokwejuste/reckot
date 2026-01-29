@@ -1,20 +1,21 @@
 {% extends "layouts/dashboard.html" %}
 {% load slippers %}
+{% load i18n %}
 
-{% block title %}Refunds - Reckot{% endblock %}
+{% block title %}{% trans "Refunds" %} - Reckot{% endblock %}
 
 {% block breadcrumbs %}
 {% #breadcrumb class="mb-4" %}
-    {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item %}Refunds{% /breadcrumb_item %}
+    {% #breadcrumb_item %}{% trans "Refunds" %}{% /breadcrumb_item %}
 {% /breadcrumb %}
 {% endblock %}
 
 {% block header_title %}
 <div>
-    <h1 class="text-lg font-semibold">Refunds</h1>
-    <p class="text-sm text-muted-foreground">Manage refund requests</p>
+    <h1 class="text-lg font-semibold">{% trans "Refunds" %}</h1>
+    <p class="text-sm text-muted-foreground">{% trans "Manage refund requests" %}</p>
 </div>
 {% endblock %}
 
@@ -23,21 +24,21 @@
     <div class="grid gap-4 sm:grid-cols-3">
         <div class="card p-4">
             <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-muted-foreground">Pending</p>
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Pending" %}</p>
                 <i data-lucide="clock" class="h-4 w-4 text-amber-500"></i>
             </div>
             <p class="text-2xl font-bold mt-2 text-amber-500">{{ stats.pending }}</p>
         </div>
         <div class="card p-4">
             <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-muted-foreground">Approved</p>
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Approved" %}</p>
                 <i data-lucide="check-circle" class="h-4 w-4 text-blue-500"></i>
             </div>
             <p class="text-2xl font-bold mt-2 text-blue-500">{{ stats.approved }}</p>
         </div>
         <div class="card p-4">
             <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-muted-foreground">Processed</p>
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Processed" %}</p>
                 <i data-lucide="check-circle-2" class="h-4 w-4 text-emerald-500"></i>
             </div>
             <p class="text-2xl font-bold mt-2 text-emerald-500">{{ stats.processed }}</p>
@@ -46,7 +47,7 @@
 
     <div class="card">
         <div class="p-4 border-b border-border">
-            <h2 class="font-semibold">Refund Requests</h2>
+            <h2 class="font-semibold">{% trans "Refund Requests" %}</h2>
         </div>
         {% if refunds %}
         <div class="divide-y divide-border">
@@ -56,13 +57,13 @@
                     <div class="flex items-center gap-2">
                         <p class="font-medium truncate">{{ refund.payment.booking.user.email }}</p>
                         {% if refund.status == 'PENDING' %}
-                        <span class="badge badge-warning">Pending</span>
+                        <span class="badge badge-warning">{% trans "Pending" %}</span>
                         {% elif refund.status == 'APPROVED' %}
-                        <span class="badge badge-info">Approved</span>
+                        <span class="badge badge-info">{% trans "Approved" %}</span>
                         {% elif refund.status == 'PROCESSED' %}
-                        <span class="badge badge-success">Processed</span>
+                        <span class="badge badge-success">{% trans "Processed" %}</span>
                         {% elif refund.status == 'REJECTED' %}
-                        <span class="badge badge-destructive">Rejected</span>
+                        <span class="badge badge-destructive">{% trans "Rejected" %}</span>
                         {% endif %}
                     </div>
                     <p class="text-sm text-muted-foreground">
@@ -74,7 +75,7 @@
                     {% if refund.status == 'PENDING' or refund.status == 'APPROVED' %}
                     <a href="{% url 'payments:refund_process' refund.id %}">
                         {% #button variant="outline" size="sm" %}
-                            Process
+                            {% trans "Process" %}
                         {% /button %}
                     </a>
                     {% endif %}
@@ -85,7 +86,7 @@
         {% else %}
         <div class="p-8 text-center">
             <i data-lucide="inbox" class="h-12 w-12 mx-auto text-muted-foreground/50"></i>
-            <p class="text-muted-foreground mt-4">No refund requests</p>
+            <p class="text-muted-foreground mt-4">{% trans "No refund requests" %}</p>
         </div>
         {% endif %}
     </div>

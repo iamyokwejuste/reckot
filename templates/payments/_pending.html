@@ -1,4 +1,5 @@
 {% load slippers %}
+{% load i18n %}
 <div
     id="payment-status"
     hx-get="{% url 'payments:poll' payment_ref=payment.reference %}"
@@ -10,24 +11,24 @@
 >
     <div class="flex flex-col items-center justify-center py-8">
         {% #loading_state size="lg" %}{% /loading_state %}
-        <h3 class="mt-4 text-lg font-semibold">Processing Payment</h3>
+        <h3 class="mt-4 text-lg font-semibold">{% trans "Processing Payment" %}</h3>
         <p class="mt-2 text-sm text-muted-foreground text-center">
-            Please complete the payment on your phone.<br>
-            A prompt should appear on your mobile device.
+            {% trans "Please complete the payment on your phone." %}<br>
+            {% trans "A prompt should appear on your mobile device." %}
         </p>
     </div>
 
     {% #alert variant="default" icon="info" %}
         <div class="space-y-2 text-sm">
-            <p><strong>Reference:</strong> {{ payment.reference }}</p>
-            <p><strong>Method:</strong> {{ payment.get_method_display }}</p>
-            <p><strong>Phone:</strong> {{ payment.phone_number }}</p>
-            <p><strong>Amount:</strong> {{ payment.amount }} XAF</p>
+            <p><strong>{% trans "Reference:" %}</strong> {{ payment.reference }}</p>
+            <p><strong>{% trans "Method:" %}</strong> {{ payment.get_method_display }}</p>
+            <p><strong>{% trans "Phone:" %}</strong> {{ payment.phone_number }}</p>
+            <p><strong>{% trans "Amount:" %}</strong> {{ payment.amount }} XAF</p>
         </div>
     {% /alert %}
 
     <p class="text-center text-xs text-muted-foreground">
-        Do not close this page. We are waiting for confirmation...
+        {% trans "Do not close this page. We are waiting for confirmation..." %}
     </p>
 </div>
 

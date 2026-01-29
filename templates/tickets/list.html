@@ -1,20 +1,21 @@
 {% extends "layouts/dashboard.html" %}
 {% load slippers %}
+{% load i18n %}
 
-{% block title %}Tickets - Reckot{% endblock %}
+{% block title %}{% trans "Tickets" %} - Reckot{% endblock %}
 
 {% block breadcrumbs %}
 {% #breadcrumb class="mb-4" %}
-    {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item %}Tickets{% /breadcrumb_item %}
+    {% #breadcrumb_item %}{% trans "Tickets" %}{% /breadcrumb_item %}
 {% /breadcrumb %}
 {% endblock %}
 
 {% block header_title %}
 <div>
-    <h1 class="text-lg font-semibold">Tickets</h1>
-    <p class="text-sm text-muted-foreground">View all tickets across your events</p>
+    <h1 class="text-lg font-semibold">{% trans "Tickets" %}</h1>
+    <p class="text-sm text-muted-foreground">{% trans "View all tickets across your events" %}</p>
 </div>
 {% endblock %}
 
@@ -23,21 +24,21 @@
     <div class="grid gap-4 sm:grid-cols-3">
         <div class="stat-card">
             <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-muted-foreground">Total Tickets</p>
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Total Tickets" %}</p>
                 <i data-lucide="ticket" class="h-4 w-4 text-muted-foreground"></i>
             </div>
             <p class="text-2xl font-bold mt-2">{{ stats.total }}</p>
         </div>
         <div class="stat-card">
             <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-muted-foreground">Checked In</p>
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Checked In" %}</p>
                 <i data-lucide="check-circle" class="h-4 w-4 text-emerald-500"></i>
             </div>
             <p class="text-2xl font-bold mt-2 text-emerald-500">{{ stats.checked_in }}</p>
         </div>
         <div class="stat-card">
             <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-muted-foreground">Pending</p>
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Pending" %}</p>
                 <i data-lucide="clock" class="h-4 w-4 text-yellow-500"></i>
             </div>
             <p class="text-2xl font-bold mt-2 text-yellow-500">{{ stats.pending }}</p>
@@ -50,11 +51,11 @@
             <table class="w-full">
                 <thead>
                     <tr class="border-b border-border">
-                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Ticket</th>
-                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Event</th>
-                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Attendee</th>
-                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Type</th>
-                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Status</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Ticket" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Event" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Attendee" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Type" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Status" %}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-border">
@@ -75,11 +76,11 @@
                         </td>
                         <td class="p-4">
                             {% if ticket.is_checked_in %}
-                                <span class="badge badge-success">Checked In</span>
+                                <span class="badge badge-success">{% trans "Checked In" %}</span>
                             {% elif ticket.booking.status == 'CONFIRMED' %}
-                                <span class="badge badge-default">Confirmed</span>
+                                <span class="badge badge-default">{% trans "Confirmed" %}</span>
                             {% elif ticket.booking.status == 'PENDING' %}
-                                <span class="badge badge-warning">Pending</span>
+                                <span class="badge badge-warning">{% trans "Pending" %}</span>
                             {% else %}
                                 <span class="badge">{{ ticket.booking.status }}</span>
                             {% endif %}
@@ -94,8 +95,8 @@
             <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
                 <i data-lucide="ticket" class="h-8 w-8 text-muted-foreground"></i>
             </div>
-            <h3 class="text-lg font-semibold mb-2">No tickets yet</h3>
-            <p class="text-muted-foreground">Tickets will appear here when attendees book your events.</p>
+            <h3 class="text-lg font-semibold mb-2">{% trans "No tickets yet" %}</h3>
+            <p class="text-muted-foreground">{% trans "Tickets will appear here when attendees book your events." %}</p>
         </div>
         {% endif %}
     </div>

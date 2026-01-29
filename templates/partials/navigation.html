@@ -1,5 +1,6 @@
 {% load slippers %}
 {% load static %}
+{% load i18n %}
 
 <header class="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-lg border-b border-border">
     <div class="container">
@@ -11,13 +12,15 @@
 
             <div class="hidden md:flex items-center gap-1">
                 {% if not user.is_authenticated %}
-                <a href="{% url 'features' %}" class="px-4 py-2 text-sm transition-colors {% if request.resolver_match.url_name == 'features' %}text-foreground font-medium{% else %}text-muted-foreground hover:text-foreground{% endif %}">Features</a>
-                <a href="{% url 'home' %}#pricing" class="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
-                <a href="{% url 'why_us' %}" class="px-4 py-2 text-sm transition-colors {% if request.resolver_match.url_name == 'why_us' %}text-foreground font-medium{% else %}text-muted-foreground hover:text-foreground{% endif %}">Why Us</a>
+                <a href="{% url 'features' %}" class="px-4 py-2 text-sm transition-colors {% if request.resolver_match.url_name == 'features' %}text-foreground font-medium{% else %}text-muted-foreground hover:text-foreground{% endif %}">{% trans "Features" %}</a>
+                <a href="{% url 'home' %}#pricing" class="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">{% trans "Pricing" %}</a>
+                <a href="{% url 'why_us' %}" class="px-4 py-2 text-sm transition-colors {% if request.resolver_match.url_name == 'why_us' %}text-foreground font-medium{% else %}text-muted-foreground hover:text-foreground{% endif %}">{% trans "Why Us" %}</a>
                 {% endif %}
             </div>
 
             <div class="hidden md:flex items-center gap-3">
+                {% include "partials/language_switcher.html" %}
+
                 <button @click="setMode(isDark ? 'light' : 'dark')" class="p-2 rounded-lg hover:bg-muted transition-colors" aria-label="Toggle theme">
                     <i x-show="!isDark" data-lucide="moon" class="h-5 w-5" aria-hidden="true"></i>
                     <i x-show="isDark" x-cloak data-lucide="sun" class="h-5 w-5" aria-hidden="true"></i>
@@ -37,27 +40,28 @@
                         </div>
                         <a href="{% url 'events:list' %}" hx-boost="false" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors" role="menuitem">
                             <i data-lucide="calendar" class="h-4 w-4" aria-hidden="true"></i>
-                            My Events
+                            {% trans "My Events" %}
                         </a>
                         <a href="{% url 'reports:analytics' %}" hx-boost="false" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors" role="menuitem">
                             <i data-lucide="bar-chart-3" class="h-4 w-4" aria-hidden="true"></i>
-                            Analytics
+                            {% trans "Analytics" %}
                         </a>
                         <div class="border-t border-border mt-2 pt-2">
                             <a href="{% url 'account_logout' %}?next={{ request.path }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-red-500 hover:bg-red-500/10 transition-colors" role="menuitem">
                                 <i data-lucide="log-out" class="h-4 w-4" aria-hidden="true"></i>
-                                Log out
+                                {% trans "Log out" %}
                             </a>
                         </div>
                     </div>
                 </div>
                 {% else %}
-                <a href="{% url 'account_login' %}" class="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">Log in</a>
-                <a href="{% url 'account_signup' %}">{% #button variant="default" %}Get Started{% /button %}</a>
+                <a href="{% url 'account_login' %}" class="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">{% trans "Log in" %}</a>
+                <a href="{% url 'account_signup' %}">{% #button variant="default" %}{% trans "Get Started" %}{% /button %}</a>
                 {% endif %}
             </div>
 
             <div class="flex md:hidden items-center gap-2">
+                {% include "partials/language_switcher.html" %}
                 <button @click="setMode(isDark ? 'light' : 'dark')" class="p-2 rounded-lg hover:bg-muted transition-colors" aria-label="Toggle theme">
                     <i x-show="!isDark" data-lucide="moon" class="h-5 w-5" aria-hidden="true"></i>
                     <i x-show="isDark" x-cloak data-lucide="sun" class="h-5 w-5" aria-hidden="true"></i>
@@ -94,26 +98,26 @@
         <div class="space-y-2">
             <a href="{% url 'events:list' %}" hx-boost="false" onclick="closeMobileMenu()" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted transition-colors">
                 <i data-lucide="calendar" class="h-6 w-6" aria-hidden="true"></i>
-                My Events
+                {% trans "My Events" %}
             </a>
             <a href="{% url 'reports:analytics' %}" hx-boost="false" onclick="closeMobileMenu()" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted transition-colors">
                 <i data-lucide="bar-chart-3" class="h-6 w-6" aria-hidden="true"></i>
-                Analytics
+                {% trans "Analytics" %}
             </a>
         </div>
         {% else %}
         <div class="space-y-2">
             <a href="{% url 'features' %}" onclick="closeMobileMenu()" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted transition-colors">
                 <i data-lucide="sparkles" class="h-6 w-6" aria-hidden="true"></i>
-                Features
+                {% trans "Features" %}
             </a>
             <a href="{% url 'home' %}#pricing" onclick="closeMobileMenu()" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted transition-colors">
                 <i data-lucide="tag" class="h-6 w-6" aria-hidden="true"></i>
-                Pricing
+                {% trans "Pricing" %}
             </a>
             <a href="{% url 'why_us' %}" onclick="closeMobileMenu()" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted transition-colors">
                 <i data-lucide="heart" class="h-6 w-6" aria-hidden="true"></i>
-                Why Us
+                {% trans "Why Us" %}
             </a>
         </div>
         {% endif %}
@@ -123,14 +127,14 @@
         {% if user.is_authenticated %}
         <a href="{% url 'account_logout' %}?next={{ request.path }}" class="flex items-center justify-center gap-2 w-full py-4 rounded-xl text-red-500 bg-red-500/10 font-semibold text-lg">
             <i data-lucide="log-out" class="h-5 w-5" aria-hidden="true"></i>
-            Log out
+            {% trans "Log out" %}
         </a>
         {% else %}
         <a href="{% url 'account_login' %}" onclick="closeMobileMenu()" class="flex items-center justify-center w-full py-4 rounded-xl border border-border text-foreground font-semibold text-lg hover:bg-muted transition-colors">
-            Log in
+            {% trans "Log in" %}
         </a>
         <a href="{% url 'account_signup' %}" onclick="closeMobileMenu()" class="flex items-center justify-center w-full py-4 rounded-xl bg-foreground text-background font-semibold text-lg hover:opacity-90 transition-opacity">
-            Get Started
+            {% trans "Get Started" %}
         </a>
         {% endif %}
     </div>

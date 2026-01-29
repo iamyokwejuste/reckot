@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% load slippers %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}Verify Email - Reckot{% endblock %}
+{% block title %}{% trans "Verify Email" %} - Reckot{% endblock %}
 
 {% block content %}
 <div class="min-h-[calc(100vh-4rem)] flex items-center justify-center py-12 px-4">
@@ -13,8 +14,8 @@
                     <img x-show="isDark" x-cloak src="{% static 'images/logo/reckto_logo_light_mode.png' %}" alt="" class="h-8 w-8">
                     <img x-show="!isDark" src="{% static 'images/logo/reckto_logo_dark_mode.png' %}" alt="" class="h-8 w-8">
                 </div>
-                <h1 class="text-2xl font-bold">Verify your email</h1>
-                <p class="text-muted-foreground mt-1">Enter the 6-digit code sent to {{ user.email }}</p>
+                <h1 class="text-2xl font-bold">{% trans "Verify your email" %}</h1>
+                <p class="text-muted-foreground mt-1">{% blocktrans with email=user.email %}Enter the 6-digit code sent to {{ email }}{% endblocktrans %}</p>
             </div>
 
             {% if messages %}
@@ -29,7 +30,7 @@
                 {% csrf_token %}
 
                 <div>
-                    <label for="otp_code" class="block text-sm font-medium mb-2">Verification Code</label>
+                    <label for="otp_code" class="block text-sm font-medium mb-2">{% trans "Verification Code" %}</label>
                     <input
                         type="text"
                         name="otp_code"
@@ -45,16 +46,16 @@
                 </div>
 
                 {% #button variant="default" type="submit" class="w-full" :disabled="loading" %}
-                    <span x-show="!loading">Verify Email</span>
+                    <span x-show="!loading">{% trans "Verify Email" %}</span>
                     <span x-show="loading" class="flex items-center gap-2">
                         <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
-                        Verifying...
+                        {% trans "Verifying..." %}
                     </span>
                 {% /button %}
             </form>
 
             <div class="text-center mt-6">
-                <p class="text-sm text-muted-foreground mb-2">Didn't receive the code?</p>
+                <p class="text-sm text-muted-foreground mb-2">{% trans "Didn't receive the code?" %}</p>
                 <button
                     type="button"
                     class="text-sm text-foreground font-medium hover:underline"
@@ -79,8 +80,8 @@
                         });
                     "
                 >
-                    <span x-show="!resending">Resend code</span>
-                    <span x-show="resending">Code sent! Wait 30s...</span>
+                    <span x-show="!resending">{% trans "Resend code" %}</span>
+                    <span x-show="resending">{% trans "Code sent! Wait 30s..." %}</span>
                 </button>
             </div>
         </div>

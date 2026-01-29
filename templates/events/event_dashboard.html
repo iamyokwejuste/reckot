@@ -1,13 +1,14 @@
 {% extends 'layouts/dashboard.html' %}
 {% load slippers %}
+{% load i18n %}
 
-{% block title %}{{ event.title }} - Dashboard - Reckot{% endblock %}
+{% block title %}{{ event.title }} - {% trans "Dashboard" %} - Reckot{% endblock %}
 
 {% block breadcrumbs %}
 {% #breadcrumb class="mb-4" %}
-    {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item href="/events/" %}Events{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/events/" %}{% trans "Events" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
     {% #breadcrumb_item %}{{ event.title|truncatewords:3 }}{% /breadcrumb_item %}
 {% /breadcrumb %}
@@ -23,9 +24,9 @@
 {% block header_actions %}
 <div class="flex items-center gap-2">
     {% if event.state == 'PUBLISHED' %}
-    <span class="inline-flex items-center rounded-full border border-success/20 bg-success/10 text-success px-2.5 py-0.5 text-xs font-semibold">Live</span>
+    <span class="inline-flex items-center rounded-full border border-success/20 bg-success/10 text-success px-2.5 py-0.5 text-xs font-semibold">{% trans "Live" %}</span>
     {% elif event.state == 'DRAFT' %}
-    <span class="inline-flex items-center rounded-full border border-border bg-muted text-muted-foreground px-2.5 py-0.5 text-xs font-semibold">Draft</span>
+    <span class="inline-flex items-center rounded-full border border-border bg-muted text-muted-foreground px-2.5 py-0.5 text-xs font-semibold">{% trans "Draft" %}</span>
     {% else %}
     <span class="inline-flex items-center rounded-full border border-warning/20 bg-warning/10 text-warning px-2.5 py-0.5 text-xs font-semibold">{{ event.state }}</span>
     {% endif %}
@@ -34,14 +35,14 @@
     <a href="{{ public_url }}" target="_blank">
         {% #button variant="outline" size="sm" %}
             <i data-lucide="external-link" class="w-4 h-4"></i>
-            View Public
+            {% trans "View Public" %}
         {% /button %}
     </a>
     {% elif preview_url %}
     <a href="{{ preview_url }}" target="_blank">
         {% #button variant="outline" size="sm" %}
             <i data-lucide="eye" class="w-4 h-4"></i>
-            Preview
+            {% trans "Preview" %}
         {% /button %}
     </a>
     {% endif %}
@@ -56,15 +57,15 @@
             <div class="flex items-start gap-3">
                 <i data-lucide="alert-circle" class="h-5 w-5 text-amber-500 shrink-0 mt-0.5"></i>
                 <div>
-                    <p class="font-medium text-amber-600">Your event is not published yet</p>
-                    <p class="text-sm text-muted-foreground">Publish your event to start selling tickets and allow attendees to view it.</p>
+                    <p class="font-medium text-amber-600">{% trans "Your event is not published yet" %}</p>
+                    <p class="text-sm text-muted-foreground">{% trans "Publish your event to start selling tickets and allow attendees to view it." %}</p>
                 </div>
             </div>
             <form method="post" action="{% url 'events:toggle_publish' event.organization.slug event.slug %}">
                 {% csrf_token %}
                 {% #button type="submit" variant="default" size="sm" %}
                     <i data-lucide="rocket" class="w-4 h-4 mr-1"></i>
-                    Publish Now
+                    {% trans "Publish Now" %}
                 {% /button %}
             </form>
         </div>
@@ -79,7 +80,7 @@
                 </div>
                 <div>
                     <p class="text-2xl font-bold">{{ stats.tickets_sold }}</p>
-                    <p class="text-xs text-muted-foreground">Tickets Sold</p>
+                    <p class="text-xs text-muted-foreground">{% trans "Tickets Sold" %}</p>
                 </div>
             </div>
         </div>
@@ -90,7 +91,7 @@
                 </div>
                 <div>
                     <p class="text-2xl font-bold">{{ stats.revenue|floatformat:0 }} XAF</p>
-                    <p class="text-xs text-muted-foreground">Revenue</p>
+                    <p class="text-xs text-muted-foreground">{% trans "Revenue" %}</p>
                 </div>
             </div>
         </div>
@@ -101,7 +102,7 @@
                 </div>
                 <div>
                     <p class="text-2xl font-bold">{{ stats.checked_in }}</p>
-                    <p class="text-xs text-muted-foreground">Checked In</p>
+                    <p class="text-xs text-muted-foreground">{% trans "Checked In" %}</p>
                 </div>
             </div>
         </div>
@@ -112,7 +113,7 @@
                 </div>
                 <div>
                     <p class="text-2xl font-bold">{{ stats.checkin_rate|floatformat:0 }}%</p>
-                    <p class="text-xs text-muted-foreground">Check-in Rate</p>
+                    <p class="text-xs text-muted-foreground">{% trans "Check-in Rate" %}</p>
                 </div>
             </div>
         </div>
@@ -121,15 +122,15 @@
     <div class="grid gap-6 lg:grid-cols-3">
         <div class="lg:col-span-2 space-y-6">
             <div class="card p-6">
-                <h2 class="text-lg font-semibold mb-4">Quick Actions</h2>
+                <h2 class="text-lg font-semibold mb-4">{% trans "Quick Actions" %}</h2>
                 <div class="grid gap-3 sm:grid-cols-2">
                     <a href="{{ edit_event_url }}" hx-boost="false" class="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted transition-colors">
                         <div class="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
                             <i data-lucide="pencil" class="h-5 w-5"></i>
                         </div>
                         <div>
-                            <p class="font-medium">Edit Event</p>
-                            <p class="text-xs text-muted-foreground">Update event details</p>
+                            <p class="font-medium">{% trans "Edit Event" %}</p>
+                            <p class="text-xs text-muted-foreground">{% trans "Update event details" %}</p>
                         </div>
                     </a>
                     <a href="{{ manage_tickets_url }}" hx-boost="false" class="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted transition-colors">
@@ -137,8 +138,8 @@
                             <i data-lucide="ticket" class="h-5 w-5"></i>
                         </div>
                         <div>
-                            <p class="font-medium">Manage Tickets</p>
-                            <p class="text-xs text-muted-foreground">Add or edit ticket types</p>
+                            <p class="font-medium">{% trans "Manage Tickets" %}</p>
+                            <p class="text-xs text-muted-foreground">{% trans "Add or edit ticket types" %}</p>
                         </div>
                     </a>
                     <a href="{{ checkin_url }}" hx-boost="false" class="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted transition-colors">
@@ -146,8 +147,8 @@
                             <i data-lucide="scan" class="h-5 w-5"></i>
                         </div>
                         <div>
-                            <p class="font-medium">Check-in</p>
-                            <p class="text-xs text-muted-foreground">Scan tickets at the door</p>
+                            <p class="font-medium">{% trans "Check-in" %}</p>
+                            <p class="text-xs text-muted-foreground">{% trans "Scan tickets at the door" %}</p>
                         </div>
                     </a>
                     <a href="{{ export_url }}" hx-boost="false" class="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted transition-colors">
@@ -155,8 +156,8 @@
                             <i data-lucide="download" class="h-5 w-5"></i>
                         </div>
                         <div>
-                            <p class="font-medium">Export Data</p>
-                            <p class="text-xs text-muted-foreground">Download reports (PDF, CSV)</p>
+                            <p class="font-medium">{% trans "Export Data" %}</p>
+                            <p class="text-xs text-muted-foreground">{% trans "Download reports (PDF, CSV)" %}</p>
                         </div>
                     </a>
                     <a href="{{ analytics_url }}" hx-boost="false" class="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted transition-colors">
@@ -164,8 +165,8 @@
                             <i data-lucide="bar-chart-3" class="h-5 w-5"></i>
                         </div>
                         <div>
-                            <p class="font-medium">Analytics</p>
-                            <p class="text-xs text-muted-foreground">View detailed reports</p>
+                            <p class="font-medium">{% trans "Analytics" %}</p>
+                            <p class="text-xs text-muted-foreground">{% trans "View detailed reports" %}</p>
                         </div>
                     </a>
                     <a href="{{ flyer_config_url }}" hx-boost="false" class="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted transition-colors">
@@ -173,8 +174,8 @@
                             <i data-lucide="image" class="h-5 w-5"></i>
                         </div>
                         <div>
-                            <p class="font-medium">I Will Be There</p>
-                            <p class="text-xs text-muted-foreground">Flyer generator for attendees</p>
+                            <p class="font-medium">{% trans "I Will Be There" %}</p>
+                            <p class="text-xs text-muted-foreground">{% trans "Flyer generator for attendees" %}</p>
                         </div>
                     </a>
                 </div>
@@ -182,34 +183,34 @@
 
             <div class="card p-6">
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-semibold">Event Details</h2>
+                    <h2 class="text-lg font-semibold">{% trans "Event Details" %}</h2>
                     <a href="{{ edit_event_url }}">
                         {% #button variant="outline" size="sm" %}
                             <i data-lucide="pencil" class="w-4 h-4"></i>
-                            Edit
+                            {% trans "Edit" %}
                         {% /button %}
                     </a>
                 </div>
                 <dl class="space-y-3 text-sm">
                     <div class="flex justify-between py-2 border-b border-border">
-                        <dt class="text-muted-foreground">Date</dt>
-                        <dd class="font-medium">{{ event.start_at|date:"F j, Y" }} at {{ event.start_at|time:"g:i A" }}</dd>
+                        <dt class="text-muted-foreground">{% trans "Date" %}</dt>
+                        <dd class="font-medium">{{ event.start_at|date:"F j, Y" }} {% trans "at" %} {{ event.start_at|time:"g:i A" }}</dd>
                     </div>
                     <div class="flex justify-between py-2 border-b border-border">
-                        <dt class="text-muted-foreground">Location</dt>
+                        <dt class="text-muted-foreground">{% trans "Location" %}</dt>
                         <dd class="font-medium">{{ event.venue_name|default:event.location }}</dd>
                     </div>
                     <div class="flex justify-between py-2 border-b border-border">
-                        <dt class="text-muted-foreground">Type</dt>
+                        <dt class="text-muted-foreground">{% trans "Type" %}</dt>
                         <dd class="font-medium">{{ event.get_event_type_display }}</dd>
                     </div>
                     <div class="flex justify-between py-2 border-b border-border">
-                        <dt class="text-muted-foreground">Capacity</dt>
-                        <dd class="font-medium">{% if event.capacity %}{{ event.capacity }}{% else %}Unlimited{% endif %}</dd>
+                        <dt class="text-muted-foreground">{% trans "Capacity" %}</dt>
+                        <dd class="font-medium">{% if event.capacity %}{{ event.capacity }}{% else %}{% trans "Unlimited" %}{% endif %}</dd>
                     </div>
                     <div class="flex justify-between py-2">
-                        <dt class="text-muted-foreground">Visibility</dt>
-                        <dd class="font-medium">{% if event.is_public %}Public{% else %}Private{% endif %}</dd>
+                        <dt class="text-muted-foreground">{% trans "Visibility" %}</dt>
+                        <dd class="font-medium">{% if event.is_public %}{% trans "Public" %}{% else %}{% trans "Private" %}{% endif %}</dd>
                     </div>
                 </dl>
             </div>
@@ -217,60 +218,60 @@
 
         <div class="space-y-6">
             <div class="card p-6">
-                <h2 class="text-lg font-semibold mb-4">Event Status</h2>
+                <h2 class="text-lg font-semibold mb-4">{% trans "Event Status" %}</h2>
                 <div class="space-y-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <span class="text-sm font-medium text-foreground">Published</span>
-                            <p class="text-xs text-muted-foreground">Make event live for ticket sales</p>
+                            <span class="text-sm font-medium text-foreground">{% trans "Published" %}</span>
+                            <p class="text-xs text-muted-foreground">{% trans "Make event live for ticket sales" %}</p>
                         </div>
                         <form method="post" action="{% url 'events:toggle_publish' event.organization.slug event.slug %}">
                             {% csrf_token %}
                             {% if event.state == 'PUBLISHED' %}
                             {% #button type="submit" variant="outline" size="sm" %}
                                 <i data-lucide="eye-off" class="w-4 h-4 mr-1"></i>
-                                Unpublish
+                                {% trans "Unpublish" %}
                             {% /button %}
                             {% else %}
                             {% #button type="submit" variant="default" size="sm" %}
                                 <i data-lucide="rocket" class="w-4 h-4 mr-1"></i>
-                                Publish
+                                {% trans "Publish" %}
                             {% /button %}
                             {% endif %}
                         </form>
                     </div>
                     <div class="flex items-center justify-between">
                         <div>
-                            <span class="text-sm font-medium text-foreground">Public</span>
-                            <p class="text-xs text-muted-foreground">Show in discover & search</p>
+                            <span class="text-sm font-medium text-foreground">{% trans "Public" %}</span>
+                            <p class="text-xs text-muted-foreground">{% trans "Show in discover & search" %}</p>
                         </div>
                         <form method="post" action="{% url 'events:toggle_public' event.organization.slug event.slug %}">
                             {% csrf_token %}
                             {% if event.is_public %}
                             {% #button type="submit" variant="outline" size="sm" %}
                                 <i data-lucide="lock" class="w-4 h-4 mr-1"></i>
-                                Make Private
+                                {% trans "Make Private" %}
                             {% /button %}
                             {% else %}
                             {% #button type="submit" variant="default" size="sm" %}
                                 <i data-lucide="globe" class="w-4 h-4 mr-1"></i>
-                                Make Public
+                                {% trans "Make Public" %}
                             {% /button %}
                             {% endif %}
                         </form>
                     </div>
                     <div class="flex items-center justify-between">
                         <div>
-                            <span class="text-sm font-medium text-foreground">Featured</span>
-                            <p class="text-xs text-muted-foreground">Highlighted on homepage</p>
+                            <span class="text-sm font-medium text-foreground">{% trans "Featured" %}</span>
+                            <p class="text-xs text-muted-foreground">{% trans "Highlighted on homepage" %}</p>
                         </div>
                         {% if event.is_featured %}
                         <span class="inline-flex items-center gap-1 text-sm text-success">
                             <i data-lucide="check-circle" class="w-4 h-4"></i>
-                            Active
+                            {% trans "Active" %}
                         </span>
                         {% else %}
-                        <span class="text-sm text-muted-foreground">Not featured</span>
+                        <span class="text-sm text-muted-foreground">{% trans "Not featured" %}</span>
                         {% endif %}
                     </div>
                 </div>
@@ -278,8 +279,8 @@
 
             {% if event.state != 'PUBLISHED' %}
             <div class="card p-6" x-data="{ copied: false }">
-                <h2 class="text-lg font-semibold mb-2">Share Preview</h2>
-                <p class="text-sm text-muted-foreground mb-4">Share a preview link with others before publishing. They can view the event but cannot purchase tickets.</p>
+                <h2 class="text-lg font-semibold mb-2">{% trans "Share Preview" %}</h2>
+                <p class="text-sm text-muted-foreground mb-4">{% trans "Share a preview link with others before publishing. They can view the event but cannot purchase tickets." %}</p>
 
                 {% if preview_url %}
                 <div class="flex gap-2 mb-3">
@@ -295,7 +296,7 @@
                     {% csrf_token %}
                     {% #button type="submit" variant="outline" size="sm" class="w-full" %}
                         <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-                        Regenerate Link
+                        {% trans "Regenerate Link" %}
                     {% /button %}
                 </form>
                 {% else %}
@@ -303,7 +304,7 @@
                     {% csrf_token %}
                     {% #button type="submit" variant="default" size="sm" class="w-full" %}
                         <i data-lucide="link" class="w-4 h-4"></i>
-                        Generate Preview Link
+                        {% trans "Generate Preview Link" %}
                     {% /button %}
                 </form>
                 {% endif %}
@@ -312,30 +313,30 @@
 
             {% if event.state == 'PUBLISHED' and event.is_public and not event.is_featured %}
             <div class="card p-6" x-data="{ showTerms: false }">
-                <h2 class="text-lg font-semibold mb-2">Get Featured</h2>
-                <p class="text-sm text-muted-foreground mb-4">Apply to have your event featured on the Reckot homepage for maximum visibility.</p>
+                <h2 class="text-lg font-semibold mb-2">{% trans "Get Featured" %}</h2>
+                <p class="text-sm text-muted-foreground mb-4">{% trans "Apply to have your event featured on the Reckot homepage for maximum visibility." %}</p>
 
                 {% if event.feature_requested_at and not event.feature_rejection_reason %}
                 <div role="alert" class="relative w-full rounded-lg border border-warning/50 text-warning bg-warning/10 p-4">
                     <i data-lucide="clock" class="h-4 w-4 absolute left-4 top-4"></i>
                     <div class="pl-7">
-                        <div class="text-sm font-medium">Feature request pending review</div>
-                        <p class="text-xs mt-1 opacity-80">Our team will review your event and get back to you within 24-48 hours.</p>
+                        <div class="text-sm font-medium">{% trans "Feature request pending review" %}</div>
+                        <p class="text-xs mt-1 opacity-80">{% trans "Our team will review your event and get back to you within 24-48 hours." %}</p>
                     </div>
                 </div>
                 {% elif event.feature_rejection_reason %}
                 <div role="alert" class="relative w-full rounded-lg border border-destructive/50 text-destructive bg-destructive/10 p-4">
-                    <h5 class="mb-1 font-medium leading-none tracking-tight">Request declined</h5>
+                    <h5 class="mb-1 font-medium leading-none tracking-tight">{% trans "Request declined" %}</h5>
                     <div class="text-sm mt-1">{{ event.feature_rejection_reason }}</div>
                 </div>
                 {% #button type="button" variant="default" size="sm" class="w-full mt-3" attrs='@click="showTerms = true"' %}
                     <i data-lucide="star" class="w-4 h-4"></i>
-                    Re-apply for Feature
+                    {% trans "Re-apply for Feature" %}
                 {% /button %}
                 {% else %}
                 {% #button type="button" variant="default" size="sm" class="w-full" attrs='@click="showTerms = true"' %}
                     <i data-lucide="star" class="w-4 h-4"></i>
-                    Apply for Feature
+                    {% trans "Apply for Feature" %}
                 {% /button %}
                 {% endif %}
 
@@ -384,13 +385,13 @@
                     </div>
                     <div class="flex gap-3 mt-6">
                         {% #button variant="outline" class="flex-1" attrs='@click="showTerms = false"' %}
-                            Cancel
+                            {% trans "Cancel" %}
                         {% /button %}
                         <form method="post" action="{% url 'events:apply_feature' event.organization.slug event.slug %}" class="flex-1">
                             {% csrf_token %}
                             {% #button type="submit" variant="default" class="w-full" %}
                                 <i data-lucide="check" class="w-4 h-4 mr-1"></i>
-                                I Accept & Apply
+                                {% trans "I Accept & Apply" %}
                             {% /button %}
                         </form>
                     </div>
@@ -402,11 +403,11 @@
             <div class="card p-6 border-amber-500/50 bg-amber-500/5">
                 <div class="flex items-center gap-2 mb-2">
                     <i data-lucide="star" class="w-5 h-5 text-amber-500"></i>
-                    <h2 class="text-lg font-semibold">Featured Event</h2>
+                    <h2 class="text-lg font-semibold">{% trans "Featured Event" %}</h2>
                 </div>
-                <p class="text-sm text-muted-foreground">Your event is currently featured on the homepage!</p>
+                <p class="text-sm text-muted-foreground">{% trans "Your event is currently featured on the homepage!" %}</p>
                 {% if event.feature_expires_at %}
-                <p class="text-xs text-muted-foreground mt-2">Expires: {{ event.feature_expires_at|date:"M j, Y" }}</p>
+                <p class="text-xs text-muted-foreground mt-2">{% trans "Expires" %}: {{ event.feature_expires_at|date:"M j, Y" }}</p>
                 {% endif %}
             </div>
             {% endif %}

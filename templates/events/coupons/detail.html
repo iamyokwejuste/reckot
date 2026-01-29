@@ -1,13 +1,14 @@
 {% extends "layouts/dashboard.html" %}
 {% load slippers %}
+{% load i18n %}
 
-{% block title %}{{ coupon.code }} - Coupons - Reckot{% endblock %}
+{% block title %}{{ coupon.code }} - {% trans "Coupons" %} - Reckot{% endblock %}
 
 {% block breadcrumbs %}
 {% #breadcrumb class="mb-4" %}
-    {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item href="/events/coupons/" %}Coupons{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/events/coupons/" %}{% trans "Coupons" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
     {% #breadcrumb_item %}{{ coupon.code }}{% /breadcrumb_item %}
 {% /breadcrumb %}
@@ -15,7 +16,7 @@
 
 {% block header_title %}
 <div>
-    <h1 class="text-lg font-semibold">Coupon: {{ coupon.code }}</h1>
+    <h1 class="text-lg font-semibold">{% trans "Coupon" %}: {{ coupon.code }}</h1>
     <p class="text-sm text-muted-foreground">{{ coupon.organization.name }}{% if coupon.event %} / {{ coupon.event.title }}{% endif %}</p>
 </div>
 {% endblock %}
@@ -27,20 +28,20 @@
         {% if coupon.is_active %}
         {% #button type="submit" variant="outline" size="sm" %}
             <i data-lucide="pause" class="w-4 h-4"></i>
-            Deactivate
+            {% trans "Deactivate" %}
         {% /button %}
         {% else %}
         {% #button type="submit" variant="default" size="sm" %}
             <i data-lucide="play" class="w-4 h-4"></i>
-            Activate
+            {% trans "Activate" %}
         {% /button %}
         {% endif %}
     </form>
-    <form method="post" action="{% url 'events:coupon_delete' coupon_id=coupon.id %}" onsubmit="return confirm('Are you sure you want to delete this coupon?');">
+    <form method="post" action="{% url 'events:coupon_delete' coupon_id=coupon.id %}" onsubmit="return confirm('{% trans "Are you sure you want to delete this coupon?" %}');">
         {% csrf_token %}
         {% #button type="submit" variant="destructive" size="sm" %}
             <i data-lucide="trash-2" class="w-4 h-4"></i>
-            Delete
+            {% trans "Delete" %}
         {% /button %}
     </form>
 </div>
@@ -51,21 +52,21 @@
     <div class="grid gap-4 sm:grid-cols-4">
         <div class="stat-card">
             <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-muted-foreground">Status</p>
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Status" %}</p>
             </div>
             <div class="mt-2">
                 {% if coupon.is_active and coupon.is_valid %}
-                <span class="badge badge-success">Active</span>
+                <span class="badge badge-success">{% trans "Active" %}</span>
                 {% elif coupon.is_active %}
-                <span class="badge badge-warning">Exhausted</span>
+                <span class="badge badge-warning">{% trans "Exhausted" %}</span>
                 {% else %}
-                <span class="badge">Inactive</span>
+                <span class="badge">{% trans "Inactive" %}</span>
                 {% endif %}
             </div>
         </div>
         <div class="stat-card">
             <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-muted-foreground">Discount</p>
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Discount" %}</p>
             </div>
             <p class="text-2xl font-bold mt-2">
                 {% if coupon.discount_type == 'PERCENTAGE' %}
@@ -77,19 +78,19 @@
         </div>
         <div class="stat-card">
             <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-muted-foreground">Used</p>
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Used" %}</p>
             </div>
             <p class="text-2xl font-bold mt-2">{{ coupon.use_count }}</p>
         </div>
         <div class="stat-card">
             <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-muted-foreground">Remaining</p>
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Remaining" %}</p>
             </div>
             <p class="text-2xl font-bold mt-2">
                 {% if coupon.remaining_uses is not None %}
                 {{ coupon.remaining_uses }}
                 {% else %}
-                Unlimited
+                {% trans "Unlimited" %}
                 {% endif %}
             </p>
         </div>
@@ -97,43 +98,43 @@
 
     <div class="grid gap-6 lg:grid-cols-2">
         <div class="card p-6">
-            <h2 class="text-lg font-semibold mb-4">Coupon Details</h2>
+            <h2 class="text-lg font-semibold mb-4">{% trans "Coupon Details" %}</h2>
             <dl class="space-y-4">
                 <div class="flex justify-between py-2 border-b border-border">
-                    <dt class="text-muted-foreground">Code</dt>
+                    <dt class="text-muted-foreground">{% trans "Code" %}</dt>
                     <dd><code class="bg-muted px-2 py-1 rounded font-mono">{{ coupon.code }}</code></dd>
                 </div>
                 {% if coupon.description %}
                 <div class="flex justify-between py-2 border-b border-border">
-                    <dt class="text-muted-foreground">Description</dt>
+                    <dt class="text-muted-foreground">{% trans "Description" %}</dt>
                     <dd>{{ coupon.description }}</dd>
                 </div>
                 {% endif %}
                 <div class="flex justify-between py-2 border-b border-border">
-                    <dt class="text-muted-foreground">Organization</dt>
+                    <dt class="text-muted-foreground">{% trans "Organization" %}</dt>
                     <dd>{{ coupon.organization.name }}</dd>
                 </div>
                 <div class="flex justify-between py-2 border-b border-border">
-                    <dt class="text-muted-foreground">Event</dt>
-                    <dd>{% if coupon.event %}{{ coupon.event.title }}{% else %}All events{% endif %}</dd>
+                    <dt class="text-muted-foreground">{% trans "Event" %}</dt>
+                    <dd>{% if coupon.event %}{{ coupon.event.title }}{% else %}{% trans "All events" %}{% endif %}</dd>
                 </div>
                 <div class="flex justify-between py-2 border-b border-border">
-                    <dt class="text-muted-foreground">Max Uses</dt>
-                    <dd>{% if coupon.max_uses > 0 %}{{ coupon.max_uses }}{% else %}Unlimited{% endif %}</dd>
+                    <dt class="text-muted-foreground">{% trans "Max Uses" %}</dt>
+                    <dd>{% if coupon.max_uses > 0 %}{{ coupon.max_uses }}{% else %}{% trans "Unlimited" %}{% endif %}</dd>
                 </div>
                 <div class="flex justify-between py-2 border-b border-border">
-                    <dt class="text-muted-foreground">Created</dt>
+                    <dt class="text-muted-foreground">{% trans "Created" %}</dt>
                     <dd>{{ coupon.created_at|date:"M d, Y H:i" }}</dd>
                 </div>
                 {% if coupon.valid_from %}
                 <div class="flex justify-between py-2 border-b border-border">
-                    <dt class="text-muted-foreground">Valid From</dt>
+                    <dt class="text-muted-foreground">{% trans "Valid From" %}</dt>
                     <dd>{{ coupon.valid_from|date:"M d, Y H:i" }}</dd>
                 </div>
                 {% endif %}
                 {% if coupon.valid_until %}
                 <div class="flex justify-between py-2 border-b border-border">
-                    <dt class="text-muted-foreground">Valid Until</dt>
+                    <dt class="text-muted-foreground">{% trans "Valid Until" %}</dt>
                     <dd>{{ coupon.valid_until|date:"M d, Y H:i" }}</dd>
                 </div>
                 {% endif %}
@@ -141,20 +142,20 @@
         </div>
 
         <div class="card p-6">
-            <h2 class="text-lg font-semibold mb-4">Assignment</h2>
+            <h2 class="text-lg font-semibold mb-4">{% trans "Assignment" %}</h2>
             {% if coupon.assignment_type == 'PUBLIC' %}
             <div class="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
                 <i data-lucide="globe" class="h-8 w-8 text-muted-foreground"></i>
                 <div>
-                    <p class="font-medium">Public Coupon</p>
-                    <p class="text-sm text-muted-foreground">Anyone can use this coupon code</p>
+                    <p class="font-medium">{% trans "Public Coupon" %}</p>
+                    <p class="text-sm text-muted-foreground">{% trans "Anyone can use this coupon code" %}</p>
                 </div>
             </div>
             {% elif coupon.assignment_type == 'INDIVIDUAL' %}
             <div class="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
                 <i data-lucide="user" class="h-8 w-8 text-muted-foreground"></i>
                 <div>
-                    <p class="font-medium">Individual Assignment</p>
+                    <p class="font-medium">{% trans "Individual Assignment" %}</p>
                     <p class="text-sm text-muted-foreground">{{ coupon.assigned_email }}</p>
                 </div>
             </div>
@@ -163,8 +164,8 @@
                 <div class="flex items-center gap-3 mb-3">
                     <i data-lucide="users" class="h-8 w-8 text-muted-foreground"></i>
                     <div>
-                        <p class="font-medium">Group Assignment</p>
-                        <p class="text-sm text-muted-foreground">{{ coupon.assigned_emails|length }} email{{ coupon.assigned_emails|length|pluralize }}</p>
+                        <p class="font-medium">{% trans "Group Assignment" %}</p>
+                        <p class="text-sm text-muted-foreground">{% blocktrans count counter=coupon.assigned_emails|length %}{{ counter }} email{% plural %}{{ counter }} emails{% endblocktrans %}</p>
                     </div>
                 </div>
                 <div class="space-y-1">
@@ -179,17 +180,17 @@
 
     <div class="card">
         <div class="p-6 border-b border-border">
-            <h2 class="text-lg font-semibold">Usage History</h2>
+            <h2 class="text-lg font-semibold">{% trans "Usage History" %}</h2>
         </div>
         {% if usages %}
         <div class="overflow-x-auto">
             <table class="w-full">
                 <thead>
                     <tr class="border-b border-border">
-                        <th class="text-left text-sm font-medium text-muted-foreground p-4">User</th>
-                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Booking</th>
-                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Discount</th>
-                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Date</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "User" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Booking" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Discount" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Date" %}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-border">
@@ -217,8 +218,8 @@
             <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
                 <i data-lucide="receipt" class="h-8 w-8 text-muted-foreground"></i>
             </div>
-            <h3 class="text-lg font-semibold mb-2">No usage yet</h3>
-            <p class="text-muted-foreground">This coupon hasn't been used yet.</p>
+            <h3 class="text-lg font-semibold mb-2">{% trans "No usage yet" %}</h3>
+            <p class="text-muted-foreground">{% trans "This coupon hasn't been used yet." %}</p>
         </div>
         {% endif %}
     </div>

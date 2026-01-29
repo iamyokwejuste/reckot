@@ -1,4 +1,5 @@
 import json
+import jwt
 import logging
 from datetime import timedelta
 
@@ -274,35 +275,97 @@ logger = logging.getLogger(__name__)
 
 @method_decorator(csrf_exempt, name='dispatch')
 class CampayWebhookView(View):
-    def post(self, request):
-        try:
-            data = json.loads(request.body)
-        except json.JSONDecodeError:
-            data = request.POST.dict()
 
-        logger.info(f'CamPay webhook received: {data}')
+    def _get_webhook_data(self, request):
+        if request.method == 'GET':
+            return request.GET.dict()
+        try:
+            return json.loads(request.body)
+        except (json.JSONDecodeError, ValueError):
+            return request.POST.dict()
+
+    def _verify_signature(self, signature: str, payment) -> bool:
+        if not signature:
+            logger.warning('CamPay webhook missing signature')
+            return True
+
+        gateway_config = payment.gateway_config
+        if not gateway_config:
+            return True
+
+        credentials = gateway_config.credentials or {}
+        webhook_key = credentials.get('webhook_key', '')
+
+        if not webhook_key:
+            return True
+
+        try:
+            jwt.decode(signature, webhook_key, algorithms=['HS256'])
+            logger.info('CamPay webhook signature verified')
+            return True
+        except jwt.ExpiredSignatureError:
+            logger.error('CamPay webhook signature expired')
+            return False
+        except jwt.InvalidTokenError as e:
+            logger.error(f'CamPay webhook signature invalid: {e}')
+            return False
+
+    def _process_webhook(self, request):
+        data = self._get_webhook_data(request)
+        logger.info(f'CamPay webhook received ({request.method}): {data}')
 
         external_reference = data.get('external_reference', '')
         campay_reference = data.get('reference', '')
         status = data.get('status', '').upper()
+        signature = data.get('signature', '')
+        operator = data.get('operator', '')
+        amount = data.get('amount', '')
+        currency = data.get('currency', '')
+        phone_number = data.get('phone_number', '')
 
         if not external_reference:
             logger.warning('CamPay webhook missing external_reference')
-            return HttpResponse('Missing reference', status=400)
+            return HttpResponse('Missing external_reference', status=400)
 
         payment = get_payment_by_id(external_reference)
         if not payment:
             logger.warning(f'Payment not found for reference: {external_reference}')
             return HttpResponse('Payment not found', status=404)
 
+        if not self._verify_signature(signature, payment):
+            logger.error(f'CamPay webhook signature verification failed for {external_reference}')
+            return HttpResponse('Invalid signature', status=403)
+
+        webhook_data = {
+            'campay_reference': campay_reference,
+            'operator': operator,
+            'amount': amount,
+            'currency': currency,
+            'phone_number': phone_number,
+            'webhook_received_at': timezone.now().isoformat(),
+        }
+
+        if payment.metadata:
+            payment.metadata.update(webhook_data)
+        else:
+            payment.metadata = webhook_data
+        payment.save(update_fields=['metadata'])
+
         if status == 'SUCCESSFUL':
             confirm_payment(payment, campay_reference)
             logger.info(f'Payment {external_reference} confirmed via CamPay webhook')
         elif status == 'FAILED':
-            fail_payment(payment, data.get('reason', 'Payment failed'))
-            logger.info(f'Payment {external_reference} failed via CamPay webhook')
+            reason = data.get('reason', '') or 'Payment failed'
+            fail_payment(payment, reason)
+            logger.info(f'Payment {external_reference} failed via CamPay webhook: {reason}')
 
         return HttpResponse('OK', status=200)
+
+    def get(self, request):
+        return self._process_webhook(request)
+
+    def post(self, request):
+        return self._process_webhook(request)
 
 
 class InvoiceDownloadView(View):

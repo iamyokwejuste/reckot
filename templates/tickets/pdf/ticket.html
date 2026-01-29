@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -16,18 +17,18 @@
         <div class="ticket-details">
             <div class="detail-row">
                 <div>
-                    <p class="detail-label">Date</p>
+                    <p class="detail-label">{% trans "Date" %}</p>
                     <p class="detail-value">{{ event.start_at|date:"F d, Y" }}</p>
                 </div>
                 <div>
-                    <p class="detail-label">Time</p>
+                    <p class="detail-label">{% trans "Time" %}</p>
                     <p class="detail-value">{{ event.start_at|date:"g:i A" }}</p>
                 </div>
             </div>
 
             <div class="detail-row">
                 <div>
-                    <p class="detail-label">Location</p>
+                    <p class="detail-label">{% trans "Location" %}</p>
                     <p class="detail-value">{{ event.location }}</p>
                 </div>
             </div>
@@ -35,7 +36,7 @@
             {% if ticket.attendee_name %}
             <div class="detail-row">
                 <div>
-                    <p class="detail-label">Attendee</p>
+                    <p class="detail-label">{% trans "Attendee" %}</p>
                     <p class="detail-value">{{ ticket.attendee_name }}</p>
                 </div>
             </div>
@@ -44,7 +45,7 @@
 
         <div class="qr-section">
             <div class="qr-code">
-                <img src="data:image/png;base64,{{ qr_code_data }}" alt="QR Code">
+                <img src="data:image/png;base64,{{ qr_code_data }}" alt="{% trans "QR Code" %}">
             </div>
             <p class="ticket-code">{{ ticket.code }}</p>
         </div>

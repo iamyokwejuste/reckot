@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load slippers %}
+{% load i18n %}
 
-{% block title %}Why Reckot - Event Management for Africa{% endblock %}
+{% block title %}{% trans "Why Reckot" %} - {% trans "Event Management for Africa" %}{% endblock %}
 
 {% block content %}
 <section class="py-20 md:py-28">
@@ -9,19 +10,19 @@
         <div class="max-w-3xl mx-auto text-center">
             <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-card text-sm font-medium mb-8">
                 <i data-lucide="sparkles" class="w-4 h-4"></i>
-                Built for Africa
+                {% trans "Built for Africa" %}
             </div>
             <h1 class="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.1] text-balance">
-                Why event organizers choose Reckot
+                {% trans "Why event organizers choose Reckot" %}
             </h1>
             <p class="mt-6 text-lg text-muted-foreground text-pretty leading-relaxed max-w-2xl mx-auto">
-                We built Reckot because African event organizers deserve tools that actually work with their reality. Mobile money, not credit cards. Simplicity, not complexity.
+                {% trans "We built Reckot because African event organizers deserve tools that actually work with their reality. Mobile money, not credit cards. Simplicity, not complexity." %}
             </p>
             <div class="mt-10 p-6 rounded-2xl border border-border bg-card/50">
                 <p class="text-xl md:text-2xl font-medium italic text-balance">
-                    "Your time builds the event. We handle everything else."
+                    {% trans "\"Your time builds the event. We handle everything else.\"" %}
                 </p>
-                <p class="mt-3 text-sm text-muted-foreground">Focus on what matters. Let us take care of tickets, payments, and check-ins.</p>
+                <p class="mt-3 text-sm text-muted-foreground">{% trans "Focus on what matters. Let us take care of tickets, payments, and check-ins." %}</p>
             </div>
         </div>
     </div>
@@ -32,15 +33,15 @@
         <div class="grid md:grid-cols-3 gap-8 lg:gap-12">
             <div class="text-center">
                 <div class="text-4xl lg:text-5xl font-semibold">{{ PLATFORM_FEE_PERCENTAGE }}%</div>
-                <p class="text-muted-foreground mt-2">Only fee we charge</p>
+                <p class="text-muted-foreground mt-2">{% trans "Only fee we charge" %}</p>
             </div>
             <div class="text-center">
                 <div class="text-4xl lg:text-5xl font-semibold">24h</div>
-                <p class="text-muted-foreground mt-2">Payout to your wallet</p>
+                <p class="text-muted-foreground mt-2">{% trans "Payout to your wallet" %}</p>
             </div>
             <div class="text-center">
                 <div class="text-4xl lg:text-5xl font-semibold">0</div>
-                <p class="text-muted-foreground mt-2">Hidden fees</p>
+                <p class="text-muted-foreground mt-2">{% trans "Hidden fees" %}</p>
             </div>
         </div>
     </div>
@@ -49,8 +50,8 @@
 <section class="py-20 md:py-28">
     <div class="container">
         <div class="text-center max-w-2xl mx-auto mb-16">
-            <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">How it works</h2>
-            <p class="text-muted-foreground mt-4 text-lg">From event creation to getting paid - transparent at every step</p>
+            <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">{% trans "How it works" %}</h2>
+            <p class="text-muted-foreground mt-4 text-lg">{% trans "From event creation to getting paid - transparent at every step" %}</p>
         </div>
 
         <div class="relative">
@@ -59,12 +60,12 @@
                 <div class="relative">
                     <div class="card p-6 h-full">
                         <div class="flex items-center justify-center h-14 w-14 rounded-2xl bg-foreground text-background text-xl font-semibold mb-4 relative z-10">1</div>
-                        <h3 class="font-semibold text-lg">Create Event</h3>
-                        <p class="text-muted-foreground text-sm mt-2">Set up your event with details, ticket types, and pricing in under 2 minutes.</p>
+                        <h3 class="font-semibold text-lg">{% trans "Create Event" %}</h3>
+                        <p class="text-muted-foreground text-sm mt-2">{% trans "Set up your event with details, ticket types, and pricing in under 2 minutes." %}</p>
                         <div class="mt-4 p-3 rounded-lg bg-muted text-xs">
                             <div class="flex items-center gap-2 text-muted-foreground">
                                 <i data-lucide="clock" class="w-3 h-3"></i>
-                                <span>~2 minutes</span>
+                                <span>{% trans "~2 minutes" %}</span>
                             </div>
                         </div>
                     </div>
@@ -73,12 +74,12 @@
                 <div class="relative">
                     <div class="card p-6 h-full">
                         <div class="flex items-center justify-center h-14 w-14 rounded-2xl bg-foreground text-background text-xl font-semibold mb-4 relative z-10">2</div>
-                        <h3 class="font-semibold text-lg">Share & Sell</h3>
-                        <p class="text-muted-foreground text-sm mt-2">Share your event link. Attendees pay with MTN MoMo or Orange Money.</p>
+                        <h3 class="font-semibold text-lg">{% trans "Share & Sell" %}</h3>
+                        <p class="text-muted-foreground text-sm mt-2">{% trans "Share your event link. Attendees pay with MTN MoMo or Orange Money." %}</p>
                         <div class="mt-4 p-3 rounded-lg bg-muted text-xs">
                             <div class="flex items-center gap-2 text-muted-foreground">
                                 <i data-lucide="smartphone" class="w-3 h-3"></i>
-                                <span>Mobile money instant</span>
+                                <span>{% trans "Mobile money instant" %}</span>
                             </div>
                         </div>
                     </div>

@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% load slippers %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}Log Out - Reckot{% endblock %}
+{% block title %}{% trans "Log Out" %} - Reckot{% endblock %}
 
 {% block content %}
 <div class="min-h-[calc(100vh-4rem)] flex items-center justify-center py-12 px-4">
@@ -13,9 +14,9 @@
                     <img x-show="isDark" x-cloak src="{% static 'images/logo/reckto_logo_light_mode.png' %}" alt="" class="h-8 w-8">
                     <img x-show="!isDark" src="{% static 'images/logo/reckto_logo_dark_mode.png' %}" alt="" class="h-8 w-8">
                 </div>
-                <h1 class="text-2xl font-bold">Log out</h1>
+                <h1 class="text-2xl font-bold">{% trans "Log out" %}</h1>
                 <p class="text-muted-foreground mt-3 text-pretty">
-                    Are you sure you want to log out of your account?
+                    {% trans "Are you sure you want to log out of your account?" %}
                 </p>
             </div>
 
@@ -27,11 +28,11 @@
                 <div class="flex gap-3">
                     <a href="{{ request.GET.next|default:'/' }}" class="flex-1">
                         {% #button variant="outline" class="w-full" %}
-                            Cancel
+                            {% trans "Cancel" %}
                         {% /button %}
                     </a>
                     {% #button type="submit" variant="default" class="flex-1" %}
-                        Log out
+                        {% trans "Log out" %}
                         <i data-lucide="log-out" class="w-4 h-4"></i>
                     {% /button %}
                 </div>

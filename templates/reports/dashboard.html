@@ -1,24 +1,25 @@
 {% extends "layouts/dashboard.html" %}
 {% load slippers %}
+{% load i18n %}
 
-{% block title %}Reports - {{ event.title }} - Reckot{% endblock %}
+{% block title %}{% trans "Reports" %} - {{ event.title }} - Reckot{% endblock %}
 
 {% block breadcrumbs %}
 {% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug as event_dashboard_url %}
 {% #breadcrumb class="mb-4" %}
-    {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item href="/events/" %}Events{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/events/" %}{% trans "Events" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
     {% #breadcrumb_item href=event_dashboard_url %}{{ event.title|truncatewords:3 }}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item %}Reports{% /breadcrumb_item %}
+    {% #breadcrumb_item %}{% trans "Reports" %}{% /breadcrumb_item %}
 {% /breadcrumb %}
 {% endblock %}
 
 {% block header_title %}
 <div>
-    <h1 class="text-lg font-semibold">Real-time Statistics</h1>
+    <h1 class="text-lg font-semibold">{% trans "Real-time Statistics" %}</h1>
     <p class="text-sm text-muted-foreground">{{ event.title }}</p>
 </div>
 {% endblock %}
@@ -28,19 +29,19 @@
     {% if event.state == 'PUBLISHED' %}
     <span id="live-indicator" class="flex items-center gap-2 text-sm text-muted-foreground">
         <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        Live
+        {% trans "Live" %}
     </span>
     {% endif %}
     <a href="{% url 'reports:attendee_list' org_slug=event.organization.slug event_slug=event.slug %}">
         {% #button variant="outline" size="sm" %}
             <i data-lucide="users" class="w-4 h-4"></i>
-            Attendee List
+            {% trans "Attendee List" %}
         {% /button %}
     </a>
     <a href="{% url 'reports:export_center' org_slug=event.organization.slug event_slug=event.slug %}">
         {% #button variant="default" size="sm" %}
             <i data-lucide="download" class="w-4 h-4"></i>
-            Export
+            {% trans "Export" %}
         {% /button %}
     </a>
 </div>
@@ -57,20 +58,20 @@
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div class="stat-card group hover:border-primary/50 transition-colors">
                 <div class="flex items-center justify-between">
-                    <p class="text-sm font-medium text-muted-foreground">Total Tickets</p>
+                    <p class="text-sm font-medium text-muted-foreground">{% trans "Total Tickets" %}</p>
                     <div class="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
                         <i data-lucide="ticket" class="h-4 w-4 text-primary"></i>
                     </div>
                 </div>
                 <div class="mt-3">
                     <p class="text-3xl font-bold">{{ summary.total_tickets }}</p>
-                    <p class="text-xs text-muted-foreground mt-1">Confirmed tickets sold</p>
+                    <p class="text-xs text-muted-foreground mt-1">{% trans "Confirmed tickets sold" %}</p>
                 </div>
             </div>
 
             <div class="stat-card group hover:border-emerald-500/50 transition-colors">
                 <div class="flex items-center justify-between">
-                    <p class="text-sm font-medium text-muted-foreground">Checked In</p>
+                    <p class="text-sm font-medium text-muted-foreground">{% trans "Checked In" %}</p>
                     <div class="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
                         <i data-lucide="scan-line" class="h-4 w-4 text-emerald-500"></i>
                     </div>
@@ -89,27 +90,27 @@
 
             <div class="stat-card group hover:border-blue-500/50 transition-colors">
                 <div class="flex items-center justify-between">
-                    <p class="text-sm font-medium text-muted-foreground">Total Revenue</p>
+                    <p class="text-sm font-medium text-muted-foreground">{% trans "Total Revenue" %}</p>
                     <div class="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
                         <i data-lucide="banknote" class="h-4 w-4 text-blue-500"></i>
                     </div>
                 </div>
                 <div class="mt-3">
                     <p class="text-3xl font-bold text-blue-600">{{ summary.total_revenue|floatformat:0 }}</p>
-                    <p class="text-xs text-muted-foreground mt-1">XAF confirmed</p>
+                    <p class="text-xs text-muted-foreground mt-1">{% trans "XAF confirmed" %}</p>
                 </div>
             </div>
 
             <div class="stat-card group hover:border-amber-500/50 transition-colors">
                 <div class="flex items-center justify-between">
-                    <p class="text-sm font-medium text-muted-foreground">Pending</p>
+                    <p class="text-sm font-medium text-muted-foreground">{% trans "Pending" %}</p>
                     <div class="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
                         <i data-lucide="clock" class="h-4 w-4 text-amber-500"></i>
                     </div>
                 </div>
                 <div class="mt-3">
                     <p class="text-3xl font-bold text-amber-600">{{ summary.pending_count|default:0 }}</p>
-                    <p class="text-xs text-muted-foreground mt-1">Awaiting payment</p>
+                    <p class="text-xs text-muted-foreground mt-1">{% trans "Awaiting payment" %}</p>
                 </div>
             </div>
         </div>
@@ -118,7 +119,7 @@
         <div class="mt-6 card p-5">
             <h3 class="font-semibold flex items-center gap-2 mb-4">
                 <i data-lucide="pie-chart" class="w-4 h-4"></i>
-                Ticket Breakdown
+                {% trans "Ticket Breakdown" %}
             </h3>
             <div class="space-y-3">
                 {% for item in summary.ticket_breakdown %}
@@ -151,7 +152,7 @@
             <div class="flex items-center justify-between mb-4">
                 <h3 class="font-semibold flex items-center gap-2">
                     <i data-lucide="trending-up" class="w-4 h-4"></i>
-                    Sales Timeline
+                    {% trans "Sales Timeline" %}
                 </h3>
                 <div class="flex items-center gap-1 bg-muted rounded-lg p-1">
                     <button type="button" @click="period = '7d'"
@@ -183,7 +184,7 @@
         <div class="card p-5">
             <h3 class="font-semibold flex items-center gap-2 mb-4">
                 <i data-lucide="activity" class="w-4 h-4"></i>
-                Recent Activity
+                {% trans "Recent Activity" %}
             </h3>
 
             <div id="recent-activity"
@@ -217,7 +218,7 @@
                 {% else %}
                 <div class="text-center py-8 text-muted-foreground">
                     <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
-                    <p class="text-sm">No recent activity</p>
+                    <p class="text-sm">{% trans "No recent activity" %}</p>
                 </div>
                 {% endif %}
             </div>
@@ -228,17 +229,17 @@
         <div class="card p-5 lg:col-span-2">
             <h3 class="font-semibold flex items-center gap-2 mb-4">
                 <i data-lucide="coins" class="w-4 h-4"></i>
-                Revenue by Ticket Type
+                {% trans "Revenue by Ticket Type" %}
             </h3>
             {% if summary.revenue_breakdown %}
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead>
                         <tr class="border-b border-border">
-                            <th class="text-left text-sm font-medium text-muted-foreground pb-3">Ticket Type</th>
-                            <th class="text-center text-sm font-medium text-muted-foreground pb-3">Sold</th>
-                            <th class="text-center text-sm font-medium text-muted-foreground pb-3">Price</th>
-                            <th class="text-right text-sm font-medium text-muted-foreground pb-3">Revenue</th>
+                            <th class="text-left text-sm font-medium text-muted-foreground pb-3">{% trans "Ticket Type" %}</th>
+                            <th class="text-center text-sm font-medium text-muted-foreground pb-3">{% trans "Sold" %}</th>
+                            <th class="text-center text-sm font-medium text-muted-foreground pb-3">{% trans "Price" %}</th>
+                            <th class="text-right text-sm font-medium text-muted-foreground pb-3">{% trans "Revenue" %}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-border">
@@ -255,7 +256,7 @@
                     </tbody>
                     <tfoot>
                         <tr class="border-t-2 border-border">
-                            <td class="pt-3 font-semibold">Total</td>
+                            <td class="pt-3 font-semibold">{% trans "Total" %}</td>
                             <td class="pt-3 text-center font-semibold">{{ summary.total_tickets }}</td>
                             <td class="pt-3"></td>
                             <td class="pt-3 text-right font-bold text-primary">{{ summary.total_revenue|floatformat:0 }} XAF</td>
@@ -266,7 +267,7 @@
             {% else %}
             <div class="text-center py-8 text-muted-foreground">
                 <i data-lucide="receipt" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
-                <p class="text-sm">No revenue data yet</p>
+                <p class="text-sm">{% trans "No revenue data yet" %}</p>
             </div>
             {% endif %}
         </div>
@@ -274,7 +275,7 @@
         <div class="card p-5">
             <h3 class="font-semibold flex items-center gap-2 mb-4">
                 <i data-lucide="zap" class="w-4 h-4"></i>
-                Quick Actions
+                {% trans "Quick Actions" %}
             </h3>
             <div class="space-y-2">
                 <a href="{% url 'reports:export_center' org_slug=event.organization.slug event_slug=event.slug %}"
@@ -283,7 +284,7 @@
                         <i data-lucide="file-spreadsheet" class="w-4 h-4 text-blue-500"></i>
                     </div>
                     <div>
-                        <p class="text-sm font-medium">Export Reports</p>
+                        <p class="text-sm font-medium">{% trans "Export Reports" %}</p>
                         <p class="text-xs text-muted-foreground">CSV, Excel, PDF</p>
                     </div>
                 </a>
@@ -293,8 +294,8 @@
                         <i data-lucide="users" class="w-4 h-4 text-emerald-500"></i>
                     </div>
                     <div>
-                        <p class="text-sm font-medium">Attendee List</p>
-                        <p class="text-xs text-muted-foreground">View all attendees</p>
+                        <p class="text-sm font-medium">{% trans "Attendee List" %}</p>
+                        <p class="text-xs text-muted-foreground">{% trans "View all attendees" %}</p>
                     </div>
                 </a>
                 <a href="{% url 'reports:attendee_list' org_slug=event.organization.slug event_slug=event.slug %}?print=1"
@@ -303,8 +304,8 @@
                         <i data-lucide="printer" class="w-4 h-4 text-purple-500"></i>
                     </div>
                     <div>
-                        <p class="text-sm font-medium">Print Check-in List</p>
-                        <p class="text-xs text-muted-foreground">Printable format</p>
+                        <p class="text-sm font-medium">{% trans "Print Check-in List" %}</p>
+                        <p class="text-xs text-muted-foreground">{% trans "Printable format" %}</p>
                     </div>
                 </a>
                 <a href="{% url 'checkin:verify' org_slug=event.organization.slug event_slug=event.slug %}"
@@ -313,8 +314,8 @@
                         <i data-lucide="qr-code" class="w-4 h-4 text-amber-500"></i>
                     </div>
                     <div>
-                        <p class="text-sm font-medium">QR Scanner</p>
-                        <p class="text-xs text-muted-foreground">Check in attendees</p>
+                        <p class="text-sm font-medium">{% trans "QR Scanner" %}</p>
+                        <p class="text-xs text-muted-foreground">{% trans "Check in attendees" %}</p>
                     </div>
                 </a>
                 <a href="{% url 'reports:custom_responses' org_slug=event.organization.slug event_slug=event.slug %}"
@@ -323,8 +324,8 @@
                         <i data-lucide="clipboard-list" class="w-4 h-4 text-pink-500"></i>
                     </div>
                     <div>
-                        <p class="text-sm font-medium">Custom Responses</p>
-                        <p class="text-xs text-muted-foreground">View form answers</p>
+                        <p class="text-sm font-medium">{% trans "Custom Responses" %}</p>
+                        <p class="text-xs text-muted-foreground">{% trans "View form answers" %}</p>
                     </div>
                 </a>
             </div>
@@ -336,11 +337,11 @@
         <div class="flex items-center justify-between mb-4">
             <h3 class="font-semibold flex items-center gap-2">
                 <i data-lucide="file-text" class="w-4 h-4"></i>
-                Recent Exports
+                {% trans "Recent Exports" %}
             </h3>
             <a href="{% url 'reports:export_center' org_slug=event.organization.slug event_slug=event.slug %}"
                class="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                View all
+                {% trans "View all" %}
             </a>
         </div>
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

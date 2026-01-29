@@ -1,7 +1,8 @@
 {% extends "layouts/dashboard.html" %}
 {% load slippers %}
+{% load i18n %}
 
-{% block title %}Create Coupon - Reckot{% endblock %}
+{% block title %}{% trans "Create Coupon" %} - Reckot{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -9,18 +10,18 @@
 
 {% block breadcrumbs %}
 {% #breadcrumb class="mb-4" %}
-    {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item href="/events/coupons/" %}Coupons{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/events/coupons/" %}{% trans "Coupons" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item %}Create{% /breadcrumb_item %}
+    {% #breadcrumb_item %}{% trans "Create" %}{% /breadcrumb_item %}
 {% /breadcrumb %}
 {% endblock %}
 
 {% block header_title %}
 <div>
-    <h1 class="text-lg font-semibold">Create Coupon</h1>
-    <p class="text-sm text-muted-foreground">Create a new discount code</p>
+    <h1 class="text-lg font-semibold">{% trans "Create Coupon" %}</h1>
+    <p class="text-sm text-muted-foreground">{% trans "Create a new discount code" %}</p>
 </div>
 {% endblock %}
 
@@ -56,15 +57,15 @@
         {% endif %}
 
         <div class="card p-6 space-y-4">
-            <h2 class="text-lg font-semibold">Basic Information</h2>
+            <h2 class="text-lg font-semibold">{% trans "Basic Information" %}</h2>
 
             <div>
-                <label class="block text-sm font-medium mb-2">Organization</label>
+                <label class="block text-sm font-medium mb-2">{% trans "Organization" %}</label>
                 <div class="custom-select-wrapper" x-data="{ open: false }">
                     <input type="hidden" name="organization" :value="selectedOrg" required>
                     <button type="button" @click="open = !open" @click.outside="open = false"
                             class="custom-select-trigger" :class="{ 'custom-select-trigger-active': open }">
-                        <span class="custom-select-value" :class="{ 'custom-select-placeholder': !selectedOrgLabel }" x-text="selectedOrgLabel || 'Select organization'"></span>
+                        <span class="custom-select-value" :class="{ 'custom-select-placeholder': !selectedOrgLabel }" x-text="selectedOrgLabel || '{% trans "Select organization" %}'"></span>
                         <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4" :class="{ 'rotate-180': open }"></i>
                     </button>
                     <div x-show="open" x-transition @click.outside="open = false" class="custom-select-dropdown" x-cloak>
@@ -82,19 +83,19 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium mb-2">Event (optional)</label>
+                <label class="block text-sm font-medium mb-2">{% trans "Event (optional)" %}</label>
                 <div class="custom-select-wrapper" x-data="{ open: false }">
                     <input type="hidden" name="event" :value="selectedEvent">
                     <button type="button" @click="open = !open" @click.outside="open = false"
                             class="custom-select-trigger" :class="{ 'custom-select-trigger-active': open }">
-                        <span class="custom-select-value" :class="{ 'custom-select-placeholder': !selectedEventLabel }" x-text="selectedEventLabel || 'All events in organization'"></span>
+                        <span class="custom-select-value" :class="{ 'custom-select-placeholder': !selectedEventLabel }" x-text="selectedEventLabel || '{% trans "All events in organization" %}'"></span>
                         <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4" :class="{ 'rotate-180': open }"></i>
                     </button>
                     <div x-show="open" x-transition @click.outside="open = false" class="custom-select-dropdown" x-cloak>
                         <div class="custom-select-options">
                             <button type="button" @click="selectedEvent = ''; selectedEventLabel = ''; open = false; updateValidUntilMax()"
                                     class="custom-select-option" :class="{ 'custom-select-option-selected': selectedEvent === '' }">
-                                <span>All events in organization</span>
+                                <span>{% trans "All events in organization" %}</span>
                                 <i x-show="selectedEvent === ''" data-lucide="check" class="custom-select-check w-4 h-4"></i>
                             </button>
                             {% for event in events %}
@@ -107,27 +108,27 @@
                         </div>
                     </div>
                 </div>
-                <p class="text-xs text-muted-foreground mt-1">Leave empty to apply to all events in the organization</p>
+                <p class="text-xs text-muted-foreground mt-1">{% trans "Leave empty to apply to all events in the organization" %}</p>
             </div>
 
             <div>
-                <label for="code" class="block text-sm font-medium mb-2">Coupon Code</label>
-                <input type="text" name="code" id="code" placeholder="SAVE20 (leave empty to auto-generate)" class="input font-mono uppercase">
-                <p class="text-xs text-muted-foreground mt-1">Letters and numbers only, will be auto-generated if empty</p>
+                <label for="code" class="block text-sm font-medium mb-2">{% trans "Coupon Code" %}</label>
+                <input type="text" name="code" id="code" placeholder="{% trans "SAVE20 (leave empty to auto-generate)" %}" class="input font-mono uppercase">
+                <p class="text-xs text-muted-foreground mt-1">{% trans "Letters and numbers only, will be auto-generated if empty" %}</p>
             </div>
 
             <div>
-                <label for="description" class="block text-sm font-medium mb-2">Description (optional)</label>
-                <input type="text" name="description" id="description" placeholder="Early bird discount" class="input">
+                <label for="description" class="block text-sm font-medium mb-2">{% trans "Description (optional)" %}</label>
+                <input type="text" name="description" id="description" placeholder="{% trans "Early bird discount" %}" class="input">
             </div>
         </div>
 
         <div class="card p-6 space-y-4">
-            <h2 class="text-lg font-semibold">Discount Settings</h2>
+            <h2 class="text-lg font-semibold">{% trans "Discount Settings" %}</h2>
 
             <div class="grid gap-4 sm:grid-cols-2">
                 <div>
-                    <label class="block text-sm font-medium mb-2">Discount Type</label>
+                    <label class="block text-sm font-medium mb-2">{% trans "Discount Type" %}</label>
                     <div class="custom-select-wrapper" x-data="{ open: false }">
                         <input type="hidden" name="discount_type" :value="discountType" required>
                         <button type="button" @click="open = !open" @click.outside="open = false"
@@ -137,14 +138,14 @@
                         </button>
                         <div x-show="open" x-transition @click.outside="open = false" class="custom-select-dropdown" x-cloak>
                             <div class="custom-select-options">
-                                <button type="button" @click="discountType = 'PERCENTAGE'; discountLabel = 'Percentage'; open = false"
+                                <button type="button" @click="discountType = 'PERCENTAGE'; discountLabel = '{% trans "Percentage" %}'; open = false"
                                         class="custom-select-option" :class="{ 'custom-select-option-selected': discountType === 'PERCENTAGE' }">
-                                    <span>Percentage</span>
+                                    <span>{% trans "Percentage" %}</span>
                                     <i x-show="discountType === 'PERCENTAGE'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
                                 </button>
-                                <button type="button" @click="discountType = 'FIXED'; discountLabel = 'Fixed Amount'; open = false"
+                                <button type="button" @click="discountType = 'FIXED'; discountLabel = '{% trans "Fixed Amount" %}'; open = false"
                                         class="custom-select-option" :class="{ 'custom-select-option-selected': discountType === 'FIXED' }">
-                                    <span>Fixed Amount</span>
+                                    <span>{% trans "Fixed Amount" %}</span>
                                     <i x-show="discountType === 'FIXED'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
                                 </button>
                             </div>
@@ -152,23 +153,23 @@
                     </div>
                 </div>
                 <div>
-                    <label for="discount_value" class="block text-sm font-medium mb-2">Discount Value</label>
+                    <label for="discount_value" class="block text-sm font-medium mb-2">{% trans "Discount Value" %}</label>
                     <input type="number" name="discount_value" id="discount_value" required min="0" step="0.01" placeholder="10" class="input">
                 </div>
             </div>
 
             <div>
-                <label for="max_uses" class="block text-sm font-medium mb-2">Maximum Uses</label>
+                <label for="max_uses" class="block text-sm font-medium mb-2">{% trans "Maximum Uses" %}</label>
                 <input type="number" name="max_uses" id="max_uses" min="0" value="1" placeholder="1" class="input">
-                <p class="text-xs text-muted-foreground mt-1">Set to 0 for unlimited uses</p>
+                <p class="text-xs text-muted-foreground mt-1">{% trans "Set to 0 for unlimited uses" %}</p>
             </div>
         </div>
 
         <div class="card p-6 space-y-4">
-            <h2 class="text-lg font-semibold">Assignment</h2>
+            <h2 class="text-lg font-semibold">{% trans "Assignment" %}</h2>
 
             <div>
-                <label class="block text-sm font-medium mb-2">Who can use this coupon?</label>
+                <label class="block text-sm font-medium mb-2">{% trans "Who can use this coupon?" %}</label>
                 <div class="custom-select-wrapper" x-data="{ open: false }">
                     <input type="hidden" name="assignment_type" :value="assignmentType" required>
                     <button type="button" @click="open = !open" @click.outside="open = false"
@@ -178,19 +179,19 @@
                     </button>
                     <div x-show="open" x-transition @click.outside="open = false" class="custom-select-dropdown" x-cloak>
                         <div class="custom-select-options">
-                            <button type="button" @click="assignmentType = 'PUBLIC'; assignmentLabel = 'Anyone (Public)'; open = false"
+                            <button type="button" @click="assignmentType = 'PUBLIC'; assignmentLabel = '{% trans "Anyone (Public)" %}'; open = false"
                                     class="custom-select-option" :class="{ 'custom-select-option-selected': assignmentType === 'PUBLIC' }">
-                                <span>Anyone (Public)</span>
+                                <span>{% trans "Anyone (Public)" %}</span>
                                 <i x-show="assignmentType === 'PUBLIC'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
                             </button>
-                            <button type="button" @click="assignmentType = 'INDIVIDUAL'; assignmentLabel = 'Specific person'; open = false"
+                            <button type="button" @click="assignmentType = 'INDIVIDUAL'; assignmentLabel = '{% trans "Specific person" %}'; open = false"
                                     class="custom-select-option" :class="{ 'custom-select-option-selected': assignmentType === 'INDIVIDUAL' }">
-                                <span>Specific person</span>
+                                <span>{% trans "Specific person" %}</span>
                                 <i x-show="assignmentType === 'INDIVIDUAL'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
                             </button>
-                            <button type="button" @click="assignmentType = 'GROUP'; assignmentLabel = 'Group of people'; open = false"
+                            <button type="button" @click="assignmentType = 'GROUP'; assignmentLabel = '{% trans "Group of people" %}'; open = false"
                                     class="custom-select-option" :class="{ 'custom-select-option-selected': assignmentType === 'GROUP' }">
-                                <span>Group of people</span>
+                                <span>{% trans "Group of people" %}</span>
                                 <i x-show="assignmentType === 'GROUP'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
                             </button>
                         </div>
@@ -199,38 +200,38 @@
             </div>
 
             <div x-show="assignmentType === 'INDIVIDUAL'" x-cloak>
-                <label for="assigned_email" class="block text-sm font-medium mb-2">Assigned Email</label>
+                <label for="assigned_email" class="block text-sm font-medium mb-2">{% trans "Assigned Email" %}</label>
                 <input type="email" name="assigned_email" id="assigned_email" placeholder="user@example.com" class="input">
-                <p class="text-xs text-muted-foreground mt-1">Only this email address can use the coupon</p>
+                <p class="text-xs text-muted-foreground mt-1">{% trans "Only this email address can use the coupon" %}</p>
             </div>
 
             <div x-show="assignmentType === 'GROUP'" x-cloak>
-                <label for="assigned_emails" class="block text-sm font-medium mb-2">Assigned Emails</label>
+                <label for="assigned_emails" class="block text-sm font-medium mb-2">{% trans "Assigned Emails" %}</label>
                 <textarea name="assigned_emails" id="assigned_emails" rows="3" placeholder="user1@example.com, user2@example.com, user3@example.com" class="input"></textarea>
-                <p class="text-xs text-muted-foreground mt-1">Comma-separated list of email addresses</p>
+                <p class="text-xs text-muted-foreground mt-1">{% trans "Comma-separated list of email addresses" %}</p>
             </div>
         </div>
 
         <div class="card p-6 space-y-4">
-            <h2 class="text-lg font-semibold">Validity Period</h2>
-            <p class="text-sm text-muted-foreground -mt-2">Both fields are optional. Defaults to starting today with no end date.</p>
+            <h2 class="text-lg font-semibold">{% trans "Validity Period" %}</h2>
+            <p class="text-sm text-muted-foreground -mt-2">{% trans "Both fields are optional. Defaults to starting today with no end date." %}</p>
 
             <div class="grid gap-4 sm:grid-cols-2">
                 {% #datepicker name="valid_from" id="valid_from" label="Valid From" placeholder="Starts today by default" enable_time=True %}{% /datepicker %}
 
                 <div>
                     {% #datepicker name="valid_until" id="valid_until" label="Valid Until" placeholder="No end date" enable_time=True %}{% /datepicker %}
-                    <p class="text-xs text-muted-foreground mt-1" x-show="selectedEvent" x-cloak>Cannot be after the event end date</p>
+                    <p class="text-xs text-muted-foreground mt-1" x-show="selectedEvent" x-cloak>{% trans "Cannot be after the event end date" %}</p>
                 </div>
             </div>
         </div>
 
         <div class="flex items-center gap-4">
             {% #button type="submit" variant="default" %}
-                Create Coupon
+                {% trans "Create Coupon" %}
                 <i data-lucide="check" class="w-4 h-4"></i>
             {% /button %}
-            <a href="{% url 'events:coupons' %}">{% #button variant="outline" %}Cancel{% /button %}</a>
+            <a href="{% url 'events:coupons' %}">{% #button variant="outline" %}{% trans "Cancel" %}{% /button %}</a>
         </div>
     </form>
 </div>

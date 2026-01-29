@@ -1,20 +1,21 @@
 {% extends "layouts/dashboard.html" %}
 {% load slippers %}
+{% load i18n %}
 
-{% block title %}Coupons - Reckot{% endblock %}
+{% block title %}{% trans "Coupons" %} - Reckot{% endblock %}
 
 {% block breadcrumbs %}
 {% #breadcrumb class="mb-4" %}
-    {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item %}Coupons{% /breadcrumb_item %}
+    {% #breadcrumb_item %}{% trans "Coupons" %}{% /breadcrumb_item %}
 {% /breadcrumb %}
 {% endblock %}
 
 {% block header_title %}
 <div>
-    <h1 class="text-lg font-semibold">Coupon Codes</h1>
-    <p class="text-sm text-muted-foreground">Manage discount codes for your events</p>
+    <h1 class="text-lg font-semibold">{% trans "Coupon Codes" %}</h1>
+    <p class="text-sm text-muted-foreground">{% trans "Manage discount codes for your events" %}</p>
 </div>
 {% endblock %}
 
@@ -22,7 +23,7 @@
 <a href="{% url 'events:coupon_create' %}">
     {% #button variant="default" size="sm" %}
         <i data-lucide="plus" class="w-4 h-4"></i>
-        Create Coupon
+        {% trans "Create Coupon" %}
     {% /button %}
 </a>
 {% endblock %}
@@ -32,14 +33,14 @@
     <div class="grid gap-4 sm:grid-cols-2">
         <div class="stat-card">
             <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-muted-foreground">Total Coupons</p>
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Total Coupons" %}</p>
                 <i data-lucide="tag" class="h-4 w-4 text-muted-foreground"></i>
             </div>
             <p class="text-2xl font-bold mt-2">{{ stats.total }}</p>
         </div>
         <div class="stat-card">
             <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-muted-foreground">Active</p>
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Active" %}</p>
                 <i data-lucide="check-circle" class="h-4 w-4 text-emerald-500"></i>
             </div>
             <p class="text-2xl font-bold mt-2 text-emerald-500">{{ stats.active }}</p>
@@ -52,13 +53,13 @@
             <table class="w-full">
                 <thead>
                     <tr class="border-b border-border">
-                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Code</th>
-                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Organization</th>
-                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Event</th>
-                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Discount</th>
-                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Assignment</th>
-                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Usage</th>
-                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Status</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Code" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Organization" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Event" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Discount" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Assignment" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Usage" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Status" %}</th>
                         <th class="text-left text-sm font-medium text-muted-foreground p-4"></th>
                     </tr>
                 </thead>
@@ -75,7 +76,7 @@
                             {% if coupon.event %}
                             <p class="text-sm">{{ coupon.event.title }}</p>
                             {% else %}
-                            <span class="text-sm text-muted-foreground">All events</span>
+                            <span class="text-sm text-muted-foreground">{% trans "All events" %}</span>
                             {% endif %}
                         </td>
                         <td class="p-4">
@@ -87,28 +88,28 @@
                         </td>
                         <td class="p-4">
                             {% if coupon.assignment_type == 'PUBLIC' %}
-                            <span class="badge badge-default">Public</span>
+                            <span class="badge badge-default">{% trans "Public" %}</span>
                             {% elif coupon.assignment_type == 'INDIVIDUAL' %}
-                            <span class="badge badge-info">Individual</span>
+                            <span class="badge badge-info">{% trans "Individual" %}</span>
                             {% else %}
-                            <span class="badge badge-info">Group</span>
+                            <span class="badge badge-info">{% trans "Group" %}</span>
                             {% endif %}
                         </td>
                         <td class="p-4">
-                            <p class="text-sm">{{ coupon.use_count }} / {% if coupon.max_uses > 0 %}{{ coupon.max_uses }}{% else %}Unlimited{% endif %}</p>
+                            <p class="text-sm">{{ coupon.use_count }} / {% if coupon.max_uses > 0 %}{{ coupon.max_uses }}{% else %}{% trans "Unlimited" %}{% endif %}</p>
                         </td>
                         <td class="p-4">
                             {% if coupon.is_active and coupon.is_valid %}
-                            <span class="badge badge-success">Active</span>
+                            <span class="badge badge-success">{% trans "Active" %}</span>
                             {% elif coupon.is_active %}
-                            <span class="badge badge-warning">Exhausted</span>
+                            <span class="badge badge-warning">{% trans "Exhausted" %}</span>
                             {% else %}
-                            <span class="badge">Inactive</span>
+                            <span class="badge">{% trans "Inactive" %}</span>
                             {% endif %}
                         </td>
                         <td class="p-4">
                             <a href="{% url 'events:coupon_detail' coupon_id=coupon.id %}" class="text-sm text-foreground hover:underline">
-                                View
+                                {% trans "View" %}
                             </a>
                         </td>
                     </tr>
@@ -121,12 +122,12 @@
             <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
                 <i data-lucide="tag" class="h-8 w-8 text-muted-foreground"></i>
             </div>
-            <h3 class="text-lg font-semibold mb-2">No coupons yet</h3>
-            <p class="text-muted-foreground mb-6">Create discount codes to offer special pricing for your events.</p>
+            <h3 class="text-lg font-semibold mb-2">{% trans "No coupons yet" %}</h3>
+            <p class="text-muted-foreground mb-6">{% trans "Create discount codes to offer special pricing for your events." %}</p>
             <a href="{% url 'events:coupon_create' %}">
                 {% #button variant="default" %}
                     <i data-lucide="plus" class="w-4 h-4"></i>
-                    Create Coupon
+                    {% trans "Create Coupon" %}
                 {% /button %}
             </a>
         </div>

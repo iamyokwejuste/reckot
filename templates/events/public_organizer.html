@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load slippers %}
+{% load i18n %}
 
-{% block title %}{{ organization.name }} - Events on Reckot{% endblock %}
+{% block title %}{{ organization.name }} - {% trans "Events on Reckot" %}{% endblock %}
 
 {% block meta_description %}Discover events by {{ organization.name }} on Reckot. Browse upcoming events and get your tickets.{% endblock %}
 
