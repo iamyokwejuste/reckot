@@ -39,6 +39,7 @@ class Event(models.Model):
     state = models.CharField(max_length=10, choices=State.choices, default=State.DRAFT)
     is_public = models.BooleanField(default=False)
     is_free = models.BooleanField(default=False)
+    preview_token = models.CharField(max_length=32, blank=True, db_index=True)
 
     is_featured = models.BooleanField(default=False)
     feature_requested_at = models.DateTimeField(null=True, blank=True)
@@ -66,6 +67,11 @@ class Event(models.Model):
             base_slug = slugify(self.title)
             self.slug = f"{base_slug}-{uuid.uuid4().hex[:8]}"
         super().save(*args, **kwargs)
+
+    def generate_preview_token(self):
+        self.preview_token = uuid.uuid4().hex[:16]
+        self.save(update_fields=['preview_token'])
+        return self.preview_token
 
 
 class EventCustomization(models.Model):

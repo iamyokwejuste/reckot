@@ -53,12 +53,25 @@ class PublicEventListView(View):
 
 class PublicEventDetailView(View):
     def get(self, request, org_slug, event_slug):
-        event = get_object_or_404(
-            Event.objects.select_related('organization'),
-            organization__slug=org_slug,
-            slug=event_slug,
-            state=Event.State.PUBLISHED
-        )
+        preview_token = request.GET.get('preview')
+        is_preview = False
+
+        if preview_token:
+            event = get_object_or_404(
+                Event.objects.select_related('organization'),
+                organization__slug=org_slug,
+                slug=event_slug,
+                preview_token=preview_token
+            )
+            is_preview = event.state != Event.State.PUBLISHED
+        else:
+            event = get_object_or_404(
+                Event.objects.select_related('organization'),
+                organization__slug=org_slug,
+                slug=event_slug,
+                state=Event.State.PUBLISHED
+            )
+
         now = timezone.now()
         all_ticket_types = event.ticket_types.filter(is_active=True)
 
@@ -219,10 +232,17 @@ class EventDashboardView(LoginRequiredMixin, View):
             'revenue': revenue,
         }
 
+        public_url = reverse('events:public_detail', args=[org_slug, event_slug])
+        preview_url = None
+        if event.preview_token:
+            preview_url = f"{public_url}?preview={event.preview_token}"
+
         return render(request, 'events/event_dashboard.html', {
             'event': event,
             'stats': stats,
             'is_published': event.state == Event.State.PUBLISHED,
+            'public_url': public_url,
+            'preview_url': preview_url,
             'manage_tickets_url': reverse('events:manage_ticket_types', args=[org_slug, event_slug]),
             'checkin_url': reverse('checkin:dashboard', args=[org_slug, event_slug]),
             'export_url': reverse('reports:export_center', args=[org_slug, event_slug]),
@@ -250,6 +270,50 @@ class ApplyFeatureView(LoginRequiredMixin, View):
         event.feature_rejection_reason = ''
         event.save(update_fields=['feature_requested_at', 'feature_rejection_reason'])
 
+        return redirect('events:dashboard', org_slug=org_slug, event_slug=event_slug)
+
+
+class TogglePublishView(LoginRequiredMixin, View):
+    def post(self, request, org_slug, event_slug):
+        event = get_object_or_404(
+            Event,
+            organization__slug=org_slug,
+            slug=event_slug,
+            organization__members=request.user
+        )
+
+        if event.state == Event.State.PUBLISHED:
+            event.state = Event.State.DRAFT
+        else:
+            event.state = Event.State.PUBLISHED
+
+        event.save(update_fields=['state'])
+        return redirect('events:dashboard', org_slug=org_slug, event_slug=event_slug)
+
+
+class TogglePublicView(LoginRequiredMixin, View):
+    def post(self, request, org_slug, event_slug):
+        event = get_object_or_404(
+            Event,
+            organization__slug=org_slug,
+            slug=event_slug,
+            organization__members=request.user
+        )
+
+        event.is_public = not event.is_public
+        event.save(update_fields=['is_public'])
+        return redirect('events:dashboard', org_slug=org_slug, event_slug=event_slug)
+
+
+class GeneratePreviewTokenView(LoginRequiredMixin, View):
+    def post(self, request, org_slug, event_slug):
+        event = get_object_or_404(
+            Event,
+            organization__slug=org_slug,
+            slug=event_slug,
+            organization__members=request.user
+        )
+        event.generate_preview_token()
         return redirect('events:dashboard', org_slug=org_slug, event_slug=event_slug)
 
 

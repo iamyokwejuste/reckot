@@ -30,12 +30,21 @@
     <span class="inline-flex items-center rounded-full border border-warning/20 bg-warning/10 text-warning px-2.5 py-0.5 text-xs font-semibold">{{ event.state }}</span>
     {% endif %}
 
-    <a href="{% url 'events:public_detail' event.organization.slug event.slug %}" target="_blank">
+    {% if event.state == 'PUBLISHED' %}
+    <a href="{{ public_url }}" target="_blank">
         {% #button variant="outline" size="sm" %}
             <i data-lucide="external-link" class="w-4 h-4"></i>
             View Public
         {% /button %}
     </a>
+    {% elif preview_url %}
+    <a href="{{ preview_url }}" target="_blank">
+        {% #button variant="outline" size="sm" %}
+            <i data-lucide="eye" class="w-4 h-4"></i>
+            Preview
+        {% /button %}
+    </a>
+    {% endif %}
 </div>
 {% endblock %}
 
@@ -173,40 +182,98 @@
                 <h2 class="text-lg font-semibold mb-4">Event Status</h2>
                 <div class="space-y-4">
                     <div class="flex items-center justify-between">
-                        <span class="text-sm text-foreground">Published</span>
-                        {% if is_published %}
-                        <span class="h-6 w-6 rounded-full bg-success flex items-center justify-center">
-                            <i data-lucide="check" class="h-4 w-4 text-background"></i>
-                        </span>
-                        {% else %}
-                        <span class="h-6 w-6 rounded-full bg-muted"></span>
-                        {% endif %}
+                        <div>
+                            <span class="text-sm font-medium text-foreground">Published</span>
+                            <p class="text-xs text-muted-foreground">Make event live for ticket sales</p>
+                        </div>
+                        <form method="post" action="{% url 'events:toggle_publish' event.organization.slug event.slug %}">
+                            {% csrf_token %}
+                            {% if event.state == 'PUBLISHED' %}
+                            {% #button type="submit" variant="outline" size="sm" %}
+                                <i data-lucide="eye-off" class="w-4 h-4 mr-1"></i>
+                                Unpublish
+                            {% /button %}
+                            {% else %}
+                            {% #button type="submit" variant="default" size="sm" %}
+                                <i data-lucide="rocket" class="w-4 h-4 mr-1"></i>
+                                Publish
+                            {% /button %}
+                            {% endif %}
+                        </form>
                     </div>
                     <div class="flex items-center justify-between">
-                        <span class="text-sm text-foreground">Public</span>
-                        {% if event.is_public %}
-                        <span class="h-6 w-6 rounded-full bg-success flex items-center justify-center">
-                            <i data-lucide="check" class="h-4 w-4 text-background"></i>
-                        </span>
-                        {% else %}
-                        <span class="h-6 w-6 rounded-full bg-muted"></span>
-                        {% endif %}
+                        <div>
+                            <span class="text-sm font-medium text-foreground">Public</span>
+                            <p class="text-xs text-muted-foreground">Show in discover & search</p>
+                        </div>
+                        <form method="post" action="{% url 'events:toggle_public' event.organization.slug event.slug %}">
+                            {% csrf_token %}
+                            {% if event.is_public %}
+                            {% #button type="submit" variant="outline" size="sm" %}
+                                <i data-lucide="lock" class="w-4 h-4 mr-1"></i>
+                                Make Private
+                            {% /button %}
+                            {% else %}
+                            {% #button type="submit" variant="default" size="sm" %}
+                                <i data-lucide="globe" class="w-4 h-4 mr-1"></i>
+                                Make Public
+                            {% /button %}
+                            {% endif %}
+                        </form>
                     </div>
                     <div class="flex items-center justify-between">
-                        <span class="text-sm text-foreground">Featured</span>
+                        <div>
+                            <span class="text-sm font-medium text-foreground">Featured</span>
+                            <p class="text-xs text-muted-foreground">Highlighted on homepage</p>
+                        </div>
                         {% if event.is_featured %}
-                        <span class="h-6 w-6 rounded-full bg-success flex items-center justify-center">
-                            <i data-lucide="check" class="h-4 w-4 text-background"></i>
+                        <span class="inline-flex items-center gap-1 text-sm text-success">
+                            <i data-lucide="check-circle" class="w-4 h-4"></i>
+                            Active
                         </span>
                         {% else %}
-                        <span class="h-6 w-6 rounded-full bg-muted"></span>
+                        <span class="text-sm text-muted-foreground">Not featured</span>
                         {% endif %}
                     </div>
                 </div>
             </div>
 
-            {% if event.is_public and not event.is_featured %}
-            <div class="card p-6">
+            {% if event.state != 'PUBLISHED' %}
+            <div class="card p-6" x-data="{ copied: false }">
+                <h2 class="text-lg font-semibold mb-2">Share Preview</h2>
+                <p class="text-sm text-muted-foreground mb-4">Share a preview link with others before publishing. They can view the event but cannot purchase tickets.</p>
+
+                {% if preview_url %}
+                <div class="flex gap-2 mb-3">
+                    <input type="text" value="{{ request.scheme }}://{{ request.get_host }}{{ preview_url }}" readonly
+                           class="input flex-1 text-xs bg-muted" id="preview-link">
+                    <button type="button" @click="navigator.clipboard.writeText(document.getElementById('preview-link').value); copied = true; setTimeout(() => copied = false, 2000)"
+                            class="btn btn-outline btn-sm">
+                        <i x-show="!copied" data-lucide="copy" class="w-4 h-4"></i>
+                        <i x-show="copied" data-lucide="check" class="w-4 h-4 text-success" x-cloak></i>
+                    </button>
+                </div>
+                <form method="post" action="{% url 'events:generate_preview' event.organization.slug event.slug %}">
+                    {% csrf_token %}
+                    {% #button type="submit" variant="outline" size="sm" class="w-full" %}
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                        Regenerate Link
+                    {% /button %}
+                </form>
+                {% else %}
+                <form method="post" action="{% url 'events:generate_preview' event.organization.slug event.slug %}">
+                    {% csrf_token %}
+                    {% #button type="submit" variant="default" size="sm" class="w-full" %}
+                        <i data-lucide="link" class="w-4 h-4"></i>
+                        Generate Preview Link
+                    {% /button %}
+                </form>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% if event.state == 'PUBLISHED' and event.is_public and not event.is_featured %}
+            <div class="card p-6" x-data="{ showTerms: false }">
                 <h2 class="text-lg font-semibold mb-2">Get Featured</h2>
                 <p class="text-sm text-muted-foreground mb-4">Apply to have your event featured on the Reckot homepage for maximum visibility.</p>
 
@@ -214,7 +281,8 @@
                 <div role="alert" class="relative w-full rounded-lg border border-warning/50 text-warning bg-warning/10 p-4">
                     <i data-lucide="clock" class="h-4 w-4 absolute left-4 top-4"></i>
                     <div class="pl-7">
-                        <div class="text-sm">Feature request pending review</div>
+                        <div class="text-sm font-medium">Feature request pending review</div>
+                        <p class="text-xs mt-1 opacity-80">Our team will review your event and get back to you within 24-48 hours.</p>
                     </div>
                 </div>
                 {% elif event.feature_rejection_reason %}
@@ -222,22 +290,73 @@
                     <h5 class="mb-1 font-medium leading-none tracking-tight">Request declined</h5>
                     <div class="text-sm mt-1">{{ event.feature_rejection_reason }}</div>
                 </div>
-                <form method="post" action="{% url 'events:apply_feature' event.organization.slug event.slug %}" class="mt-3">
-                    {% csrf_token %}
-                    {% #button type="submit" variant="default" size="sm" class="w-full" %}
-                        <i data-lucide="star" class="w-4 h-4"></i>
-                        Re-apply for Feature
-                    {% /button %}
-                </form>
+                {% #button type="button" variant="default" size="sm" class="w-full mt-3" attrs='@click="showTerms = true"' %}
+                    <i data-lucide="star" class="w-4 h-4"></i>
+                    Re-apply for Feature
+                {% /button %}
                 {% else %}
-                <form method="post" action="{% url 'events:apply_feature' event.organization.slug event.slug %}">
-                    {% csrf_token %}
-                    {% #button type="submit" variant="default" size="sm" class="w-full" %}
-                        <i data-lucide="star" class="w-4 h-4"></i>
-                        Apply for Feature
-                    {% /button %}
-                </form>
+                {% #button type="button" variant="default" size="sm" class="w-full" attrs='@click="showTerms = true"' %}
+                    <i data-lucide="star" class="w-4 h-4"></i>
+                    Apply for Feature
+                {% /button %}
                 {% endif %}
+
+                {% #modal trigger="showTerms" title="Featured Event - Terms & Conditions" size="lg" %}
+                    <div class="space-y-4 text-sm max-h-[50vh] overflow-y-auto">
+                        <div>
+                            <h4 class="font-semibold mb-2">1. Feature Placement</h4>
+                            <p class="text-muted-foreground">
+                                Featured events are displayed prominently on the Reckot homepage and in the "Featured Events" section of the discover page. Placement is at our discretion based on event quality, relevance, and timing.
+                            </p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-2">2. Eligibility Requirements</h4>
+                            <p class="text-muted-foreground">To be eligible for featuring, your event must:</p>
+                            <ul class="list-disc list-inside text-muted-foreground mt-2 space-y-1">
+                                <li>Be published and publicly visible</li>
+                                <li>Have a complete event description and cover image</li>
+                                <li>Be scheduled at least 7 days in the future</li>
+                                <li>Comply with our community guidelines and terms of service</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-2">3. Review Process</h4>
+                            <p class="text-muted-foreground">
+                                All feature requests are reviewed by our team within <strong>24-48 hours</strong>. We may approve, reject, or request modifications to your event before featuring.
+                            </p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-2">4. Feature Duration</h4>
+                            <p class="text-muted-foreground">
+                                Featured status typically lasts until your event date or up to <strong>30 days</strong>, whichever comes first. We reserve the right to remove featured status at any time.
+                            </p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-2">5. No Guarantee</h4>
+                            <p class="text-muted-foreground">
+                                Submitting a feature request does not guarantee approval. Our team evaluates each request based on content quality, relevance to our audience, and available feature slots.
+                            </p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-2">6. Content Standards</h4>
+                            <p class="text-muted-foreground">
+                                By applying, you confirm that your event content is accurate, not misleading, and does not violate any laws or third-party rights.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3 mt-6">
+                        {% #button variant="outline" class="flex-1" attrs='@click="showTerms = false"' %}
+                            Cancel
+                        {% /button %}
+                        <form method="post" action="{% url 'events:apply_feature' event.organization.slug event.slug %}" class="flex-1">
+                            {% csrf_token %}
+                            {% #button type="submit" variant="default" class="w-full" %}
+                                <i data-lucide="check" class="w-4 h-4 mr-1"></i>
+                                I Accept & Apply
+                            {% /button %}
+                        </form>
+                    </div>
+                {% /modal %}
             </div>
             {% endif %}
 
