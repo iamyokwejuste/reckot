@@ -72,26 +72,38 @@ class PublicEventDetailView(View):
                 state=Event.State.PUBLISHED
             )
 
-        now = timezone.now()
+        now = timezone.localtime(timezone.now())
         all_ticket_types = event.ticket_types.filter(is_active=True)
 
         available_tickets = []
         for tt in all_ticket_types:
             is_available = True
             status_message = None
+            sales_started = False
 
-            if tt.sales_start and now < tt.sales_start:
+            sales_start = tt.sales_start.replace(tzinfo=None) if tt.sales_start else None
+            sales_end = tt.sales_end.replace(tzinfo=None) if tt.sales_end else None
+            now_naive = now.replace(tzinfo=None)
+
+            if sales_start and now_naive < sales_start:
                 is_available = False
-                status_message = f"Sales start {tt.sales_start.strftime('%b %d, %Y')}"
-            elif tt.sales_end and now > tt.sales_end:
+                if sales_start.date() == now_naive.date():
+                    status_message = f"Sales start today at {sales_start.strftime('%I:%M %p')}"
+                else:
+                    status_message = f"Sales start {sales_start.strftime('%b %d, %Y at %I:%M %p')}"
+            elif sales_end and now_naive > sales_end:
                 is_available = False
-                status_message = "No longer available"
+                status_message = "Sales ended"
             elif tt.available_quantity <= 0:
                 is_available = False
                 status_message = "Sold out"
+            else:
+                if sales_start and now_naive >= sales_start:
+                    sales_started = True
 
             tt.is_available = is_available
             tt.status_message = status_message
+            tt.sales_started = sales_started
             available_tickets.append(tt)
 
         checkout_questions = event.checkout_questions.all()
@@ -239,6 +251,39 @@ class EventDetailView(LoginRequiredMixin, View):
         return render(request, 'events/event_detail.html', {'event': event, 'booking_form': booking_form})
 
 
+class EventEditView(LoginRequiredMixin, View):
+    def get(self, request, org_slug, event_slug):
+        event = get_object_or_404(
+            Event.objects.select_related('organization'),
+            organization__slug=org_slug,
+            slug=event_slug,
+            organization__members=request.user
+        )
+        form = EventForm(instance=event)
+        return render(request, 'events/edit_event.html', {
+            'form': form,
+            'event': event,
+        })
+
+    def post(self, request, org_slug, event_slug):
+        event = get_object_or_404(
+            Event.objects.select_related('organization'),
+            organization__slug=org_slug,
+            slug=event_slug,
+            organization__members=request.user
+        )
+
+        form = EventForm(request.POST, request.FILES, instance=event)
+        if form.is_valid():
+            form.save()
+            return redirect('events:dashboard', org_slug=org_slug, event_slug=event.slug)
+
+        return render(request, 'events/edit_event.html', {
+            'form': form,
+            'event': event,
+        })
+
+
 class EventDashboardView(LoginRequiredMixin, View):
     def get(self, request, org_slug, event_slug):
         event = get_object_or_404(
@@ -283,6 +328,7 @@ class EventDashboardView(LoginRequiredMixin, View):
             'export_url': reverse('reports:export_center', args=[org_slug, event_slug]),
             'analytics_url': reverse('reports:dashboard', args=[org_slug, event_slug]),
             'flyer_config_url': reverse('events:flyer_config', args=[org_slug, event_slug]),
+            'edit_event_url': reverse('events:edit', args=[org_slug, event_slug]),
         })
 
 

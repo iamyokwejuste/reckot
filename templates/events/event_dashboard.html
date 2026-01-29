@@ -123,6 +123,15 @@
             <div class="card p-6">
                 <h2 class="text-lg font-semibold mb-4">Quick Actions</h2>
                 <div class="grid gap-3 sm:grid-cols-2">
+                    <a href="{{ edit_event_url }}" hx-boost="false" class="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted transition-colors">
+                        <div class="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
+                            <i data-lucide="pencil" class="h-5 w-5"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium">Edit Event</p>
+                            <p class="text-xs text-muted-foreground">Update event details</p>
+                        </div>
+                    </a>
                     <a href="{{ manage_tickets_url }}" hx-boost="false" class="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted transition-colors">
                         <div class="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
                             <i data-lucide="ticket" class="h-5 w-5"></i>
@@ -172,7 +181,15 @@
             </div>
 
             <div class="card p-6">
-                <h2 class="text-lg font-semibold mb-4">Event Details</h2>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold">Event Details</h2>
+                    <a href="{{ edit_event_url }}">
+                        {% #button variant="outline" size="sm" %}
+                            <i data-lucide="pencil" class="w-4 h-4"></i>
+                            Edit
+                        {% /button %}
+                    </a>
+                </div>
                 <dl class="space-y-3 text-sm">
                     <div class="flex justify-between py-2 border-b border-border">
                         <dt class="text-muted-foreground">Date</dt>

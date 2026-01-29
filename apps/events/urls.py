@@ -16,6 +16,7 @@ urlpatterns = [
     path('coupons/validate/', actions.ValidateCouponView.as_view(), name='validate_coupon'),
     path('<slug:org_slug>/<slug:event_slug>/', actions.PublicEventDetailView.as_view(), name='public_detail'),
     path('<slug:org_slug>/<slug:event_slug>/dashboard/', actions.EventDashboardView.as_view(), name='dashboard'),
+    path('<slug:org_slug>/<slug:event_slug>/edit/', actions.EventEditView.as_view(), name='edit'),
     path('<slug:org_slug>/<slug:event_slug>/manage/', actions.EventDetailView.as_view(), name='detail'),
     path('<slug:org_slug>/<slug:event_slug>/tickets/', actions.TicketTypeManageView.as_view(), name='manage_ticket_types'),
     path('<slug:org_slug>/<slug:event_slug>/tickets/<int:ticket_type_id>/edit/', actions.TicketTypeEditView.as_view(), name='edit_ticket_type'),

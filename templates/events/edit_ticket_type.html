@@ -15,9 +15,9 @@
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
     {% #breadcrumb_item href="/events/" %}Events{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item :href="event_dashboard_url" %}{{ event.title|truncatewords:3 }}{% /breadcrumb_item %}
+    {% #breadcrumb_item href=event_dashboard_url %}{{ event.title|truncatewords:3 }}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item :href="tickets_url" %}Ticket Types{% /breadcrumb_item %}
+    {% #breadcrumb_item href=tickets_url %}Ticket Types{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
     {% #breadcrumb_item %}Edit{% /breadcrumb_item %}
 {% /breadcrumb %}
@@ -88,9 +88,35 @@
                 <h3 class="text-sm font-semibold mb-4">Sales Window (Early Bird / Limited Time)</h3>
                 <p class="text-xs text-muted-foreground mb-4">Leave empty for tickets to be always available. Set dates to create early bird or limited time offers.</p>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    {% #datepicker name="sales_start" id="id_sales_start" label="Sales Start" placeholder="Select date and time" value=form.sales_start.value|default:'' enable_time=True help_text="When ticket sales begin" %}{% /datepicker %}
+                    <div class="datepicker-wrapper">
+                        <label for="id_sales_start" class="block text-sm font-medium mb-2">Sales Start</label>
+                        <div class="relative">
+                            <div class="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground z-10 flex items-center justify-center w-5 h-5">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M16 14h.01"/><path d="M12 14h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
+                            </div>
+                            <input type="text" name="sales_start" id="id_sales_start"
+                                   {% if ticket_type.sales_start %}value="{{ ticket_type.sales_start|date:'Y-m-d H:i' }}"{% endif %}
+                                   placeholder="Select date and time"
+                                   class="input w-full pl-12 cursor-pointer"
+                                   data-datepicker data-enable-time="true" data-min-date="today" readonly>
+                        </div>
+                        <p class="text-xs text-muted-foreground mt-1">When ticket sales begin</p>
+                    </div>
 
-                    {% #datepicker name="sales_end" id="id_sales_end" label="Sales End" placeholder="Select date and time" value=form.sales_end.value|default:'' enable_time=True help_text="When ticket sales end (e.g., early bird deadline)" %}{% /datepicker %}
+                    <div class="datepicker-wrapper">
+                        <label for="id_sales_end" class="block text-sm font-medium mb-2">Sales End</label>
+                        <div class="relative">
+                            <div class="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground z-10 flex items-center justify-center w-5 h-5">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M16 14h.01"/><path d="M12 14h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
+                            </div>
+                            <input type="text" name="sales_end" id="id_sales_end"
+                                   {% if ticket_type.sales_end %}value="{{ ticket_type.sales_end|date:'Y-m-d H:i' }}"{% endif %}
+                                   placeholder="Select date and time"
+                                   class="input w-full pl-12 cursor-pointer"
+                                   data-datepicker data-enable-time="true" data-min-date="today" readonly>
+                        </div>
+                        <p class="text-xs text-muted-foreground mt-1">When ticket sales end (e.g., early bird deadline)</p>
+                    </div>
                 </div>
             </div>
 

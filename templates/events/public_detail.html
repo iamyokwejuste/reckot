@@ -7,8 +7,15 @@
 {% block og_title %}{{ event.title }}{% endblock %}
 {% block og_description %}{{ event.description|truncatewords:30 }}{% endblock %}
 
+{% block extra_head %}
+{% if event.cover_image %}
+<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ event.cover_image.url }}">
+<meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{{ event.cover_image.url }}">
+{% endif %}
+{% endblock %}
+
 {% block content %}
-<div class="container mx-auto px-4 py-8">
+<div class="container mx-auto px-4 py-8 pb-24">
     <div class="max-w-4xl mx-auto">
         <div class="mb-6">
             <a href="{% url 'events:discover' %}" class="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1">
@@ -16,6 +23,12 @@
                 Back to events
             </a>
         </div>
+
+        {% if event.cover_image %}
+        <div class="mb-6 rounded-xl overflow-hidden">
+            <img src="{{ event.cover_image.url }}" alt="{{ event.title }}" class="w-full h-64 sm:h-80 object-cover">
+        </div>
+        {% endif %}
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2">
@@ -89,32 +102,44 @@
                 {% endif %}
             </div>
 
-            <div class="lg:col-span-1">
+            <div class="lg:col-span-1 self-start">
                 <div class="card p-6 sticky top-24"
                      x-data="{
-                         eventDate: new Date('{{ event.start_at|date:'c' }}'),
-                         now: new Date(),
+                         eventDate: new Date('{{ event.start_at|date:'Y-m-d' }}T{{ event.start_at|date:'H:i:s' }}'),
+                         years: 0,
                          days: 0,
                          hours: 0,
                          minutes: 0,
                          seconds: 0,
                          isPast: false,
+                         showYears: false,
                          init() {
                              this.updateCountdown();
                              setInterval(() => this.updateCountdown(), 1000);
                          },
                          updateCountdown() {
-                             this.now = new Date();
-                             const diff = this.eventDate - this.now;
+                             const now = new Date();
+                             const diff = this.eventDate - now;
                              if (diff <= 0) {
                                  this.isPast = true;
+                                 this.years = 0;
                                  this.days = 0;
                                  this.hours = 0;
                                  this.minutes = 0;
                                  this.seconds = 0;
+                                 this.showYears = false;
                              } else {
                                  this.isPast = false;
-                                 this.days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                                 const totalDays = Math.floor(diff / (1000 * 60 * 60 * 24));
+                                 if (totalDays >= 365) {
+                                     this.showYears = true;
+                                     this.years = Math.floor(totalDays / 365);
+                                     this.days = totalDays % 365;
+                                 } else {
+                                     this.showYears = false;
+                                     this.years = 0;
+                                     this.days = totalDays;
+                                 }
                                  this.hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                                  this.minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                                  this.seconds = Math.floor((diff % (1000 * 60)) / 1000);
@@ -124,23 +149,29 @@
                     <h3 class="font-semibold mb-4">Tickets</h3>
 
                     <div class="mb-4 p-3 rounded-lg bg-muted/50 border border-border" x-show="!isPast">
-                        <div class="text-xs text-muted-foreground text-center mb-2">Event starts in</div>
-                        <div class="grid grid-cols-4 gap-2 text-center">
-                            <div>
-                                <div class="text-xl font-bold" x-text="days">0</div>
-                                <div class="text-xs text-muted-foreground">days</div>
+                        <div class="text-xs text-muted-foreground text-center mb-1">Event starts in</div>
+                        <div class="flex justify-center gap-2 text-center">
+                            <template x-if="showYears">
+                                <div class="min-w-[32px]">
+                                    <div class="text-base font-bold" x-text="years">0</div>
+                                    <div class="text-[10px] text-muted-foreground">yrs</div>
+                                </div>
+                            </template>
+                            <div class="min-w-[32px]">
+                                <div class="text-base font-bold" x-text="days">0</div>
+                                <div class="text-[10px] text-muted-foreground">days</div>
                             </div>
-                            <div>
-                                <div class="text-xl font-bold" x-text="hours">0</div>
-                                <div class="text-xs text-muted-foreground">hrs</div>
+                            <div class="min-w-[32px]">
+                                <div class="text-base font-bold" x-text="hours">0</div>
+                                <div class="text-[10px] text-muted-foreground">hrs</div>
                             </div>
-                            <div>
-                                <div class="text-xl font-bold" x-text="minutes">0</div>
-                                <div class="text-xs text-muted-foreground">min</div>
+                            <div class="min-w-[32px]">
+                                <div class="text-base font-bold" x-text="minutes">0</div>
+                                <div class="text-[10px] text-muted-foreground">min</div>
                             </div>
-                            <div>
-                                <div class="text-xl font-bold" x-text="seconds">0</div>
-                                <div class="text-xs text-muted-foreground">sec</div>
+                            <div class="min-w-[32px]">
+                                <div class="text-base font-bold" x-text="seconds">0</div>
+                                <div class="text-[10px] text-muted-foreground">sec</div>
                             </div>
                         </div>
                     </div>
@@ -212,6 +243,11 @@
                                         <i data-lucide="clock" class="w-3 h-3 inline"></i>
                                         {{ ticket_type.status_message }}
                                     </div>
+                                    {% elif ticket_type.sales_started %}
+                                    <div class="text-xs text-success mt-1">
+                                        <i data-lucide="check-circle" class="w-3 h-3 inline"></i>
+                                        Sales started!
+                                    </div>
                                     {% elif ticket_type.sales_end and ticket_type.is_available %}
                                     <div class="text-xs text-warning mt-1">
                                         <i data-lucide="clock" class="w-3 h-3 inline"></i>
@@ -227,10 +263,22 @@
                                     {% endif %}
                                 </div>
                             </div>
+
+                            <div class="mb-3">
+                                <div class="flex justify-between text-xs text-muted-foreground mb-1">
+                                    <span>{{ ticket_type.sold|default:0 }} sold</span>
+                                    <span>{{ ticket_type.available_quantity|default:ticket_type.quantity }} left</span>
+                                </div>
+                                <div class="w-full bg-muted rounded-full h-1.5 overflow-hidden">
+                                    <div class="bg-primary h-full rounded-full transition-all duration-300"
+                                         style="width: {% widthratio ticket_type.sold|default:0 ticket_type.quantity 100 %}%"></div>
+                                </div>
+                            </div>
+
                             {% if ticket_type.is_available %}
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-3">
                                 <label class="text-sm text-muted-foreground">Qty:</label>
-                                <select name="ticket_{{ ticket_type.id }}" class="input w-20">
+                                <select name="ticket_{{ ticket_type.id }}" class="input w-24 text-center">
                                     {% for i in "0123456789"|make_list %}
                                     {% if forloop.counter0 <= ticket_type.max_per_order %}
                                     <option value="{{ forloop.counter0 }}">{{ forloop.counter0 }}</option>
@@ -238,12 +286,8 @@
                                     {% endfor %}
                                 </select>
                                 {% if ticket_type.available_quantity < 10 and ticket_type.available_quantity > 0 %}
-                                <span class="text-sm text-destructive">{{ ticket_type.available_quantity }} left</span>
+                                <span class="text-sm text-destructive">Only {{ ticket_type.available_quantity }} left!</span>
                                 {% endif %}
-                            </div>
-                            {% else %}
-                            <div class="text-sm text-muted-foreground italic">
-                                {{ ticket_type.status_message }}
                             </div>
                             {% endif %}
                         </div>
