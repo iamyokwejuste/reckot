@@ -3,6 +3,16 @@
 
 {% block title %}{{ organization.name }} - Reckot{% endblock %}
 
+{% block breadcrumbs %}
+{% #breadcrumb class="mb-4" %}
+    {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item href="{% url 'orgs:list' %}" %}Organizations{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item %}{{ organization.name }}{% /breadcrumb_item %}
+{% /breadcrumb %}
+{% endblock %}
+
 {% block header_title %}
 <div class="flex items-center gap-4">
     {% if organization.logo %}

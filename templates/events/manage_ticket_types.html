@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'layouts/dashboard.html' %}
 {% load slippers %}
 
 {% block title %}Manage Tickets - {{ event.title }} - Reckot{% endblock %}
@@ -7,23 +7,38 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 {% endblock %}
 
-{% block content %}
-<div class="max-w-4xl mx-auto py-12 px-4">
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-            <h1 class="text-2xl font-bold">Manage Ticket Types</h1>
-            <p class="text-muted-foreground mt-1">{{ event.title }}</p>
-        </div>
-        <a href="{% url 'events:detail' org_slug=event.organization.slug event_slug=event.slug %}">
-            {% #button variant="outline" %}
-                <i data-lucide="arrow-left" class="mr-2 h-4 w-4"></i>
-                Back to Event
-            {% /button %}
-        </a>
-    </div>
+{% block breadcrumbs %}
+{% #breadcrumb class="mb-4" %}
+    {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item href="{% url 'events:list' %}" %}Events{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item href="{% url 'events:dashboard' event.organization.slug event.slug %}" %}{{ event.title|truncatewords:3 }}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item %}Ticket Types{% /breadcrumb_item %}
+{% /breadcrumb %}
+{% endblock %}
 
-    <div class="mt-8">
-        <h2 class="text-xl font-semibold">Existing Ticket Types</h2>
+{% block header_title %}
+<div>
+    <h1 class="text-lg font-semibold">Manage Ticket Types</h1>
+    <p class="text-sm text-muted-foreground">{{ event.title }}</p>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug %}">
+    {% #button variant="outline" size="sm" %}
+        <i data-lucide="arrow-left" class="mr-2 h-4 w-4"></i>
+        Back
+    {% /button %}
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div>
+        <h2 class="text-xl font-semibold mb-4">Existing Ticket Types</h2>
         {% if ticket_types %}
             <div class="mt-4 card overflow-hidden">
                 <table class="w-full">
@@ -90,8 +105,7 @@
         {% endif %}
     </div>
 
-    <div class="mt-12">
-        <div class="card p-6 sm:p-8">
+    <div class="card p-6 sm:p-8">
             <h2 class="text-xl font-semibold">Add New Ticket Type</h2>
             <p class="text-muted-foreground mt-1">Create a new ticket option for attendees</p>
 
@@ -177,7 +191,6 @@
                     {% /button %}
                 </div>
             </form>
-        </div>
     </div>
 </div>
 {% endblock %}

@@ -7,6 +7,16 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 {% endblock %}
 
+{% block breadcrumbs %}
+{% #breadcrumb class="mb-4" %}
+    {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item href="{% url 'events:coupons' %}" %}Coupons{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item %}Create{% /breadcrumb_item %}
+{% /breadcrumb %}
+{% endblock %}
+
 {% block header_title %}
 <div>
     <h1 class="text-lg font-semibold">Create Coupon</h1>

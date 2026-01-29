@@ -420,6 +420,8 @@ class FlyerGeneratorView(View):
             config = event.flyer_config
             if not config.is_enabled:
                 return render(request, 'events/flyer_disabled.html', {'event': event})
+            if not has_feature and not config.pay_per_use_accepted:
+                return render(request, 'events/flyer_upgrade.html', {'event': event})
         except EventFlyerConfig.DoesNotExist:
             return render(request, 'events/flyer_disabled.html', {'event': event})
 
@@ -460,7 +462,7 @@ class FlyerGeneratorView(View):
         try:
             flyer_image = generate_flyer(config, user_photo, text_values)
 
-            if not has_feature:
+            if not has_feature and config.pay_per_use_accepted:
                 FlyerGeneration.objects.create(
                     event=event,
                     ip_address=request.META.get('REMOTE_ADDR'),
@@ -533,6 +535,16 @@ class FlyerConfigView(LoginRequiredMixin, View):
         if request.POST.get('accept_pay_per_use') == '1' and not config.pay_per_use_accepted:
             config.pay_per_use_accepted = True
             config.pay_per_use_accepted_at = timezone.now()
+
+        if 'template_image' in request.FILES:
+            if config.pay_per_use_accepted and config.template_change_count > 0:
+                billing, _ = FlyerBilling.objects.get_or_create(
+                    event=event,
+                    defaults={'rate_per_flyer': FLYER_PAY_PER_USE_PRICE}
+                )
+                billing.total_amount += 1000
+                billing.save(update_fields=['total_amount', 'updated_at'])
+            config.template_change_count += 1
 
         config.save()
 

@@ -3,6 +3,16 @@
 
 {% block title %}{{ event.title }} - Dashboard - Reckot{% endblock %}
 
+{% block breadcrumbs %}
+{% #breadcrumb class="mb-4" %}
+    {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item href="{% url 'events:list' %}" %}Events{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item %}{{ event.title|truncatewords:3 }}{% /breadcrumb_item %}
+{% /breadcrumb %}
+{% endblock %}
+
 {% block header_title %}
 <div>
     <h1 class="text-lg font-semibold line-clamp-1">{{ event.title }}</h1>
