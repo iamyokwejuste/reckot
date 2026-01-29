@@ -22,6 +22,5 @@ dependencies = [
     "whitenoise==6.8.2",
     "gunicorn==23.0.0",
     "psycopg[binary]==3.2.4",
-    "twilio==9.4.3",
     "weasyprint>=68.0",
 ]

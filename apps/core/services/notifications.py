@@ -1,16 +1,24 @@
+import logging
+import requests
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.conf import settings
 from email.mime.image import MIMEImage
-import logging
 
 logger = logging.getLogger(__name__)
+
+TWILIO_API_BASE = 'https://api.twilio.com/2010-04-01'
+TWILIO_VERIFY_BASE = 'https://verify.twilio.com/v2'
 
 
 class NotificationService:
     @staticmethod
     def get_site_url() -> str:
         return getattr(settings, 'SITE_URL', 'http://127.0.0.1:8000')
+
+    @staticmethod
+    def _get_twilio_auth():
+        return (settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
 
     @classmethod
     def send_email(
@@ -146,23 +154,25 @@ class NotificationService:
                 logger.warning(f"No Twilio sender configured, SMS to {phone_number}: {message}")
                 return True
 
-            from twilio.rest import Client
-            client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+            url = f"{TWILIO_API_BASE}/Accounts/{settings.TWILIO_ACCOUNT_SID}/Messages.json"
+            data = {
+                'To': phone_number,
+                'Body': message,
+            }
 
             if has_messaging_service:
-                client.messages.create(
-                    body=message,
-                    messaging_service_sid=settings.TWILIO_MESSAGING_SERVICE_SID,
-                    to=phone_number
-                )
+                data['MessagingServiceSid'] = settings.TWILIO_MESSAGING_SERVICE_SID
             else:
-                client.messages.create(
-                    body=message,
-                    from_=settings.TWILIO_PHONE_NUMBER,
-                    to=phone_number
-                )
-            logger.info(f"SMS sent to {phone_number}")
-            return True
+                data['From'] = settings.TWILIO_PHONE_NUMBER
+
+            response = requests.post(url, data=data, auth=cls._get_twilio_auth())
+
+            if response.status_code in (200, 201):
+                logger.info(f"SMS sent to {phone_number}")
+                return True
+            else:
+                logger.error(f"Twilio SMS failed: {response.status_code} - {response.text}")
+                return False
 
         except Exception as e:
             logger.error(f"Failed to send SMS to {phone_number}: {e}")
@@ -171,15 +181,22 @@ class NotificationService:
     @classmethod
     def send_otp_sms(cls, phone_number: str, otp_code: str = None, expiry_minutes: int = 10) -> bool:
         try:
-            if settings.TWILIO_VERIFY_SERVICE_SID and settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN:
-                from twilio.rest import Client
-                client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
-                client.verify.v2.services(settings.TWILIO_VERIFY_SERVICE_SID).verifications.create(
-                    to=phone_number,
-                    channel='sms'
-                )
-                logger.info(f"Twilio Verify OTP sent to {phone_number}")
-                return True
+            verify_sid = getattr(settings, 'TWILIO_VERIFY_SERVICE_SID', '')
+            if verify_sid and settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN:
+                url = f"{TWILIO_VERIFY_BASE}/Services/{verify_sid}/Verifications"
+                data = {
+                    'To': phone_number,
+                    'Channel': 'sms'
+                }
+                response = requests.post(url, data=data, auth=cls._get_twilio_auth())
+
+                if response.status_code in (200, 201):
+                    logger.info(f"Twilio Verify OTP sent to {phone_number}")
+                    return True
+                else:
+                    logger.error(f"Twilio Verify failed: {response.status_code} - {response.text}")
+                    return False
+
             elif otp_code:
                 return cls.send_sms(
                     phone_number=phone_number,
@@ -199,14 +216,21 @@ class NotificationService:
     @classmethod
     def verify_otp_sms(cls, phone_number: str, code: str) -> bool:
         try:
-            if settings.TWILIO_VERIFY_SERVICE_SID and settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN:
-                from twilio.rest import Client
-                client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
-                verification_check = client.verify.v2.services(settings.TWILIO_VERIFY_SERVICE_SID).verification_checks.create(
-                    to=phone_number,
-                    code=code
-                )
-                return verification_check.status == 'approved'
+            verify_sid = getattr(settings, 'TWILIO_VERIFY_SERVICE_SID', '')
+            if verify_sid and settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN:
+                url = f"{TWILIO_VERIFY_BASE}/Services/{verify_sid}/VerificationCheck"
+                data = {
+                    'To': phone_number,
+                    'Code': code
+                }
+                response = requests.post(url, data=data, auth=cls._get_twilio_auth())
+
+                if response.status_code in (200, 201):
+                    result = response.json()
+                    return result.get('status') == 'approved'
+                else:
+                    logger.error(f"Twilio Verify check failed: {response.status_code} - {response.text}")
+                    return False
             return False
         except Exception as e:
             logger.error(f"Failed to verify OTP for {phone_number}: {e}")
