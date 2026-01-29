@@ -23,4 +23,5 @@ dependencies = [
     "gunicorn==23.0.0",
     "psycopg[binary]==3.2.4",
     "weasyprint>=68.0",
+    "google-genai>=1.0.0",
 ]

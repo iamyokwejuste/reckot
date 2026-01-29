@@ -431,6 +431,7 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="{% static 'js/richtext.js' %}"></script>
 <script src="{% static 'js/image-compress.js' %}"></script>
+<script src="{% static 'js/ai-assistant.js' %}"></script>
 <script>
 let startPicker = null;
 let endPicker = null;
@@ -506,7 +507,22 @@ window.initDatePickers = function() {
 };
 
 document.addEventListener('DOMContentLoaded', function() {
-    // No form persistence for edit mode
+    if (window.AIComponents) {
+        setTimeout(() => {
+            const descriptionField = document.querySelector('#id_description');
+            if (descriptionField) {
+                const wrapper = descriptionField.closest('.richtext-wrapper') || descriptionField.parentElement;
+                if (wrapper) {
+                    AIComponents.createDescriptionGenerator('#id_description', {
+                        titleSelector: '#id_title'
+                    });
+                    AIComponents.createTranslateButton('#id_description', {
+                        languages: ['French', 'English']
+                    });
+                }
+            }
+        }, 500);
+    }
 });
 </script>
 {% endblock %}

@@ -129,6 +129,10 @@
         </div>
     </div>
 
+    {% if analytics_metrics %}
+    {% include "reports/_ai_insights.html" with metrics_json=analytics_metrics %}
+    {% endif %}
+
     <div class="grid gap-4 lg:grid-cols-2">
         <div class="card p-4 lg:p-6">
             <div class="flex items-center justify-between mb-6">

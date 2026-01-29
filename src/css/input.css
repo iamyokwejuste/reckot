@@ -673,3 +673,60 @@
 .card-overflow-visible {
     overflow: visible !important;
 }
+
+.ai-btn {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+    color: white;
+    border: none;
+    font-size: 0.8125rem;
+    padding: 0.5rem 0.875rem;
+    height: auto;
+    min-height: 2rem;
+}
+
+.ai-btn:hover {
+    background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+    opacity: 1;
+}
+
+.ai-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.ai-tools-wrapper {
+    margin-bottom: 0.75rem;
+}
+
+@media (max-width: 639px) {
+    .ai-tools-wrapper {
+        align-items: flex-start;
+    }
+    .ai-tools-wrapper .flex-wrap {
+        width: 100%;
+    }
+}
+
+.ai-loading {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ai-assistant .ai-messages::-webkit-scrollbar {
+    width: 4px;
+}
+
+.ai-assistant .ai-messages::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.ai-assistant .ai-messages::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 2px;
+}
+
+.ai-caption-output textarea {
+    resize: none;
+    background: var(--color-muted);
+}

@@ -141,6 +141,10 @@
         {% endif %}
     </div>
 
+    {% if event_metrics %}
+    {% include "reports/_ai_insights.html" with metrics_json=event_metrics %}
+    {% endif %}
+
     {% url 'reports:sales_timeline' org_slug=event.organization.slug event_slug=event.slug as timeline_url %}
     <div class="grid gap-6 lg:grid-cols-2">
         <div class="card p-5" x-data="{ period: '7d' }">

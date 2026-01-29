@@ -1,3 +1,4 @@
+import json
 from django.views import View
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -75,8 +76,17 @@ class AnalyticsView(LoginRequiredMixin, View):
             ))
         ).order_by('-revenue')[:5]
 
-        # All events for export modal
         all_events = user_events.order_by('-start_at')[:20]
+
+        analytics_metrics = json.dumps({
+            'total_revenue': float(total_revenue),
+            'tickets_sold': tickets_sold,
+            'check_in_rate': round(checkin_rate, 1),
+            'total_checked_in': checked_in,
+            'active_events': active_events,
+            'upcoming_events_count': upcoming_events.count() if upcoming_events else 0,
+            'top_events_count': len(top_events),
+        })
 
         return render(request, 'reports/analytics.html', {
             'total_revenue': f"{total_revenue:,.0f}",
@@ -87,6 +97,7 @@ class AnalyticsView(LoginRequiredMixin, View):
             'recent_sales': recent_sales,
             'top_events': top_events,
             'all_events': all_events,
+            'analytics_metrics': analytics_metrics,
         })
 
 
@@ -158,8 +169,19 @@ class ReportsDashboardView(LoginRequiredMixin, View):
         ).order_by('-count')
         summary['ticket_breakdown'] = list(ticket_breakdown)
 
-        # Recent activity
         recent_activity = self._get_recent_activity(event)
+
+        event_metrics = json.dumps({
+            'event_title': event.title,
+            'total_tickets': summary.get('total_tickets', 0),
+            'checked_in': summary.get('checked_in', 0),
+            'check_in_rate': summary.get('check_in_rate', 0),
+            'total_revenue': float(summary.get('total_revenue', 0)),
+            'pending_orders': pending_count,
+            'ticket_types': len(revenue_breakdown_list),
+            'days_until_event': (event.start_at.date() - timezone.now().date()).days if event.start_at else 0,
+            'recent_sales_count': len([a for a in recent_activity if a['type'] == 'sale']),
+        })
 
         return render(request, 'reports/dashboard.html', {
             'event': event,
@@ -169,6 +191,7 @@ class ReportsDashboardView(LoginRequiredMixin, View):
             'sales_timeline': sales_timeline_filled,
             'max_daily_sales': max_daily_sales,
             'recent_activity': recent_activity,
+            'event_metrics': event_metrics,
         })
 
     def _get_recent_activity(self, event, limit=5):
