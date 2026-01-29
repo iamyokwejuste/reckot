@@ -7,9 +7,9 @@
 {% #breadcrumb class="mb-4" %}
     {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item href="{% url 'events:list' %}" %}Events{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/events/" %}Events{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item href="{% url 'events:dashboard' event.organization.slug event.slug %}" %}{{ event.title|truncatewords:3 }}{% /breadcrumb_item %}
+    {% #breadcrumb_item %}{{ event.title|truncatewords:3 }}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
     {% #breadcrumb_item %}Reports{% /breadcrumb_item %}
 {% /breadcrumb %}

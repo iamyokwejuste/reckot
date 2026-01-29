@@ -118,33 +118,51 @@
                 <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" name="is_enabled" class="sr-only peer"
                            {% if config and config.is_enabled %}checked{% endif %}>
-                    <div class="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                    <div class="w-11 h-6 bg-zinc-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-offset-2 peer-focus:ring-offset-background peer-focus:ring-emerald-500 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-400 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 peer-checked:after:bg-white"></div>
                 </label>
             </div>
 
             <div class="space-y-4">
-                <div>
+                <div x-data="{ dragging: false, preview: {% if config and config.template_image %}'{{ config.template_image.url }}'{% else %}null{% endif %} }">
                     <label class="block text-sm font-medium mb-2">Template Image</label>
-                    {% if config and config.template_image %}
-                    <div class="mb-3 p-3 rounded-lg bg-muted/50 flex items-center gap-3">
-                        <img src="{{ config.template_image.url }}" alt="Current template" class="w-16 h-16 object-cover rounded">
-                        <div class="flex-1">
-                            <p class="text-sm font-medium">Current Template</p>
-                            <p class="text-xs text-muted-foreground">Uploaded and active</p>
-                        </div>
-                    </div>
-                    <input type="hidden" name="existing_template" value="1">
-                    {% endif %}
                     {% if config and config.pay_per_use_accepted and config.template_change_count > 0 %}
                     <div class="mb-2 p-2 rounded bg-amber-500/10 border border-amber-500/30 text-sm text-amber-600">
                         <i data-lucide="alert-triangle" class="w-4 h-4 inline mr-1"></i>
                         Changing the template will cost <strong>1,000 FCFA</strong>
                     </div>
                     {% endif %}
-                    <input type="file" name="template_image" accept="image/*" class="input w-full"
-                           @change="loadTemplatePreview($event)"
-                           {% if not config %}required{% endif %}>
-                    <p class="text-xs text-muted-foreground mt-1">Recommended size: 1080x1080 pixels</p>
+                    {% if config and config.template_image %}
+                    <input type="hidden" name="existing_template" value="1">
+                    {% endif %}
+                    <div class="border-2 border-dashed border-border rounded-lg p-6 text-center transition-colors"
+                         @dragover.prevent="dragging = true"
+                         @dragleave.prevent="dragging = false"
+                         @drop.prevent="dragging = false; const file = $event.dataTransfer.files[0]; if (file) { $refs.templateInput.files = $event.dataTransfer.files; preview = URL.createObjectURL(file); loadTemplatePreview({ target: $refs.templateInput }); }"
+                         :class="{ 'border-primary bg-primary/5': dragging }">
+                        <input type="file" name="template_image" accept="image/*" x-ref="templateInput"
+                               class="hidden"
+                               @change="preview = URL.createObjectURL($event.target.files[0]); loadTemplatePreview($event)"
+                               {% if not config %}required{% endif %}>
+                        <div x-show="!preview" class="space-y-3">
+                            <div class="w-12 h-12 mx-auto rounded-full bg-muted flex items-center justify-center">
+                                <i data-lucide="image-plus" class="w-6 h-6 text-muted-foreground"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium">Drop your template image here</p>
+                                <p class="text-xs text-muted-foreground mt-1">or click to browse</p>
+                            </div>
+                            {% #button type="button" variant="outline" size="sm" attrs='@click="$refs.templateInput.click()"' %}
+                                Choose File
+                            {% /button %}
+                            <p class="text-xs text-muted-foreground">Recommended: 1080x1080 pixels</p>
+                        </div>
+                        <div x-show="preview" class="space-y-3">
+                            <img :src="preview" class="max-w-[200px] max-h-[200px] mx-auto object-contain rounded-lg border border-border">
+                            {% #button type="button" variant="outline" size="sm" attrs='@click="$refs.templateInput.click()"' %}
+                                Change Image
+                            {% /button %}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

@@ -74,6 +74,9 @@ class AnalyticsView(LoginRequiredMixin, View):
             ))
         ).order_by('-revenue')[:5]
 
+        # All events for export modal
+        all_events = user_events.order_by('-start_at')[:20]
+
         return render(request, 'reports/analytics.html', {
             'total_revenue': f"{total_revenue:,.0f}",
             'tickets_sold': f"{tickets_sold:,}",
@@ -82,6 +85,7 @@ class AnalyticsView(LoginRequiredMixin, View):
             'upcoming_events': upcoming_events,
             'recent_sales': recent_sales,
             'top_events': top_events,
+            'all_events': all_events,
         })
 
 
