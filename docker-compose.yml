@@ -6,6 +6,14 @@ services:
     restart: unless-stopped
     expose:
       - "8000"
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      restart_policy:
+        condition: on-failure
     environment:
       SECRET_KEY: ${SECRET_KEY:-change-me-in-production-use-a-long-random-string}
       DEBUG: ${DEBUG:-False}
@@ -57,6 +65,7 @@ services:
         condition: service_healthy
     volumes:
       - media_data:/app/media
+      - static_data:/app/staticfiles
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
       interval: 10s
@@ -149,3 +158,5 @@ volumes:
     name: reckot_media_data
   backup_data:
     name: reckot_backup_data
+  static_data:
+    name: reckot_static_data
