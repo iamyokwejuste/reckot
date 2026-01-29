@@ -255,6 +255,8 @@ class EventFlyerConfig(models.Model):
 
     event = models.OneToOneField(Event, on_delete=models.CASCADE, related_name='flyer_config')
     is_enabled = models.BooleanField(default=False)
+    pay_per_use_accepted = models.BooleanField(default=False)
+    pay_per_use_accepted_at = models.DateTimeField(null=True, blank=True)
     template_image = models.ImageField(upload_to='flyer_templates/')
     photo_x = models.PositiveIntegerField(default=50)
     photo_y = models.PositiveIntegerField(default=50)
@@ -297,3 +299,51 @@ class FlyerTextField(models.Model):
 
     def __str__(self):
         return f'{self.label} - {self.flyer_config.event.title}'
+
+
+class FlyerGeneration(models.Model):
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='flyer_generations')
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.CharField(max_length=500, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['event', 'created_at']),
+        ]
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'Flyer generated for {self.event.title} at {self.created_at}'
+
+
+class FlyerBilling(models.Model):
+    class Status(models.TextChoices):
+        PENDING = 'PENDING', 'Pending'
+        INVOICED = 'INVOICED', 'Invoiced'
+        PAID = 'PAID', 'Paid'
+
+    event = models.OneToOneField(Event, on_delete=models.CASCADE, related_name='flyer_billing')
+    generation_count = models.PositiveIntegerField(default=0)
+    rate_per_flyer = models.DecimalField(max_digits=10, decimal_places=2, default=25)
+    currency = models.CharField(max_length=3, default='XAF')
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
+    invoiced_at = models.DateTimeField(null=True, blank=True)
+    paid_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['event']),
+        ]
+
+    def __str__(self):
+        return f'Flyer billing for {self.event.title} - {self.generation_count} flyers'
+
+    def update_totals(self):
+        self.generation_count = self.event.flyer_generations.count()
+        self.total_amount = self.generation_count * self.rate_per_flyer
+        self.save(update_fields=['generation_count', 'total_amount', 'updated_at'])

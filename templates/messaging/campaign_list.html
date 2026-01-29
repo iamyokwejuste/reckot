@@ -11,9 +11,11 @@
 {% endblock %}
 
 {% block header_actions %}
-<a href="{% url 'messaging:template_list' org_slug=organization.slug %}" class="btn btn-outline btn-md">
-    <i data-lucide="file-text" class="w-4 h-4"></i>
-    Templates
+<a href="{% url 'messaging:template_list' org_slug=organization.slug %}">
+    {% #button variant="outline" %}
+        <i data-lucide="file-text" class="w-4 h-4"></i>
+        Templates
+    {% /button %}
 </a>
 {% endblock %}
 
@@ -67,9 +69,10 @@
                     {% elif campaign.status == 'FAILED' %}
                     <span class="badge badge-destructive">Failed</span>
                     {% endif %}
-                    <a href="{% url 'messaging:campaign_detail' org_slug=organization.slug campaign_ref=campaign.reference %}"
-                       class="btn btn-outline btn-sm">
-                        View
+                    <a href="{% url 'messaging:campaign_detail' org_slug=organization.slug campaign_ref=campaign.reference %}">
+                        {% #button variant="outline" size="sm" %}
+                            View
+                        {% /button %}
                     </a>
                 </div>
             </div>

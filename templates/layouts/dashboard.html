@@ -96,7 +96,7 @@
         function createToastContainer() {
             const container = document.createElement('div');
             container.id = 'toast-container';
-            container.className = 'fixed top-4 right-4 z-[100] flex flex-col gap-2 max-w-sm w-full pointer-events-none';
+            container.className = 'fixed bottom-4 right-4 z-[100] flex flex-col gap-2 max-w-sm w-full pointer-events-none';
             document.body.appendChild(container);
             return container;
         }
@@ -107,7 +107,7 @@
     </style>
     {% block extra_head %}{% endblock %}
 </head>
-<body class="min-h-full bg-background text-foreground antialiased" hx-boost="true">
+<body class="min-h-screen bg-background text-foreground antialiased" hx-boost="true">
     {% include "partials/messages.html" %}
     <div x-data="{ sidebarOpen: false, collapsed: localStorage.getItem('sidebarCollapsed') === 'true' }"
          x-init="$watch('collapsed', val => localStorage.setItem('sidebarCollapsed', val))"

@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
+{% load slippers %}
 
 {% block title %}Manage Tickets - {{ event.title }} - Reckot{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+{% endblock %}
 
 {% block content %}
 <div class="max-w-4xl mx-auto py-12 px-4">
@@ -9,9 +14,11 @@
             <h1 class="text-2xl font-bold">Manage Ticket Types</h1>
             <p class="text-muted-foreground mt-1">{{ event.title }}</p>
         </div>
-        <a href="{% url 'events:detail' org_slug=event.organization.slug event_slug=event.slug %}" class="btn btn-outline">
-            <i data-lucide="arrow-left" class="mr-2 h-4 w-4"></i>
-            Back to Event
+        <a href="{% url 'events:detail' org_slug=event.organization.slug event_slug=event.slug %}">
+            {% #button variant="outline" %}
+                <i data-lucide="arrow-left" class="mr-2 h-4 w-4"></i>
+                Back to Event
+            {% /button %}
         </a>
     </div>
 
@@ -134,21 +141,11 @@
                     <h3 class="text-sm font-semibold mb-4">Sales Window (Early Bird / Limited Time)</h3>
                     <p class="text-xs text-muted-foreground mb-4">Leave empty for tickets to be always available. Set dates to create early bird or limited time offers.</p>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div>
-                            <label for="id_sales_start" class="block text-sm font-medium mb-2">Sales Start</label>
-                            <input type="datetime-local" name="sales_start" id="id_sales_start"
-                                   value="{{ form.sales_start.value|default:'' }}"
-                                   class="input w-full">
-                            <p class="text-xs text-muted-foreground mt-1">When ticket sales begin</p>
-                        </div>
+                        {% #datepicker name="sales_start" id="id_sales_start" label="Sales Start" placeholder="Select date and time" value=form.sales_start.value|default:'' enable_time=True min_date="today" help_text="When ticket sales begin" %}
+                        {% /datepicker %}
 
-                        <div>
-                            <label for="id_sales_end" class="block text-sm font-medium mb-2">Sales End</label>
-                            <input type="datetime-local" name="sales_end" id="id_sales_end"
-                                   value="{{ form.sales_end.value|default:'' }}"
-                                   class="input w-full">
-                            <p class="text-xs text-muted-foreground mt-1">When ticket sales end (e.g., early bird deadline)</p>
-                        </div>
+                        {% #datepicker name="sales_end" id="id_sales_end" label="Sales End" placeholder="Select date and time" value=form.sales_end.value|default:'' enable_time=True min_date="today" help_text="When ticket sales end (e.g., early bird deadline)" %}
+                        {% /datepicker %}
                     </div>
                 </div>
 
@@ -174,13 +171,17 @@
                 {% endif %}
 
                 <div class="pt-2">
-                    <button type="submit" class="btn btn-primary">
+                    {% #button type="submit" variant="default" %}
                         <i data-lucide="plus" class="mr-2 h-4 w-4"></i>
                         Add Ticket Type
-                    </button>
+                    {% /button %}
                 </div>
             </form>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+{% include "partials/datepicker_init.html" %}
 {% endblock %}

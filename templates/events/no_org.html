@@ -7,9 +7,11 @@
 <div class="max-w-xl mx-auto py-12 px-4 text-center">
     {% #empty_state icon="building-2" title="No Organization Found" description="You need to create or be invited to an organization before you can create events." %}
         <p class="text-sm text-muted-foreground mt-4">Please contact your administrator or create an organization to get started.</p>
-        <a href="{% url 'home' %}" class="btn btn-primary btn-md mt-6 inline-flex">
-            <i data-lucide="home" class="mr-2 h-4 w-4"></i>
-            Back to Home
+        <a href="{% url 'home' %}" class="mt-6 inline-flex">
+            {% #button variant="default" %}
+                <i data-lucide="home" class="mr-2 h-4 w-4"></i>
+                Back to Home
+            {% /button %}
         </a>
     {% /empty_state %}
 </div>

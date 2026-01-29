@@ -245,18 +245,20 @@ class InvoiceDownloadView(LoginRequiredMixin, View):
 
 class RefundListView(LoginRequiredMixin, View):
     def get(self, request):
-        refunds = Refund.objects.filter(
+        base_refunds = Refund.objects.filter(
             payment__booking__event__organization__members=request.user
-        ).select_related(
+        )
+
+        stats = {
+            'pending': base_refunds.filter(status=Refund.Status.PENDING).count(),
+            'approved': base_refunds.filter(status=Refund.Status.APPROVED).count(),
+            'processed': base_refunds.filter(status=Refund.Status.PROCESSED).count(),
+        }
+
+        refunds = base_refunds.select_related(
             'payment__booking__user',
             'payment__booking__event'
         ).order_by('-created_at')[:100]
-
-        stats = {
-            'pending': refunds.filter(status=Refund.Status.PENDING).count(),
-            'approved': refunds.filter(status=Refund.Status.APPROVED).count(),
-            'processed': refunds.filter(status=Refund.Status.PROCESSED).count(),
-        }
 
         return render(request, 'payments/refunds/list.html', {
             'refunds': refunds,

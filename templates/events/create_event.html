@@ -234,8 +234,11 @@
                         <div class="relative">
                             <input type="text" name="start_at" id="id_start_at" required
                                    placeholder="Select date and time"
-                                   class="input flatpickr-datetime cursor-pointer" :class="{ 'border-red-500': errors.startAt }"
+                                   class="input pl-10 flatpickr-datetime cursor-pointer" :class="{ 'border-red-500': errors.startAt }"
                                    x-model="startAt" @change="clearError('startAt')">
+                            <div class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                                <i data-lucide="calendar-clock" class="w-4 h-4"></i>
+                            </div>
                         </div>
                         <p x-show="errors.startAt" x-cloak class="text-sm text-red-500 mt-1" x-text="errors.startAt"></p>
                     </div>
@@ -244,8 +247,11 @@
                         <div class="relative">
                             <input type="text" name="end_at" id="id_end_at" required
                                    placeholder="Select date and time"
-                                   class="input flatpickr-datetime cursor-pointer" :class="{ 'border-red-500': errors.endAt }"
+                                   class="input pl-10 flatpickr-datetime cursor-pointer" :class="{ 'border-red-500': errors.endAt }"
                                    x-model="endAt" @change="clearError('endAt')">
+                            <div class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                                <i data-lucide="calendar-clock" class="w-4 h-4"></i>
+                            </div>
                         </div>
                         <p x-show="errors.endAt" x-cloak class="text-sm text-red-500 mt-1" x-text="errors.endAt"></p>
                     </div>
@@ -384,24 +390,27 @@
         </div>
 
         <div class="flex items-center justify-between mt-6">
-            <button type="button" @click="prevStep()" x-show="step > 1"
-                    class="btn btn-outline btn-md">
-                <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                Back
-            </button>
+            <template x-if="step > 1">
+                {% #button type="button" variant="outline" attrs='@click="prevStep()"' %}
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    Back
+                {% /button %}
+            </template>
             <div x-show="step === 1"></div>
 
-            <button type="button" @click="nextStep()" x-show="step < totalSteps"
-                    class="btn btn-primary btn-md">
-                Next
-                <i data-lucide="arrow-right" class="w-4 h-4"></i>
-            </button>
+            <template x-if="step < totalSteps">
+                {% #button type="button" variant="default" attrs='@click="nextStep()"' %}
+                    Next
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                {% /button %}
+            </template>
 
-            <button type="submit" x-show="step === totalSteps" x-cloak
-                    class="btn btn-primary btn-md">
-                Create Event
-                <i data-lucide="check" class="w-4 h-4"></i>
-            </button>
+            <template x-if="step === totalSteps">
+                {% #button type="submit" variant="default" %}
+                    Create Event
+                    <i data-lucide="check" class="w-4 h-4"></i>
+                {% /button %}
+            </template>
         </div>
     </form>
 </div>

@@ -1,38 +1,31 @@
-{% extends "base.html" %}
+{% extends "layouts/dashboard.html" %}
 {% load slippers %}
 
 {% block title %}Check-in - {{ event.title }} - Reckot{% endblock %}
 
+{% block header_title %}
+<div>
+    <h1 class="text-lg font-semibold">{{ event.title }}</h1>
+    <p class="text-sm text-muted-foreground">Check-in Dashboard</p>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'checkin:verify' org_slug=event.organization.slug event_slug=event.slug %}">
+    {% #button variant="default" size="sm" %}
+        <i data-lucide="scan" class="mr-2 h-4 w-4"></i>
+        Scan Tickets
+    {% /button %}
+</a>
+{% endblock %}
+
 {% block content %}
-<div class="container py-8">
-    {% #breadcrumb %}
-        {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
-        {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-        {% #breadcrumb_item href="/events/" %}Events{% /breadcrumb_item %}
-        {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-        {% #breadcrumb_item %}Check-in{% /breadcrumb_item %}
-    {% /breadcrumb %}
-
-    <div class="mt-6 flex items-center justify-between" data-animate="fade-up">
-        <div>
-            <h1 class="text-2xl font-bold">{{ event.title }}</h1>
-            <p class="text-muted-foreground">Check-in Dashboard</p>
-        </div>
-        <a href="{% url 'checkin:verify' org_slug=event.organization.slug event_slug=event.slug %}">
-            {% #button variant="gradient" %}
-                <i data-lucide="scan" class="mr-2 h-4 w-4"></i>
-                Scan Tickets
-            {% /button %}
-        </a>
+<div class="space-y-6">
+    <div id="stats-panel" hx-get="{% url 'checkin:stats' org_slug=event.organization.slug event_slug=event.slug %}" hx-trigger="every 10s">
+        {% include "checkin/_stats.html" %}
     </div>
 
-    <div class="mt-8 grid gap-6 md:grid-cols-3">
-        <div id="stats-panel" hx-get="{% url 'checkin:stats' org_slug=event.organization.slug event_slug=event.slug %}" hx-trigger="every 10s">
-            {% include "checkin/_stats.html" %}
-        </div>
-    </div>
-
-    <div class="mt-8 grid gap-6 lg:grid-cols-2">
+    <div class="grid gap-6 lg:grid-cols-2">
         <div data-animate="fade-up" data-delay="0.1">
             {% #card %}
                 <h2 class="text-lg font-semibold mb-4">Recent Check-ins</h2>

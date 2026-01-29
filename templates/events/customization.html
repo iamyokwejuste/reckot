@@ -13,13 +13,17 @@
 {% block content %}
 <div class="max-w-4xl mx-auto space-y-6">
     <div class="flex items-center justify-between">
-        <a href="{% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug %}" class="btn btn-outline btn-sm">
-            <i data-lucide="arrow-left" class="w-4 h-4"></i>
-            Back to Event
+        <a href="{% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug %}">
+            {% #button variant="outline" size="sm" %}
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                Back to Event
+            {% /button %}
         </a>
-        <a href="{% url 'events:public_detail' org_slug=event.organization.slug event_slug=event.slug %}" target="_blank" class="btn btn-outline btn-sm">
-            <i data-lucide="external-link" class="w-4 h-4"></i>
-            Preview
+        <a href="{% url 'events:public_detail' org_slug=event.organization.slug event_slug=event.slug %}" target="_blank">
+            {% #button variant="outline" size="sm" %}
+                <i data-lucide="external-link" class="w-4 h-4"></i>
+                Preview
+            {% /button %}
         </a>
     </div>
 
@@ -184,13 +188,15 @@
         </div>
 
         <div class="flex items-center justify-end gap-3">
-            <a href="{% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug %}" class="btn btn-outline btn-md">
-                Cancel
+            <a href="{% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug %}">
+                {% #button variant="outline" %}
+                    Cancel
+                {% /button %}
             </a>
-            <button type="submit" class="btn btn-primary btn-md">
+            {% #button type="submit" variant="default" %}
                 <i data-lucide="save" class="w-4 h-4"></i>
                 Save Changes
-            </button>
+            {% /button %}
         </div>
     </form>
 </div>

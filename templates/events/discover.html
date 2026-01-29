@@ -18,10 +18,10 @@
             <div class="flex-1">
                 <input type="text" name="location" value="{{ location }}" placeholder="Location..." class="input w-full">
             </div>
-            <button type="submit" class="btn btn-primary">
+            {% #button type="submit" variant="default" %}
                 <i data-lucide="search" class="w-4 h-4 mr-2"></i>
                 Search
-            </button>
+            {% /button %}
         </div>
     </form>
 
@@ -58,11 +58,15 @@
     {% if events.has_other_pages %}
     <div class="flex justify-center mt-8 gap-2">
         {% if events.has_previous %}
-        <a href="?page={{ events.previous_page_number }}{% if search %}&q={{ search }}{% endif %}{% if location %}&location={{ location }}{% endif %}" class="btn btn-outline btn-sm">Previous</a>
+        <a href="?page={{ events.previous_page_number }}{% if search %}&q={{ search }}{% endif %}{% if location %}&location={{ location }}{% endif %}">
+            {% #button variant="outline" size="sm" %}Previous{% /button %}
+        </a>
         {% endif %}
-        <span class="btn btn-ghost btn-sm">Page {{ events.number }} of {{ events.paginator.num_pages }}</span>
+        {% #button variant="ghost" size="sm" %}Page {{ events.number }} of {{ events.paginator.num_pages }}{% /button %}
         {% if events.has_next %}
-        <a href="?page={{ events.next_page_number }}{% if search %}&q={{ search }}{% endif %}{% if location %}&location={{ location }}{% endif %}" class="btn btn-outline btn-sm">Next</a>
+        <a href="?page={{ events.next_page_number }}{% if search %}&q={{ search }}{% endif %}{% if location %}&location={{ location }}{% endif %}">
+            {% #button variant="outline" size="sm" %}Next{% /button %}
+        </a>
         {% endif %}
     </div>
     {% endif %}

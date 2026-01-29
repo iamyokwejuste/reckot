@@ -1,3 +1,4 @@
+{% load slippers %}
 <!DOCTYPE html>
 <html lang="en" class="{% if widget.theme == 'DARK' %}dark{% endif %}">
 <head>
@@ -60,8 +61,10 @@
             {% endfor %}
         </div>
 
-        <a href="/events/{{ event.organization.slug }}/{{ event.slug }}/" target="_blank" class="btn btn-primary" style="width: 100%;">
+        <a href="/events/{{ event.organization.slug }}/{{ event.slug }}/" target="_blank" style="width: 100%; display: block;">
+            {% #button variant="default" class="w-full" style="background: {{ widget.button_color }};" %}
             {{ widget.button_text }}
+            {% /button %}
         </a>
     </div>
 

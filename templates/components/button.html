@@ -11,17 +11,17 @@
         focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
         disabled:pointer-events-none disabled:opacity-50
         {% if variant == 'default' or variant == 'gradient' %}
-            bg-gradient-primary text-white rounded-full shadow-lg hover:shadow-xl
+            bg-accent text-accent-foreground rounded-full shadow-lg hover:shadow-xl hover:opacity-90
         {% elif variant == 'destructive' %}
-            bg-destructive text-white rounded-full shadow-lg hover:shadow-xl
+            bg-destructive text-destructive-foreground rounded-full shadow-lg hover:shadow-xl hover:opacity-90
         {% elif variant == 'outline' %}
-            border-2 border-border bg-transparent hover:bg-muted hover:border-primary/50 rounded-full text-foreground
+            border-2 border-border bg-transparent hover:bg-muted rounded-full text-foreground
         {% elif variant == 'secondary' %}
-            bg-secondary text-secondary-foreground rounded-full shadow-sm hover:shadow-md
+            bg-secondary text-secondary-foreground rounded-full shadow-sm hover:shadow-md hover:opacity-90
         {% elif variant == 'ghost' %}
-            hover:bg-muted rounded-lg
+            hover:bg-muted rounded-lg text-foreground
         {% elif variant == 'link' %}
-            text-primary underline-offset-4 hover:underline
+            text-foreground underline-offset-4 hover:underline
         {% endif %}
         {% if size == 'default' %}
             h-11 px-6 text-sm

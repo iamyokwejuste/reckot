@@ -22,14 +22,18 @@
 {% block header_actions %}
 <div class="flex items-center gap-2">
     {% if can_manage_members %}
-    <a href="{% url 'orgs:edit' organization.slug %}" class="btn btn-outline btn-sm">
-        <i data-lucide="settings" class="w-4 h-4"></i>
-        Settings
+    <a href="{% url 'orgs:edit' organization.slug %}">
+        {% #button variant="outline" size="sm" %}
+            <i data-lucide="settings" class="w-4 h-4"></i>
+            Settings
+        {% /button %}
     </a>
     {% endif %}
-    <a href="{% url 'events:create' %}" class="btn btn-primary btn-sm">
-        <i data-lucide="plus" class="w-4 h-4"></i>
-        New Event
+    <a href="{% url 'events:create' %}">
+        {% #button variant="default" size="sm" %}
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            New Event
+        {% /button %}
     </a>
 </div>
 {% endblock %}
@@ -111,9 +115,11 @@
                 <h2 class="font-semibold">Team Members</h2>
                 <div class="flex items-center gap-2">
                     {% if can_invite %}
-                    <a href="{% url 'orgs:invite_member' organization.slug %}" class="btn btn-outline btn-sm">
-                        <i data-lucide="user-plus" class="w-4 h-4"></i>
-                        Invite
+                    <a href="{% url 'orgs:invite_member' organization.slug %}">
+                        {% #button variant="outline" size="sm" %}
+                            <i data-lucide="user-plus" class="w-4 h-4"></i>
+                            Invite
+                        {% /button %}
                     </a>
                     {% endif %}
                     {% if can_manage_members %}

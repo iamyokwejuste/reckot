@@ -1,0 +1,43 @@
+{% load slippers %}
+
+<div class="datepicker-wrapper" {{ attrs }}>
+    {% if label %}
+    <label for="{{ id|default:name }}" class="block text-sm font-medium mb-2">
+        {{ label }}
+        {% if required %}<span class="text-destructive">*</span>{% endif %}
+    </label>
+    {% endif %}
+
+    <div class="relative">
+        <input
+            type="text"
+            name="{{ name }}"
+            id="{{ id|default:name }}"
+            {% if value %}value="{{ value }}"{% endif %}
+            placeholder="{{ placeholder|default:'Select date' }}"
+            class="input w-full pl-10 cursor-pointer {{ class }}"
+            {% if required %}required{% endif %}
+            data-datepicker
+            {% if enable_time %}data-enable-time="true"{% endif %}
+            {% if time_24hr %}data-time-24hr="true"{% endif %}
+            {% if min_date %}data-min-date="{{ min_date }}"{% endif %}
+            {% if max_date %}data-max-date="{{ max_date }}"{% endif %}
+            readonly
+        >
+        <div class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+            {% if enable_time %}
+            <i data-lucide="calendar-clock" class="w-4 h-4"></i>
+            {% else %}
+            <i data-lucide="calendar" class="w-4 h-4"></i>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if help_text %}
+    <p class="text-xs text-muted-foreground mt-1">{{ help_text }}</p>
+    {% endif %}
+
+    {% if error %}
+    <p class="text-xs text-destructive mt-1">{{ error }}</p>
+    {% endif %}
+</div>

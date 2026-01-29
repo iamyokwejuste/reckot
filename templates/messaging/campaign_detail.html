@@ -14,10 +14,10 @@
 {% if campaign.status == 'DRAFT' %}
 <form method="post" action="{% url 'messaging:campaign_send' org_slug=organization.slug campaign_ref=campaign.reference %}">
     {% csrf_token %}
-    <button type="submit" class="btn btn-primary btn-md">
+    {% #button variant="default" type="submit" %}
         <i data-lucide="send" class="w-4 h-4"></i>
         Send Campaign
-    </button>
+    {% /button %}
 </form>
 {% endif %}
 {% endblock %}
@@ -186,9 +186,11 @@
     </div>
 
     <div class="flex items-center gap-3">
-        <a href="{% url 'messaging:campaign_list' org_slug=organization.slug %}" class="btn btn-outline btn-md">
-            <i data-lucide="arrow-left" class="w-4 h-4"></i>
-            Back to Campaigns
+        <a href="{% url 'messaging:campaign_list' org_slug=organization.slug %}">
+            {% #button variant="outline" %}
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                Back to Campaigns
+            {% /button %}
         </a>
     </div>
 </div>

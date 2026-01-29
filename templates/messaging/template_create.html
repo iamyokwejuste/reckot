@@ -83,13 +83,15 @@
         </div>
 
         <div class="flex items-center justify-between gap-4">
-            <a href="{% url 'messaging:template_list' org_slug=organization.slug %}" class="btn btn-outline btn-md">
-                Cancel
+            <a href="{% url 'messaging:template_list' org_slug=organization.slug %}">
+                {% #button variant="outline" %}
+                    Cancel
+                {% /button %}
             </a>
-            <button type="submit" class="btn btn-primary btn-md">
+            {% #button variant="default" type="submit" %}
                 <i data-lucide="save" class="w-4 h-4"></i>
                 Save Template
-            </button>
+            {% /button %}
         </div>
     </form>
 </div>

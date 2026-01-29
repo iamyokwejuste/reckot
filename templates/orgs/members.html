@@ -12,17 +12,23 @@
 
 {% block header_actions %}
 <div class="flex items-center gap-2">
-    <a href="{% url 'orgs:detail' organization.slug %}" class="btn btn-outline btn-sm">
-        <i data-lucide="arrow-left" class="w-4 h-4"></i>
-        Back
+    <a href="{% url 'orgs:detail' organization.slug %}">
+        {% #button variant="outline" size="sm" %}
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            Back
+        {% /button %}
     </a>
-    <a href="{% url 'orgs:bulk_invite' organization.slug %}" class="btn btn-outline btn-sm">
-        <i data-lucide="users" class="w-4 h-4"></i>
-        Bulk Import
+    <a href="{% url 'orgs:bulk_invite' organization.slug %}">
+        {% #button variant="outline" size="sm" %}
+            <i data-lucide="users" class="w-4 h-4"></i>
+            Bulk Import
+        {% /button %}
     </a>
-    <a href="{% url 'orgs:invite_member' organization.slug %}" class="btn btn-primary btn-sm">
-        <i data-lucide="user-plus" class="w-4 h-4"></i>
-        Invite
+    <a href="{% url 'orgs:invite_member' organization.slug %}">
+        {% #button variant="default" size="sm" %}
+            <i data-lucide="user-plus" class="w-4 h-4"></i>
+            Invite
+        {% /button %}
     </a>
 </div>
 {% endblock %}

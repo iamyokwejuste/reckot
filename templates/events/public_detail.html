@@ -49,21 +49,29 @@
                 <div class="card p-6" x-data="{ shareOpen: false }">
                     <h3 class="font-semibold mb-4">Share this event</h3>
                     <div class="flex flex-wrap gap-2">
-                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank" class="btn btn-outline btn-sm" @click="$refs.shareTrack.submit()">
-                            <i data-lucide="facebook" class="w-4 h-4"></i>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank" @click="$refs.shareTrack.submit()">
+                            {% #button variant="outline" size="sm" %}
+                                <i data-lucide="facebook" class="w-4 h-4"></i>
+                            {% /button %}
                         </a>
-                        <a href="https://twitter.com/intent/tweet?text={{ event.title|urlencode }}&url={{ request.build_absolute_uri }}" target="_blank" class="btn btn-outline btn-sm">
-                            <i data-lucide="twitter" class="w-4 h-4"></i>
+                        <a href="https://twitter.com/intent/tweet?text={{ event.title|urlencode }}&url={{ request.build_absolute_uri }}" target="_blank">
+                            {% #button variant="outline" size="sm" %}
+                                <i data-lucide="twitter" class="w-4 h-4"></i>
+                            {% /button %}
                         </a>
-                        <a href="https://wa.me/?text={{ event.title|urlencode }}%20{{ request.build_absolute_uri }}" target="_blank" class="btn btn-outline btn-sm">
-                            <i data-lucide="message-circle" class="w-4 h-4"></i>
+                        <a href="https://wa.me/?text={{ event.title|urlencode }}%20{{ request.build_absolute_uri }}" target="_blank">
+                            {% #button variant="outline" size="sm" %}
+                                <i data-lucide="message-circle" class="w-4 h-4"></i>
+                            {% /button %}
                         </a>
-                        <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.build_absolute_uri }}" target="_blank" class="btn btn-outline btn-sm">
-                            <i data-lucide="linkedin" class="w-4 h-4"></i>
+                        <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.build_absolute_uri }}" target="_blank">
+                            {% #button variant="outline" size="sm" %}
+                                <i data-lucide="linkedin" class="w-4 h-4"></i>
+                            {% /button %}
                         </a>
-                        <button type="button" class="btn btn-outline btn-sm" @click="navigator.clipboard.writeText('{{ request.build_absolute_uri }}'); $dispatch('notice', {type: 'success', text: 'Link copied!'})">
+                        {% #button type="button" variant="outline" size="sm" attrs="@click=\"navigator.clipboard.writeText('{{ request.build_absolute_uri }}'); $dispatch('notice', {type: 'success', text: 'Link copied!'})\"" %}
                             <i data-lucide="link" class="w-4 h-4"></i>
-                        </button>
+                        {% /button %}
                     </div>
                 </div>
 
@@ -71,9 +79,11 @@
                 <div class="card p-6 mt-6 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
                     <h3 class="font-semibold mb-2">I Will Be There!</h3>
                     <p class="text-sm text-muted-foreground mb-4">Create your personalized flyer to share</p>
-                    <a href="{% url 'events:flyer_generator' org_slug=event.organization.slug event_slug=event.slug %}" class="btn btn-primary btn-sm">
-                        <i data-lucide="image" class="w-4 h-4 mr-2"></i>
-                        Create My Flyer
+                    <a href="{% url 'events:flyer_generator' org_slug=event.organization.slug event_slug=event.slug %}">
+                        {% #button variant="default" size="sm" %}
+                            <i data-lucide="image" class="w-4 h-4 mr-2"></i>
+                            Create My Flyer
+                        {% /button %}
                     </a>
                 </div>
                 {% endif %}
@@ -189,9 +199,9 @@
                                 <input type="text" name="coupon_code" x-model="couponCode"
                                        placeholder="Enter code" class="input flex-1 uppercase font-mono"
                                        @input.debounce.500ms="validateCoupon()">
-                                <button type="button" class="btn btn-outline btn-sm" @click="validateCoupon()">
+                                {% #button type="button" variant="outline" size="sm" attrs='@click="validateCoupon()"' %}
                                     Apply
-                                </button>
+                                {% /button %}
                             </div>
                             <div x-show="couponValid === true" class="mt-2 text-sm text-success flex items-center gap-1" x-cloak>
                                 <i data-lucide="check-circle" class="w-4 h-4"></i>
@@ -233,10 +243,10 @@
                         </div>
                         {% endif %}
 
-                        <button type="submit" class="btn btn-primary w-full">
+                        {% #button type="submit" variant="default" class="w-full" %}
                             Get Tickets
                             <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                        </button>
+                        {% /button %}
                     </form>
                     {% else %}
                     <p class="text-muted-foreground text-sm">No tickets available at this time.</p>

@@ -11,9 +11,11 @@
 {% endblock %}
 
 {% block header_actions %}
-<a href="{% url 'events:coupon_create' %}" class="btn btn-primary btn-sm">
-    <i data-lucide="plus" class="w-4 h-4"></i>
-    Create Coupon
+<a href="{% url 'events:coupon_create' %}">
+    {% #button variant="default" size="sm" %}
+        <i data-lucide="plus" class="w-4 h-4"></i>
+        Create Coupon
+    {% /button %}
 </a>
 {% endblock %}
 
@@ -113,9 +115,11 @@
             </div>
             <h3 class="text-lg font-semibold mb-2">No coupons yet</h3>
             <p class="text-muted-foreground mb-6">Create discount codes to offer special pricing for your events.</p>
-            <a href="{% url 'events:coupon_create' %}" class="btn btn-primary btn-md">
-                <i data-lucide="plus" class="w-4 h-4"></i>
-                Create Coupon
+            <a href="{% url 'events:coupon_create' %}">
+                {% #button variant="default" %}
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    Create Coupon
+                {% /button %}
             </a>
         </div>
         {% endif %}

@@ -63,13 +63,15 @@
         </div>
 
         <div class="flex items-center gap-4">
-            <a href="{% url 'marketing:affiliate_list' org_slug=organization.slug %}" class="btn btn-outline btn-md">
+            <a href="{% url 'marketing:affiliate_list' org_slug=organization.slug %}">
+                {% #button variant="outline" %}
                 Cancel
+                {% /button %}
             </a>
-            <button type="submit" class="btn btn-primary btn-md">
+            {% #button type="submit" variant="default" %}
                 <i data-lucide="plus" class="w-4 h-4"></i>
                 Create Link
-            </button>
+            {% /button %}
         </div>
     </form>
 </div>

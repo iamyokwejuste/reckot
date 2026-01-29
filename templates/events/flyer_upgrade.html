@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load slippers %}
 
 {% block title %}Upgrade to Access - {{ event.title }}{% endblock %}
 
@@ -40,9 +41,17 @@
         </div>
 
         <div class="flex flex-col gap-3">
-            <a href="{% url 'events:public_detail' org_slug=event.organization.slug event_slug=event.slug %}" class="btn btn-outline">
-                <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i>
-                Back to Event
+            <a href="mailto:support@reckot.com?subject=Upgrade%20Request%20-%20{{ event.organization.name|urlencode }}&body=Hi%2C%0A%0AI%20would%20like%20to%20upgrade%20my%20organization%20%22{{ event.organization.name|urlencode }}%22%20to%20the%20Starter%20plan%20to%20access%20the%20flyer%20generator%20feature.%0A%0AThank%20you!">
+                {% #button variant="default" %}
+                    <i data-lucide="sparkles" class="w-4 h-4 mr-2"></i>
+                    Request Upgrade
+                {% /button %}
+            </a>
+            <a href="{% url 'events:public_detail' org_slug=event.organization.slug event_slug=event.slug %}">
+                {% #button variant="outline" %}
+                    <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i>
+                    Back to Event
+                {% /button %}
             </a>
         </div>
     </div>

@@ -11,9 +11,11 @@
 {% endblock %}
 
 {% block header_actions %}
-<a href="{% url 'events:create' %}" class="btn btn-primary btn-sm">
-    <i data-lucide="plus" class="w-4 h-4"></i>
-    Create Event
+<a href="{% url 'events:create' %}">
+    {% #button variant="default" size="sm" %}
+        <i data-lucide="plus" class="w-4 h-4"></i>
+        Create Event
+    {% /button %}
 </a>
 {% endblock %}
 
@@ -55,17 +57,23 @@
             </div>
 
             <div class="pt-3 border-t border-border flex flex-wrap gap-2">
-                <a href="{% url 'events:dashboard' event.organization.slug event.slug %}" class="btn btn-outline btn-sm">
-                    <i data-lucide="settings" class="w-3.5 h-3.5"></i>
-                    Manage
+                <a href="{% url 'events:dashboard' event.organization.slug event.slug %}">
+                    {% #button variant="outline" size="sm" %}
+                        <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+                        Manage
+                    {% /button %}
                 </a>
-                <a href="{% url 'checkin:dashboard' event.organization.slug event.slug %}" class="btn btn-outline btn-sm">
-                    <i data-lucide="scan" class="w-3.5 h-3.5"></i>
-                    Check-in
+                <a href="{% url 'checkin:dashboard' event.organization.slug event.slug %}">
+                    {% #button variant="outline" size="sm" %}
+                        <i data-lucide="scan" class="w-3.5 h-3.5"></i>
+                        Check-in
+                    {% /button %}
                 </a>
-                <a href="{% url 'reports:export_center' event.organization.slug event.slug %}" class="btn btn-outline btn-sm">
-                    <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                    Export
+                <a href="{% url 'reports:export_center' event.organization.slug event.slug %}">
+                    {% #button variant="outline" size="sm" %}
+                        <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                        Export
+                    {% /button %}
                 </a>
             </div>
         {% /card %}
@@ -73,9 +81,11 @@
     </div>
     {% else %}
     {% #empty_state icon="calendar" title="No events yet" description="Get started by creating your first event" %}
-        <a href="{% url 'events:create' %}" class="btn btn-primary btn-md">
-            <i data-lucide="plus" class="w-4 h-4"></i>
-            Create Event
+        <a href="{% url 'events:create' %}">
+            {% #button variant="default" %}
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                Create Event
+            {% /button %}
         </a>
     {% /empty_state %}
     {% endif %}

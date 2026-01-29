@@ -11,9 +11,11 @@
 {% endblock %}
 
 {% block header_actions %}
-<a href="{% url 'reports:dashboard' event.organization.slug event.slug %}" class="btn btn-outline btn-sm">
-    <i data-lucide="arrow-left" class="w-4 h-4"></i>
-    Back to Reports
+<a href="{% url 'reports:dashboard' event.organization.slug event.slug %}">
+    {% #button variant="outline" size="sm" %}
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        Back to Reports
+    {% /button %}
 </a>
 {% endblock %}
 
@@ -150,14 +152,14 @@
         <input type="hidden" name="format" :value="selectedFormat">
 
         <div class="flex items-center gap-4">
-            <button type="submit" class="btn btn-primary btn-md" :disabled="generating">
+            {% #button type="submit" variant="default" attrs=':disabled="generating"' %}
                 <i x-show="!generating" data-lucide="download" class="w-4 h-4"></i>
                 <i x-show="generating" x-cloak data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
                 <span x-text="generating ? 'Generating...' : 'Generate & Download'"></span>
-            </button>
-            <button type="button" @click="selectedType = ''; selectedFormat = 'PDF'" class="btn btn-outline btn-md">
+            {% /button %}
+            {% #button type="button" variant="outline" attrs="@click=\"selectedType = ''; selectedFormat = 'PDF'\"" %}
                 Reset Selection
-            </button>
+            {% /button %}
         </div>
     </form>
 
@@ -182,9 +184,11 @@
                         <p class="text-xs text-muted-foreground">{{ export.created_at|date:"M j, Y g:i A" }}</p>
                     </div>
                 </div>
-                <a href="{% url 'reports:download' export.reference %}" class="btn btn-outline btn-sm">
-                    <i data-lucide="download" class="w-4 h-4"></i>
-                    Download
+                <a href="{% url 'reports:download' export.reference %}">
+                    {% #button variant="outline" size="sm" %}
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        Download
+                    {% /button %}
                 </a>
             </div>
             {% endfor %}

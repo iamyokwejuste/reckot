@@ -16,15 +16,17 @@
         <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
         Live
     </span>
-    <a href="{% url 'reports:attendee_list' org_slug=event.organization.slug event_slug=event.slug %}"
-       class="btn btn-outline btn-sm">
-        <i data-lucide="users" class="w-4 h-4"></i>
-        Attendee List
+    <a href="{% url 'reports:attendee_list' org_slug=event.organization.slug event_slug=event.slug %}">
+        {% #button variant="outline" size="sm" %}
+            <i data-lucide="users" class="w-4 h-4"></i>
+            Attendee List
+        {% /button %}
     </a>
-    <a href="{% url 'reports:export_center' org_slug=event.organization.slug event_slug=event.slug %}"
-       class="btn btn-primary btn-sm">
-        <i data-lucide="download" class="w-4 h-4"></i>
-        Export
+    <a href="{% url 'reports:export_center' org_slug=event.organization.slug event_slug=event.slug %}">
+        {% #button variant="default" size="sm" %}
+            <i data-lucide="download" class="w-4 h-4"></i>
+            Export
+        {% /button %}
     </a>
 </div>
 {% endblock %}
@@ -297,7 +299,7 @@
                         <p class="text-xs text-muted-foreground">Printable format</p>
                     </div>
                 </a>
-                <a href="{% url 'check_in:scan' org_slug=event.organization.slug event_slug=event.slug %}"
+                <a href="{% url 'checkin:verify' org_slug=event.organization.slug event_slug=event.slug %}"
                    class="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                     <div class="h-9 w-9 rounded-lg bg-amber-500/10 flex items-center justify-center">
                         <i data-lucide="qr-code" class="w-4 h-4 text-amber-500"></i>
@@ -343,8 +345,10 @@
                     </div>
                 </div>
                 {% if export.file %}
-                <a href="{% url 'reports:download' export.reference %}" class="btn btn-outline btn-sm p-2">
-                    <i data-lucide="download" class="w-4 h-4"></i>
+                <a href="{% url 'reports:download' export.reference %}">
+                    {% #button variant="outline" size="sm" class="p-2" %}
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                    {% /button %}
                 </a>
                 {% endif %}
             </div>

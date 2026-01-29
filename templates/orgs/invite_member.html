@@ -11,9 +11,11 @@
 {% endblock %}
 
 {% block header_actions %}
-<a href="{% url 'orgs:members' organization.slug %}" class="btn btn-outline btn-sm">
-    <i data-lucide="arrow-left" class="w-4 h-4"></i>
-    Back
+<a href="{% url 'orgs:members' organization.slug %}">
+    {% #button variant="outline" size="sm" %}
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        Back
+    {% /button %}
 </a>
 {% endblock %}
 
@@ -45,10 +47,10 @@
             </div>
 
             <div class="mt-6 flex gap-3">
-                <button type="submit" class="btn btn-primary btn-md flex-1">
+                {% #button variant="default" type="submit" class="flex-1" %}
                     <i data-lucide="send" class="w-4 h-4"></i>
                     Send Invitation
-                </button>
+                {% /button %}
             </div>
         </form>
     </div>

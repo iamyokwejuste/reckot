@@ -29,10 +29,10 @@
 
             <form method="post">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-primary btn-lg w-full">
+                {% #button variant="default" type="submit" size="lg" class="w-full" %}
                     <i data-lucide="check" class="w-5 h-5"></i>
                     Accept Invitation
-                </button>
+                {% /button %}
             </form>
 
             <p class="text-xs text-muted-foreground mt-4">

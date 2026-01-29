@@ -1,4 +1,5 @@
 {% extends 'layouts/dashboard.html' %}
+{% load slippers %}
 
 {% block title %}{{ event.title }} - Dashboard - Reckot{% endblock %}
 
@@ -19,9 +20,11 @@
     <span class="inline-flex items-center rounded-full border border-warning/20 bg-warning/10 text-warning px-2.5 py-0.5 text-xs font-semibold">{{ event.state }}</span>
     {% endif %}
 
-    <a href="{% url 'events:public_detail' event.organization.slug event.slug %}" target="_blank" class="btn btn-outline btn-sm">
-        <i data-lucide="external-link" class="w-4 h-4"></i>
-        View Public
+    <a href="{% url 'events:public_detail' event.organization.slug event.slug %}" target="_blank">
+        {% #button variant="outline" size="sm" %}
+            <i data-lucide="external-link" class="w-4 h-4"></i>
+            View Public
+        {% /button %}
     </a>
 </div>
 {% endblock %}
@@ -211,18 +214,18 @@
                 </div>
                 <form method="post" action="{% url 'events:apply_feature' event.organization.slug event.slug %}" class="mt-3">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-primary btn-sm w-full">
+                    {% #button type="submit" variant="default" size="sm" class="w-full" %}
                         <i data-lucide="star" class="w-4 h-4"></i>
                         Re-apply for Feature
-                    </button>
+                    {% /button %}
                 </form>
                 {% else %}
                 <form method="post" action="{% url 'events:apply_feature' event.organization.slug event.slug %}">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-primary btn-sm w-full">
+                    {% #button type="submit" variant="default" size="sm" class="w-full" %}
                         <i data-lucide="star" class="w-4 h-4"></i>
                         Apply for Feature
-                    </button>
+                    {% /button %}
                 </form>
                 {% endif %}
             </div>

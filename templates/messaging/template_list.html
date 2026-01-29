@@ -11,18 +11,22 @@
 {% endblock %}
 
 {% block header_actions %}
-<a href="{% url 'messaging:template_create' org_slug=organization.slug %}" class="btn btn-primary btn-md">
-    <i data-lucide="plus" class="w-4 h-4"></i>
-    New Template
+<a href="{% url 'messaging:template_create' org_slug=organization.slug %}">
+    {% #button variant="default" %}
+        <i data-lucide="plus" class="w-4 h-4"></i>
+        New Template
+    {% /button %}
 </a>
 {% endblock %}
 
 {% block content %}
 <div class="space-y-6">
     <div class="flex items-center gap-3">
-        <a href="{% url 'messaging:campaign_list' org_slug=organization.slug %}" class="btn btn-outline btn-sm">
-            <i data-lucide="arrow-left" class="w-4 h-4"></i>
-            Back to Campaigns
+        <a href="{% url 'messaging:campaign_list' org_slug=organization.slug %}">
+            {% #button variant="outline" size="sm" %}
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                Back to Campaigns
+            {% /button %}
         </a>
         <span class="text-sm text-muted-foreground">{{ templates.count }} template{{ templates.count|pluralize }}</span>
     </div>
@@ -49,10 +53,9 @@
             <div class="flex items-center justify-between mt-4 pt-4 border-t border-border">
                 <span class="text-xs text-muted-foreground">{{ template.created_at|date:"M d, Y" }}</span>
                 <div class="flex items-center gap-2">
-                    <button type="button" class="btn btn-outline btn-xs"
-                            onclick="navigator.clipboard.writeText('{{ template.body|escapejs }}'); this.innerHTML='<i data-lucide=&quot;check&quot; class=&quot;w-3 h-3&quot;></i>'; setTimeout(() => this.innerHTML='<i data-lucide=&quot;copy&quot; class=&quot;w-3 h-3&quot;></i>', 2000); lucide.createIcons();">
+                    {% #button variant="outline" size="sm" type="button" attrs="x-data x-on:click=\"navigator.clipboard.writeText('{{ template.body|escapejs }}'); $el.innerHTML='<i data-lucide=&quot;check&quot; class=&quot;w-3 h-3&quot;></i>'; setTimeout(() => { $el.innerHTML='<i data-lucide=&quot;copy&quot; class=&quot;w-3 h-3&quot;></i>'; lucide.createIcons(); }, 2000); lucide.createIcons();\"" %}
                         <i data-lucide="copy" class="w-3 h-3"></i>
-                    </button>
+                    {% /button %}
                 </div>
             </div>
         </div>
@@ -65,9 +68,11 @@
         </div>
         <h3 class="font-semibold text-lg">No templates yet</h3>
         <p class="text-muted-foreground mt-1">Create reusable templates for your campaigns</p>
-        <a href="{% url 'messaging:template_create' org_slug=organization.slug %}" class="btn btn-primary btn-md mt-6">
-            <i data-lucide="plus" class="w-4 h-4"></i>
-            Create Template
+        <a href="{% url 'messaging:template_create' org_slug=organization.slug %}" class="mt-6 inline-block">
+            {% #button variant="default" %}
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                Create Template
+            {% /button %}
         </a>
     </div>
     {% endif %}

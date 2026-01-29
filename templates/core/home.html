@@ -19,11 +19,15 @@
                     Create events, sell tickets with mobile money, and check in attendees with QR codes. Everything you need, nothing you don't.
                 </p>
                 <div class="flex flex-col sm:flex-row gap-3 mt-10" x-data x-intersect.once="$el.classList.add('animate-in', 'delay-3')">
-                    <a href="{% url 'account_signup' %}" class="btn btn-primary btn-lg">
-                        Start free
-                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    <a href="{% url 'account_signup' %}">
+                        {% #button variant="default" size="lg" %}
+                            Start free
+                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        {% /button %}
                     </a>
-                    <a href="#how" class="btn btn-outline btn-lg">How it works</a>
+                    <a href="#how">
+                        {% #button variant="outline" size="lg" %}How it works{% /button %}
+                    </a>
                 </div>
             </div>
             <div class="relative" x-data x-intersect.once="$el.classList.add('animate-scale')">
@@ -126,9 +130,11 @@
                 <h2 class="text-2xl md:text-3xl font-semibold tracking-tight">Featured Events</h2>
                 <p class="text-muted-foreground mt-2">Discover upcoming events handpicked by our team</p>
             </div>
-            <a href="{% url 'events:discover' %}" class="btn btn-outline btn-sm hidden sm:inline-flex">
-                View all events
-                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            <a href="{% url 'events:discover' %}" class="hidden sm:inline-flex">
+                {% #button variant="outline" size="sm" %}
+                    View all events
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                {% /button %}
             </a>
         </div>
 
@@ -181,9 +187,11 @@
             <div class="absolute right-0 top-0 bottom-4 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none lg:hidden"></div>
         </div>
 
-        <a href="{% url 'events:discover' %}" class="btn btn-outline btn-sm w-full mt-6 sm:hidden">
-            View all events
-            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        <a href="{% url 'events:discover' %}" class="w-full mt-6 sm:hidden block">
+            {% #button variant="outline" size="sm" class="w-full" %}
+                View all events
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            {% /button %}
         </a>
     </div>
 </section>
@@ -312,9 +320,11 @@
                         </div>
                     </div>
                 </div>
-                <a href="{% url 'account_signup' %}" class="btn btn-primary btn-md mt-10 inline-flex">
-                    Get started free
-                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                <a href="{% url 'account_signup' %}" class="mt-10 inline-flex">
+                    {% #button variant="default" %}
+                        Get started free
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    {% /button %}
                 </a>
             </div>
             <div class="relative" x-data x-intersect.once="$el.classList.add('animate-scale')">
@@ -364,7 +374,7 @@
     <div class="container">
         <div class="text-center max-w-2xl mx-auto mb-16" x-data x-intersect.once="$el.classList.add('animate-in')">
             <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">Simple, transparent pricing</h2>
-            <p class="text-muted-foreground mt-4 text-lg">No monthly fees. No hidden costs. Pay only when you sell.</p>
+            <p class="text-muted-foreground mt-4 text-lg">No monthly fees. <a href="{% url 'why_us' %}#pricing-calculator" class="underline hover:text-foreground">No hidden costs.</a> Pay only when you sell.</p>
         </div>
         {% url 'account_signup' as signup_url %}
         <div class="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
@@ -404,9 +414,11 @@
         <div class="rounded-2xl border border-border bg-card p-8 md:p-12 lg:p-16 text-center" x-data x-intersect.once="$el.classList.add('animate-in')">
             <h2 class="text-2xl md:text-3xl lg:text-4xl font-semibold tracking-tight max-w-xl mx-auto">Ready to host your next event?</h2>
             <p class="mt-4 text-muted-foreground text-lg">Join 500+ organizers already using Reckot</p>
-            <a href="{% url 'account_signup' %}" class="btn btn-primary btn-lg mt-8 inline-flex">
-                Create your first event
-                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            <a href="{% url 'account_signup' %}" class="mt-8 inline-flex">
+                {% #button variant="default" size="lg" %}
+                    Create your first event
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                {% /button %}
             </a>
         </div>
     </div>

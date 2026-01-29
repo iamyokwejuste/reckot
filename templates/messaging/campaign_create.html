@@ -127,18 +127,20 @@
         </div>
 
         <div class="flex items-center justify-between gap-4">
-            <a href="{% url 'messaging:campaign_list' org_slug=organization.slug %}" class="btn btn-outline btn-md">
-                Cancel
+            <a href="{% url 'messaging:campaign_list' org_slug=organization.slug %}">
+                {% #button variant="outline" %}
+                    Cancel
+                {% /button %}
             </a>
             <div class="flex items-center gap-3">
-                <button type="submit" name="send_now" value="" class="btn btn-outline btn-md">
+                {% #button variant="outline" type="submit" attrs='name="send_now" value=""' %}
                     <i data-lucide="save" class="w-4 h-4"></i>
                     Save Draft
-                </button>
-                <button type="submit" name="send_now" value="1" class="btn btn-primary btn-md">
+                {% /button %}
+                {% #button variant="default" type="submit" attrs='name="send_now" value="1"' %}
                     <i data-lucide="send" class="w-4 h-4"></i>
                     Send Now
-                </button>
+                {% /button %}
             </div>
         </div>
     </form>

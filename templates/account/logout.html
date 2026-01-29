@@ -22,13 +22,15 @@
             <form method="post" hx-boost="false" action="{% url 'account_logout' %}">
                 {% csrf_token %}
                 <div class="flex gap-3">
-                    <a href="{% url 'home' %}" class="btn btn-outline btn-md flex-1">
-                        Cancel
+                    <a href="{% url 'home' %}" class="flex-1">
+                        {% #button variant="outline" class="w-full" %}
+                            Cancel
+                        {% /button %}
                     </a>
-                    <button type="submit" class="btn btn-primary btn-md flex-1">
+                    {% #button type="submit" variant="default" class="flex-1" %}
                         Log out
                         <i data-lucide="log-out" class="w-4 h-4"></i>
-                    </button>
+                    {% /button %}
                 </div>
             </form>
         </div>

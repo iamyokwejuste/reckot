@@ -24,7 +24,7 @@
             {% if provider.id == 'google' %}
             <form method="POST" action="{% provider_login_url provider.id %}" class="w-full mb-6" hx-boost="false">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-outline btn-md w-full">
+                {% #button type="submit" variant="outline" class="w-full" %}
                     <svg class="w-5 h-5" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                         <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -32,7 +32,7 @@
                         <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                     </svg>
                     Continue with Google
-                </button>
+                {% /button %}
             </form>
             <div class="relative my-6">
                 <div class="absolute inset-0 flex items-center">
@@ -94,10 +94,10 @@
                 </div>
                 {% endif %}
 
-                <button type="submit" class="btn btn-primary btn-md w-full mt-2">
+                {% #button type="submit" variant="default" class="w-full mt-2" %}
                     Create Account
                     <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                </button>
+                {% /button %}
             </form>
 
             <div x-show="signupMethod === 'phone'" x-cloak class="space-y-4">
@@ -112,7 +112,7 @@
                         <p class="text-xs text-muted-foreground mt-1">We'll send you a verification code</p>
                     </div>
                     <div id="phone-signup-result"></div>
-                    <button type="submit" class="btn btn-primary btn-md w-full mt-4" :disabled="otpLoading">
+                    {% #button type="submit" variant="default" class="w-full mt-4" attrs=':disabled="otpLoading"' %}
                         <template x-if="!otpLoading">
                             <span class="flex items-center gap-2">
                                 Send Code
@@ -125,7 +125,7 @@
                                 Sending...
                             </span>
                         </template>
-                    </button>
+                    {% /button %}
                 </form>
 
                 <form x-show="otpSent" x-cloak method="post" action="{% url 'phone_signup_verify' %}" class="space-y-4" hx-boost="false">
@@ -148,14 +148,14 @@
                         <input type="password" name="password2" id="phone_password2" placeholder="Confirm your password" required autocomplete="new-password" class="input">
                     </div>
 
-                    <button type="submit" class="btn btn-primary btn-md w-full">
+                    {% #button type="submit" variant="default" class="w-full" %}
                         Create Account
                         <i data-lucide="check" class="w-4 h-4"></i>
-                    </button>
-                    <button type="button" @click="otpSent = false" class="btn btn-outline btn-md w-full">
+                    {% /button %}
+                    {% #button type="button" variant="outline" class="w-full" attrs='@click="otpSent = false"' %}
                         <i data-lucide="arrow-left" class="w-4 h-4"></i>
                         Change Phone Number
-                    </button>
+                    {% /button %}
                 </form>
             </div>
 

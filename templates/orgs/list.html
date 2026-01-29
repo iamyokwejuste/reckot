@@ -11,9 +11,11 @@
 {% endblock %}
 
 {% block header_actions %}
-<a href="{% url 'orgs:create' %}" class="btn btn-primary btn-sm">
-    <i data-lucide="plus" class="w-4 h-4"></i>
-    New Organization
+<a href="{% url 'orgs:create' %}">
+    {% #button variant="default" size="sm" %}
+        <i data-lucide="plus" class="w-4 h-4"></i>
+        New Organization
+    {% /button %}
 </a>
 {% endblock %}
 
@@ -46,9 +48,11 @@
         </div>
         <h3 class="text-lg font-semibold mb-2">No organizations yet</h3>
         <p class="text-muted-foreground mb-6">You're not a member of any organization.</p>
-        <a href="{% url 'orgs:create' %}" class="btn btn-primary btn-md">
-            <i data-lucide="plus" class="w-4 h-4"></i>
-            Create Organization
+        <a href="{% url 'orgs:create' %}">
+            {% #button variant="default" %}
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                Create Organization
+            {% /button %}
         </a>
     </div>
     {% endif %}

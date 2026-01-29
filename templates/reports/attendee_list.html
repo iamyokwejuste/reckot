@@ -1,10 +1,9 @@
-{% extends "base.html" %}
+{% extends "layouts/dashboard.html" %}
 {% load slippers %}
 
 {% block title %}Attendee List - {{ event.title }}{% endblock %}
 
 {% block extra_head %}
-{% if print_mode %}
 <style>
     @media print {
         body { background: white !important; }
@@ -12,30 +11,95 @@
         .card { box-shadow: none !important; border: 1px solid #ddd !important; }
         table { font-size: 10pt; }
         th, td { padding: 4px 8px !important; }
+        aside, header { display: none !important; }
+        main { padding: 0 !important; margin: 0 !important; }
+        .flex-1 { padding-left: 0 !important; }
     }
     @page { margin: 1cm; }
 </style>
-{% endif %}
+{% endblock %}
+
+{% block header_title %}
+<div>
+    <h1 class="text-lg font-semibold">Attendee List</h1>
+    <p class="text-sm text-muted-foreground">{{ event.title }}</p>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<div class="flex gap-2" x-data="{ showExportModal: false }">
+    {% #button variant="outline" size="sm" attrs='@click="showExportModal = true"' %}
+        <i data-lucide="download" class="w-4 h-4 mr-1"></i>
+        Download
+    {% /button %}
+    <a href="{% url 'reports:dashboard' org_slug=event.organization.slug event_slug=event.slug %}">
+        {% #button variant="outline" size="sm" %}
+            <i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i>
+            Back
+        {% /button %}
+    </a>
+
+    {% #modal trigger="showExportModal" title="Export Attendee List" description="Choose a format to download the attendee list." %}
+        <div class="space-y-3">
+            <form method="post" action="{% url 'reports:export_generate' org_slug=event.organization.slug event_slug=event.slug %}">
+                {% csrf_token %}
+                <input type="hidden" name="report_type" value="RSVP">
+                <input type="hidden" name="format" value="CSV">
+                <button type="submit" class="flex items-center gap-4 p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors w-full text-left">
+                    <div class="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                        <i data-lucide="file-spreadsheet" class="w-5 h-5 text-emerald-500"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium">CSV</p>
+                        <p class="text-xs text-muted-foreground">Comma-separated values</p>
+                    </div>
+                </button>
+            </form>
+            <form method="post" action="{% url 'reports:export_generate' org_slug=event.organization.slug event_slug=event.slug %}">
+                {% csrf_token %}
+                <input type="hidden" name="report_type" value="RSVP">
+                <input type="hidden" name="format" value="EXCEL">
+                <button type="submit" class="flex items-center gap-4 p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors w-full text-left">
+                    <div class="h-10 w-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+                        <i data-lucide="table" class="w-5 h-5 text-green-500"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium">Excel</p>
+                        <p class="text-xs text-muted-foreground">Microsoft Excel spreadsheet</p>
+                    </div>
+                </button>
+            </form>
+            <form method="post" action="{% url 'reports:export_generate' org_slug=event.organization.slug event_slug=event.slug %}">
+                {% csrf_token %}
+                <input type="hidden" name="report_type" value="RSVP">
+                <input type="hidden" name="format" value="PDF">
+                <button type="submit" class="flex items-center gap-4 p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors w-full text-left">
+                    <div class="h-10 w-10 rounded-lg bg-red-500/10 flex items-center justify-center">
+                        <i data-lucide="file-text" class="w-5 h-5 text-red-500"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium">PDF</p>
+                        <p class="text-xs text-muted-foreground">Portable document format</p>
+                    </div>
+                </button>
+            </form>
+            <button @click="window.print(); showExportModal = false"
+                    class="flex items-center gap-4 p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors w-full text-left">
+                <div class="h-10 w-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                    <i data-lucide="printer" class="w-5 h-5 text-purple-500"></i>
+                </div>
+                <div>
+                    <p class="font-medium">Print</p>
+                    <p class="text-xs text-muted-foreground">Print directly from browser</p>
+                </div>
+            </button>
+        </div>
+    {% /modal %}
+</div>
 {% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8 {% if print_mode %}max-w-full{% endif %}">
-    <div class="flex justify-between items-center mb-6 no-print">
-        <div>
-            <h1 class="text-2xl font-bold">Attendee List</h1>
-            <p class="text-muted-foreground">{{ event.title }}</p>
-        </div>
-        <div class="flex gap-2">
-            <a href="?print=1" class="btn btn-outline btn-sm" onclick="window.print(); return false;">
-                <i data-lucide="printer" class="w-4 h-4 mr-1"></i>
-                Print
-            </a>
-            <a href="{% url 'reports:dashboard' org_slug=event.organization.slug event_slug=event.slug %}" class="btn btn-outline btn-sm">
-                <i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i>
-                Back
-            </a>
-        </div>
-    </div>
+<div class="space-y-6">
 
     <div class="card mb-6">
         <div class="p-4 border-b border-border flex justify-between items-center">

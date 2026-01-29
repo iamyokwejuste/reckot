@@ -44,17 +44,13 @@
                     >
                 </div>
 
-                <button
-                    type="submit"
-                    class="btn btn-primary btn-md w-full"
-                    :disabled="loading"
-                >
+                {% #button variant="default" type="submit" class="w-full" :disabled="loading" %}
                     <span x-show="!loading">Verify Email</span>
                     <span x-show="loading" class="flex items-center gap-2">
                         <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
                         Verifying...
                     </span>
-                </button>
+                {% /button %}
             </form>
 
             <div class="text-center mt-6">

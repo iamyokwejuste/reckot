@@ -64,8 +64,10 @@
                 </div>
                 <div class="flex items-center gap-2">
                     {% if refund.status == 'PENDING' or refund.status == 'APPROVED' %}
-                    <a href="{% url 'payments:refund_process' refund.id %}" class="btn btn-outline btn-sm">
-                        Process
+                    <a href="{% url 'payments:refund_process' refund.id %}">
+                        {% #button variant="outline" size="sm" %}
+                            Process
+                        {% /button %}
                     </a>
                     {% endif %}
                 </div>

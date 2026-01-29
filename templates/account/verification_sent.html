@@ -25,9 +25,11 @@
             </div>
 
             <div class="mt-6 space-y-3">
-                <a href="{% url 'home' %}" class="btn btn-primary btn-md w-full">
-                    Continue to Reckot
-                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                <a href="{% url 'home' %}">
+                    {% #button variant="default" class="w-full" %}
+                        Continue to Reckot
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    {% /button %}
                 </a>
             </div>
         </div>

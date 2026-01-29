@@ -15,23 +15,23 @@
     <form method="post" action="{% url 'events:coupon_toggle' coupon_id=coupon.id %}">
         {% csrf_token %}
         {% if coupon.is_active %}
-        <button type="submit" class="btn btn-outline btn-sm">
+        {% #button type="submit" variant="outline" size="sm" %}
             <i data-lucide="pause" class="w-4 h-4"></i>
             Deactivate
-        </button>
+        {% /button %}
         {% else %}
-        <button type="submit" class="btn btn-primary btn-sm">
+        {% #button type="submit" variant="default" size="sm" %}
             <i data-lucide="play" class="w-4 h-4"></i>
             Activate
-        </button>
+        {% /button %}
         {% endif %}
     </form>
     <form method="post" action="{% url 'events:coupon_delete' coupon_id=coupon.id %}" onsubmit="return confirm('Are you sure you want to delete this coupon?');">
         {% csrf_token %}
-        <button type="submit" class="btn btn-destructive btn-sm">
+        {% #button type="submit" variant="destructive" size="sm" %}
             <i data-lucide="trash-2" class="w-4 h-4"></i>
             Delete
-        </button>
+        {% /button %}
     </form>
 </div>
 {% endblock %}

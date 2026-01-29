@@ -12,7 +12,7 @@ from django.utils import timezone
 from apps.events.forms import EventForm, TicketTypeForm
 from apps.events.services import create_event
 from apps.events.queries import get_user_events
-from apps.events.models import Event, Coupon, EventFlyerConfig, FlyerTextField, CheckoutQuestion, EventCustomization
+from apps.events.models import Event, Coupon, EventFlyerConfig, FlyerTextField, CheckoutQuestion, EventCustomization, FlyerGeneration, FlyerBilling
 from apps.events.flyer_service import generate_flyer
 from apps.orgs.models import Organization
 from apps.tickets.forms import BookingForm
@@ -403,6 +403,8 @@ class ValidateCouponView(View):
         })
 
 
+FLYER_PAY_PER_USE_PRICE = 25
+
 class FlyerGeneratorView(View):
     def get(self, request, org_slug, event_slug):
         event = get_object_or_404(
@@ -412,8 +414,7 @@ class FlyerGeneratorView(View):
             state=Event.State.PUBLISHED
         )
 
-        if not event.organization.has_feature('flyer_generator'):
-            return render(request, 'events/flyer_upgrade.html', {'event': event})
+        has_feature = event.organization.has_feature('flyer_generator')
 
         try:
             config = event.flyer_config
@@ -428,6 +429,8 @@ class FlyerGeneratorView(View):
             'event': event,
             'config': config,
             'text_fields': text_fields,
+            'has_feature': has_feature,
+            'pay_per_use_price': FLYER_PAY_PER_USE_PRICE,
         })
 
     def post(self, request, org_slug, event_slug):
@@ -438,8 +441,7 @@ class FlyerGeneratorView(View):
             state=Event.State.PUBLISHED
         )
 
-        if not event.organization.has_feature('flyer_generator'):
-            return HttpResponse('Feature not available on current plan', status=403)
+        has_feature = event.organization.has_feature('flyer_generator')
 
         try:
             config = event.flyer_config
@@ -457,6 +459,19 @@ class FlyerGeneratorView(View):
 
         try:
             flyer_image = generate_flyer(config, user_photo, text_values)
+
+            if not has_feature:
+                FlyerGeneration.objects.create(
+                    event=event,
+                    ip_address=request.META.get('REMOTE_ADDR'),
+                    user_agent=request.META.get('HTTP_USER_AGENT', '')[:500]
+                )
+                billing, _ = FlyerBilling.objects.get_or_create(
+                    event=event,
+                    defaults={'rate_per_flyer': FLYER_PAY_PER_USE_PRICE}
+                )
+                billing.update_totals()
+
             response = HttpResponse(flyer_image.getvalue(), content_type='image/jpeg')
             response['Content-Disposition'] = f'inline; filename="{event.slug}-flyer.jpg"'
             return response
@@ -514,25 +529,36 @@ class FlyerConfigView(LoginRequiredMixin, View):
         config.photo_border_color = request.POST.get('photo_border_color', '#ffffff')
         config.output_width = int(request.POST.get('output_width', 1080))
         config.output_height = int(request.POST.get('output_height', 1080))
+
+        if request.POST.get('accept_pay_per_use') == '1' and not config.pay_per_use_accepted:
+            config.pay_per_use_accepted = True
+            config.pay_per_use_accepted_at = timezone.now()
+
         config.save()
 
         config.text_fields.all().delete()
-        field_labels = request.POST.getlist('field_label')
-        for i, label in enumerate(field_labels):
-            if not label.strip():
+        import json
+        fields_json = request.POST.get('fields_json', '[]')
+        try:
+            fields = json.loads(fields_json)
+        except json.JSONDecodeError:
+            fields = []
+
+        for i, field in enumerate(fields):
+            if not field.get('label', '').strip():
                 continue
             FlyerTextField.objects.create(
                 flyer_config=config,
-                label=label,
-                placeholder=request.POST.getlist('field_placeholder')[i] if i < len(request.POST.getlist('field_placeholder')) else '',
-                is_required=f'field_required_{i}' in request.POST,
+                label=field.get('label', ''),
+                placeholder=field.get('placeholder', ''),
+                is_required=field.get('required', True),
                 order=i,
-                x=int(request.POST.getlist('field_x')[i]) if i < len(request.POST.getlist('field_x')) else 0,
-                y=int(request.POST.getlist('field_y')[i]) if i < len(request.POST.getlist('field_y')) else 0,
-                max_width=int(request.POST.getlist('field_max_width')[i]) if i < len(request.POST.getlist('field_max_width')) else 400,
-                font_size=int(request.POST.getlist('field_font_size')[i]) if i < len(request.POST.getlist('field_font_size')) else 32,
-                font_color=request.POST.getlist('field_font_color')[i] if i < len(request.POST.getlist('field_font_color')) else '#ffffff',
-                text_align=request.POST.getlist('field_text_align')[i] if i < len(request.POST.getlist('field_text_align')) else 'CENTER',
+                x=int(field.get('x', 0)),
+                y=int(field.get('y', 0)),
+                max_width=int(field.get('max_width', 400)),
+                font_size=int(field.get('font_size', 32)),
+                font_color=field.get('font_color', '#ffffff'),
+                text_align=field.get('text_align', 'CENTER'),
             )
 
         return redirect('events:flyer_config', org_slug=org_slug, event_slug=event_slug)
@@ -631,3 +657,5 @@ class EventCustomizationView(LoginRequiredMixin, View):
 
         customization.save()
         return redirect('events:customization', org_slug=org_slug, event_slug=event_slug)
+
+

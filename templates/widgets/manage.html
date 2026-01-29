@@ -13,14 +13,18 @@
 {% block content %}
 <div class="max-w-4xl mx-auto space-y-6">
     <div class="flex items-center justify-between">
-        <a href="{% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug %}" class="btn btn-outline btn-sm">
+        <a href="{% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug %}">
+            {% #button variant="outline" size="sm" %}
             <i data-lucide="arrow-left" class="w-4 h-4"></i>
             Back to Event
+            {% /button %}
         </a>
         {% if widget %}
-        <a href="{{ base_url }}/widgets/{{ widget.widget_id }}/" target="_blank" class="btn btn-outline btn-sm">
+        <a href="{{ base_url }}/widgets/{{ widget.widget_id }}/" target="_blank">
+            {% #button variant="outline" size="sm" %}
             <i data-lucide="external-link" class="w-4 h-4"></i>
             Preview Widget
+            {% /button %}
         </a>
         {% endif %}
     </div>
@@ -101,10 +105,10 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-md">
-                <i data-lucide="save" class="w-4 h-4"></i>
-                Save Settings
-            </button>
+            {% #button variant="default" type="submit" %}
+            <i data-lucide="save" class="w-4 h-4"></i>
+            Save Settings
+            {% /button %}
         </form>
 
         <div class="space-y-6">
@@ -120,10 +124,9 @@
                     <div class="relative">
                         <pre class="p-4 rounded-lg bg-muted text-xs overflow-x-auto"><code>&lt;div id="reckot-widget-{{ widget.widget_id }}"&gt;&lt;/div&gt;
 &lt;script src="{{ base_url }}/widgets/{{ widget.widget_id }}/embed.js" async&gt;&lt;/script&gt;</code></pre>
-                        <button type="button" onclick="navigator.clipboard.writeText(this.previousElementSibling.textContent); this.innerHTML='<i data-lucide=&quot;check&quot; class=&quot;w-4 h-4&quot;></i>'; setTimeout(() => { this.innerHTML='<i data-lucide=&quot;copy&quot; class=&quot;w-4 h-4&quot;></i>'; lucide.createIcons(); }, 2000); lucide.createIcons();"
-                                class="absolute top-2 right-2 btn btn-outline btn-xs">
-                            <i data-lucide="copy" class="w-4 h-4"></i>
-                        </button>
+                        {% #button variant="outline" size="sm" type="button" class="absolute top-2 right-2" onclick="navigator.clipboard.writeText(this.previousElementSibling.textContent); this.innerHTML='<i data-lucide=\"check\" class=\"w-4 h-4\"></i>'; setTimeout(() => { this.innerHTML='<i data-lucide=\"copy\" class=\"w-4 h-4\"></i>'; lucide.createIcons(); }, 2000); lucide.createIcons();" %}
+                        <i data-lucide="copy" class="w-4 h-4"></i>
+                        {% /button %}
                     </div>
                 </div>
 
@@ -132,10 +135,9 @@
                     <div class="relative">
                         <input type="text" readonly value="{{ base_url }}/widgets/{{ widget.widget_id }}/"
                                class="input font-mono text-sm pr-12">
-                        <button type="button" onclick="navigator.clipboard.writeText(this.previousElementSibling.value); this.innerHTML='<i data-lucide=&quot;check&quot; class=&quot;w-4 h-4&quot;></i>'; setTimeout(() => { this.innerHTML='<i data-lucide=&quot;copy&quot; class=&quot;w-4 h-4&quot;></i>'; lucide.createIcons(); }, 2000); lucide.createIcons();"
-                                class="absolute top-1/2 right-2 -translate-y-1/2 btn btn-outline btn-xs">
-                            <i data-lucide="copy" class="w-4 h-4"></i>
-                        </button>
+                        {% #button variant="outline" size="sm" type="button" class="absolute top-1/2 right-2 -translate-y-1/2" onclick="navigator.clipboard.writeText(this.previousElementSibling.value); this.innerHTML='<i data-lucide=\"check\" class=\"w-4 h-4\"></i>'; setTimeout(() => { this.innerHTML='<i data-lucide=\"copy\" class=\"w-4 h-4\"></i>'; lucide.createIcons(); }, 2000); lucide.createIcons();" %}
+                        <i data-lucide="copy" class="w-4 h-4"></i>
+                        {% /button %}
                     </div>
                 </div>
             </div>

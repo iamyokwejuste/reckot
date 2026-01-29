@@ -85,11 +85,13 @@
         </div>
 
         <div class="flex items-center gap-4">
-            <button type="submit" class="btn btn-primary btn-md">
+            {% #button variant="default" type="submit" %}
                 <i data-lucide="send" class="w-4 h-4"></i>
                 Send Invitations
-            </button>
-            <a href="{% url 'orgs:members' organization.slug %}" class="btn btn-outline btn-md">Cancel</a>
+            {% /button %}
+            <a href="{% url 'orgs:members' organization.slug %}">
+                {% #button variant="outline" %}Cancel{% /button %}
+            </a>
         </div>
     </form>
 </div>

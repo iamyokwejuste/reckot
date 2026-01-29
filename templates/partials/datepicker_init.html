@@ -1,0 +1,53 @@
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+(function() {
+    function initDatepickers() {
+        document.querySelectorAll('[data-datepicker]:not(.flatpickr-input)').forEach(function(el) {
+            const enableTime = el.dataset.enableTime === 'true';
+            const time24hr = el.dataset.time24hr === 'true';
+            const minDate = el.dataset.minDate || null;
+            const maxDate = el.dataset.maxDate || null;
+
+            const config = {
+                dateFormat: enableTime ? "Y-m-d H:i" : "Y-m-d",
+                altInput: true,
+                altFormat: enableTime ? "F j, Y \\a\\t h:i K" : "F j, Y",
+                enableTime: enableTime,
+                time_24hr: time24hr,
+                minuteIncrement: enableTime ? 15 : 1,
+                disableMobile: false,
+                wrap: false,
+                allowInput: false,
+                clickOpens: true,
+            };
+
+            if (minDate) {
+                if (minDate === 'today') {
+                    config.minDate = 'today';
+                } else {
+                    config.minDate = new Date(minDate);
+                }
+            }
+
+            if (maxDate) {
+                config.maxDate = new Date(maxDate);
+            }
+
+            flatpickr(el, config);
+        });
+
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initDatepickers);
+    } else {
+        initDatepickers();
+    }
+
+    document.addEventListener('htmx:afterSwap', initDatepickers);
+    window.initDatepickers = initDatepickers;
+})();
+</script>

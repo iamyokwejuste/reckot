@@ -42,26 +42,25 @@
                         <form method="post" action="{% url 'account_email' %}" class="inline">
                             {% csrf_token %}
                             <input type="hidden" name="email" value="{{ emailaddress.email }}">
-                            <button type="submit" name="action_send" class="btn btn-outline btn-xs" title="Resend verification">
+                            {% #button type="submit" variant="outline" size="xs" attrs='name="action_send" title="Resend verification"' %}
                                 <i data-lucide="send" class="w-3 h-3"></i>
-                            </button>
+                            {% /button %}
                         </form>
                         {% endif %}
                         {% if not emailaddress.primary %}
                         <form method="post" action="{% url 'account_email' %}" class="inline">
                             {% csrf_token %}
                             <input type="hidden" name="email" value="{{ emailaddress.email }}">
-                            <button type="submit" name="action_primary" class="btn btn-outline btn-xs" title="Make primary"
-                                    {% if not emailaddress.verified %}disabled{% endif %}>
+                            {% #button type="submit" variant="outline" size="xs" attrs='name="action_primary" title="Make primary" {% if not emailaddress.verified %}disabled{% endif %}' %}
                                 <i data-lucide="star" class="w-3 h-3"></i>
-                            </button>
+                            {% /button %}
                         </form>
                         <form method="post" action="{% url 'account_email' %}" class="inline">
                             {% csrf_token %}
                             <input type="hidden" name="email" value="{{ emailaddress.email }}">
-                            <button type="submit" name="action_remove" class="btn btn-outline btn-xs text-red-500 hover:bg-red-500/10" title="Remove">
+                            {% #button type="submit" variant="outline" size="xs" class="text-red-500 hover:bg-red-500/10" attrs='name="action_remove" title="Remove"' %}
                                 <i data-lucide="trash-2" class="w-3 h-3"></i>
-                            </button>
+                            {% /button %}
                         </form>
                         {% endif %}
                     </div>
@@ -78,18 +77,20 @@
                     <div>
                         <input type="email" name="email" placeholder="new@email.com" required class="input">
                     </div>
-                    <button type="submit" name="action_add" class="btn btn-primary btn-sm w-full">
+                    {% #button type="submit" variant="default" size="sm" class="w-full" attrs='name="action_add"' %}
                         <i data-lucide="plus" class="w-4 h-4"></i>
                         Add Email
-                    </button>
+                    {% /button %}
                 </form>
             </div>
             {% endif %}
 
             <div class="mt-6 pt-6 border-t border-border">
-                <a href="{% url 'settings' %}" class="btn btn-outline btn-md w-full">
-                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                    Back to Settings
+                <a href="{% url 'settings' %}" class="w-full block">
+                    {% #button variant="outline" class="w-full" %}
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        Back to Settings
+                    {% /button %}
                 </a>
             </div>
         </div>

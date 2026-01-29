@@ -90,26 +90,26 @@
             <form method="post">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="approve">
-                <button type="submit" class="btn btn-primary btn-md w-full">
+                {% #button type="submit" variant="default" class="w-full" %}
                     <i data-lucide="check" class="w-4 h-4"></i>
                     Approve Refund
-                </button>
+                {% /button %}
             </form>
 
             <div x-data="{ showReject: false }">
-                <button @click="showReject = !showReject" class="btn btn-outline btn-md w-full text-red-500 hover:bg-red-500/10">
+                {% #button type="button" variant="outline" class="w-full text-red-500 hover:bg-red-500/10" attrs='@click="showReject = !showReject"' %}
                     <i data-lucide="x" class="w-4 h-4"></i>
                     Reject Refund
-                </button>
+                {% /button %}
                 <form method="post" x-show="showReject" x-cloak class="mt-4">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="reject">
                     <textarea name="rejection_reason" rows="2" required
                               placeholder="Reason for rejection..."
                               class="input resize-none mb-3"></textarea>
-                    <button type="submit" class="btn btn-destructive btn-sm w-full">
+                    {% #button type="submit" variant="destructive" size="sm" class="w-full" %}
                         Confirm Rejection
-                    </button>
+                    {% /button %}
                 </form>
             </div>
         </div>
@@ -120,19 +120,21 @@
             <p class="text-sm text-muted-foreground mb-4">
                 Mark this refund as processed once you've completed the refund through your payment provider.
             </p>
-            <button type="submit" class="btn btn-primary btn-md">
+            {% #button type="submit" variant="default" %}
                 <i data-lucide="check-circle" class="w-4 h-4"></i>
                 Mark as Processed
-            </button>
+            {% /button %}
         </form>
         {% endif %}
     </div>
     {% endif %}
 
     <div class="flex items-center gap-3">
-        <a href="{% url 'payments:refunds' %}" class="btn btn-outline btn-md">
-            <i data-lucide="arrow-left" class="w-4 h-4"></i>
-            Back to Refunds
+        <a href="{% url 'payments:refunds' %}">
+            {% #button variant="outline" %}
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                Back to Refunds
+            {% /button %}
         </a>
     </div>
 </div>

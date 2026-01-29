@@ -72,11 +72,11 @@
             </div>
 
             <div class="flex items-center gap-3 pt-4">
-                <button type="submit" class="btn btn-primary btn-md">
+                {% #button type="submit" variant="default" %}
                     <i data-lucide="send" class="w-4 h-4"></i>
                     Submit Request
-                </button>
-                <a href="{% url 'payments:success' payment_ref=payment.reference %}" class="btn btn-outline btn-md">Cancel</a>
+                {% /button %}
+                <a href="{% url 'payments:success' payment_ref=payment.reference %}">{% #button variant="outline" %}Cancel{% /button %}</a>
             </div>
         </form>
     </div>

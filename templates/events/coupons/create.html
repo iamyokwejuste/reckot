@@ -18,7 +18,13 @@
 <div class="max-w-2xl mx-auto">
     <form method="post" class="space-y-6" x-data="{
         assignmentType: 'PUBLIC',
+        assignmentLabel: 'Anyone (Public)',
+        discountType: 'PERCENTAGE',
+        discountLabel: 'Percentage',
+        selectedOrg: '',
+        selectedOrgLabel: '',
         selectedEvent: '',
+        selectedEventLabel: '',
         eventDates: {
             {% for event in events %}
             '{{ event.id }}': '{{ event.end_at|date:'Y-m-d H:i' }}',
@@ -43,23 +49,54 @@
             <h2 class="text-lg font-semibold">Basic Information</h2>
 
             <div>
-                <label for="organization" class="block text-sm font-medium mb-2">Organization</label>
-                <select name="organization" id="organization" required class="input">
-                    <option value="">Select organization</option>
-                    {% for org in organizations %}
-                    <option value="{{ org.id }}">{{ org.name }}</option>
-                    {% endfor %}
-                </select>
+                <label class="block text-sm font-medium mb-2">Organization</label>
+                <div class="custom-select-wrapper" x-data="{ open: false }">
+                    <input type="hidden" name="organization" :value="selectedOrg" required>
+                    <button type="button" @click="open = !open" @click.outside="open = false"
+                            class="custom-select-trigger" :class="{ 'custom-select-trigger-active': open }">
+                        <span class="custom-select-value" :class="{ 'custom-select-placeholder': !selectedOrgLabel }" x-text="selectedOrgLabel || 'Select organization'"></span>
+                        <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4" :class="{ 'rotate-180': open }"></i>
+                    </button>
+                    <div x-show="open" x-transition @click.outside="open = false" class="custom-select-dropdown" x-cloak>
+                        <div class="custom-select-options">
+                            {% for org in organizations %}
+                            <button type="button" @click="selectedOrg = '{{ org.id }}'; selectedOrgLabel = '{{ org.name|escapejs }}'; open = false"
+                                    class="custom-select-option" :class="{ 'custom-select-option-selected': selectedOrg === '{{ org.id }}' }">
+                                <span>{{ org.name }}</span>
+                                <i x-show="selectedOrg === '{{ org.id }}'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                            </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div>
-                <label for="event" class="block text-sm font-medium mb-2">Event (optional)</label>
-                <select name="event" id="event" class="input" x-model="selectedEvent" @change="updateValidUntilMax()">
-                    <option value="">All events in organization</option>
-                    {% for event in events %}
-                    <option value="{{ event.id }}" data-end="{{ event.end_at|date:'Y-m-d H:i' }}">{{ event.title }} ({{ event.organization.name }})</option>
-                    {% endfor %}
-                </select>
+                <label class="block text-sm font-medium mb-2">Event (optional)</label>
+                <div class="custom-select-wrapper" x-data="{ open: false }">
+                    <input type="hidden" name="event" :value="selectedEvent">
+                    <button type="button" @click="open = !open" @click.outside="open = false"
+                            class="custom-select-trigger" :class="{ 'custom-select-trigger-active': open }">
+                        <span class="custom-select-value" :class="{ 'custom-select-placeholder': !selectedEventLabel }" x-text="selectedEventLabel || 'All events in organization'"></span>
+                        <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4" :class="{ 'rotate-180': open }"></i>
+                    </button>
+                    <div x-show="open" x-transition @click.outside="open = false" class="custom-select-dropdown" x-cloak>
+                        <div class="custom-select-options">
+                            <button type="button" @click="selectedEvent = ''; selectedEventLabel = ''; open = false; updateValidUntilMax()"
+                                    class="custom-select-option" :class="{ 'custom-select-option-selected': selectedEvent === '' }">
+                                <span>All events in organization</span>
+                                <i x-show="selectedEvent === ''" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                            </button>
+                            {% for event in events %}
+                            <button type="button" @click="selectedEvent = '{{ event.id }}'; selectedEventLabel = '{{ event.title|escapejs }} ({{ event.organization.name|escapejs }})'; open = false; updateValidUntilMax()"
+                                    class="custom-select-option" :class="{ 'custom-select-option-selected': selectedEvent === '{{ event.id }}' }">
+                                <span>{{ event.title }} ({{ event.organization.name }})</span>
+                                <i x-show="selectedEvent === '{{ event.id }}'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                            </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
                 <p class="text-xs text-muted-foreground mt-1">Leave empty to apply to all events in the organization</p>
             </div>
 
@@ -80,11 +117,29 @@
 
             <div class="grid gap-4 sm:grid-cols-2">
                 <div>
-                    <label for="discount_type" class="block text-sm font-medium mb-2">Discount Type</label>
-                    <select name="discount_type" id="discount_type" required class="input">
-                        <option value="PERCENTAGE">Percentage</option>
-                        <option value="FIXED">Fixed Amount</option>
-                    </select>
+                    <label class="block text-sm font-medium mb-2">Discount Type</label>
+                    <div class="custom-select-wrapper" x-data="{ open: false }">
+                        <input type="hidden" name="discount_type" :value="discountType" required>
+                        <button type="button" @click="open = !open" @click.outside="open = false"
+                                class="custom-select-trigger" :class="{ 'custom-select-trigger-active': open }">
+                            <span class="custom-select-value" x-text="discountLabel"></span>
+                            <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4" :class="{ 'rotate-180': open }"></i>
+                        </button>
+                        <div x-show="open" x-transition @click.outside="open = false" class="custom-select-dropdown" x-cloak>
+                            <div class="custom-select-options">
+                                <button type="button" @click="discountType = 'PERCENTAGE'; discountLabel = 'Percentage'; open = false"
+                                        class="custom-select-option" :class="{ 'custom-select-option-selected': discountType === 'PERCENTAGE' }">
+                                    <span>Percentage</span>
+                                    <i x-show="discountType === 'PERCENTAGE'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                                </button>
+                                <button type="button" @click="discountType = 'FIXED'; discountLabel = 'Fixed Amount'; open = false"
+                                        class="custom-select-option" :class="{ 'custom-select-option-selected': discountType === 'FIXED' }">
+                                    <span>Fixed Amount</span>
+                                    <i x-show="discountType === 'FIXED'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div>
                     <label for="discount_value" class="block text-sm font-medium mb-2">Discount Value</label>
@@ -103,12 +158,34 @@
             <h2 class="text-lg font-semibold">Assignment</h2>
 
             <div>
-                <label for="assignment_type" class="block text-sm font-medium mb-2">Who can use this coupon?</label>
-                <select name="assignment_type" id="assignment_type" required class="input" x-model="assignmentType">
-                    <option value="PUBLIC">Anyone (Public)</option>
-                    <option value="INDIVIDUAL">Specific person</option>
-                    <option value="GROUP">Group of people</option>
-                </select>
+                <label class="block text-sm font-medium mb-2">Who can use this coupon?</label>
+                <div class="custom-select-wrapper" x-data="{ open: false }">
+                    <input type="hidden" name="assignment_type" :value="assignmentType" required>
+                    <button type="button" @click="open = !open" @click.outside="open = false"
+                            class="custom-select-trigger" :class="{ 'custom-select-trigger-active': open }">
+                        <span class="custom-select-value" x-text="assignmentLabel"></span>
+                        <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4" :class="{ 'rotate-180': open }"></i>
+                    </button>
+                    <div x-show="open" x-transition @click.outside="open = false" class="custom-select-dropdown" x-cloak>
+                        <div class="custom-select-options">
+                            <button type="button" @click="assignmentType = 'PUBLIC'; assignmentLabel = 'Anyone (Public)'; open = false"
+                                    class="custom-select-option" :class="{ 'custom-select-option-selected': assignmentType === 'PUBLIC' }">
+                                <span>Anyone (Public)</span>
+                                <i x-show="assignmentType === 'PUBLIC'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                            </button>
+                            <button type="button" @click="assignmentType = 'INDIVIDUAL'; assignmentLabel = 'Specific person'; open = false"
+                                    class="custom-select-option" :class="{ 'custom-select-option-selected': assignmentType === 'INDIVIDUAL' }">
+                                <span>Specific person</span>
+                                <i x-show="assignmentType === 'INDIVIDUAL'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                            </button>
+                            <button type="button" @click="assignmentType = 'GROUP'; assignmentLabel = 'Group of people'; open = false"
+                                    class="custom-select-option" :class="{ 'custom-select-option-selected': assignmentType === 'GROUP' }">
+                                <span>Group of people</span>
+                                <i x-show="assignmentType === 'GROUP'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div x-show="assignmentType === 'INDIVIDUAL'" x-cloak>
@@ -129,31 +206,30 @@
             <p class="text-sm text-muted-foreground -mt-2">Both fields are optional. Defaults to starting today with no end date.</p>
 
             <div class="grid gap-4 sm:grid-cols-2">
+                {% #datepicker name="valid_from" id="valid_from" label="Valid From" placeholder="Starts today by default" enable_time=True %}
+                {% /datepicker %}
+
                 <div>
-                    <label for="valid_from" class="block text-sm font-medium mb-2">Valid From</label>
-                    <input type="text" name="valid_from" id="valid_from" placeholder="Starts today by default" class="input flatpickr-datetime">
-                </div>
-                <div>
-                    <label for="valid_until" class="block text-sm font-medium mb-2">Valid Until</label>
-                    <input type="text" name="valid_until" id="valid_until" placeholder="No end date" class="input flatpickr-datetime-until">
+                    {% #datepicker name="valid_until" id="valid_until" label="Valid Until" placeholder="No end date" enable_time=True %}
+                    {% /datepicker %}
                     <p class="text-xs text-muted-foreground mt-1" x-show="selectedEvent" x-cloak>Cannot be after the event end date</p>
                 </div>
             </div>
         </div>
 
         <div class="flex items-center gap-4">
-            <button type="submit" class="btn btn-primary btn-md">
+            {% #button type="submit" variant="default" %}
                 Create Coupon
                 <i data-lucide="check" class="w-4 h-4"></i>
-            </button>
-            <a href="{% url 'events:coupons' %}" class="btn btn-outline btn-md">Cancel</a>
+            {% /button %}
+            <a href="{% url 'events:coupons' %}">{% #button variant="outline" %}Cancel{% /button %}</a>
         </div>
     </form>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+{% include "partials/datepicker_init.html" %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const eventDates = {
@@ -162,42 +238,32 @@ document.addEventListener('DOMContentLoaded', function() {
         {% endfor %}
     };
 
-    const commonConfig = {
-        enableTime: true,
-        dateFormat: "Y-m-d H:i",
-        altInput: true,
-        altFormat: "F j, Y at h:i K",
-        time_24hr: false,
-        minuteIncrement: 15,
-    };
+    const validFromEl = document.getElementById('valid_from');
+    const validUntilEl = document.getElementById('valid_until');
 
-    const validFromPicker = flatpickr("#valid_from", {
-        ...commonConfig,
-        defaultDate: new Date(),
-        onChange: function(selectedDates) {
-            if (selectedDates[0]) {
-                validUntilPicker.set('minDate', selectedDates[0]);
-            }
+    setTimeout(function() {
+        const validFromPicker = validFromEl._flatpickr;
+        const validUntilPicker = validUntilEl._flatpickr;
+
+        if (validFromPicker && validUntilPicker) {
+            validFromPicker.config.onChange.push(function(selectedDates) {
+                if (selectedDates[0]) {
+                    validUntilPicker.set('minDate', selectedDates[0]);
+                }
+            });
+
+            const eventSelect = document.querySelector('[name="event"]').closest('.custom-select-wrapper').querySelector('input[type="hidden"]');
+            window.updateValidUntilMax = function() {
+                const selectedEventId = eventSelect.value;
+                if (selectedEventId && eventDates[selectedEventId]) {
+                    const eventEndDate = new Date(eventDates[selectedEventId]);
+                    validUntilPicker.set('maxDate', eventEndDate);
+                } else {
+                    validUntilPicker.set('maxDate', null);
+                }
+            };
         }
-    });
-
-    const validUntilPicker = flatpickr("#valid_until", {
-        ...commonConfig,
-        minDate: new Date(),
-    });
-
-    const eventSelect = document.getElementById('event');
-    window.updateValidUntilMax = function() {
-        const selectedEventId = eventSelect.value;
-        if (selectedEventId && eventDates[selectedEventId]) {
-            const eventEndDate = new Date(eventDates[selectedEventId]);
-            validUntilPicker.set('maxDate', eventEndDate);
-        } else {
-            validUntilPicker.set('maxDate', null);
-        }
-    };
-
-    eventSelect.addEventListener('change', updateValidUntilMax);
+    }, 100);
 
     const form = document.querySelector('form');
     if (form && window.FormPersistence) {

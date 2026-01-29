@@ -106,8 +106,10 @@
                 <i data-lucide="calendar-x" class="h-16 w-16 mx-auto text-muted-foreground/50"></i>
                 <h2 class="text-xl font-semibold mt-4">No events yet</h2>
                 <p class="text-muted-foreground mt-2">{{ organization.name }} hasn't published any events yet.</p>
-                <a href="{% url 'events:discover' %}" class="btn btn-primary btn-md mt-6 inline-flex">
-                    Discover other events
+                <a href="{% url 'events:discover' %}" class="mt-6 inline-block">
+                    {% #button variant="default" %}
+                        Discover other events
+                    {% /button %}
                 </a>
             </div>
             {% endif %}

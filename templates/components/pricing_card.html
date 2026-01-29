@@ -1,3 +1,4 @@
+{% load slippers %}
 <div class="card p-6 lg:p-8 {% if popular %}border-2 border-foreground relative{% endif %} {% if highlight %}bg-gradient-to-br from-foreground/5 to-foreground/10{% endif %} {% if popular %}mt-4 md:mt-0{% elif offset_mobile %}mt-4 {% if offset_lg %}lg:mt-0{% else %}md:mt-0{% endif %}{% endif %} {{ class }}" x-data x-intersect.once="$el.classList.add('animate-scale'{% if delay %}, 'delay-{{ delay }}'{% endif %})">
     {% if popular %}
     <span class="absolute -top-3 left-6 px-3 py-1 text-xs font-medium rounded-full bg-foreground text-background">Most popular</span>
@@ -16,11 +17,19 @@
         {{ children }}
     </ul>
     {% if contact_href %}
-    <a href="{{ contact_href }}" class="btn btn-outline btn-md w-full mt-8">
-        <i data-lucide="mail" class="w-4 h-4"></i>
-        Contact us
+    <a href="{{ contact_href }}" class="w-full mt-8 block">
+        {% #button variant="outline" class="w-full" %}
+            <i data-lucide="mail" class="w-4 h-4"></i>
+            Contact us
+        {% /button %}
     </a>
     {% else %}
-    <a href="{{ href }}" class="btn {% if popular %}btn-primary{% else %}btn-outline{% endif %} btn-md w-full mt-8">{{ cta|default:"Get started" }}</a>
+    <a href="{{ href }}" class="w-full mt-8 block">
+        {% if popular %}
+        {% #button variant="default" class="w-full" %}{{ cta|default:"Get started" }}{% /button %}
+        {% else %}
+        {% #button variant="outline" class="w-full" %}{{ cta|default:"Get started" }}{% /button %}
+        {% endif %}
+    </a>
     {% endif %}
 </div>

@@ -13,9 +13,11 @@
 {% block content %}
 <div class="max-w-3xl mx-auto space-y-6">
     <div class="flex items-center justify-between">
-        <a href="{% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug %}" class="btn btn-outline btn-sm">
-            <i data-lucide="arrow-left" class="w-4 h-4"></i>
-            Back to Event
+        <a href="{% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug %}">
+            {% #button variant="outline" size="sm" %}
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                Back to Event
+            {% /button %}
         </a>
         <span class="text-sm text-muted-foreground">{{ questions.count }} question{{ questions.count|pluralize }}</span>
     </div>
@@ -23,10 +25,10 @@
     <div class="card p-6" x-data="{ showForm: false }">
         <div class="flex items-center justify-between mb-4">
             <h2 class="font-semibold">Custom Questions</h2>
-            <button type="button" @click="showForm = !showForm" class="btn btn-primary btn-sm">
+            {% #button type="button" variant="default" size="sm" attrs='@click="showForm = !showForm"' %}
                 <i data-lucide="plus" class="w-4 h-4"></i>
                 Add Question
-            </button>
+            {% /button %}
         </div>
 
         <form x-show="showForm" x-cloak method="post" class="mb-6 p-4 rounded-lg border border-border bg-muted/30 space-y-4">
@@ -71,11 +73,11 @@
             </div>
 
             <div class="flex items-center gap-3">
-                <button type="submit" class="btn btn-primary btn-sm">
+                {% #button type="submit" variant="default" size="sm" %}
                     <i data-lucide="plus" class="w-4 h-4"></i>
                     Add Question
-                </button>
-                <button type="button" @click="showForm = false" class="btn btn-outline btn-sm">Cancel</button>
+                {% /button %}
+                {% #button type="button" variant="outline" size="sm" attrs='@click="showForm = false"' %}Cancel{% /button %}
             </div>
         </form>
 
@@ -107,9 +109,9 @@
                     {% csrf_token %}
                     <input type="hidden" name="action" value="delete">
                     <input type="hidden" name="question_id" value="{{ q.id }}">
-                    <button type="submit" class="btn btn-outline btn-xs text-red-500 hover:bg-red-500/10">
+                    {% #button type="submit" variant="outline" size="sm" class="text-red-500 hover:bg-red-500/10" %}
                         <i data-lucide="trash-2" class="w-3 h-3"></i>
-                    </button>
+                    {% /button %}
                 </form>
             </div>
             {% endfor %}

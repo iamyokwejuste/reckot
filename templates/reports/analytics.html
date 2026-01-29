@@ -40,10 +40,10 @@
             </div>
         </div>
     </div>
-    <button class="btn btn-primary btn-sm">
+    {% #button variant="default" size="sm" %}
         <i data-lucide="download" class="h-4 w-4"></i>
         <span class="hidden sm:inline">Export</span>
-    </button>
+    {% /button %}
 </div>
 {% endblock %}
 
@@ -242,9 +242,11 @@
             <i data-lucide="bar-chart-3" class="h-12 w-12 mx-auto mb-4 opacity-50"></i>
             <p class="text-lg font-medium mb-2">No events yet</p>
             <p class="text-sm mb-4">Create your first event to start tracking analytics</p>
-            <a href="{% url 'events:create' %}" class="btn btn-primary btn-md">
-                <i data-lucide="plus" class="mr-2 h-4 w-4"></i>
-                Create Event
+            <a href="{% url 'events:create' %}">
+                {% #button variant="default" %}
+                    <i data-lucide="plus" class="mr-2 h-4 w-4"></i>
+                    Create Event
+                {% /button %}
             </a>
         </div>
         {% endif %}

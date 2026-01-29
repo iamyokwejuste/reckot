@@ -21,10 +21,10 @@
 
             <form method="post" hx-boost="false" action="{% url 'account_confirm_email' key=confirmation.key %}">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-primary btn-md w-full">
+                {% #button variant="default" type="submit" class="w-full" %}
                     Confirm email
                     <i data-lucide="check" class="w-4 h-4"></i>
-                </button>
+                {% /button %}
             </form>
 
             <p class="text-center text-sm text-muted-foreground mt-6">

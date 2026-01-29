@@ -11,9 +11,11 @@
 {% endblock %}
 
 {% block header_actions %}
-<a href="{% url 'marketing:affiliate_create' org_slug=organization.slug %}" class="btn btn-primary btn-md">
+<a href="{% url 'marketing:affiliate_create' org_slug=organization.slug %}">
+    {% #button variant="default" %}
     <i data-lucide="plus" class="w-4 h-4"></i>
     Create Link
+    {% /button %}
 </a>
 {% endblock %}
 
@@ -105,9 +107,10 @@
                         {% else %}
                         <span class="badge badge-outline">Inactive</span>
                         {% endif %}
-                        <a href="{% url 'marketing:affiliate_detail' org_slug=organization.slug link_code=link.code %}"
-                           class="btn btn-outline btn-sm">
+                        <a href="{% url 'marketing:affiliate_detail' org_slug=organization.slug link_code=link.code %}">
+                            {% #button variant="outline" size="sm" %}
                             View
+                            {% /button %}
                         </a>
                     </div>
                 </div>
@@ -122,9 +125,11 @@
         </div>
         <h3 class="font-semibold text-lg">No affiliate links yet</h3>
         <p class="text-muted-foreground mt-1">Create tracking links for your partners and affiliates</p>
-        <a href="{% url 'marketing:affiliate_create' org_slug=organization.slug %}" class="btn btn-primary btn-md mt-6">
+        <a href="{% url 'marketing:affiliate_create' org_slug=organization.slug %}" class="mt-6 inline-block">
+            {% #button variant="default" %}
             <i data-lucide="plus" class="w-4 h-4"></i>
             Create Your First Link
+            {% /button %}
         </a>
     </div>
     {% endif %}
