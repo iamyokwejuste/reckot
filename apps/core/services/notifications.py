@@ -135,17 +135,32 @@ class NotificationService:
         try:
             message = render_to_string(template_name, context)
 
-            if not all([settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN, settings.TWILIO_PHONE_NUMBER]):
+            has_messaging_service = bool(getattr(settings, 'TWILIO_MESSAGING_SERVICE_SID', ''))
+            has_phone = bool(getattr(settings, 'TWILIO_PHONE_NUMBER', ''))
+
+            if not all([settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN]):
                 logger.warning(f"Twilio not configured, SMS to {phone_number}: {message}")
+                return True
+
+            if not has_messaging_service and not has_phone:
+                logger.warning(f"No Twilio sender configured, SMS to {phone_number}: {message}")
                 return True
 
             from twilio.rest import Client
             client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
-            client.messages.create(
-                body=message,
-                from_=settings.TWILIO_PHONE_NUMBER,
-                to=phone_number
-            )
+
+            if has_messaging_service:
+                client.messages.create(
+                    body=message,
+                    messaging_service_sid=settings.TWILIO_MESSAGING_SERVICE_SID,
+                    to=phone_number
+                )
+            else:
+                client.messages.create(
+                    body=message,
+                    from_=settings.TWILIO_PHONE_NUMBER,
+                    to=phone_number
+                )
             logger.info(f"SMS sent to {phone_number}")
             return True
 
