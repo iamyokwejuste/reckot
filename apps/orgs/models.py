@@ -35,6 +35,14 @@ class Organization(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
+        if self.pk:
+            try:
+                old = Organization.objects.get(pk=self.pk)
+                if old.name != self.name:
+                    base_slug = slugify(self.name)
+                    self.slug = f"{base_slug}-{uuid.uuid4().hex[:6]}"
+            except Organization.DoesNotExist:
+                pass
         if not self.slug:
             base_slug = slugify(self.name)
             self.slug = f"{base_slug}-{uuid.uuid4().hex[:6]}"

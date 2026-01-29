@@ -63,6 +63,14 @@ class Event(models.Model):
         return self.title
 
     def save(self, *args, **kwargs):
+        if self.pk:
+            try:
+                old = Event.objects.get(pk=self.pk)
+                if old.title != self.title:
+                    base_slug = slugify(self.title)
+                    self.slug = f"{base_slug}-{uuid.uuid4().hex[:8]}"
+            except Event.DoesNotExist:
+                pass
         if not self.slug:
             base_slug = slugify(self.title)
             self.slug = f"{base_slug}-{uuid.uuid4().hex[:8]}"
