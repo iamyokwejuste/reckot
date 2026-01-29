@@ -18,9 +18,13 @@
 <div class="max-w-xl mx-auto" x-data="{
     logoPreview: {% if organization.logo %}'{{ organization.logo.url }}'{% else %}null{% endif %},
     removeExistingLogo: false,
-    handleLogoUpload(e) {
+    async handleLogoUpload(e) {
         const file = e.target.files[0];
-        if (file) {
+        if (file && window.ImageCompressor) {
+            const compressed = await ImageCompressor.processFileInput(e.target);
+            this.logoPreview = URL.createObjectURL(compressed);
+            this.removeExistingLogo = false;
+        } else if (file) {
             this.logoPreview = URL.createObjectURL(file);
             this.removeExistingLogo = false;
         }
@@ -107,6 +111,7 @@
 
 {% block extra_scripts %}
 <script src="{% static 'js/richtext.js' %}"></script>
+<script src="{% static 'js/image-compress.js' %}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     lucide.createIcons();

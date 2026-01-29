@@ -52,9 +52,12 @@
     contactEmail: '{{ event.contact_email|default:""|escapejs }}',
     contactPhone: '{{ event.contact_phone|default:""|escapejs }}',
     errors: {},
-    handleCoverUpload(e) {
+    async handleCoverUpload(e) {
         const file = e.target.files[0];
-        if (file) {
+        if (file && window.ImageCompressor) {
+            const compressed = await ImageCompressor.processFileInput(e.target);
+            this.coverPreview = URL.createObjectURL(compressed);
+        } else if (file) {
             this.coverPreview = URL.createObjectURL(file);
         }
     },
@@ -427,6 +430,7 @@
 {% block extra_scripts %}
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="{% static 'js/richtext.js' %}"></script>
+<script src="{% static 'js/image-compress.js' %}"></script>
 <script>
 let startPicker = null;
 let endPicker = null;
