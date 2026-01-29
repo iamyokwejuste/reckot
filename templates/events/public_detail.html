@@ -388,9 +388,9 @@
 
                         <div class="border-t border-border pt-4">
                             <label class="block text-sm font-medium mb-2">Have a coupon code?</label>
-                            <div class="flex gap-2">
+                            <div class="flex gap-2 items-center">
                                 <input type="text" name="coupon_code" x-model="couponCode"
-                                       placeholder="Enter code" class="input flex-1 uppercase font-mono"
+                                       placeholder="Enter code" class="input flex-1 uppercase font-mono text-sm h-9"
                                        @input.debounce.500ms="validateCoupon()">
                                 {% #button type="button" variant="outline" size="sm" attrs='@click="validateCoupon()"' %}
                                     Apply
