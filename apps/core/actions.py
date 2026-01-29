@@ -150,7 +150,7 @@ class SettingsView(LoginRequiredMixin, View):
         if last_name:
             user.last_name = last_name
         if phone:
-            user.phone = phone
+            user.phone_number = re.sub(r'[\s\-\(\)]', '', phone)
 
         user.save()
         messages.success(request, 'Settings updated successfully.')
@@ -158,6 +158,9 @@ class SettingsView(LoginRequiredMixin, View):
 
 
 class PhoneLoginRequestView(View):
+    def get(self, request):
+        return redirect('account_login')
+
     def post(self, request):
         phone = request.POST.get('phone_number', '').strip()
         if not phone:
@@ -188,6 +191,9 @@ class PhoneLoginRequestView(View):
 
 
 class PhoneLoginVerifyView(View):
+    def get(self, request):
+        return redirect('account_login')
+
     def post(self, request):
         phone = request.POST.get('phone_number', '').strip()
         code = request.POST.get('otp_code', '').strip()
@@ -232,6 +238,9 @@ class PhoneLoginVerifyView(View):
 
 
 class PhoneSignupRequestView(View):
+    def get(self, request):
+        return redirect('account_signup')
+
     def post(self, request):
         phone = request.POST.get('phone_number', '').strip()
         if not phone:
@@ -262,6 +271,9 @@ class PhoneSignupRequestView(View):
 
 
 class PhoneSignupVerifyView(View):
+    def get(self, request):
+        return redirect('account_signup')
+
     def post(self, request):
         phone = request.POST.get('phone_number', '').strip()
         code = request.POST.get('otp_code', '').strip()
