@@ -4,12 +4,12 @@
 
 {% block title %}{{ event.title }} - {{ event.start_at|date:"M j, Y" }} | Reckot{% endblock %}
 
-{% block meta_description %}{{ event.short_description|default:event.description|truncatewords:30 }} Join us on {{ event.start_at|date:"F j, Y" }} at {{ event.location|default:"Online" }}.{% endblock %}
+{% block meta_description %}{{ event.short_description|default:event.description|striptags|truncatewords:30 }} Join us on {{ event.start_at|date:"F j, Y" }} at {{ event.location|default:"Online" }}.{% endblock %}
 {% block meta_keywords %}{{ event.title }}, {{ event.organization.name }}, events, {{ event.city|default:"Africa" }}, {{ event.event_type|lower }}, tickets, {{ event.start_at|date:"Y" }}{% endblock %}
 
 {% block og_type %}event{% endblock %}
 {% block og_title %}{{ event.title }} - {{ event.start_at|date:"M j, Y" }}{% endblock %}
-{% block og_description %}{{ event.short_description|default:event.description|truncatewords:30 }} Join us on {{ event.start_at|date:"F j, Y" }}.{% endblock %}
+{% block og_description %}{{ event.short_description|default:event.description|striptags|truncatewords:30 }} Join us on {{ event.start_at|date:"F j, Y" }}.{% endblock %}
 {% block og_image %}
 <meta property="og:image" content="{% if event.cover_image %}{{ request.scheme }}://{{ request.get_host }}{{ event.cover_image.url }}{% else %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/reckot_preview.png' %}{% endif %}">
 <meta property="og:image:width" content="1200">
@@ -18,7 +18,7 @@
 {% endblock %}
 
 {% block twitter_title %}{{ event.title }} - {{ event.start_at|date:"M j" }}{% endblock %}
-{% block twitter_description %}{{ event.short_description|default:event.description|truncatewords:25 }} {{ event.start_at|date:"F j, Y" }}{% endblock %}
+{% block twitter_description %}{{ event.short_description|default:event.description|striptags|truncatewords:25 }} {{ event.start_at|date:"F j, Y" }}{% endblock %}
 {% block twitter_image %}
 <meta name="twitter:image" content="{% if event.cover_image %}{{ request.scheme }}://{{ request.get_host }}{{ event.cover_image.url }}{% else %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/reckot_preview.png' %}{% endif %}">
 <meta name="twitter:image:alt" content="{{ event.title }}">
@@ -30,7 +30,7 @@
     "@context": "https://schema.org",
     "@type": "Event",
     "name": "{{ event.title|escapejs }}",
-    "description": "{{ event.description|truncatewords:50|escapejs }}",
+    "description": "{{ event.description|striptags|truncatewords:50|escapejs }}",
     "startDate": "{{ event.start_at|date:'c' }}",
     "endDate": "{{ event.end_at|date:'c' }}",
     "eventStatus": "https://schema.org/EventScheduled",
@@ -114,7 +114,7 @@
                         </div>
                     </div>
 
-                    <div class="text-sm text-muted-foreground whitespace-pre-line">{{ event.description }}</div>
+                    <div class="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">{{ event.description|safe }}</div>
                 </div>
 
                 <div class="card p-6" x-data="{ shareOpen: false }">

@@ -45,7 +45,7 @@
                     {% endif %}
                 </div>
                 <h3 class="font-semibold text-lg mb-2">{{ event.title }}</h3>
-                <p class="text-sm text-muted-foreground mb-4">{{ event.description|truncatewords:20 }}</p>
+                <div class="text-sm text-muted-foreground mb-4 line-clamp-2 prose prose-sm dark:prose-invert max-w-none">{{ event.description|safe }}</div>
                 <div class="flex items-center gap-4 text-sm text-muted-foreground">
                     <span class="flex items-center gap-1">
                         <i data-lucide="clock" class="w-4 h-4"></i>

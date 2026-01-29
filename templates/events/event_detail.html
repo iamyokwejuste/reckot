@@ -56,7 +56,7 @@
                 <h2 class="text-lg font-semibold mb-4">Event Details</h2>
 
                 <div class="prose prose-sm max-w-none text-muted-foreground">
-                    <p>{{ event.description }}</p>
+                    <div class="prose prose-sm dark:prose-invert max-w-none">{{ event.description|safe }}</div>
                 </div>
 
                 <div class="mt-6 grid gap-4 sm:grid-cols-2">

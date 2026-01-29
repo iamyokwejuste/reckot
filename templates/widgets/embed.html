@@ -40,7 +40,7 @@
         </p>
 
         {% if widget.show_description and event.description %}
-        <p style="margin: 0 0 16px 0; font-size: 0.875rem;">{{ event.description|truncatewords:30 }}</p>
+        <p style="margin: 0 0 16px 0; font-size: 0.875rem;">{{ event.description|striptags|truncatewords:30 }}</p>
         {% endif %}
 
         <div style="margin-bottom: 16px;">
