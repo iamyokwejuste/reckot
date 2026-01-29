@@ -30,15 +30,27 @@ def initiate_payment(booking: Booking, provider: str, phone: str, **kwargs) -> t
         else:
             default_email = booking.guest_email or ''
 
-        payment = Payment.objects.create(
+        existing_payment = Payment.objects.filter(
             booking=booking,
-            amount=amount,
-            currency=currency,
-            provider=provider,
-            phone_number=phone,
-            customer_email=kwargs.get('email', default_email),
-            expires_at=timezone.now() + timedelta(minutes=30)
-        )
+            status=Payment.Status.PENDING
+        ).first()
+
+        if existing_payment:
+            existing_payment.phone_number = phone
+            existing_payment.provider = provider
+            existing_payment.expires_at = timezone.now() + timedelta(minutes=30)
+            existing_payment.save()
+            payment = existing_payment
+        else:
+            payment = Payment.objects.create(
+                booking=booking,
+                amount=amount,
+                currency=currency,
+                provider=provider,
+                phone_number=phone,
+                customer_email=kwargs.get('email', default_email),
+                expires_at=timezone.now() + timedelta(minutes=30)
+            )
 
         callback_base = settings.PAYMENT_GATEWAYS.get('CALLBACK_BASE_URL', '')
         if provider == 'CAMPAY':

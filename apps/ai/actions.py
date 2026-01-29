@@ -28,7 +28,10 @@ class AIAssistantView(View):
         if session_id:
             conversation = AIConversation.objects.filter(session_id=session_id).first()
             if conversation:
-                messages_list = list(conversation.messages.values('role', 'content', 'created_at'))
+                messages_list = [
+                    {'role': m.role, 'content': m.content}
+                    for m in conversation.messages.all()
+                ]
 
         context = self._build_user_context(request)
 

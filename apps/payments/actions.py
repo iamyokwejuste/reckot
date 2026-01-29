@@ -15,7 +15,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from apps.payments.models import Payment, PaymentProvider, Invoice, Refund
-from apps.payments.services import initiate_payment, confirm_payment, fail_payment
+from apps.payments.services import initiate_payment, confirm_payment, fail_payment, verify_and_confirm_payment
 from apps.payments.queries import get_payment_by_id, get_booking_payment
 from apps.payments.invoice_service import get_invoice_pdf, create_invoice
 from apps.tickets.models import Booking, GuestSession
@@ -260,6 +260,15 @@ class PaymentPollView(View):
             payment.status = Payment.Status.EXPIRED
             payment.save()
             return render(request, 'payments/_failed.html', {'payment': payment})
+
+        if payment.status == Payment.Status.PENDING and payment.external_reference:
+            verify_and_confirm_payment(payment)
+            payment.refresh_from_db()
+            if payment.status == Payment.Status.CONFIRMED:
+                return render(request, 'payments/_success.html', {'payment': payment})
+            if payment.status == Payment.Status.FAILED:
+                return render(request, 'payments/_failed.html', {'payment': payment})
+
         return render(request, 'payments/_pending.html', {'payment': payment})
 
 
