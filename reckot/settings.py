@@ -79,6 +79,10 @@ TEMPLATES = [
     },
 ]
 
+SLIPPERS = {
+    'COMPONENTS_DIRS': [BASE_DIR / 'templates' / 'components'],
+}
+
 WSGI_APPLICATION = 'reckot.wsgi.application'
 
 DATABASES = {

@@ -50,5 +50,4 @@ urlpatterns = [
     path('accounts/phone/signup/verify/', PhoneSignupVerifyView.as_view(), name='phone_signup_verify'),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

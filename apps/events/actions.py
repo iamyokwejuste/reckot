@@ -184,7 +184,7 @@ class EventDashboardView(LoginRequiredMixin, View):
         tickets = Ticket.objects.filter(booking__event=event)
 
         tickets_sold = tickets.count()
-        checked_in = tickets.filter(checked_in=True).count()
+        checked_in = tickets.filter(is_checked_in=True).count()
         checkin_rate = (checked_in / tickets_sold * 100) if tickets_sold > 0 else 0
 
         revenue = Payment.objects.filter(

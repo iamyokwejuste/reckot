@@ -1,8 +1,8 @@
 <div class="flex items-center justify-between {{ class }}" {{ attrs }}>
-    <span class="text-sm">{{ label }}</span>
+    <span class="text-sm text-foreground">{{ label }}</span>
     {% if active %}
-    <span class="h-6 w-6 rounded-full bg-emerald-500 flex items-center justify-center">
-        <i data-lucide="check" class="h-4 w-4 text-white"></i>
+    <span class="h-6 w-6 rounded-full bg-success flex items-center justify-center">
+        <i data-lucide="check" class="h-4 w-4 text-background"></i>
     </span>
     {% else %}
     <span class="h-6 w-6 rounded-full bg-muted"></span>

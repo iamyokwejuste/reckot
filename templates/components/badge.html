@@ -3,12 +3,12 @@
     class="
         inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors
         focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2
-        {% if variant == 'default' %}border-transparent bg-primary text-primary-foreground hover:bg-primary/80{% endif %}
+        {% if variant == 'default' %}border-border bg-muted text-muted-foreground{% endif %}
         {% if variant == 'secondary' %}border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80{% endif %}
         {% if variant == 'destructive' %}border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80{% endif %}
-        {% if variant == 'success' %}border-transparent bg-success text-success-foreground hover:bg-success/80{% endif %}
-        {% if variant == 'warning' %}border-transparent bg-warning text-warning-foreground hover:bg-warning/80{% endif %}
-        {% if variant == 'outline' %}text-foreground{% endif %}
+        {% if variant == 'success' %}border-success/20 bg-success/10 text-success{% endif %}
+        {% if variant == 'warning' %}border-warning/20 bg-warning/10 text-warning{% endif %}
+        {% if variant == 'outline' %}border-border text-foreground{% endif %}
         {{ class }}
     "
     {{ attrs }}
