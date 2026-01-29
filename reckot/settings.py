@@ -197,12 +197,15 @@ GEMINI_MODEL = os.getenv('GEMINI_MODEL', 'gemini-1.5-flash')
 
 RECKOT_PLATFORM_FEE_PERCENTAGE = Decimal(os.getenv('RECKOT_PLATFORM_FEE_PERCENTAGE', '7'))
 
+# campay docs: https://documenter.getpostman.com/view/2391374/T1LV8PVA
+
 PAYMENT_GATEWAYS = {
     'PRIMARY': os.getenv('PAYMENT_PRIMARY_GATEWAY', 'CAMPAY'),
     'FALLBACKS': os.getenv('PAYMENT_FALLBACK_GATEWAYS', 'PAWAPAY,FLUTTERWAVE').split(','),
 
     'CREDENTIALS': {
         'CAMPAY': {
+            'app_id': os.getenv('CAMPAY_APP_ID', ''),
             'app_username': os.getenv('CAMPAY_APP_USERNAME', ''),
             'app_password': os.getenv('CAMPAY_APP_PASSWORD', ''),
             'permanent_token': os.getenv('CAMPAY_PERMANENT_TOKEN', ''),

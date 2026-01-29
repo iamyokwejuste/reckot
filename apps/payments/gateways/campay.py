@@ -17,6 +17,7 @@ class CampayGateway(PaymentGateway):
 
     def __init__(self, credentials: dict):
         super().__init__(credentials)
+        self.app_id = credentials.get('app_id', '')
         self.app_username = credentials.get('app_username', '')
         self.app_password = credentials.get('app_password', '')
         self.permanent_token = credentials.get('permanent_token', '')
@@ -26,10 +27,14 @@ class CampayGateway(PaymentGateway):
         self._token = None
 
     def validate_credentials(self):
-        has_username_password = self.credentials.get('app_username') and self.credentials.get('app_password')
+        has_full_credentials = (
+            self.credentials.get('app_id') and
+            self.credentials.get('app_username') and
+            self.credentials.get('app_password')
+        )
         has_permanent_token = self.credentials.get('permanent_token')
-        if not has_username_password and not has_permanent_token:
-            raise ValueError('Campay requires either app_username/app_password or permanent_token')
+        if not has_full_credentials and not has_permanent_token:
+            raise ValueError('Campay requires either app_id/app_username/app_password or permanent_token')
 
     def _get_token(self) -> str:
         if self.permanent_token:
