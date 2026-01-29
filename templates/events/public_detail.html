@@ -114,9 +114,7 @@
                         </div>
                     </div>
 
-                    <div class="prose prose-sm max-w-none">
-                        {{ event.description|linebreaks }}
-                    </div>
+                    <div class="text-sm text-muted-foreground whitespace-pre-line">{{ event.description }}</div>
                 </div>
 
                 <div class="card p-6" x-data="{ shareOpen: false }">
