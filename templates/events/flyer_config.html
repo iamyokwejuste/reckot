@@ -3,6 +3,19 @@
 
 {% block title %}Flyer Configuration - {{ event.title }}{% endblock %}
 
+{% block breadcrumbs %}
+{% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug as event_dashboard_url %}
+{% #breadcrumb class="mb-4" %}
+    {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item href="/events/" %}Events{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item href=event_dashboard_url %}{{ event.title|truncatewords:3 }}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item %}I Will Be There{% /breadcrumb_item %}
+{% /breadcrumb %}
+{% endblock %}
+
 {% block content %}
 <div class="space-y-6" x-data="flyerEditor()" x-init="init()">
     <div class="flex items-center justify-between">
@@ -157,7 +170,7 @@
                             <p class="text-xs text-muted-foreground">Recommended: 1080x1080 pixels</p>
                         </div>
                         <div x-show="preview" class="space-y-3">
-                            <img :src="preview" class="max-w-[200px] max-h-[200px] mx-auto object-contain rounded-lg border border-border">
+                            <img :src="preview" class="w-24 h-24 mx-auto object-cover rounded-lg border border-border">
                             {% #button type="button" variant="outline" size="sm" attrs='@click="$refs.templateInput.click()"' %}
                                 Change Image
                             {% /button %}
@@ -183,10 +196,16 @@
                             <img :src="templateUrl" class="absolute inset-0 w-full h-full object-contain" alt="Template">
                         </template>
                         <template x-if="!templateUrl">
-                            <div class="absolute inset-0 flex items-center justify-center text-muted-foreground">
-                                <div class="text-center">
-                                    <i data-lucide="image" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
-                                    <p class="text-sm">Upload a template image</p>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900/50 border-2 border-dashed border-zinc-700 rounded-lg">
+                                <div class="w-24 h-24 rounded-full bg-zinc-800 flex items-center justify-center mb-4 border-2 border-zinc-600">
+                                    <i data-lucide="user" class="w-10 h-10 text-zinc-500"></i>
+                                </div>
+                                <div class="w-48 h-6 bg-zinc-800 rounded mb-3"></div>
+                                <div class="w-36 h-4 bg-zinc-800/60 rounded mb-2"></div>
+                                <div class="w-28 h-4 bg-zinc-800/40 rounded mb-6"></div>
+                                <div class="flex items-center gap-2 text-muted-foreground mt-4">
+                                    <i data-lucide="image-plus" class="w-5 h-5"></i>
+                                    <p class="text-sm">Upload a template to get started</p>
                                 </div>
                             </div>
                         </template>
@@ -264,11 +283,19 @@
                                 <div class="grid grid-cols-2 gap-2">
                                     <div>
                                         <label class="block text-xs font-medium mb-1">Width</label>
-                                        <input type="number" x-model.number="photo.width" @input="updatePhotoPercent()" class="input w-full text-sm">
+                                        <input type="number" x-model.number="photo.width"
+                                               @input="constrainPhotoSize(); updatePhotoPercent()"
+                                               :max="templateWidth" min="10"
+                                               class="input w-full text-sm">
+                                        <span class="text-xs text-muted-foreground">Max: <span x-text="templateWidth"></span>px</span>
                                     </div>
                                     <div>
                                         <label class="block text-xs font-medium mb-1">Height</label>
-                                        <input type="number" x-model.number="photo.height" @input="updatePhotoPercent()" class="input w-full text-sm">
+                                        <input type="number" x-model.number="photo.height"
+                                               @input="constrainPhotoSize(); updatePhotoPercent()"
+                                               :max="templateHeight" min="10"
+                                               class="input w-full text-sm">
+                                        <span class="text-xs text-muted-foreground">Max: <span x-text="templateHeight"></span>px</span>
                                     </div>
                                 </div>
                                 <div>
@@ -400,6 +427,8 @@
 function flyerEditor() {
     return {
         templateUrl: {% if config and config.template_image %}'{{ config.template_image.url }}'{% else %}null{% endif %},
+        templateWidth: {{ config.output_width|default:1080 }},
+        templateHeight: {{ config.output_height|default:1080 }},
         canvasScale: 0.5,
         selectedElement: null,
         dragging: null,
@@ -444,6 +473,7 @@ function flyerEditor() {
         ],
 
         init() {
+            this.constrainPhotoSize();
             this.updatePhotoPercent();
             this.updateFieldPercents();
             this.$nextTick(() => { if (window.lucide) lucide.createIcons(); });
@@ -468,7 +498,34 @@ function flyerEditor() {
         loadTemplatePreview(event) {
             const file = event.target.files[0];
             if (file) {
-                this.templateUrl = URL.createObjectURL(file);
+                const url = URL.createObjectURL(file);
+                const img = new Image();
+                img.onload = () => {
+                    this.templateWidth = img.naturalWidth;
+                    this.templateHeight = img.naturalHeight;
+                    this.output.width = img.naturalWidth;
+                    this.output.height = img.naturalHeight;
+                    this.constrainPhotoSize();
+                    this.updatePhotoPercent();
+                    this.updateFieldPercents();
+                };
+                img.src = url;
+                this.templateUrl = url;
+            }
+        },
+
+        constrainPhotoSize() {
+            if (this.photo.width > this.templateWidth) {
+                this.photo.width = this.templateWidth;
+            }
+            if (this.photo.height > this.templateHeight) {
+                this.photo.height = this.templateHeight;
+            }
+            if (this.photo.x + this.photo.width > this.templateWidth) {
+                this.photo.x = this.templateWidth - this.photo.width;
+            }
+            if (this.photo.y + this.photo.height > this.templateHeight) {
+                this.photo.y = this.templateHeight - this.photo.height;
             }
         },
 
@@ -501,8 +558,9 @@ function flyerEditor() {
             if (this.resizing === 'photo') {
                 const newW = Math.max(5, x - this.photoPercent.x);
                 const newH = Math.max(5, y - this.photoPercent.y);
-                this.photo.width = Math.round((newW / 100) * this.output.width);
-                this.photo.height = Math.round((newH / 100) * this.output.height);
+                this.photo.width = Math.min(this.templateWidth, Math.round((newW / 100) * this.output.width));
+                this.photo.height = Math.min(this.templateHeight, Math.round((newH / 100) * this.output.height));
+                this.constrainPhotoSize();
                 this.updatePhotoPercent();
                 return;
             }
