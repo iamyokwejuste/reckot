@@ -129,7 +129,12 @@ class ResendOTPView(LoginRequiredMixin, View):
         if request.user.email_verified:
             return JsonResponse({'success': False, 'message': 'Email already verified'})
 
-        resend_otp_task.enqueue(request.user.id, OTPVerification.Type.EMAIL)
+        try:
+            resend_otp_task.enqueue(request.user.id, OTPVerification.Type.EMAIL)
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"Failed to resend OTP: {e}")
+            return JsonResponse({'success': False, 'message': 'Failed to send code. Please try again.'})
         return JsonResponse({'success': True, 'message': 'New code sent to your email'})
 
 
@@ -178,11 +183,15 @@ class PhoneLoginRequestView(View):
             )
 
         request.session['login_phone'] = phone
-        if settings.TWILIO_VERIFY_SERVICE_SID:
-            send_otp_sms_task.enqueue(phone)
-        else:
-            otp = OTPVerification.create_for_user(user, OTPVerification.Type.PHONE)
-            send_otp_sms_task.enqueue(phone, otp.code)
+        try:
+            if settings.TWILIO_VERIFY_SERVICE_SID:
+                send_otp_sms_task.enqueue(phone)
+            else:
+                otp = OTPVerification.create_for_user(user, OTPVerification.Type.PHONE)
+                send_otp_sms_task.enqueue(phone, otp.code)
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"Failed to send OTP SMS: {e}")
         return HttpResponse(
             '<p class="text-sm text-emerald-500 mt-2">Verification code sent!</p>'
         )
@@ -266,11 +275,15 @@ class PhoneSignupRequestView(View):
             )
 
         request.session['signup_phone'] = phone
-        if settings.TWILIO_VERIFY_SERVICE_SID:
-            send_otp_sms_task.enqueue(phone)
-        else:
-            request.session['signup_otp'] = OTPVerification.generate_code()
-            send_otp_sms_task.enqueue(phone, request.session['signup_otp'])
+        try:
+            if settings.TWILIO_VERIFY_SERVICE_SID:
+                send_otp_sms_task.enqueue(phone)
+            else:
+                request.session['signup_otp'] = OTPVerification.generate_code()
+                send_otp_sms_task.enqueue(phone, request.session['signup_otp'])
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"Failed to send OTP SMS: {e}")
         return HttpResponse(
             '<p class="text-sm text-emerald-500 mt-2">Verification code sent!</p>'
         )
