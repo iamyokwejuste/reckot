@@ -47,6 +47,9 @@ COPY --chown=appuser:appuser . .
 
 RUN chmod +x /app/entrypoint.sh
 
+RUN mkdir -p /app/media/org_logos /app/media/event_covers /app/media/event_heroes /app/media/event_logos /app/media/flyers \
+    && chown -R appuser:appuser /app/media
+
 RUN uv run python manage.py collectstatic --noinput --clear
 
 USER appuser
