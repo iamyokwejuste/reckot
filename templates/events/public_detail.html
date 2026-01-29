@@ -84,7 +84,49 @@
                     <h3 class="font-semibold mb-4">Tickets</h3>
 
                     {% if ticket_types %}
-                    <form method="post" action="{% url 'payments:checkout' %}" class="space-y-4" hx-boost="false">
+                    <form method="post" action="{% url 'payments:checkout' %}" class="space-y-4" hx-boost="false"
+                          x-data="{
+                              couponCode: '',
+                              couponValid: null,
+                              couponError: '',
+                              couponDiscount: null,
+                              discountType: '',
+                              discountValue: 0,
+                              async validateCoupon() {
+                                  if (!this.couponCode.trim()) {
+                                      this.couponValid = null;
+                                      this.couponError = '';
+                                      this.couponDiscount = null;
+                                      return;
+                                  }
+                                  try {
+                                      const response = await fetch('{% url 'events:validate_coupon' %}', {
+                                          method: 'POST',
+                                          headers: {
+                                              'Content-Type': 'application/x-www-form-urlencoded',
+                                              'X-CSRFToken': '{{ csrf_token }}'
+                                          },
+                                          body: `code=${encodeURIComponent(this.couponCode)}&event_id={{ event.id }}`
+                                      });
+                                      const data = await response.json();
+                                      this.couponValid = data.valid;
+                                      if (data.valid) {
+                                          this.couponError = '';
+                                          this.discountType = data.discount_type;
+                                          this.discountValue = data.discount_value;
+                                          this.couponDiscount = data.discount_type === 'PERCENTAGE'
+                                              ? `${data.discount_value}% off`
+                                              : `${data.discount_value} XAF off`;
+                                      } else {
+                                          this.couponError = data.error;
+                                          this.couponDiscount = null;
+                                      }
+                                  } catch (e) {
+                                      this.couponError = 'Failed to validate coupon';
+                                      this.couponValid = false;
+                                  }
+                              }
+                          }">
                         {% csrf_token %}
                         <input type="hidden" name="event_id" value="{{ event.id }}">
                         {% if affiliate_code %}
@@ -92,16 +134,34 @@
                         {% endif %}
 
                         {% for ticket_type in ticket_types %}
-                        <div class="border border-border rounded-lg p-4">
+                        <div class="border border-border rounded-lg p-4 {% if not ticket_type.is_available %}opacity-60{% endif %}">
                             <div class="flex justify-between items-start mb-2">
                                 <div>
                                     <div class="font-medium">{{ ticket_type.name }}</div>
                                     {% if ticket_type.description %}
                                     <div class="text-sm text-muted-foreground">{{ ticket_type.description|truncatewords:10 }}</div>
                                     {% endif %}
+                                    {% if ticket_type.status_message %}
+                                    <div class="text-xs text-warning mt-1">
+                                        <i data-lucide="clock" class="w-3 h-3 inline"></i>
+                                        {{ ticket_type.status_message }}
+                                    </div>
+                                    {% elif ticket_type.sales_end and ticket_type.is_available %}
+                                    <div class="text-xs text-warning mt-1">
+                                        <i data-lucide="clock" class="w-3 h-3 inline"></i>
+                                        Ends {{ ticket_type.sales_end|date:"M j, Y" }}
+                                    </div>
+                                    {% endif %}
                                 </div>
-                                <div class="text-lg font-bold">{{ ticket_type.price }} XAF</div>
+                                <div class="text-lg font-bold">
+                                    {% if ticket_type.price == 0 %}
+                                    <span class="text-success">Free</span>
+                                    {% else %}
+                                    {{ ticket_type.price }} XAF
+                                    {% endif %}
+                                </div>
                             </div>
+                            {% if ticket_type.is_available %}
                             <div class="flex items-center gap-2">
                                 <label class="text-sm text-muted-foreground">Qty:</label>
                                 <select name="ticket_{{ ticket_type.id }}" class="input w-20">
@@ -111,12 +171,37 @@
                                     {% endif %}
                                     {% endfor %}
                                 </select>
-                                {% if ticket_type.available_quantity < 10 %}
-                                <span class="text-sm text-red-500">{{ ticket_type.available_quantity }} left</span>
+                                {% if ticket_type.available_quantity < 10 and ticket_type.available_quantity > 0 %}
+                                <span class="text-sm text-destructive">{{ ticket_type.available_quantity }} left</span>
                                 {% endif %}
                             </div>
+                            {% else %}
+                            <div class="text-sm text-muted-foreground italic">
+                                {{ ticket_type.status_message }}
+                            </div>
+                            {% endif %}
                         </div>
                         {% endfor %}
+
+                        <div class="border-t border-border pt-4">
+                            <label class="block text-sm font-medium mb-2">Have a coupon code?</label>
+                            <div class="flex gap-2">
+                                <input type="text" name="coupon_code" x-model="couponCode"
+                                       placeholder="Enter code" class="input flex-1 uppercase font-mono"
+                                       @input.debounce.500ms="validateCoupon()">
+                                <button type="button" class="btn btn-outline btn-sm" @click="validateCoupon()">
+                                    Apply
+                                </button>
+                            </div>
+                            <div x-show="couponValid === true" class="mt-2 text-sm text-success flex items-center gap-1" x-cloak>
+                                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                                <span x-text="couponDiscount"></span> applied!
+                            </div>
+                            <div x-show="couponValid === false" class="mt-2 text-sm text-destructive flex items-center gap-1" x-cloak>
+                                <i data-lucide="x-circle" class="w-4 h-4"></i>
+                                <span x-text="couponError"></span>
+                            </div>
+                        </div>
 
                         {% if checkout_questions %}
                         <div class="border-t border-border pt-4 mt-4">

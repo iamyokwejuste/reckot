@@ -59,14 +59,34 @@ class PublicEventDetailView(View):
             slug=event_slug,
             state=Event.State.PUBLISHED
         )
-        ticket_types = event.ticket_types.filter(is_active=True)
-        checkout_questions = event.checkout_questions.all()
+        now = timezone.now()
+        all_ticket_types = event.ticket_types.filter(is_active=True)
 
+        available_tickets = []
+        for tt in all_ticket_types:
+            is_available = True
+            status_message = None
+
+            if tt.sales_start and now < tt.sales_start:
+                is_available = False
+                status_message = f"Sales start {tt.sales_start.strftime('%b %d, %Y')}"
+            elif tt.sales_end and now > tt.sales_end:
+                is_available = False
+                status_message = "No longer available"
+            elif tt.available_quantity <= 0:
+                is_available = False
+                status_message = "Sold out"
+
+            tt.is_available = is_available
+            tt.status_message = status_message
+            available_tickets.append(tt)
+
+        checkout_questions = event.checkout_questions.all()
         affiliate_code = request.session.get('affiliate_code')
 
         return render(request, 'events/public_detail.html', {
             'event': event,
-            'ticket_types': ticket_types,
+            'ticket_types': available_tickets,
             'checkout_questions': checkout_questions,
             'affiliate_code': affiliate_code,
         })

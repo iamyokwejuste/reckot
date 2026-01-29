@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-{% load slippers %}
 
 {% block title %}Manage Tickets - {{ event.title }} - Reckot{% endblock %}
 
@@ -10,11 +9,9 @@
             <h1 class="text-2xl font-bold">Manage Ticket Types</h1>
             <p class="text-muted-foreground mt-1">{{ event.title }}</p>
         </div>
-        <a href="{% url 'events:detail' org_slug=event.organization.slug event_slug=event.slug %}">
-            {% #button variant="outline" %}
-                <i data-lucide="arrow-left" class="mr-2 h-4 w-4"></i>
-                Back to Event
-            {% /button %}
+        <a href="{% url 'events:detail' org_slug=event.organization.slug event_slug=event.slug %}" class="btn btn-outline">
+            <i data-lucide="arrow-left" class="mr-2 h-4 w-4"></i>
+            Back to Event
         </a>
     </div>
 
@@ -29,12 +26,19 @@
                             <th class="text-left p-4 font-medium">Price</th>
                             <th class="text-left p-4 font-medium">Available</th>
                             <th class="text-left p-4 font-medium">Sold</th>
+                            <th class="text-left p-4 font-medium">Sales Window</th>
+                            <th class="text-left p-4 font-medium">Status</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-border">
                         {% for tt in ticket_types %}
                             <tr class="hover:bg-muted/30 transition-colors">
-                                <td class="p-4 font-medium">{{ tt.name }}</td>
+                                <td class="p-4">
+                                    <div class="font-medium">{{ tt.name }}</div>
+                                    {% if tt.description %}
+                                    <div class="text-xs text-muted-foreground mt-1">{{ tt.description|truncatewords:10 }}</div>
+                                    {% endif %}
+                                </td>
                                 <td class="p-4">
                                     {% if tt.price == 0 %}
                                         <span class="text-success font-medium">Free</span>
@@ -44,15 +48,37 @@
                                 </td>
                                 <td class="p-4">{{ tt.quantity }}</td>
                                 <td class="p-4 text-muted-foreground">{{ tt.sold|default:0 }}</td>
+                                <td class="p-4 text-sm">
+                                    {% if tt.sales_start or tt.sales_end %}
+                                        <div class="text-xs">
+                                            {% if tt.sales_start %}
+                                            <div>From: {{ tt.sales_start|date:"M j, Y g:i A" }}</div>
+                                            {% endif %}
+                                            {% if tt.sales_end %}
+                                            <div>Until: {{ tt.sales_end|date:"M j, Y g:i A" }}</div>
+                                            {% endif %}
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted-foreground">Always available</span>
+                                    {% endif %}
+                                </td>
+                                <td class="p-4">
+                                    {% if tt.is_active %}
+                                        <span class="inline-flex items-center rounded-full border border-success/20 bg-success/10 text-success px-2 py-0.5 text-xs font-medium">Active</span>
+                                    {% else %}
+                                        <span class="inline-flex items-center rounded-full border border-border bg-muted text-muted-foreground px-2 py-0.5 text-xs font-medium">Inactive</span>
+                                    {% endif %}
+                                </td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         {% else %}
-            <div class="mt-4">
-                {% #empty_state icon="ticket" title="No Ticket Types Yet" description="Add your first ticket type for this event." %}
-                {% /empty_state %}
+            <div class="mt-4 text-center py-12 border border-dashed border-border rounded-lg">
+                <i data-lucide="ticket" class="w-12 h-12 mx-auto text-muted-foreground mb-4"></i>
+                <h3 class="text-lg font-semibold mb-2">No Ticket Types Yet</h3>
+                <p class="text-muted-foreground">Add your first ticket type for this event.</p>
             </div>
         {% endif %}
     </div>
@@ -72,7 +98,14 @@
                            class="input w-full">
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                    <label for="id_description" class="block text-sm font-medium mb-2">Description (optional)</label>
+                    <textarea name="description" id="id_description" rows="2"
+                              placeholder="Describe what's included with this ticket type"
+                              class="input w-full">{{ form.description.value|default:'' }}</textarea>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
                     <div>
                         <label for="id_price" class="block text-sm font-medium mb-2">Price (XAF)</label>
                         <input type="number" name="price" id="id_price" value="{{ form.price.value|default:'0' }}"
@@ -87,10 +120,48 @@
                                min="1" placeholder="100" required
                                class="input w-full">
                     </div>
+
+                    <div>
+                        <label for="id_max_per_order" class="block text-sm font-medium mb-2">Max Per Order</label>
+                        <input type="number" name="max_per_order" id="id_max_per_order" value="{{ form.max_per_order.value|default:'10' }}"
+                               min="1" max="100" placeholder="10"
+                               class="input w-full">
+                        <p class="text-xs text-muted-foreground mt-1">Limit per transaction</p>
+                    </div>
+                </div>
+
+                <div class="border-t border-border pt-6">
+                    <h3 class="text-sm font-semibold mb-4">Sales Window (Early Bird / Limited Time)</h3>
+                    <p class="text-xs text-muted-foreground mb-4">Leave empty for tickets to be always available. Set dates to create early bird or limited time offers.</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label for="id_sales_start" class="block text-sm font-medium mb-2">Sales Start</label>
+                            <input type="datetime-local" name="sales_start" id="id_sales_start"
+                                   value="{{ form.sales_start.value|default:'' }}"
+                                   class="input w-full">
+                            <p class="text-xs text-muted-foreground mt-1">When ticket sales begin</p>
+                        </div>
+
+                        <div>
+                            <label for="id_sales_end" class="block text-sm font-medium mb-2">Sales End</label>
+                            <input type="datetime-local" name="sales_end" id="id_sales_end"
+                                   value="{{ form.sales_end.value|default:'' }}"
+                                   class="input w-full">
+                            <p class="text-xs text-muted-foreground mt-1">When ticket sales end (e.g., early bird deadline)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" name="is_active" id="id_is_active"
+                           {% if form.is_active.value != False %}checked{% endif %}
+                           class="h-4 w-4 rounded border-border">
+                    <label for="id_is_active" class="text-sm font-medium">Active</label>
+                    <span class="text-xs text-muted-foreground ml-2">Uncheck to hide this ticket type from buyers</span>
                 </div>
 
                 {% if form.errors %}
-                    <div class="rounded-lg bg-red-500/10 border border-red-500/20 p-4 text-sm text-red-500">
+                    <div class="rounded-lg bg-destructive/10 border border-destructive/20 p-4 text-sm text-destructive">
                         {% for field in form %}
                             {% for error in field.errors %}
                                 <p>{{ field.label }}: {{ error }}</p>
@@ -103,10 +174,10 @@
                 {% endif %}
 
                 <div class="pt-2">
-                    {% #button type='submit' variant="primary" %}
+                    <button type="submit" class="btn btn-primary">
                         <i data-lucide="plus" class="mr-2 h-4 w-4"></i>
                         Add Ticket Type
-                    {% /button %}
+                    </button>
                 </div>
             </form>
         </div>

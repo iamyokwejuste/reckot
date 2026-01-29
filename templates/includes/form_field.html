@@ -1,0 +1,58 @@
+{#
+Usage:
+{% include "includes/form_field.html" with label="Field Name" name="field_name" type="text" placeholder="Enter value" required=True hint="Helper text" %}
+
+For select:
+{% include "includes/form_field.html" with label="Select" name="field" type="select" options=options_list %}
+
+For textarea:
+{% include "includes/form_field.html" with label="Description" name="desc" type="textarea" rows="3" %}
+#}
+<div class="{% if class %}{{ class }}{% endif %}">
+    {% if label %}
+    <label for="id_{{ name }}" class="block text-sm font-medium mb-2">
+        {{ label }}{% if required %} <span class="text-destructive">*</span>{% endif %}
+    </label>
+    {% endif %}
+
+    {% if type == "textarea" %}
+    <textarea name="{{ name }}" id="id_{{ name }}"
+              rows="{{ rows|default:'3' }}"
+              placeholder="{{ placeholder|default:'' }}"
+              class="input w-full resize-none"
+              {% if required %}required{% endif %}>{{ value|default:'' }}</textarea>
+    {% elif type == "select" %}
+    <select name="{{ name }}" id="id_{{ name }}" class="input w-full" {% if required %}required{% endif %}>
+        {% if placeholder %}
+        <option value="">{{ placeholder }}</option>
+        {% endif %}
+        {% for option in options %}
+        <option value="{{ option.value }}" {% if option.value == value %}selected{% endif %}>{{ option.label }}</option>
+        {% endfor %}
+    </select>
+    {% elif type == "checkbox" %}
+    <div class="flex items-center gap-2">
+        <input type="checkbox" name="{{ name }}" id="id_{{ name }}"
+               class="h-4 w-4 rounded border-border"
+               {% if value %}checked{% endif %}>
+        <label for="id_{{ name }}" class="text-sm font-medium">{{ checkbox_label }}</label>
+    </div>
+    {% else %}
+    <input type="{{ type|default:'text' }}" name="{{ name }}" id="id_{{ name }}"
+           value="{{ value|default:'' }}"
+           placeholder="{{ placeholder|default:'' }}"
+           class="input w-full"
+           {% if min %}min="{{ min }}"{% endif %}
+           {% if max %}max="{{ max }}"{% endif %}
+           {% if step %}step="{{ step }}"{% endif %}
+           {% if required %}required{% endif %}>
+    {% endif %}
+
+    {% if hint %}
+    <p class="text-xs text-muted-foreground mt-1">{{ hint }}</p>
+    {% endif %}
+
+    {% if error %}
+    <p class="text-sm text-destructive mt-1">{{ error }}</p>
+    {% endif %}
+</div>

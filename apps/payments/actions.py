@@ -16,7 +16,7 @@ from apps.payments.queries import get_payment_by_id, get_booking_payment
 from apps.payments.invoice_service import get_invoice_pdf, create_invoice
 from apps.tickets.models import Booking
 from apps.tickets.services import create_multi_ticket_booking
-from apps.events.models import Event
+from apps.events.models import Event, Coupon
 
 
 class CheckoutView(LoginRequiredMixin, View):
@@ -53,11 +53,26 @@ class CheckoutView(LoginRequiredMixin, View):
                           org_slug=event.organization.slug,
                           event_slug=event.slug)
 
+        coupon_code = request.POST.get('coupon_code', '').strip().upper()
+        coupon = None
+        if coupon_code:
+            from django.db.models import Q
+            coupon = Coupon.objects.filter(
+                Q(code=coupon_code),
+                Q(event=event) | Q(event__isnull=True, organization=event.organization),
+                is_active=True
+            ).first()
+            if coupon and not coupon.is_valid:
+                coupon = None
+            if coupon and not coupon.can_be_used_by(request.user.email):
+                coupon = None
+
         booking, error = create_multi_ticket_booking(
             user=request.user,
             event=event,
             ticket_selections=ticket_selections,
-            question_answers=question_answers
+            question_answers=question_answers,
+            coupon=coupon
         )
 
         if error:

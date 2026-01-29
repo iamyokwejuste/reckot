@@ -21,7 +21,7 @@ def create_booking(user, ticket_type: TicketType, quantity: int):
     return booking, None
 
 
-def create_multi_ticket_booking(user, event, ticket_selections: dict, question_answers: dict = None):
+def create_multi_ticket_booking(user, event, ticket_selections: dict, question_answers: dict = None, coupon=None):
     """
     Create a booking with multiple ticket types.
 
@@ -30,10 +30,13 @@ def create_multi_ticket_booking(user, event, ticket_selections: dict, question_a
         event: The event being booked
         ticket_selections: Dict of {ticket_type_id: quantity}
         question_answers: Dict of {question_id: answer}
+        coupon: Optional Coupon object to apply discount
 
     Returns:
         tuple: (booking, error_message)
     """
+    from django.utils import timezone
+
     with transaction.atomic():
         total_tickets = sum(ticket_selections.values())
         if total_tickets == 0:
@@ -41,6 +44,7 @@ def create_multi_ticket_booking(user, event, ticket_selections: dict, question_a
 
         total_amount = Decimal('0.00')
         tickets_to_create = []
+        now = timezone.now()
 
         for ticket_type_id, quantity in ticket_selections.items():
             if quantity <= 0:
@@ -55,6 +59,12 @@ def create_multi_ticket_booking(user, event, ticket_selections: dict, question_a
             except TicketType.DoesNotExist:
                 return None, f"Invalid ticket type selected."
 
+            if ticket_type.sales_start and now < ticket_type.sales_start:
+                return None, f"{ticket_type.name} tickets are not yet available for purchase."
+
+            if ticket_type.sales_end and now > ticket_type.sales_end:
+                return None, f"{ticket_type.name} tickets are no longer available for purchase."
+
             if ticket_type.available_quantity < quantity:
                 return None, f"Not enough {ticket_type.name} tickets available. Only {ticket_type.available_quantity} left."
 
@@ -66,11 +76,29 @@ def create_multi_ticket_booking(user, event, ticket_selections: dict, question_a
 
             total_amount += ticket_type.price * quantity
 
+        discount_amount = Decimal('0.00')
+        if coupon and coupon.is_valid:
+            if coupon.discount_type == 'PERCENTAGE':
+                discount_amount = total_amount * (coupon.discount_value / Decimal('100'))
+            else:
+                discount_amount = min(coupon.discount_value, total_amount)
+            total_amount = max(Decimal('0.00'), total_amount - discount_amount)
+
         booking = Booking.objects.create(
             user=user,
             event=event,
             total_amount=total_amount
         )
+
+        if coupon and discount_amount > 0:
+            from apps.events.models import CouponUsage
+            CouponUsage.objects.create(
+                coupon=coupon,
+                booking=booking,
+                used_by=user,
+                discount_amount=discount_amount
+            )
+            coupon.use()
 
         created_tickets = []
         for ticket_type in tickets_to_create:

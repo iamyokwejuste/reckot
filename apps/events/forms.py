@@ -42,6 +42,27 @@ class EventForm(forms.ModelForm):
 
 
 class TicketTypeForm(forms.ModelForm):
+    sales_start = forms.DateTimeField(
+        required=False,
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+        help_text='Leave empty to start sales immediately'
+    )
+    sales_end = forms.DateTimeField(
+        required=False,
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+        help_text='Leave empty for no end date'
+    )
+
     class Meta:
         model = TicketType
-        fields = ['name', 'price', 'quantity']
+        fields = ['name', 'description', 'price', 'quantity', 'max_per_order', 'sales_start', 'sales_end', 'is_active']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        sales_start = cleaned_data.get('sales_start')
+        sales_end = cleaned_data.get('sales_end')
+
+        if sales_start and sales_end and sales_start >= sales_end:
+            raise forms.ValidationError('Sales end date must be after sales start date.')
+
+        return cleaned_data
