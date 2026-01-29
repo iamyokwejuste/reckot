@@ -29,6 +29,30 @@ class TicketType(models.Model):
         return max(0, self.quantity - sold)
 
 
+class GuestSession(models.Model):
+    """Tracks guest checkout sessions for unauthenticated users."""
+    token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, db_index=True)
+    email = models.EmailField()
+    name = models.CharField(max_length=200)
+    phone = models.CharField(max_length=20, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['email']),
+            models.Index(fields=['expires_at']),
+        ]
+
+    def __str__(self):
+        return f'Guest {self.email} ({self.token})'
+
+    @property
+    def is_expired(self):
+        from django.utils import timezone
+        return timezone.now() > self.expires_at
+
+
 class Booking(models.Model):
     class Status(models.TextChoices):
         PENDING = 'PENDING', 'Pending Payment'
@@ -41,8 +65,20 @@ class Booking(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
+        related_name='bookings',
+        null=True,
+        blank=True
+    )
+    guest_session = models.ForeignKey(
+        GuestSession,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name='bookings'
     )
+    guest_email = models.EmailField(blank=True)
+    guest_name = models.CharField(max_length=200, blank=True)
+    guest_phone = models.CharField(max_length=20, blank=True)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -53,10 +89,30 @@ class Booking(models.Model):
             models.Index(fields=['reference']),
             models.Index(fields=['user', 'status']),
             models.Index(fields=['event', 'status']),
+            models.Index(fields=['guest_session']),
+            models.Index(fields=['guest_email']),
         ]
 
     def __str__(self):
-        return f'Booking {self.reference} for {self.user}'
+        if self.user:
+            return f'Booking {self.reference} for {self.user}'
+        return f'Booking {self.reference} for {self.guest_email or "Guest"}'
+
+    @property
+    def is_guest(self):
+        return self.user is None
+
+    @property
+    def buyer_email(self):
+        if self.user:
+            return self.user.email
+        return self.guest_email
+
+    @property
+    def buyer_name(self):
+        if self.user:
+            return self.user.get_full_name() or self.user.email
+        return self.guest_name
 
 
 class Ticket(models.Model):

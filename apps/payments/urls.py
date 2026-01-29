@@ -52,4 +52,9 @@ urlpatterns = [
         actions.RefundProcessView.as_view(),
         name='refund_process'
     ),
+    path(
+        'track/<uuid:token>/',
+        actions.TransactionStatusView.as_view(),
+        name='track'
+    ),
 ]

@@ -14,5 +14,6 @@ urlpatterns = [
     path('<slug:org_slug>/<slug:event_slug>/attendees/', actions.AttendeeListView.as_view(), name='attendee_list'),
     path('<slug:org_slug>/<slug:event_slug>/export/', actions.ExportCenterView.as_view(), name='export_center'),
     path('<slug:org_slug>/<slug:event_slug>/export/generate/', actions.ExportGenerateView.as_view(), name='export_generate'),
+    path('<slug:org_slug>/<slug:event_slug>/responses/', actions.CustomResponsesView.as_view(), name='custom_responses'),
     path('download/<uuid:export_ref>/', actions.DownloadReportView.as_view(), name='download'),
 ]

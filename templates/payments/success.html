@@ -55,12 +55,25 @@
             </div>
 
             <div class="flex flex-col gap-3 mt-6">
+                {% if user.is_authenticated %}
                 <a href="{% url 'tickets:list' %}">
                     {% #button class="w-full" variant="gradient" %}
                         <i data-lucide="ticket" class="mr-2 h-4 w-4"></i>
                         View My Tickets
                     {% /button %}
                 </a>
+                {% elif payment.booking.guest_session %}
+                <a href="{% url 'payments:track' token=payment.booking.guest_session.token %}">
+                    {% #button class="w-full" variant="gradient" %}
+                        <i data-lucide="bookmark" class="mr-2 h-4 w-4"></i>
+                        Save Tracking Link
+                    {% /button %}
+                </a>
+                <div class="rounded-lg bg-muted/50 p-3 text-center">
+                    <p class="text-xs text-muted-foreground">Bookmark this link to track your order:</p>
+                    <code class="text-xs break-all">{{ request.scheme }}://{{ request.get_host }}{% url 'payments:track' token=payment.booking.guest_session.token %}</code>
+                </div>
+                {% endif %}
                 <div class="grid grid-cols-2 gap-3">
                     <a href="{% url 'payments:invoice' payment_ref=payment.reference %}" target="_blank">
                         {% #button variant="outline" class="w-full" %}
@@ -68,12 +81,14 @@
                             Invoice
                         {% /button %}
                     </a>
+                    {% if user.is_authenticated %}
                     <a href="{% url 'payments:refund_request' payment_ref=payment.reference %}">
                         {% #button variant="outline" class="w-full" %}
                             <i data-lucide="rotate-ccw" class="mr-2 h-4 w-4"></i>
                             Refund
                         {% /button %}
                     </a>
+                    {% endif %}
                 </div>
                 <a href="{% url 'events:public_detail' org_slug=payment.booking.event.organization.slug event_slug=payment.booking.event.slug %}">
                     {% #button variant="outline" class="w-full" %}

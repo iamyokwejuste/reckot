@@ -313,6 +313,16 @@
                         <p class="text-xs text-muted-foreground">Check in attendees</p>
                     </div>
                 </a>
+                <a href="{% url 'reports:custom_responses' org_slug=event.organization.slug event_slug=event.slug %}"
+                   class="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                    <div class="h-9 w-9 rounded-lg bg-pink-500/10 flex items-center justify-center">
+                        <i data-lucide="clipboard-list" class="w-4 h-4 text-pink-500"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium">Custom Responses</p>
+                        <p class="text-xs text-muted-foreground">View form answers</p>
+                    </div>
+                </a>
             </div>
         </div>
     </div>

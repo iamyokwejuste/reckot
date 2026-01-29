@@ -177,8 +177,9 @@
                     <label for="id_description" class="block text-sm font-medium mb-2">Full Description <span class="text-red-500">*</span></label>
                     <textarea name="description" id="id_description" rows="4" required
                               placeholder="Tell attendees what to expect..."
-                              class="input resize-y min-h-[100px]" :class="{ 'border-red-500': errors.description }"
-                              x-model="description" @input="clearError('description')">{{ event.description }}</textarea>
+                              class="input resize-none min-h-[100px] overflow-hidden" :class="{ 'border-red-500': errors.description }"
+                              x-model="description" @input="clearError('description'); $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
+                              x-init="$nextTick(() => { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px' })">{{ event.description }}</textarea>
                     <p x-show="errors.description" x-cloak class="text-sm text-red-500 mt-1" x-text="errors.description"></p>
                 </div>
 

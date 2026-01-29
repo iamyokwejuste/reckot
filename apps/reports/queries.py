@@ -1,6 +1,7 @@
+import json
 from django.db.models import Sum
-from apps.events.models import Event
-from apps.tickets.models import Ticket, Booking
+from apps.events.models import Event, CheckoutQuestion
+from apps.tickets.models import Ticket, Booking, TicketQuestionAnswer
 from apps.checkin.models import CheckIn, SwagCollection
 from apps.payments.models import Payment
 
@@ -41,34 +42,40 @@ def get_rsvp_data(event_id: int, mask_emails: bool = True):
         booking__event_id=event_id,
         booking__status=Booking.Status.CONFIRMED
     ).select_related(
-        'booking__user', 'ticket_type'
-    ).values(
-        'code',
-        'booking__user__email',
-        'booking__user__first_name',
-        'booking__user__last_name',
-        'ticket_type__name',
-        'attendee_name',
-        'attendee_email',
-        'is_checked_in',
-        'checked_in_at',
-        'booking__created_at'
-    )
+        'booking__user', 'ticket_type', 'booking'
+    ).prefetch_related('answers__question')
+
+    questions = list(CheckoutQuestion.objects.filter(event_id=event_id).order_by('order'))
+    question_headers = [q.question for q in questions]
+
     result = []
-    for row in tickets:
-        email = row['attendee_email'] or row['booking__user__email']
-        name = row['attendee_name'] or f"{row['booking__user__first_name'] or ''} {row['booking__user__last_name'] or ''}".strip()
+    for ticket in tickets:
+        booking = ticket.booking
+        if booking.user:
+            email = ticket.attendee_email or booking.user.email
+            name = ticket.attendee_name or f"{booking.user.first_name or ''} {booking.user.last_name or ''}".strip()
+        else:
+            email = ticket.attendee_email or booking.guest_email
+            name = ticket.attendee_name or booking.guest_name
+
         if mask_emails and email:
             email = mask_email(email)
-        result.append({
-            'code': str(row['code'])[:8],
+
+        row_data = {
+            'code': str(ticket.code)[:8],
             'name': name or 'N/A',
             'email': email or 'N/A',
-            'ticket_type': row['ticket_type__name'],
-            'checked_in': 'Yes' if row['is_checked_in'] else 'No',
-            'checked_in_at': str(row['checked_in_at'] or ''),
-            'booked_at': str(row['booking__created_at']),
-        })
+            'ticket_type': ticket.ticket_type.name,
+            'checked_in': 'Yes' if ticket.is_checked_in else 'No',
+            'checked_in_at': str(ticket.checked_in_at or ''),
+            'booked_at': str(booking.created_at),
+        }
+
+        answers_dict = {a.question_id: a.answer for a in ticket.answers.all()}
+        for q in questions:
+            row_data[q.question] = answers_dict.get(q.id, '')
+
+        result.append(row_data)
     return result
 
 
@@ -153,5 +160,59 @@ def get_swag_data(event_id: int, mask_emails: bool = True):
             'email': email,
             'ticket_code': str(row['checkin__ticket__code']),
             'collected_at': str(row['collected_at']),
+        })
+    return result
+
+
+def get_custom_responses_data(event_id: int, mask_emails: bool = True):
+    questions = CheckoutQuestion.objects.filter(event_id=event_id).order_by('order')
+    answers = TicketQuestionAnswer.objects.filter(
+        question__event_id=event_id,
+        booking__status=Booking.Status.CONFIRMED
+    ).select_related('ticket', 'booking__user', 'booking', 'question')
+
+    result = []
+    for answer in answers:
+        booking = answer.booking
+        if booking.user:
+            email = booking.user.email
+            name = f"{booking.user.first_name or ''} {booking.user.last_name or ''}".strip() or email
+        else:
+            email = booking.guest_email
+            name = booking.guest_name
+
+        if mask_emails and email:
+            email = mask_email(email)
+
+        result.append({
+            'ticket_code': str(answer.ticket.code)[:8],
+            'name': name or 'N/A',
+            'email': email or 'N/A',
+            'question': answer.question.question,
+            'answer': answer.answer,
+            'submitted_at': str(answer.created_at),
+        })
+    return result
+
+
+def get_questions_summary(event_id: int):
+    questions = CheckoutQuestion.objects.filter(event_id=event_id).order_by('order')
+    result = []
+    for q in questions:
+        answers = TicketQuestionAnswer.objects.filter(
+            question=q,
+            booking__status=Booking.Status.CONFIRMED
+        )
+        answer_count = answers.count()
+        if q.field_type in ['SELECT', 'RADIO', 'CHECKBOX']:
+            breakdown = {}
+            for a in answers:
+                breakdown[a.answer] = breakdown.get(a.answer, 0) + 1
+        else:
+            breakdown = None
+        result.append({
+            'question': q,
+            'answer_count': answer_count,
+            'breakdown': breakdown,
         })
     return result

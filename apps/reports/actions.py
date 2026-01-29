@@ -10,7 +10,7 @@ from django.utils.timesince import timesince
 from datetime import timedelta
 from apps.events.models import Event
 from apps.reports.models import ReportExport
-from apps.reports.queries import get_event_summary
+from apps.reports.queries import get_event_summary, get_questions_summary, get_custom_responses_data
 from apps.reports.services import generate_csv_export, generate_excel_export, generate_pdf_export, generate_json_export, get_recent_exports
 from apps.tickets.models import Ticket, Booking
 from apps.payments.models import Payment
@@ -394,6 +394,7 @@ class LiveStatsView(LoginRequiredMixin, View):
 
 class AttendeeListView(LoginRequiredMixin, View):
     def get(self, request, org_slug, event_slug):
+        from apps.events.models import CheckoutQuestion
         event = get_object_or_404(Event, organization__slug=org_slug, slug=event_slug)
         print_mode = request.GET.get('print') == '1'
 
@@ -402,12 +403,16 @@ class AttendeeListView(LoginRequiredMixin, View):
             booking__status=Booking.Status.CONFIRMED
         ).select_related(
             'booking__user',
+            'booking',
             'ticket_type'
-        ).order_by('booking__user__last_name', 'booking__user__first_name')
+        ).prefetch_related('answers__question').order_by('booking__user__last_name', 'booking__user__first_name')
+
+        questions = CheckoutQuestion.objects.filter(event=event).order_by('order')
 
         return render(request, 'reports/attendee_list.html', {
             'event': event,
             'tickets': tickets,
+            'questions': questions,
             'print_mode': print_mode,
             'total_count': tickets.count(),
             'checked_in_count': tickets.filter(is_checked_in=True).count(),
@@ -450,3 +455,18 @@ class ExportGenerateView(LoginRequiredMixin, View):
         except Exception as e:
             messages.error(request, f'Export failed: {str(e)}')
             return redirect('reports:export_center', org_slug=org_slug, event_slug=event_slug)
+
+
+class CustomResponsesView(LoginRequiredMixin, View):
+    def get(self, request, org_slug, event_slug):
+        event = get_object_or_404(
+            Event.objects.select_related('organization'),
+            organization__slug=org_slug,
+            slug=event_slug,
+            organization__members=request.user
+        )
+        questions_summary = get_questions_summary(event.id)
+        return render(request, 'reports/custom_responses.html', {
+            'event': event,
+            'questions_summary': questions_summary,
+        })

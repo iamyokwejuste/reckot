@@ -1,5 +1,6 @@
 import json
 import logging
+from datetime import timedelta
 
 from django.views import View
 from django.http import HttpResponse
@@ -9,17 +10,18 @@ from django.db.models import Sum, Q
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.utils import timezone
 
 from apps.payments.models import Payment, PaymentProvider, Invoice, Refund
 from apps.payments.services import initiate_payment, confirm_payment, fail_payment
 from apps.payments.queries import get_payment_by_id, get_booking_payment
 from apps.payments.invoice_service import get_invoice_pdf, create_invoice
-from apps.tickets.models import Booking
+from apps.tickets.models import Booking, GuestSession
 from apps.tickets.services import create_multi_ticket_booking
 from apps.events.models import Event, Coupon
 
 
-class CheckoutView(LoginRequiredMixin, View):
+class CheckoutView(View):
     def post(self, request):
         event_id = request.POST.get('event_id')
         if not event_id:
@@ -55,7 +57,11 @@ class CheckoutView(LoginRequiredMixin, View):
 
         coupon_code = request.POST.get('coupon_code', '').strip().upper()
         coupon = None
+        user = request.user if request.user.is_authenticated else None
+        guest_email = None
+
         if coupon_code:
+            email_for_coupon = request.user.email if user else request.POST.get('guest_email', '')
             coupon = Coupon.objects.filter(
                 Q(code=coupon_code),
                 Q(event=event) | Q(event__isnull=True, organization=event.organization),
@@ -63,15 +69,48 @@ class CheckoutView(LoginRequiredMixin, View):
             ).first()
             if coupon and not coupon.is_valid:
                 coupon = None
-            if coupon and not coupon.can_be_used_by(request.user.email):
+            if coupon and email_for_coupon and not coupon.can_be_used_by(email_for_coupon):
                 coupon = None
 
+        guest_session = None
+        guest_name = None
+        guest_phone = None
+
+        if not user:
+            guest_email = request.POST.get('guest_email', '').strip()
+            guest_name = request.POST.get('guest_name', '').strip()
+            guest_phone = request.POST.get('guest_phone', '').strip()
+
+            if not guest_email:
+                messages.error(request, 'Please enter your email address.')
+                return redirect('events:public_detail',
+                              org_slug=event.organization.slug,
+                              event_slug=event.slug)
+
+            if not guest_name:
+                messages.error(request, 'Please enter your name.')
+                return redirect('events:public_detail',
+                              org_slug=event.organization.slug,
+                              event_slug=event.slug)
+
+            guest_session = GuestSession.objects.create(
+                email=guest_email,
+                name=guest_name,
+                phone=guest_phone,
+                expires_at=timezone.now() + timedelta(hours=24)
+            )
+            request.session['guest_token'] = str(guest_session.token)
+
         booking, error = create_multi_ticket_booking(
-            user=request.user,
+            user=user,
             event=event,
             ticket_selections=ticket_selections,
             question_answers=question_answers,
-            coupon=coupon
+            coupon=coupon,
+            guest_session=guest_session,
+            guest_email=guest_email,
+            guest_name=guest_name,
+            guest_phone=guest_phone
         )
 
         if error:
@@ -119,9 +158,30 @@ class PaymentListView(LoginRequiredMixin, View):
         })
 
 
-class PaymentSelectMethodView(LoginRequiredMixin, View):
+def get_booking_for_request(request, booking_ref):
+    if request.user.is_authenticated:
+        booking = Booking.objects.filter(reference=booking_ref, user=request.user).first()
+        if booking:
+            return booking, None
+
+    guest_token = request.session.get('guest_token')
+    if guest_token:
+        booking = Booking.objects.filter(
+            reference=booking_ref,
+            guest_session__token=guest_token
+        ).first()
+        if booking:
+            return booking, None
+
+    return None, redirect('events:discover')
+
+
+class PaymentSelectMethodView(View):
     def get(self, request, booking_ref):
-        booking = get_object_or_404(Booking, reference=booking_ref, user=request.user)
+        booking, error = get_booking_for_request(request, booking_ref)
+        if error:
+            messages.error(request, 'Booking not found.')
+            return error
         existing_payment = get_booking_payment(booking.id)
         if existing_payment and existing_payment.status == Payment.Status.CONFIRMED:
             return redirect('payments:success', payment_ref=existing_payment.reference)
@@ -132,9 +192,11 @@ class PaymentSelectMethodView(LoginRequiredMixin, View):
         })
 
 
-class PaymentStartView(LoginRequiredMixin, View):
+class PaymentStartView(View):
     def post(self, request, booking_ref):
-        booking = get_object_or_404(Booking, reference=booking_ref, user=request.user)
+        booking, error = get_booking_for_request(request, booking_ref)
+        if error:
+            return render(request, 'payments/_error.html', {'error': 'Booking not found.'})
         method = request.POST.get('method')
         phone = request.POST.get('phone')
         if not method or not phone:
@@ -151,9 +213,29 @@ class PaymentStartView(LoginRequiredMixin, View):
         return response
 
 
-class PaymentPollView(LoginRequiredMixin, View):
+def get_payment_for_request(request, payment_ref):
+    if request.user.is_authenticated:
+        payment = Payment.objects.filter(reference=payment_ref, booking__user=request.user).first()
+        if payment:
+            return payment, None
+
+    guest_token = request.session.get('guest_token')
+    if guest_token:
+        payment = Payment.objects.filter(
+            reference=payment_ref,
+            booking__guest_session__token=guest_token
+        ).first()
+        if payment:
+            return payment, None
+
+    return None, True
+
+
+class PaymentPollView(View):
     def get(self, request, payment_ref):
-        payment = get_object_or_404(Payment, reference=payment_ref, booking__user=request.user)
+        payment, error = get_payment_for_request(request, payment_ref)
+        if error:
+            return render(request, 'payments/_error.html', {'error': 'Payment not found.'})
         if payment.status == Payment.Status.CONFIRMED:
             return render(request, 'payments/_success.html', {'payment': payment})
         if payment.status in [Payment.Status.FAILED, Payment.Status.EXPIRED]:
@@ -165,9 +247,12 @@ class PaymentPollView(LoginRequiredMixin, View):
         return render(request, 'payments/_pending.html', {'payment': payment})
 
 
-class PaymentSuccessView(LoginRequiredMixin, View):
+class PaymentSuccessView(View):
     def get(self, request, payment_ref):
-        payment = get_object_or_404(Payment, reference=payment_ref, booking__user=request.user)
+        payment, error = get_payment_for_request(request, payment_ref)
+        if error:
+            messages.error(request, 'Payment not found.')
+            return redirect('events:discover')
         return render(request, 'payments/success.html', {'payment': payment})
 
 
@@ -220,12 +305,15 @@ class CampayWebhookView(View):
         return HttpResponse('OK', status=200)
 
 
-class InvoiceDownloadView(LoginRequiredMixin, View):
+class InvoiceDownloadView(View):
     def get(self, request, payment_ref):
-        payment = get_object_or_404(Payment, reference=payment_ref, booking__user=request.user)
+        payment, error = get_payment_for_request(request, payment_ref)
+        if error:
+            messages.error(request, 'Payment not found.')
+            return redirect('events:discover')
         if payment.status != Payment.Status.CONFIRMED:
             messages.error(request, 'Invoice not available for unpaid orders.')
-            return redirect('payments:list')
+            return redirect('events:discover')
 
         try:
             invoice = payment.invoice
@@ -235,7 +323,7 @@ class InvoiceDownloadView(LoginRequiredMixin, View):
         pdf_content = get_invoice_pdf(invoice)
         if not pdf_content:
             messages.error(request, 'Failed to generate invoice.')
-            return redirect('payments:list')
+            return redirect('events:discover')
 
         response = HttpResponse(pdf_content, content_type='application/pdf')
         response['Content-Disposition'] = f'inline; filename="{invoice.invoice_number}.pdf"'
@@ -338,3 +426,15 @@ class RefundProcessView(LoginRequiredMixin, View):
             messages.success(request, 'Refund rejected.')
 
         return redirect('payments:refunds')
+
+
+class TransactionStatusView(View):
+    def get(self, request, token):
+        guest_session = get_object_or_404(GuestSession, token=token)
+        bookings = Booking.objects.filter(
+            guest_session=guest_session
+        ).select_related('event').prefetch_related('tickets', 'payment_set')
+        return render(request, 'payments/transaction_status.html', {
+            'guest_session': guest_session,
+            'bookings': bookings,
+        })

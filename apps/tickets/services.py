@@ -7,7 +7,7 @@ import qrcode
 import base64
 from weasyprint import HTML, CSS
 from weasyprint.text.fonts import FontConfiguration
-from apps.tickets.models import TicketType, Booking, Ticket, TicketQuestionAnswer
+from apps.tickets.models import TicketType, Booking, Ticket, TicketQuestionAnswer, GuestSession
 from apps.events.models import CouponUsage, CheckoutQuestion
 
 
@@ -25,7 +25,20 @@ def create_booking(user, ticket_type: TicketType, quantity: int):
     return booking, None
 
 
-def create_multi_ticket_booking(user, event, ticket_selections: dict, question_answers: dict = None, coupon=None):
+def create_multi_ticket_booking(
+    user=None,
+    event=None,
+    ticket_selections: dict = None,
+    question_answers: dict = None,
+    coupon=None,
+    guest_session=None,
+    guest_email: str = None,
+    guest_name: str = None,
+    guest_phone: str = None
+):
+    if not user and not guest_email:
+        return None, "Either user or guest email is required."
+
     with transaction.atomic():
         total_tickets = sum(ticket_selections.values())
         if total_tickets == 0:
@@ -80,7 +93,11 @@ def create_multi_ticket_booking(user, event, ticket_selections: dict, question_a
         booking = Booking.objects.create(
             user=user,
             event=event,
-            total_amount=total_amount
+            total_amount=total_amount,
+            guest_session=guest_session,
+            guest_email=guest_email or '',
+            guest_name=guest_name or '',
+            guest_phone=guest_phone or ''
         )
 
         if coupon and discount_amount > 0:
