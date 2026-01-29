@@ -2,14 +2,17 @@ from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
 from apps.payments.models import Payment, Refund, RefundAuditLog
+from apps.tickets.models import Booking
+from apps.tickets.tasks import send_ticket_confirmation_task
 
 
 @receiver(post_save, sender=Payment)
 def handle_payment_status_change(sender, instance, created, **kwargs):
     if not created and instance.status == Payment.Status.CONFIRMED:
-        from apps.tickets.tasks import send_ticket_confirmation_task
-
         booking = instance.booking
+        if booking.status != Booking.Status.CONFIRMED:
+            booking.status = Booking.Status.CONFIRMED
+            booking.save(update_fields=['status'])
         send_ticket_confirmation_task.enqueue(booking.id)
 
 
