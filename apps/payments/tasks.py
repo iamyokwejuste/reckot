@@ -1,8 +1,10 @@
 import logging
+from django_tasks import task
 
 logger = logging.getLogger(__name__)
 
 
+@task
 def send_refund_notification_task(refund_id: int):
     from .models import Refund
     from apps.core.services.notifications import NotificationService
@@ -50,6 +52,7 @@ def send_refund_notification_task(refund_id: int):
         logger.error(f"Failed to send refund notification: {e}")
 
 
+@task
 def process_expired_payments_task():
     from django.utils import timezone
     from .models import Payment
@@ -67,6 +70,7 @@ def process_expired_payments_task():
         logger.error(f"Failed to process expired payments: {e}")
 
 
+@task
 def send_payment_reminder_task(payment_id: int):
     from django.utils import timezone
     from .models import Payment

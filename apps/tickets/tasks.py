@@ -1,8 +1,10 @@
 import logging
+from django_tasks import task
 
 logger = logging.getLogger(__name__)
 
 
+@task
 def send_ticket_confirmation_task(booking_id: int):
     from .models import Booking
     from apps.core.services.notifications import NotificationService
@@ -54,6 +56,7 @@ def send_ticket_confirmation_task(booking_id: int):
         logger.error(f"Failed to send ticket confirmation: {e}")
 
 
+@task
 def generate_ticket_qr_task(ticket_id: int) -> str | None:
     from .models import Ticket
     from apps.core.services.qrcode import QRCodeService

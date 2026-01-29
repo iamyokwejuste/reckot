@@ -10,7 +10,7 @@ from django.http import JsonResponse, HttpResponse
 from django.conf import settings
 
 from apps.core.models import OTPVerification, User
-from apps.core.tasks import resend_otp_task
+from apps.core.tasks import resend_otp_task, send_otp_sms_task
 from apps.core.services.notifications import NotificationService
 from apps.events.models import Event
 
@@ -129,7 +129,7 @@ class ResendOTPView(LoginRequiredMixin, View):
         if request.user.email_verified:
             return JsonResponse({'success': False, 'message': 'Email already verified'})
 
-        resend_otp_task(request.user.id, OTPVerification.Type.EMAIL)
+        resend_otp_task.enqueue(request.user.id, OTPVerification.Type.EMAIL)
         return JsonResponse({'success': True, 'message': 'New code sent to your email'})
 
 
@@ -179,10 +179,10 @@ class PhoneLoginRequestView(View):
 
         request.session['login_phone'] = phone
         if settings.TWILIO_VERIFY_SERVICE_SID:
-            NotificationService.send_otp_sms(phone)
+            send_otp_sms_task.enqueue(phone)
         else:
             otp = OTPVerification.create_for_user(user, OTPVerification.Type.PHONE)
-            NotificationService.send_otp_sms(phone, otp.code)
+            send_otp_sms_task.enqueue(phone, otp.code)
         return HttpResponse(
             '<p class="text-sm text-emerald-500 mt-2">Verification code sent!</p>'
         )
@@ -267,10 +267,10 @@ class PhoneSignupRequestView(View):
 
         request.session['signup_phone'] = phone
         if settings.TWILIO_VERIFY_SERVICE_SID:
-            NotificationService.send_otp_sms(phone)
+            send_otp_sms_task.enqueue(phone)
         else:
             request.session['signup_otp'] = OTPVerification.generate_code()
-            NotificationService.send_otp_sms(phone, request.session['signup_otp'])
+            send_otp_sms_task.enqueue(phone, request.session['signup_otp'])
         return HttpResponse(
             '<p class="text-sm text-emerald-500 mt-2">Verification code sent!</p>'
         )

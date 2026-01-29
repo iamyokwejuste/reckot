@@ -1,10 +1,12 @@
 import logging
 from django.contrib.auth import get_user_model
+from django_tasks import task
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
+@task
 def send_email_task(
     to_email: str,
     subject: str,
@@ -28,6 +30,7 @@ def send_email_task(
         logger.error(f"Failed to send email to {to_email}: {e}")
 
 
+@task
 def send_sms_task(phone_number: str, template_name: str, context: dict):
     from .services.notifications import NotificationService
     try:
@@ -41,6 +44,21 @@ def send_sms_task(phone_number: str, template_name: str, context: dict):
         logger.error(f"Failed to send SMS to {phone_number}: {e}")
 
 
+@task
+def send_otp_sms_task(phone_number: str, otp_code: str = None, expiry_minutes: int = 10):
+    from .services.notifications import NotificationService
+    try:
+        NotificationService.send_otp_sms(
+            phone_number=phone_number,
+            otp_code=otp_code,
+            expiry_minutes=expiry_minutes,
+        )
+        logger.info(f"OTP SMS sent to {phone_number}")
+    except Exception as e:
+        logger.error(f"Failed to send OTP SMS to {phone_number}: {e}")
+
+
+@task
 def send_otp_verification_task(user_id: int, otp_id: int):
     from .models import OTPVerification
     from .services.notifications import NotificationService
@@ -80,6 +98,7 @@ def send_otp_verification_task(user_id: int, otp_id: int):
         logger.error(f"Failed to send OTP verification: {e}")
 
 
+@task
 def send_welcome_email_task(user_id: int):
     from .services.notifications import NotificationService
 
@@ -95,6 +114,7 @@ def send_welcome_email_task(user_id: int):
         logger.error(f"Failed to send welcome email: {e}")
 
 
+@task
 def resend_otp_task(user_id: int, otp_type: str = 'EMAIL'):
     from .models import OTPVerification
 
@@ -105,7 +125,7 @@ def resend_otp_task(user_id: int, otp_type: str = 'EMAIL'):
             otp_type=otp_type,
             expiry_minutes=10
         )
-        send_otp_verification_task(user_id, otp.id)
+        send_otp_verification_task.enqueue(user_id, otp.id)
         logger.info(f"New OTP created and sent to user {user_id}")
     except User.DoesNotExist:
         logger.error(f"User {user_id} not found")
@@ -113,6 +133,7 @@ def resend_otp_task(user_id: int, otp_type: str = 'EMAIL'):
         logger.error(f"Failed to resend OTP: {e}")
 
 
+@task
 def cleanup_expired_otps_task():
     from django.utils import timezone
     from datetime import timedelta
@@ -129,6 +150,7 @@ def cleanup_expired_otps_task():
         logger.error(f"Failed to cleanup OTPs: {e}")
 
 
+@task
 def cleanup_used_otps_task():
     from django.utils import timezone
     from datetime import timedelta
