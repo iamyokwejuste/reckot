@@ -27,6 +27,10 @@ class RichTextEditor {
         }
 
         this.setupEvents();
+
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
     }
 
     createToolbar() {
@@ -132,6 +136,9 @@ class RichTextEditor {
             }
         }
         this.element.value = this.editor.innerHTML;
+
+        // Dispatch input event for Alpine.js binding
+        this.element.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
     getContent() {

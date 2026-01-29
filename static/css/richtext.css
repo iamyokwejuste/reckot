@@ -8,7 +8,7 @@
 
 .richtext-editor:empty:before {
     content: attr(data-placeholder);
-    color: hsl(var(--muted-foreground));
+    color: var(--color-muted-foreground);
     pointer-events: none;
     position: absolute;
 }
