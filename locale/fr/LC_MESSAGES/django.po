@@ -1548,7 +1548,7 @@ msgstr "Continuer vers Reckot"
 #: templates/ai/tickets/list.html:68 templates/base.html:220
 #: templates/base.html:223
 msgid "AI Assistant"
-msgstr ""
+msgstr "Assistant IA"
 
 #: templates/ai/assistant.html:10 templates/ai/tickets/create.html:10
 #: templates/ai/tickets/detail.html:10 templates/ai/tickets/list.html:10
@@ -1574,164 +1574,140 @@ msgstr "Accueil"
 
 #: templates/ai/assistant.html:23
 msgid "Reckot AI Assistant"
-msgstr ""
+msgstr "Assistant IA Reckot"
 
 #: templates/ai/assistant.html:24
 msgid "Powered by Google Gemini"
-msgstr ""
+msgstr "Propulsé par Google Gemini"
 
 #: templates/ai/assistant.html:38
 msgid "How can I help you today?"
-msgstr ""
+msgstr "Comment puis-je vous aider aujourd'hui ?"
 
 #: templates/ai/assistant.html:39
 msgid ""
 "Ask me about events, tickets, payments, or any issues you're experiencing."
 msgstr ""
+"Posez-moi des questions sur les événements, les billets, les paiements ou "
+"tout problème que vous rencontrez."
 
 #: templates/ai/assistant.html:42
-#, fuzzy
-#| msgid "Create your event"
 msgid "How to create an event?"
-msgstr "Créez votre événement"
+msgstr "Comment créer un événement ?"
 
 #: templates/ai/assistant.html:45
-#, fuzzy
-#| msgid "Payments"
 msgid "Payment issue"
-msgstr "Paiements"
+msgstr "Problème de paiement"
 
 #: templates/ai/assistant.html:48
-#, fuzzy
-#| msgid "Check-in Report"
 msgid "Check-in help"
-msgstr "Rapport d'enregistrement"
+msgstr "Aide à l'enregistrement"
 
 #: templates/ai/assistant.html:81
 msgid "Type your message..."
-msgstr ""
+msgstr "Tapez votre message..."
 
 #: templates/ai/assistant.html:91
 msgid "Can't resolve your issue?"
-msgstr ""
+msgstr "Impossible de résoudre votre problème ?"
 
 #: templates/ai/assistant.html:93
-#, fuzzy
-#| msgid "Create your event"
 msgid "Create support ticket"
-msgstr "Créez votre événement"
+msgstr "Créer un ticket de support"
 
 #: templates/ai/assistant.html:125
-#, fuzzy
-#| msgid "Failed to send code. Please try again."
 msgid "Sorry, something went wrong. Please try again."
-msgstr "Échec de l'envoi du code. Veuillez réessayer."
+msgstr "Désolé, une erreur s'est produite. Veuillez réessayer."
 
 #: templates/ai/assistant.html:133
 msgid "Clear conversation history?"
-msgstr ""
+msgstr "Effacer l'historique de conversation ?"
 
 #: templates/ai/tickets/create.html:5 templates/ai/tickets/create.html:23
-#, fuzzy
-#| msgid "Create your event"
 msgid "Create Support Ticket"
-msgstr "Créez votre événement"
+msgstr "Créer un ticket de support"
 
 #: templates/ai/tickets/create.html:12 templates/ai/tickets/detail.html:12
 #: templates/ai/tickets/list.html:5 templates/ai/tickets/list.html:12
-#, fuzzy
-#| msgid "Total Tickets"
 msgid "Support Tickets"
-msgstr "Total des billets"
+msgstr "Tickets de support"
 
 #: templates/ai/tickets/create.html:14 templates/events/coupons/create.html:17
 #: templates/events/create_event.html:19 templates/orgs/create.html:16
 msgid "Create"
-msgstr ""
+msgstr "Créer"
 
 #: templates/ai/tickets/create.html:24
 msgid "Describe your issue and we'll help you resolve it"
-msgstr ""
+msgstr "Décrivez votre problème et nous vous aiderons à le résoudre"
 
 #: templates/ai/tickets/create.html:33
-#, fuzzy
-#| msgid "Check your email"
 msgid "your@email.com"
-msgstr "Vérifiez votre e-mail"
+msgstr "votre@email.com"
 
 #: templates/ai/tickets/create.html:38
 msgid "Category"
-msgstr ""
+msgstr "Catégorie"
 
 #: templates/ai/tickets/create.html:40
-#, fuzzy
-#| msgid "Payments"
 msgid "Payment Issue"
-msgstr "Paiements"
+msgstr "Problème de paiement"
 
 #: templates/ai/tickets/create.html:41
-#, fuzzy
-#| msgid "Ticket Code"
 msgid "Ticket Issue"
-msgstr "Code du billet"
+msgstr "Problème de billet"
 
 #: templates/ai/tickets/create.html:42
-#, fuzzy
-#| msgid "Events"
 msgid "Event Issue"
-msgstr "Événements"
+msgstr "Problème d'événement"
 
 #: templates/ai/tickets/create.html:43
-#, fuzzy
-#| msgid "Account Inactive"
 msgid "Account Issue"
-msgstr "Compte inactif"
+msgstr "Problème de compte"
 
 #: templates/ai/tickets/create.html:44
 msgid "Technical Issue"
-msgstr ""
+msgstr "Problème technique"
 
 #: templates/ai/tickets/create.html:45
 msgid "Other"
-msgstr ""
+msgstr "Autre"
 
 #: templates/ai/tickets/create.html:50
 #: templates/messaging/campaign_create.html:109
 #: templates/messaging/campaign_detail.html:125
 msgid "Subject"
-msgstr ""
+msgstr "Sujet"
 
 #: templates/ai/tickets/create.html:51
 msgid "Brief summary of your issue"
-msgstr ""
+msgstr "Résumé bref de votre problème"
 
 #: templates/ai/tickets/create.html:55 templates/ai/tickets/detail.html:46
 #: templates/events/coupons/detail.html:109 templates/orgs/create.html:88
 #: templates/orgs/edit.html:88 templates/payments/invoice_pdf.html:62
 msgid "Description"
-msgstr ""
+msgstr "Description"
 
 #: templates/ai/tickets/create.html:56
 msgid "Please describe your issue in detail..."
-msgstr ""
+msgstr "Veuillez décrire votre problème en détail..."
 
 #: templates/ai/tickets/create.html:62
 msgid "Our AI will analyze your issue and suggest solutions automatically."
-msgstr ""
+msgstr "Notre IA analysera votre problème et suggérera des solutions automatiquement."
 
 #: templates/ai/tickets/create.html:67
-#, fuzzy
-#| msgid "Scan Tickets"
 msgid "Submit Ticket"
-msgstr "Scanner les billets"
+msgstr "Soumettre le ticket"
 
 #: templates/ai/tickets/create.html:72
 msgid "Need quick help?"
-msgstr ""
+msgstr "Besoin d'aide rapide ?"
 
 #: templates/ai/tickets/create.html:74
 msgid "Chat with AI Assistant"
-msgstr ""
+msgstr "Discuter avec l'assistant IA"
 
 #: templates/ai/tickets/detail.html:5 templates/checkin/list.html:46
 #: templates/reports/attendee_list.html:124 templates/tickets/list.html:54
@@ -1739,23 +1715,21 @@ msgid "Ticket"
 msgstr "Billet"
 
 #: templates/ai/tickets/detail.html:54
-#, fuzzy
-#| msgid "Analytics"
 msgid "AI Analysis"
-msgstr "Analyses"
+msgstr "Analyse IA"
 
 #: templates/ai/tickets/detail.html:64
 msgid "Suggested Solution"
-msgstr ""
+msgstr "Solution suggérée"
 
 #: templates/ai/tickets/detail.html:72
 msgid "Resolution"
-msgstr ""
+msgstr "Résolution"
 
 #: templates/ai/tickets/detail.html:78 templates/events/coupons/detail.html:126
 #: templates/messaging/campaign_detail.html:106
 msgid "Created"
-msgstr ""
+msgstr "Créé"
 
 #: templates/ai/tickets/detail.html:78 templates/ai/tickets/detail.html:80
 #: templates/checkin/dashboard.html:56
@@ -1764,34 +1738,28 @@ msgstr "il y a"
 
 #: templates/ai/tickets/detail.html:80
 msgid "Resolved"
-msgstr ""
+msgstr "Résolu"
 
 #: templates/ai/tickets/list.html:16
-#, fuzzy
-#| msgid "Total Tickets"
 msgid "My Support Tickets"
-msgstr "Total des billets"
+msgstr "Mes tickets de support"
 
 #: templates/ai/tickets/list.html:20
-#, fuzzy
-#| msgid "Ticket"
 msgid "New Ticket"
-msgstr "Billet"
+msgstr "Nouveau ticket"
 
 #: templates/ai/tickets/list.html:62 templates/tickets/list.html:98
 #: templates/tickets/my_tickets.html:86
 msgid "No tickets yet"
-msgstr ""
+msgstr "Pas encore de billets"
 
 #: templates/ai/tickets/list.html:63
 msgid "Need help? Create a support ticket or chat with our AI assistant."
-msgstr ""
+msgstr "Besoin d'aide ? Créez un ticket de support ou discutez avec notre assistant IA."
 
 #: templates/ai/tickets/list.html:74
-#, fuzzy
-#| msgid "Create Account"
 msgid "Create Ticket"
-msgstr "Créer un compte"
+msgstr "Créer un ticket"
 
 #: templates/base.html:118
 msgid "Modern event management for Africa."
@@ -2939,57 +2907,57 @@ msgstr "Travailler sans internet, synchroniser à la reconnexion"
 
 #: templates/core/settings.html:193
 msgid "Pending changes"
-msgstr ""
+msgstr "Modifications en attente"
 
 #: templates/core/settings.html:194
 msgid "item"
-msgstr ""
+msgstr "élément"
 
 #: templates/core/settings.html:194
 msgid "waiting to sync"
-msgstr ""
+msgstr "en attente de synchronisation"
 
 #: templates/core/settings.html:206
 msgid "How offline mode works"
-msgstr ""
+msgstr "Comment fonctionne le mode hors ligne"
 
 #: templates/core/settings.html:208
 msgid "Forms auto-save to your device as you type"
-msgstr ""
+msgstr "Les formulaires sont enregistrés automatiquement pendant la saisie"
 
 #: templates/core/settings.html:209
 msgid "Changes are queued when you're offline"
-msgstr ""
+msgstr "Les modifications sont mises en file d'attente hors ligne"
 
 #: templates/core/settings.html:210
 msgid "Data syncs automatically when you reconnect"
-msgstr ""
+msgstr "Les données se synchronisent automatiquement à la reconnexion"
 
 #: templates/core/settings.html:211
 msgid "Cached pages remain accessible offline"
-msgstr ""
+msgstr "Les pages en cache restent accessibles hors ligne"
 
 #: templates/core/settings.html:221
 msgid "Security"
-msgstr ""
+msgstr "Sécurité"
 
 #: templates/core/settings.html:232 templates/layouts/dashboard.html:238
 #: templates/layouts/dashboard.html:290
 msgid "Sign out"
-msgstr ""
+msgstr "Se déconnecter"
 
 #: templates/core/settings.html:233
 msgid "Log out of your account"
-msgstr ""
+msgstr "Déconnexion de votre compte"
 
 #: templates/core/terms.html:5 templates/core/terms.html:16
 #: templates/emails/base.html:279
 msgid "Terms of Service"
-msgstr ""
+msgstr "Conditions d'utilisation"
 
 #: templates/core/terms.html:32
 msgid "1. Acceptance of Terms"
-msgstr ""
+msgstr "1. Acceptation des conditions"
 
 #: templates/core/terms.html:34
 msgid ""
