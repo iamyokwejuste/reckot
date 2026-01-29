@@ -7,45 +7,45 @@ services:
     expose:
       - "8000"
     environment:
-      - SECRET_KEY=${SECRET_KEY}
-      - DEBUG=${DEBUG:-False}
-      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1}
-      - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS:-}
-      - SITE_ID=${SITE_ID:-1}
-      - TIME_ZONE=${TIME_ZONE:-Africa/Douala}
-      - DB_ENGINE=django.db.backends.postgresql
-      - DB_NAME=${DB_NAME:-reckot}
-      - DB_USER=${DB_USER:-reckot}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_HOST=db
-      - DB_PORT=5432
-      - EMAIL_BACKEND=${EMAIL_BACKEND:-django.core.mail.backends.smtp.EmailBackend}
-      - EMAIL_HOST=${EMAIL_HOST}
-      - EMAIL_PORT=${EMAIL_PORT:-587}
-      - EMAIL_USE_TLS=${EMAIL_USE_TLS:-True}
-      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
-      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
-      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL}
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
-      - ACCOUNT_EMAIL_VERIFICATION=${ACCOUNT_EMAIL_VERIFICATION:-mandatory}
-      - PAYMENT_PRIMARY_GATEWAY=${PAYMENT_PRIMARY_GATEWAY:-CAMPAY}
-      - PAYMENT_FALLBACK_GATEWAYS=${PAYMENT_FALLBACK_GATEWAYS:-}
-      - CAMPAY_USERNAME=${CAMPAY_USERNAME:-}
-      - CAMPAY_PASSWORD=${CAMPAY_PASSWORD:-}
-      - CAMPAY_IS_PRODUCTION=${CAMPAY_IS_PRODUCTION:-False}
-      - PAWAPAY_API_TOKEN=${PAWAPAY_API_TOKEN:-}
-      - PAWAPAY_IS_PRODUCTION=${PAWAPAY_IS_PRODUCTION:-False}
-      - FLUTTERWAVE_SECRET_KEY=${FLUTTERWAVE_SECRET_KEY:-}
-      - FLUTTERWAVE_PUBLIC_KEY=${FLUTTERWAVE_PUBLIC_KEY:-}
-      - FLUTTERWAVE_ENCRYPTION_KEY=${FLUTTERWAVE_ENCRYPTION_KEY:-}
-      - PAYMENT_CALLBACK_URL=${PAYMENT_CALLBACK_URL:-}
-      - DEFAULT_CURRENCY=${DEFAULT_CURRENCY:-XAF}
-      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID:-}
-      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN:-}
-      - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER:-}
-      - TWILIO_VERIFY_SERVICE_SID=${TWILIO_VERIFY_SERVICE_SID:-}
-      - RUN_MIGRATIONS=true
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production-use-a-long-random-string}
+      DEBUG: ${DEBUG:-False}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-*}
+      CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-}
+      SITE_ID: ${SITE_ID:-1}
+      TIME_ZONE: ${TIME_ZONE:-Africa/Douala}
+      DB_ENGINE: django.db.backends.postgresql
+      DB_NAME: ${DB_NAME:-reckot}
+      DB_USER: ${DB_USER:-reckot}
+      DB_PASSWORD: ${DB_PASSWORD:-changeme}
+      DB_HOST: db
+      DB_PORT: 5432
+      EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.console.EmailBackend}
+      EMAIL_HOST: ${EMAIL_HOST:-}
+      EMAIL_PORT: ${EMAIL_PORT:-587}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS:-True}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
+      DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-noreply@example.com}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      ACCOUNT_EMAIL_VERIFICATION: ${ACCOUNT_EMAIL_VERIFICATION:-none}
+      PAYMENT_PRIMARY_GATEWAY: ${PAYMENT_PRIMARY_GATEWAY:-CAMPAY}
+      PAYMENT_FALLBACK_GATEWAYS: ${PAYMENT_FALLBACK_GATEWAYS:-}
+      CAMPAY_USERNAME: ${CAMPAY_USERNAME:-}
+      CAMPAY_PASSWORD: ${CAMPAY_PASSWORD:-}
+      CAMPAY_IS_PRODUCTION: ${CAMPAY_IS_PRODUCTION:-False}
+      PAWAPAY_API_TOKEN: ${PAWAPAY_API_TOKEN:-}
+      PAWAPAY_IS_PRODUCTION: ${PAWAPAY_IS_PRODUCTION:-False}
+      FLUTTERWAVE_SECRET_KEY: ${FLUTTERWAVE_SECRET_KEY:-}
+      FLUTTERWAVE_PUBLIC_KEY: ${FLUTTERWAVE_PUBLIC_KEY:-}
+      FLUTTERWAVE_ENCRYPTION_KEY: ${FLUTTERWAVE_ENCRYPTION_KEY:-}
+      PAYMENT_CALLBACK_URL: ${PAYMENT_CALLBACK_URL:-}
+      DEFAULT_CURRENCY: ${DEFAULT_CURRENCY:-XAF}
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+      TWILIO_PHONE_NUMBER: ${TWILIO_PHONE_NUMBER:-}
+      TWILIO_VERIFY_SERVICE_SID: ${TWILIO_VERIFY_SERVICE_SID:-}
+      RUN_MIGRATIONS: "true"
     depends_on:
       db:
         condition: service_healthy
@@ -53,10 +53,10 @@ services:
       - media_data:/app/media
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
-      interval: 30s
+      interval: 10s
       timeout: 10s
-      retries: 3
-      start_period: 40s
+      retries: 30
+      start_period: 120s
 
   worker:
     build:
@@ -65,26 +65,26 @@ services:
     restart: unless-stopped
     command: uv run python manage.py db_worker
     environment:
-      - SECRET_KEY=${SECRET_KEY}
-      - DEBUG=False
-      - DB_ENGINE=django.db.backends.postgresql
-      - DB_NAME=${DB_NAME:-reckot}
-      - DB_USER=${DB_USER:-reckot}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_HOST=db
-      - DB_PORT=5432
-      - EMAIL_BACKEND=${EMAIL_BACKEND:-django.core.mail.backends.smtp.EmailBackend}
-      - EMAIL_HOST=${EMAIL_HOST}
-      - EMAIL_PORT=${EMAIL_PORT:-587}
-      - EMAIL_USE_TLS=${EMAIL_USE_TLS:-True}
-      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
-      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
-      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL}
-      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID:-}
-      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN:-}
-      - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER:-}
-      - TWILIO_VERIFY_SERVICE_SID=${TWILIO_VERIFY_SERVICE_SID:-}
-      - RUN_MIGRATIONS=false
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production-use-a-long-random-string}
+      DEBUG: "False"
+      DB_ENGINE: django.db.backends.postgresql
+      DB_NAME: ${DB_NAME:-reckot}
+      DB_USER: ${DB_USER:-reckot}
+      DB_PASSWORD: ${DB_PASSWORD:-changeme}
+      DB_HOST: db
+      DB_PORT: 5432
+      EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.console.EmailBackend}
+      EMAIL_HOST: ${EMAIL_HOST:-}
+      EMAIL_PORT: ${EMAIL_PORT:-587}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS:-True}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
+      DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-noreply@example.com}
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+      TWILIO_PHONE_NUMBER: ${TWILIO_PHONE_NUMBER:-}
+      TWILIO_VERIFY_SERVICE_SID: ${TWILIO_VERIFY_SERVICE_SID:-}
+      RUN_MIGRATIONS: "false"
     depends_on:
       web:
         condition: service_healthy
@@ -116,7 +116,7 @@ services:
       POSTGRES_USER: ${DB_USER:-reckot}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
       SCHEDULE: ${BACKUP_SCHEDULE:-@daily}
-      BACKUP_ON_START: ${BACKUP_ON_START:-TRUE}
+      BACKUP_ON_START: "TRUE"
       BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-7}
       BACKUP_KEEP_WEEKS: ${BACKUP_KEEP_WEEKS:-4}
       BACKUP_KEEP_MONTHS: ${BACKUP_KEEP_MONTHS:-6}
