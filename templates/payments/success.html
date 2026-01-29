@@ -70,6 +70,12 @@
                     {% /button %}
                 </a>
                 {% elif payment.booking.guest_session %}
+                <a href="{% url 'tickets:public_booking_pdf' booking_ref=payment.booking.reference %}" target="_blank">
+                    {% #button class="w-full" variant="gradient" %}
+                        <i data-lucide="download" class="mr-2 h-4 w-4"></i>
+                        {% trans "Download Tickets (PDF)" %}
+                    {% /button %}
+                </a>
                 <a href="{% url 'payments:track' token=payment.booking.guest_session.token %}">
                     {% #button class="w-full" variant="gradient" %}
                         <i data-lucide="bookmark" class="mr-2 h-4 w-4"></i>
