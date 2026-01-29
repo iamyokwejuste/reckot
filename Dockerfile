@@ -22,7 +22,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PATH="/opt/venv/bin:/usr/local/bin:$PATH" \
     APP_HOME=/app \
-    UV_LINK_MODE=copy
+    UV_PROJECT_ENVIRONMENT=/opt/venv
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
@@ -39,7 +39,7 @@ COPY --chown=appuser:appuser . .
 
 RUN chmod +x /app/entrypoint.sh
 
-RUN python manage.py collectstatic --noinput --clear
+RUN uv run python manage.py collectstatic --noinput --clear
 
 USER appuser
 
