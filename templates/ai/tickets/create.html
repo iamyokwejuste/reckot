@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load slippers %}
+{% load i18n %}
+
+{% block title %}{% trans "Create Support Ticket" %} - Reckot{% endblock %}
+
+{% block content %}
+<div class="container py-8">
+    {% #breadcrumb %}
+        {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
+        {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+        {% #breadcrumb_item href="{% url 'ai:tickets' %}" %}{% trans "Support Tickets" %}{% /breadcrumb_item %}
+        {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+        {% #breadcrumb_item %}{% trans "Create" %}{% /breadcrumb_item %}
+    {% /breadcrumb %}
+
+    <div class="mx-auto mt-8 max-w-lg">
+        {% #card %}
+            <div class="text-center mb-6">
+                <div class="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-animated mb-4">
+                    <i data-lucide="life-buoy" class="h-7 w-7 text-white"></i>
+                </div>
+                <h1 class="text-2xl font-bold">{% trans "Create Support Ticket" %}</h1>
+                <p class="text-sm text-muted-foreground mt-1">{% trans "Describe your issue and we'll help you resolve it" %}</p>
+            </div>
+
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+
+                {% if not user.is_authenticated %}
+                <div class="space-y-2">
+                    <label for="email" class="block text-sm font-medium">{% trans "Email" %}</label>
+                    <input type="email" name="email" id="email" required class="input w-full" placeholder="{% trans 'your@email.com' %}">
+                </div>
+                {% endif %}
+
+                <div class="space-y-2">
+                    <label for="category" class="block text-sm font-medium">{% trans "Category" %}</label>
+                    <select name="category" id="category" class="input w-full">
+                        <option value="PAYMENT">{% trans "Payment Issue" %}</option>
+                        <option value="TICKET">{% trans "Ticket Issue" %}</option>
+                        <option value="EVENT">{% trans "Event Issue" %}</option>
+                        <option value="ACCOUNT">{% trans "Account Issue" %}</option>
+                        <option value="TECHNICAL">{% trans "Technical Issue" %}</option>
+                        <option value="OTHER">{% trans "Other" %}</option>
+                    </select>
+                </div>
+
+                <div class="space-y-2">
+                    <label for="subject" class="block text-sm font-medium">{% trans "Subject" %}</label>
+                    <input type="text" name="subject" id="subject" required class="input w-full" placeholder="{% trans 'Brief summary of your issue' %}">
+                </div>
+
+                <div class="space-y-2">
+                    <label for="description" class="block text-sm font-medium">{% trans "Description" %}</label>
+                    <textarea name="description" id="description" required rows="5" class="input w-full" placeholder="{% trans 'Please describe your issue in detail...' %}"></textarea>
+                </div>
+
+                <div class="p-4 rounded-xl bg-muted/50 text-sm">
+                    <div class="flex items-start gap-2">
+                        <i data-lucide="bot" class="h-4 w-4 text-primary mt-0.5"></i>
+                        <p class="text-muted-foreground">{% trans "Our AI will analyze your issue and suggest solutions automatically." %}</p>
+                    </div>
+                </div>
+
+                {% #button type="submit" variant="default" class="w-full" %}
+                    {% trans "Submit Ticket" %}
+                {% /button %}
+            </form>
+
+            <div class="mt-4 pt-4 border-t text-center">
+                <p class="text-sm text-muted-foreground mb-2">{% trans "Need quick help?" %}</p>
+                <a href="{% url 'ai:assistant' %}" class="text-sm text-primary hover:underline">
+                    {% trans "Chat with AI Assistant" %}
+                </a>
+            </div>
+        {% /card %}
+    </div>
+</div>
+{% endblock %}

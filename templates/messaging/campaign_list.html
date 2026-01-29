@@ -1,12 +1,12 @@
 {% extends "layouts/dashboard.html" %}
-{% load slippers %}
+{% load slippers i18n %}
 
-{% block title %}Campaigns - {{ organization.name }} - Reckot{% endblock %}
+{% block title %}{% trans "Campaigns" %} - {{ organization.name }} - Reckot{% endblock %}
 
 {% block header_title %}
 <div>
-    <h1 class="text-lg font-semibold">Message Campaigns</h1>
-    <p class="text-sm text-muted-foreground">Send messages to your event attendees</p>
+    <h1 class="text-lg font-semibold">{% trans "Message Campaigns" %}</h1>
+    <p class="text-sm text-muted-foreground">{% trans "Send messages to your event attendees" %}</p>
 </div>
 {% endblock %}
 
@@ -14,7 +14,7 @@
 <a href="{% url 'messaging:template_list' org_slug=organization.slug %}">
     {% #button variant="outline" %}
         <i data-lucide="file-text" class="w-4 h-4"></i>
-        Templates
+        {% trans "Templates" %}
     {% /button %}
 </a>
 {% endblock %}
@@ -23,7 +23,7 @@
 <div class="space-y-6">
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
-            <span class="text-sm text-muted-foreground">{{ campaigns.count }} campaign{{ campaigns.count|pluralize }}</span>
+            <span class="text-sm text-muted-foreground">{{ campaigns.count }} {% trans "campaign" %}{{ campaigns.count|pluralize }}</span>
         </div>
     </div>
 
@@ -52,26 +52,26 @@
                             </span>
                             <span class="flex items-center gap-1">
                                 <i data-lucide="users" class="w-3.5 h-3.5"></i>
-                                {{ campaign.total_recipients }} recipient{{ campaign.total_recipients|pluralize }}
+                                {{ campaign.total_recipients }} {% trans "recipient" %}{{ campaign.total_recipients|pluralize }}
                             </span>
                         </div>
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
                     {% if campaign.status == 'DRAFT' %}
-                    <span class="badge badge-outline">Draft</span>
+                    <span class="badge badge-outline">{% trans "Draft" %}</span>
                     {% elif campaign.status == 'SCHEDULED' %}
-                    <span class="badge badge-info">Scheduled</span>
+                    <span class="badge badge-info">{% trans "Scheduled" %}</span>
                     {% elif campaign.status == 'SENDING' %}
-                    <span class="badge badge-warning">Sending</span>
+                    <span class="badge badge-warning">{% trans "Sending" %}</span>
                     {% elif campaign.status == 'COMPLETED' %}
-                    <span class="badge badge-success">Completed</span>
+                    <span class="badge badge-success">{% trans "Completed" %}</span>
                     {% elif campaign.status == 'FAILED' %}
-                    <span class="badge badge-destructive">Failed</span>
+                    <span class="badge badge-destructive">{% trans "Failed" %}</span>
                     {% endif %}
                     <a href="{% url 'messaging:campaign_detail' org_slug=organization.slug campaign_ref=campaign.reference %}">
                         {% #button variant="outline" size="sm" %}
-                            View
+                            {% trans "View" %}
                         {% /button %}
                     </a>
                 </div>
@@ -81,22 +81,22 @@
                 <div class="grid grid-cols-4 gap-4 text-center">
                     <div>
                         <p class="text-lg font-semibold">{{ campaign.sent_count }}</p>
-                        <p class="text-xs text-muted-foreground">Sent</p>
+                        <p class="text-xs text-muted-foreground">{% trans "Sent" %}</p>
                     </div>
                     <div>
                         <p class="text-lg font-semibold text-emerald-600">
                             {% widthratio campaign.deliveries.filter.status__in.0 campaign.total_recipients 100 as open_rate %}
                             {{ campaign.deliveries.filter.status__in|length }}
                         </p>
-                        <p class="text-xs text-muted-foreground">Delivered</p>
+                        <p class="text-xs text-muted-foreground">{% trans "Delivered" %}</p>
                     </div>
                     <div>
                         <p class="text-lg font-semibold text-blue-600">0</p>
-                        <p class="text-xs text-muted-foreground">Opened</p>
+                        <p class="text-xs text-muted-foreground">{% trans "Opened" %}</p>
                     </div>
                     <div>
                         <p class="text-lg font-semibold text-red-600">{{ campaign.failed_count }}</p>
-                        <p class="text-xs text-muted-foreground">Failed</p>
+                        <p class="text-xs text-muted-foreground">{% trans "Failed" %}</p>
                     </div>
                 </div>
             </div>
@@ -109,10 +109,10 @@
         <div class="h-16 w-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
             <i data-lucide="mail" class="w-8 h-8 text-muted-foreground"></i>
         </div>
-        <h3 class="font-semibold text-lg">No campaigns yet</h3>
-        <p class="text-muted-foreground mt-1">Create a campaign to message your event attendees</p>
+        <h3 class="font-semibold text-lg">{% trans "No campaigns yet" %}</h3>
+        <p class="text-muted-foreground mt-1">{% trans "Create a campaign to message your event attendees" %}</p>
         <p class="text-sm text-muted-foreground mt-4">
-            Select an event from the sidebar to create a new campaign.
+            {% trans "Select an event from the sidebar to create a new campaign." %}
         </p>
     </div>
     {% endif %}

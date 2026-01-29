@@ -1,12 +1,12 @@
 {% extends "layouts/dashboard.html" %}
-{% load slippers %}
+{% load slippers i18n %}
 
-{% block title %}Message Templates - {{ organization.name }} - Reckot{% endblock %}
+{% block title %}{% trans "Message Templates" %} - {{ organization.name }} - Reckot{% endblock %}
 
 {% block header_title %}
 <div>
-    <h1 class="text-lg font-semibold">Message Templates</h1>
-    <p class="text-sm text-muted-foreground">Reusable templates for your campaigns</p>
+    <h1 class="text-lg font-semibold">{% trans "Message Templates" %}</h1>
+    <p class="text-sm text-muted-foreground">{% trans "Reusable templates for your campaigns" %}</p>
 </div>
 {% endblock %}
 
@@ -14,7 +14,7 @@
 <a href="{% url 'messaging:template_create' org_slug=organization.slug %}">
     {% #button variant="default" %}
         <i data-lucide="plus" class="w-4 h-4"></i>
-        New Template
+        {% trans "New Template" %}
     {% /button %}
 </a>
 {% endblock %}
@@ -25,10 +25,10 @@
         <a href="{% url 'messaging:campaign_list' org_slug=organization.slug %}">
             {% #button variant="outline" size="sm" %}
                 <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                Back to Campaigns
+                {% trans "Back to Campaigns" %}
             {% /button %}
         </a>
-        <span class="text-sm text-muted-foreground">{{ templates.count }} template{{ templates.count|pluralize }}</span>
+        <span class="text-sm text-muted-foreground">{{ templates.count }} {% trans "template" %}{{ templates.count|pluralize }}</span>
     </div>
 
     {% if templates %}
@@ -66,12 +66,12 @@
         <div class="h-16 w-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
             <i data-lucide="file-text" class="w-8 h-8 text-muted-foreground"></i>
         </div>
-        <h3 class="font-semibold text-lg">No templates yet</h3>
-        <p class="text-muted-foreground mt-1">Create reusable templates for your campaigns</p>
+        <h3 class="font-semibold text-lg">{% trans "No templates yet" %}</h3>
+        <p class="text-muted-foreground mt-1">{% trans "Create reusable templates for your campaigns" %}</p>
         <a href="{% url 'messaging:template_create' org_slug=organization.slug %}" class="mt-6 inline-block">
             {% #button variant="default" %}
                 <i data-lucide="plus" class="w-4 h-4"></i>
-                Create Template
+                {% trans "Create Template" %}
             {% /button %}
         </a>
     </div>

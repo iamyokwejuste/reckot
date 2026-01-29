@@ -1,20 +1,20 @@
 {% extends "layouts/dashboard.html" %}
-{% load slippers %}
+{% load slippers i18n %}
 
-{% block title %}Check-ins - Reckot{% endblock %}
+{% block title %}{% trans "Check-ins" %} - Reckot{% endblock %}
 
 {% block breadcrumbs %}
 {% #breadcrumb class="mb-4" %}
-    {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item %}Check-in{% /breadcrumb_item %}
+    {% #breadcrumb_item %}{% trans "Check-in" %}{% /breadcrumb_item %}
 {% /breadcrumb %}
 {% endblock %}
 
 {% block header_title %}
 <div>
-    <h1 class="text-lg font-semibold">Check-ins</h1>
-    <p class="text-sm text-muted-foreground">View all check-in activity across your events</p>
+    <h1 class="text-lg font-semibold">{% trans "Check-ins" %}</h1>
+    <p class="text-sm text-muted-foreground">{% trans "View all check-in activity across your events" %}</p>
 </div>
 {% endblock %}
 
@@ -23,14 +23,14 @@
     <div class="grid gap-4 sm:grid-cols-2">
         <div class="stat-card">
             <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-muted-foreground">Today's Check-ins</p>
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Today's Check-ins" %}</p>
                 <i data-lucide="calendar-check" class="h-4 w-4 text-muted-foreground"></i>
             </div>
             <p class="text-2xl font-bold mt-2">{{ stats.today }}</p>
         </div>
         <div class="stat-card">
             <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-muted-foreground">Total Check-ins</p>
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Total Check-ins" %}</p>
                 <i data-lucide="scan-line" class="h-4 w-4 text-muted-foreground"></i>
             </div>
             <p class="text-2xl font-bold mt-2">{{ stats.total }}</p>
@@ -43,11 +43,11 @@
             <table class="w-full">
                 <thead>
                     <tr class="border-b border-border">
-                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Ticket</th>
-                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Event</th>
-                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Attendee</th>
-                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Checked In By</th>
-                        <th class="text-left text-sm font-medium text-muted-foreground p-4">Time</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Ticket" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Event" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Attendee" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Checked In By" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Time" %}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-border">
@@ -63,7 +63,7 @@
                             <p class="text-sm">{{ checkin.ticket.booking.user.email }}</p>
                         </td>
                         <td class="p-4">
-                            <p class="text-sm text-muted-foreground">{{ checkin.checked_in_by.email|default:"System" }}</p>
+                            <p class="text-sm text-muted-foreground">{{ checkin.checked_in_by.email|default:_("System") }}</p>
                         </td>
                         <td class="p-4">
                             <p class="text-sm text-muted-foreground">{{ checkin.checked_in_at|date:"M d, Y H:i" }}</p>
@@ -78,8 +78,8 @@
             <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
                 <i data-lucide="scan-line" class="h-8 w-8 text-muted-foreground"></i>
             </div>
-            <h3 class="text-lg font-semibold mb-2">No check-ins yet</h3>
-            <p class="text-muted-foreground">Check-ins will appear here when attendees are verified at your events.</p>
+            <h3 class="text-lg font-semibold mb-2">{% trans "No check-ins yet" %}</h3>
+            <p class="text-muted-foreground">{% trans "Check-ins will appear here when attendees are verified at your events." %}</p>
         </div>
         {% endif %}
     </div>

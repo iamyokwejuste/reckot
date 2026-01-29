@@ -1,6 +1,6 @@
-{% load slippers %}
+{% load slippers i18n %}
 <div class="space-y-4" data-motion>
-    {% #alert variant="success" icon="check-circle" title="Check-in Successful" %}
+    {% #alert variant="success" icon="check-circle" title=_("Check-in Successful") %}
         <div class="space-y-1 text-sm">
             <p><strong>{{ ticket.booking.user.email }}</strong></p>
             <p>{{ ticket.ticket_type.name }}</p>
@@ -10,7 +10,7 @@
 
     {% if swag_items %}
     <div class="rounded-lg border border-border p-4">
-        <h4 class="font-medium mb-3">Collect Swag</h4>
+        <h4 class="font-medium mb-3">{% trans "Collect Swag" %}</h4>
         <div class="space-y-2">
             {% for item in swag_items %}
             <div class="flex items-center justify-between">
@@ -22,7 +22,7 @@
                     class="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground hover:bg-secondary/80"
                 >
                     <i data-lucide="gift" class="mr-1 h-3 w-3"></i>
-                    Collect
+                    {% trans "Collect" %}
                 </button>
             </div>
             {% endfor %}

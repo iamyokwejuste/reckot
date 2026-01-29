@@ -1,12 +1,12 @@
-{% load slippers %}
+{% load slippers i18n %}
 <div data-motion>
-    {% #alert variant="destructive" icon="x-circle" title="Check-in Failed" %}
+    {% #alert variant="destructive" icon="x-circle" title=_("Check-in Failed") %}
         <p class="text-sm">{{ error }}</p>
         {% if ticket %}
         <div class="mt-2 text-sm">
-            <p><strong>Ticket:</strong> {{ ticket.code }}</p>
+            <p><strong>{% trans "Ticket:" %}</strong> {{ ticket.code }}</p>
             {% if checked_in_at %}
-            <p><strong>Checked in at:</strong> {{ checked_in_at|date:"M d, Y H:i" }}</p>
+            <p><strong>{% trans "Checked in at:" %}</strong> {{ checked_in_at|date:"M d, Y H:i" }}</p>
             {% endif %}
         </div>
         {% endif %}

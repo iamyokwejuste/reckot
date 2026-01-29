@@ -1,4 +1,5 @@
 {% load static %}
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -266,16 +267,16 @@
             <!-- Footer -->
             <div class="footer email-muted">
                 <p style="margin: 0 0 8px 0;">
-                    {% block footer_message %}You're receiving this email because you have an account with Reckot.{% endblock %}
+                    {% block footer_message %}{% trans "You're receiving this email because you have an account with Reckot." %}{% endblock %}
                 </p>
                 <p style="margin: 0;">
-                    &copy; {% now "Y" %} Reckot. All rights reserved.
+                    &copy; {% now "Y" %} Reckot. {% trans "All rights reserved." %}
                 </p>
                 {% block footer_links %}
                 <p style="margin: 16px 0 0 0;">
-                    <a href="{{ site_url }}/privacy/" style="text-decoration: underline;">Privacy Policy</a>
+                    <a href="{{ site_url }}/privacy/" style="text-decoration: underline;">{% trans "Privacy Policy" %}</a>
                     &nbsp;&middot;&nbsp;
-                    <a href="{{ site_url }}/terms/" style="text-decoration: underline;">Terms of Service</a>
+                    <a href="{{ site_url }}/terms/" style="text-decoration: underline;">{% trans "Terms of Service" %}</a>
                 </p>
                 {% endblock %}
             </div>

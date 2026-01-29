@@ -1,258 +1,259 @@
-# French translations for Reckot.
-# Copyright (C) 2026 Reckot
-# This file is distributed under the same license as the Reckot package.
-# Reckot Team <support@reckot.com>, 2026.
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
+#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: Reckot 1.0\n"
+"Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-29 21:31+0100\n"
-"PO-Revision-Date: 2026-01-29 22:00+0100\n"
-"Last-Translator: Reckot Team <support@reckot.com>\n"
-"Language-Team: French <fr@reckot.com>\n"
-"Language: fr\n"
+"POT-Creation-Date: 2026-01-29 21:44+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: apps/checkin/actions.py:74
 msgid "Please enter a ticket code"
-msgstr "Veuillez entrer un code de billet"
+msgstr ""
 
 #: apps/core/actions.py:100
 msgid "Please enter a valid 6-digit code."
-msgstr "Veuillez entrer un code valide à 6 chiffres."
+msgstr ""
 
 #: apps/core/actions.py:110 apps/core/actions.py:233
 msgid "No verification code found. Please request a new one."
-msgstr "Aucun code de vérification trouvé. Veuillez en demander un nouveau."
+msgstr ""
 
 #: apps/core/actions.py:116
 msgid "Email verified successfully!"
-msgstr "E-mail vérifié avec succès !"
+msgstr ""
 
 #: apps/core/actions.py:119 apps/core/actions.py:239
 msgid "Code expired. Please request a new one."
-msgstr "Code expiré. Veuillez en demander un nouveau."
+msgstr ""
 
 #: apps/core/actions.py:121 apps/core/actions.py:242
 msgid "Too many attempts. Please request a new code."
-msgstr "Trop de tentatives. Veuillez demander un nouveau code."
+msgstr ""
 
 #: apps/core/actions.py:123 apps/core/actions.py:252
 msgid "Invalid code. Please try again."
-msgstr "Code invalide. Veuillez réessayer."
+msgstr ""
 
 #: apps/core/actions.py:131
 msgid "Email already verified"
-msgstr "E-mail déjà vérifié"
+msgstr ""
 
 #: apps/core/actions.py:138
 msgid "Failed to send code. Please try again."
-msgstr "Échec de l'envoi du code. Veuillez réessayer."
+msgstr ""
 
 #: apps/core/actions.py:139
 msgid "New code sent to your email"
-msgstr "Nouveau code envoyé à votre e-mail"
+msgstr ""
 
 #: apps/core/actions.py:162
 msgid "Settings updated successfully."
-msgstr "Paramètres mis à jour avec succès."
+msgstr ""
 
 #: apps/core/actions.py:174 apps/core/actions.py:267
 msgid "Please enter a phone number"
-msgstr "Veuillez entrer un numéro de téléphone"
+msgstr ""
 
 #: apps/core/actions.py:182
 msgid "No account found with this phone number"
-msgstr "Aucun compte trouvé avec ce numéro de téléphone"
+msgstr ""
 
 #: apps/core/actions.py:197 apps/core/actions.py:289
 msgid "Verification code sent!"
-msgstr "Code de vérification envoyé !"
+msgstr ""
 
 #: apps/core/actions.py:213
 msgid "Phone number and code are required"
-msgstr "Le numéro de téléphone et le code sont requis"
+msgstr ""
 
 #: apps/core/actions.py:219
 msgid "Invalid phone number"
-msgstr "Numéro de téléphone invalide"
+msgstr ""
 
 #: apps/core/actions.py:249
 msgid "Logged in successfully!"
-msgstr "Connexion réussie !"
+msgstr ""
 
 #: apps/core/actions.py:274
 msgid "An account with this phone number already exists"
-msgstr "Un compte avec ce numéro de téléphone existe déjà"
+msgstr ""
 
 #: apps/core/actions.py:310
 msgid "Phone number mismatch. Please start over."
-msgstr "Numéro de téléphone incorrect. Veuillez recommencer."
+msgstr ""
 
 #: apps/core/actions.py:322
 msgid "Invalid verification code"
-msgstr "Code de vérification invalide"
+msgstr ""
 
 #: apps/core/actions.py:326
 msgid "Passwords do not match"
-msgstr "Les mots de passe ne correspondent pas"
+msgstr ""
 
 #: apps/core/actions.py:330
 msgid "Password must be at least 8 characters"
-msgstr "Le mot de passe doit contenir au moins 8 caractères"
+msgstr ""
 
 #: apps/core/actions.py:346
 msgid "Account created successfully!"
-msgstr "Compte créé avec succès !"
+msgstr ""
 
 #: apps/core/api/ai.py:26
 msgid "Title is required"
-msgstr "Le titre est requis"
+msgstr ""
 
 #: apps/core/api/ai.py:61
 msgid "Failed to generate description. Check API key."
-msgstr "Échec de la génération de la description. Vérifiez la clé API."
+msgstr ""
 
 #: apps/core/api/ai.py:75
 msgid "Description required"
-msgstr "Description requise"
+msgstr ""
 
 #: apps/core/api/ai.py:81
 msgid "Failed to improve description"
-msgstr "Échec de l'amélioration de la description"
+msgstr ""
 
 #: apps/core/api/ai.py:96 apps/core/api/ai.py:118 apps/core/api/ai.py:200
 msgid "Title required"
-msgstr "Titre requis"
+msgstr ""
 
 #: apps/core/api/ai.py:102
 msgid "Failed to generate SEO metadata"
-msgstr "Échec de la génération des métadonnées SEO"
+msgstr ""
 
 #: apps/core/api/ai.py:124
 msgid "Failed to generate caption"
-msgstr "Échec de la génération de la légende"
+msgstr ""
 
 #: apps/core/api/ai.py:139 apps/core/api/ai.py:160
 msgid "Text required"
-msgstr "Texte requis"
+msgstr ""
 
 #: apps/core/api/ai.py:145
 msgid "Failed to translate"
-msgstr "Échec de la traduction"
+msgstr ""
 
 #: apps/core/api/ai.py:166
 msgid "Failed to summarize"
-msgstr "Échec du résumé"
+msgstr ""
 
 #: apps/core/api/ai.py:185
 msgid "Failed to suggest pricing"
-msgstr "Échec de la suggestion de tarification"
+msgstr ""
 
 #: apps/core/api/ai.py:206
 msgid "Failed to suggest tags"
-msgstr "Échec de la suggestion de tags"
+msgstr ""
 
 #: apps/core/api/ai.py:220
 msgid "Question required"
-msgstr "Question requise"
+msgstr ""
 
 #: apps/core/api/ai.py:226
 msgid "Failed to get answer"
-msgstr "Échec de l'obtention de la réponse"
+msgstr ""
 
 #: apps/core/api/ai.py:240
 msgid "Metrics required"
-msgstr "Métriques requises"
+msgstr ""
 
 #: apps/core/api/ai.py:246
 msgid "Failed to generate insight"
-msgstr "Échec de la génération de l'analyse"
+msgstr ""
 
 #: apps/core/models.py:23
 msgid "Email Verification"
-msgstr "Vérification de l'e-mail"
+msgstr ""
 
 #: apps/core/models.py:24
 msgid "Phone Verification"
-msgstr "Vérification du téléphone"
+msgstr ""
 
 #: apps/core/models.py:25
 msgid "Password Reset"
-msgstr "Réinitialisation du mot de passe"
+msgstr ""
 
 #: apps/events/actions.py:98
 msgid "Sales ended"
-msgstr "Ventes terminées"
+msgstr ""
 
 #: apps/events/actions.py:101
 msgid "Sold out"
-msgstr "Épuisé"
+msgstr ""
 
 #: apps/events/actions.py:181
 #, python-format
 msgid "Event \"%(title)s\" created successfully!"
-msgstr "Événement \"%(title)s\" créé avec succès !"
+msgstr ""
 
 #: apps/events/actions.py:185
 msgid "Failed to create event. Please check the errors below."
-msgstr "Échec de la création de l'événement. Veuillez vérifier les erreurs ci-dessous."
+msgstr ""
 
 #: apps/events/actions.py:241
 msgid "Cannot delete ticket type with existing tickets"
-msgstr "Impossible de supprimer un type de billet avec des billets existants"
+msgstr ""
 
 #: apps/events/actions.py:461
 msgid "A coupon with this code already exists in this organization."
-msgstr "Un coupon avec ce code existe déjà dans cette organisation."
+msgstr ""
 
 #: apps/events/actions.py:539
 msgid "Please enter a coupon code"
-msgstr "Veuillez entrer un code de coupon"
+msgstr ""
 
 #: apps/events/actions.py:547
 msgid "Invalid coupon code"
-msgstr "Code de coupon invalide"
+msgstr ""
 
 #: apps/events/actions.py:550
 msgid "This coupon is no longer valid"
-msgstr "Ce coupon n'est plus valide"
+msgstr ""
 
 #: apps/events/actions.py:553
 msgid "This coupon cannot be used with your email"
-msgstr "Ce coupon ne peut pas être utilisé avec votre e-mail"
+msgstr ""
 
 #: apps/events/actions.py:612
 msgid "Flyer generation not enabled"
-msgstr "Génération de flyer non activée"
+msgstr ""
 
 #: apps/events/actions.py:614
 msgid "Flyer not configured"
-msgstr "Flyer non configuré"
+msgstr ""
 
 #: apps/events/forms.py:41
 msgid "At least one contact method (email or phone) is required."
-msgstr "Au moins une méthode de contact (e-mail ou téléphone) est requise."
+msgstr ""
 
 #: apps/events/forms.py:45
 msgid "Location is required for in-person and hybrid events."
-msgstr "Le lieu est requis pour les événements en personne et hybrides."
+msgstr ""
 
 #: apps/events/forms.py:54
 msgid "Leave empty to start sales immediately"
-msgstr "Laisser vide pour démarrer les ventes immédiatement"
+msgstr ""
 
 #: apps/events/forms.py:59
 msgid "Leave empty for no end date"
-msgstr "Laisser vide pour aucune date de fin"
+msgstr ""
 
 #: apps/events/forms.py:72
 msgid "Sales end date must be after sales start date."
-msgstr "La date de fin des ventes doit être après la date de début des ventes."
+msgstr ""
 
 #: apps/events/models.py:10 apps/messaging/models.py:41
 #: templates/events/event_dashboard.html:29
@@ -261,76 +262,77 @@ msgstr "La date de fin des ventes doit être après la date de début des ventes
 #: templates/messaging/campaign_list.html:62 templates/orgs/detail.html:111
 #: templates/reports/analytics.html:190 templates/reports/analytics.html:263
 msgid "Draft"
-msgstr "Brouillon"
+msgstr ""
 
 #: apps/events/models.py:11 templates/events/event_dashboard.html:225
 #: templates/orgs/detail.html:109
 msgid "Published"
-msgstr "Publié"
+msgstr ""
 
 #: apps/events/models.py:12
 msgid "Closed"
-msgstr "Fermé"
+msgstr ""
 
 #: apps/events/models.py:13
 msgid "Archived"
-msgstr "Archivé"
+msgstr ""
 
 #: apps/events/models.py:16 templates/events/create_event.html:323
 #: templates/events/edit_event.html:302
 msgid "In Person"
-msgstr "En personne"
+msgstr ""
 
 #: apps/events/models.py:17 templates/events/create_event.html:324
 #: templates/events/edit_event.html:303
 msgid "Online"
-msgstr "En ligne"
+msgstr ""
 
 #: apps/events/models.py:18 templates/events/create_event.html:325
 #: templates/events/edit_event.html:304
 msgid "Hybrid"
-msgstr "Hybride"
+msgstr ""
 
 #: apps/events/models.py:88 templates/events/customization.html:138
 msgid "Default"
-msgstr "Par défaut"
+msgstr ""
 
 #: apps/events/models.py:89 templates/events/customization.html:139
 msgid "Minimal"
-msgstr "Minimal"
+msgstr ""
 
 #: apps/events/models.py:90 templates/events/customization.html:140
 msgid "Full Width"
-msgstr "Pleine largeur"
+msgstr ""
 
 #: apps/events/models.py:91 templates/events/customization.html:141
 msgid "Centered"
-msgstr "Centré"
+msgstr ""
 
 #: apps/events/models.py:115 templates/events/checkout_questions.html:48
 msgid "Text"
-msgstr "Texte"
+msgstr ""
 
 #: apps/events/models.py:116 templates/events/checkout_questions.html:49
 msgid "Long Text"
-msgstr "Texte long"
+msgstr ""
 
 #: apps/events/models.py:117 templates/events/checkout_questions.html:50
 msgid "Dropdown"
-msgstr "Liste déroulante"
+msgstr ""
 
 #: apps/events/models.py:118 templates/events/checkout_questions.html:51
 msgid "Radio Buttons"
-msgstr "Boutons radio"
+msgstr ""
 
 #: apps/events/models.py:119 templates/events/checkout_questions.html:52
 msgid "Checkbox"
-msgstr "Case à cocher"
+msgstr ""
 
 #: apps/events/models.py:120 apps/marketing/models.py:108
 #: apps/messaging/models.py:12 templates/account/login.html:55
 #: templates/account/login.html:78 templates/account/signup.html:56
-#: templates/account/signup.html:71 templates/events/checkout_questions.html:53
+#: templates/account/signup.html:71 templates/ai/tickets/create.html:32
+#: templates/events/checkout_questions.html:53
 #: templates/events/create_event.html:392 templates/events/edit_event.html:379
 #: templates/messaging/campaign_create.html:43
 #: templates/messaging/template_create.html:38
@@ -338,14 +340,14 @@ msgstr "Case à cocher"
 #: templates/reports/pdf/attendees.html:20
 #: templates/reports/pdf/checkins.html:20
 msgid "Email"
-msgstr "E-mail"
+msgstr ""
 
 #: apps/events/models.py:121 templates/account/login.html:122
 #: templates/account/signup.html:77 templates/account/signup.html:112
 #: templates/events/checkout_questions.html:54
 #: templates/payments/select_method.html:82
 msgid "Phone Number"
-msgstr "Numéro de téléphone"
+msgstr ""
 
 #: apps/events/models.py:122 templates/events/checkout_questions.html:55
 #: templates/events/coupons/detail.html:193
@@ -356,61 +358,61 @@ msgstr "Numéro de téléphone"
 #: templates/tickets/pdf/booking_tickets.html:22
 #: templates/tickets/pdf/ticket.html:20
 msgid "Date"
-msgstr "Date"
+msgstr ""
 
 #: apps/events/models.py:123 templates/events/checkout_questions.html:56
 msgid "Number"
-msgstr "Nombre"
+msgstr ""
 
 #: apps/events/models.py:146 apps/marketing/models.py:13
 #: apps/payments/models.py:36 templates/events/coupons/create.html:141
 #: templates/events/coupons/create.html:143
 msgid "Percentage"
-msgstr "Pourcentage"
+msgstr ""
 
 #: apps/events/models.py:147 apps/marketing/models.py:12
 #: apps/payments/models.py:35 templates/events/coupons/create.html:146
 #: templates/events/coupons/create.html:148
 msgid "Fixed Amount"
-msgstr "Montant fixe"
+msgstr ""
 
 #: apps/events/models.py:150
 msgid "Public (Anyone)"
-msgstr "Public (Tout le monde)"
+msgstr ""
 
 #: apps/events/models.py:151
 msgid "Assigned to Individual"
-msgstr "Attribué à un individu"
+msgstr ""
 
 #: apps/events/models.py:152
 msgid "Assigned to Group"
-msgstr "Attribué à un groupe"
+msgstr ""
 
 #: apps/events/models.py:267 templates/events/flyer_config.html:259
 #: templates/events/flyer_config.html:266
 msgid "Circle"
-msgstr "Cercle"
+msgstr ""
 
 #: apps/events/models.py:268 templates/events/flyer_config.html:259
 #: templates/events/flyer_config.html:271
 msgid "Square"
-msgstr "Carré"
+msgstr ""
 
 #: apps/events/models.py:269
 msgid "Rounded Rectangle"
-msgstr "Rectangle arrondi"
+msgstr ""
 
 #: apps/events/models.py:296 templates/events/flyer_config.html:352
 msgid "Left"
-msgstr "Gauche"
+msgstr ""
 
 #: apps/events/models.py:297 templates/events/flyer_config.html:355
 msgid "Center"
-msgstr "Centre"
+msgstr ""
 
 #: apps/events/models.py:298 templates/events/flyer_config.html:358
 msgid "Right"
-msgstr "Droite"
+msgstr ""
 
 #: apps/events/models.py:338 apps/marketing/models.py:69
 #: apps/messaging/models.py:106 apps/orgs/models.py:192
@@ -423,88 +425,88 @@ msgstr "Droite"
 #: templates/reports/_live_stats.html:51 templates/reports/dashboard.html:106
 #: templates/tickets/list.html:41 templates/tickets/list.html:83
 msgid "Pending"
-msgstr "En attente"
+msgstr ""
 
 #: apps/events/models.py:339
 msgid "Invoiced"
-msgstr "Facturé"
+msgstr ""
 
 #: apps/events/models.py:340 apps/marketing/models.py:71
 msgid "Paid"
-msgstr "Payé"
+msgstr ""
 
 #: apps/marketing/models.py:70 apps/payments/models.py:189
 #: templates/payments/refunds/list.html:34
 #: templates/payments/refunds/list.html:62
 msgid "Approved"
-msgstr "Approuvé"
+msgstr ""
 
 #: apps/marketing/models.py:72 apps/payments/models.py:154
 #: apps/payments/models.py:191 templates/payments/refunds/list.html:66
 #: templates/payments/refunds/process.html:36
 msgid "Rejected"
-msgstr "Rejeté"
+msgstr ""
 
 #: apps/marketing/models.py:103
 msgid "Facebook"
-msgstr "Facebook"
+msgstr ""
 
 #: apps/marketing/models.py:104
 msgid "Twitter/X"
-msgstr "Twitter/X"
+msgstr ""
 
 #: apps/marketing/models.py:105
 msgid "LinkedIn"
-msgstr "LinkedIn"
+msgstr ""
 
 #: apps/marketing/models.py:106
 msgid "WhatsApp"
-msgstr "WhatsApp"
+msgstr ""
 
 #: apps/marketing/models.py:107
 msgid "Telegram"
-msgstr "Telegram"
+msgstr ""
 
 #: apps/marketing/models.py:109
 msgid "Copy Link"
-msgstr "Copier le lien"
+msgstr ""
 
 #: apps/messaging/actions.py:60 apps/messaging/actions.py:88
 msgid "Campaign is being sent."
-msgstr "La campagne est en cours d'envoi."
+msgstr ""
 
 #: apps/messaging/actions.py:62
 msgid "Campaign saved as draft."
-msgstr "Campagne enregistrée comme brouillon."
+msgstr ""
 
 #: apps/messaging/actions.py:90
 msgid "Campaign cannot be sent."
-msgstr "La campagne ne peut pas être envoyée."
+msgstr ""
 
 #: apps/messaging/actions.py:125
 msgid "Template created."
-msgstr "Modèle créé."
+msgstr ""
 
 #: apps/messaging/models.py:13 templates/messaging/campaign_create.html:49
 #: templates/messaging/template_create.html:44
 msgid "SMS"
-msgstr "SMS"
+msgstr ""
 
 #: apps/messaging/models.py:42 templates/messaging/campaign_detail.html:87
 #: templates/messaging/campaign_list.html:64
 msgid "Scheduled"
-msgstr "Planifié"
+msgstr ""
 
 #: apps/messaging/models.py:43 templates/messaging/campaign_detail.html:89
 #: templates/messaging/campaign_list.html:66
 msgid "Sending"
-msgstr "En cours d'envoi"
+msgstr ""
 
 #: apps/messaging/models.py:44 templates/messaging/campaign_detail.html:91
 #: templates/messaging/campaign_list.html:68
 #: templates/reports/analytics.html:258
 msgid "Completed"
-msgstr "Terminé"
+msgstr ""
 
 #: apps/messaging/models.py:45 apps/messaging/models.py:112
 #: apps/payments/models.py:82 templates/messaging/campaign_detail.html:68
@@ -513,266 +515,269 @@ msgstr "Terminé"
 #: templates/messaging/campaign_list.html:70
 #: templates/messaging/campaign_list.html:99 templates/payments/list.html:93
 msgid "Failed"
-msgstr "Échoué"
+msgstr ""
 
 #: apps/messaging/models.py:48 templates/messaging/campaign_create.html:65
 msgid "All Attendees"
-msgstr "Tous les participants"
+msgstr ""
 
 #: apps/messaging/models.py:49
 msgid "By Ticket Type"
-msgstr "Par type de billet"
+msgstr ""
 
 #: apps/messaging/models.py:50 templates/messaging/campaign_create.html:67
 msgid "Checked In Only"
-msgstr "Enregistrés uniquement"
+msgstr ""
 
 #: apps/messaging/models.py:51 templates/messaging/campaign_create.html:68
 msgid "Not Checked In"
-msgstr "Non enregistrés"
+msgstr ""
 
 #: apps/messaging/models.py:107 templates/messaging/campaign_detail.html:46
 #: templates/messaging/campaign_detail.html:111
 #: templates/messaging/campaign_detail.html:162
 #: templates/messaging/campaign_list.html:84
 msgid "Sent"
-msgstr "Envoyé"
+msgstr ""
 
 #: apps/messaging/models.py:108 templates/messaging/campaign_detail.html:164
 #: templates/messaging/campaign_list.html:91
 msgid "Delivered"
-msgstr "Livré"
+msgstr ""
 
 #: apps/messaging/models.py:109 templates/messaging/campaign_detail.html:57
 #: templates/messaging/campaign_detail.html:166
 #: templates/messaging/campaign_list.html:95
 msgid "Opened"
-msgstr "Ouvert"
+msgstr ""
 
 #: apps/messaging/models.py:110 templates/messaging/campaign_detail.html:168
 msgid "Clicked"
-msgstr "Cliqué"
+msgstr ""
 
 #: apps/messaging/models.py:111 templates/messaging/campaign_detail.html:170
 msgid "Bounced"
-msgstr "Rejeté"
+msgstr ""
 
 #: apps/orgs/actions.py:36
 msgid "You don't have permission to perform this action."
-msgstr "Vous n'avez pas la permission d'effectuer cette action."
+msgstr ""
 
 #: apps/orgs/actions.py:67 apps/orgs/actions.py:450
 msgid "Organization name is required."
-msgstr "Le nom de l'organisation est requis."
+msgstr ""
 
 #: apps/orgs/actions.py:88
 #, python-format
 msgid "Organization \"%(name)s\" created successfully!"
-msgstr "Organisation \"%(name)s\" créée avec succès !"
+msgstr ""
 
 #: apps/orgs/actions.py:94
 #, python-format
 msgid "Failed to create organization: %(error)s"
-msgstr "Échec de la création de l'organisation : %(error)s"
+msgstr ""
 
 #: apps/orgs/actions.py:172
 msgid "Email is required."
-msgstr "L'e-mail est requis."
+msgstr ""
 
 #: apps/orgs/actions.py:176
 msgid "Cannot invite someone as Owner."
-msgstr "Impossible d'inviter quelqu'un en tant que Propriétaire."
+msgstr ""
 
 #: apps/orgs/actions.py:181
 #, python-format
 msgid "%(email)s is already a member of this organization."
-msgstr "%(email)s est déjà membre de cette organisation."
+msgstr ""
 
 #: apps/orgs/actions.py:191
 #, python-format
 msgid "An invitation has already been sent to %(email)s."
-msgstr "Une invitation a déjà été envoyée à %(email)s."
+msgstr ""
 
 #: apps/orgs/actions.py:223
 #, python-format
 msgid "Invitation sent to %(email)s."
-msgstr "Invitation envoyée à %(email)s."
+msgstr ""
 
 #: apps/orgs/actions.py:235
 msgid "Invalid role."
-msgstr "Rôle invalide."
+msgstr ""
 
 #: apps/orgs/actions.py:245
 msgid "Cannot change the role of the organization owner."
-msgstr "Impossible de changer le rôle du propriétaire de l'organisation."
+msgstr ""
 
 #: apps/orgs/actions.py:249
 msgid "Cannot assign Owner role. Transfer ownership instead."
-msgstr "Impossible d'attribuer le rôle de Propriétaire. Transférez la propriété à la place."
+msgstr ""
 
 #: apps/orgs/actions.py:255
 #, python-format
 msgid "Updated %(email)s's role to %(role)s."
-msgstr "Rôle de %(email)s mis à jour vers %(role)s."
+msgstr ""
 
 #: apps/orgs/actions.py:272
 msgid "Cannot remove the organization owner."
-msgstr "Impossible de supprimer le propriétaire de l'organisation."
+msgstr ""
 
 #: apps/orgs/actions.py:276
 msgid "You cannot remove yourself. Leave the organization instead."
-msgstr "Vous ne pouvez pas vous supprimer vous-même. Quittez l'organisation à la place."
+msgstr ""
 
 #: apps/orgs/actions.py:282
 #, python-format
 msgid "Removed %(email)s from the organization."
-msgstr "%(email)s a été supprimé de l'organisation."
+msgstr ""
 
 #: apps/orgs/actions.py:291
 msgid ""
 "As the owner, you cannot leave the organization. Transfer ownership first."
-msgstr "En tant que propriétaire, vous ne pouvez pas quitter l'organisation. Transférez d'abord la propriété."
+msgstr ""
 
 #: apps/orgs/actions.py:301
 #, python-format
 msgid "You have left %(name)s."
-msgstr "Vous avez quitté %(name)s."
+msgstr ""
 
 #: apps/orgs/actions.py:320
 #, python-format
 msgid "Cancelled invitation to %(email)s."
-msgstr "Invitation annulée pour %(email)s."
+msgstr ""
 
 #: apps/orgs/actions.py:354
 #, python-format
 msgid "Invitation resent to %(email)s."
-msgstr "Invitation renvoyée à %(email)s."
+msgstr ""
 
 #: apps/orgs/actions.py:356
 msgid "Failed to resend invitation."
-msgstr "Échec du renvoi de l'invitation."
+msgstr ""
 
 #: apps/orgs/actions.py:367
 msgid "This invitation has already been used or cancelled."
-msgstr "Cette invitation a déjà été utilisée ou annulée."
+msgstr ""
 
 #: apps/orgs/actions.py:374
 msgid "This invitation has expired."
-msgstr "Cette invitation a expiré."
+msgstr ""
 
 #: apps/orgs/actions.py:386
 msgid "This invitation is no longer valid."
-msgstr "Cette invitation n'est plus valide."
+msgstr ""
 
 #: apps/orgs/actions.py:392
 #, python-format
 msgid "Welcome to %(name)s!"
-msgstr "Bienvenue chez %(name)s !"
+msgstr ""
 
 #: apps/orgs/actions.py:396
 msgid "Failed to accept invitation."
-msgstr "Échec de l'acceptation de l'invitation."
+msgstr ""
 
 #: apps/orgs/actions.py:406
 msgid "Please select a new owner."
-msgstr "Veuillez sélectionner un nouveau propriétaire."
+msgstr ""
 
 #: apps/orgs/actions.py:428
 #, python-format
 msgid "Ownership transferred to %(email)s."
-msgstr "Propriété transférée à %(email)s."
+msgstr ""
 
 #: apps/orgs/actions.py:465
 msgid "Organization updated successfully!"
-msgstr "Organisation mise à jour avec succès !"
+msgstr ""
 
 #: apps/orgs/actions.py:485
 msgid "Cannot invite users as Owner."
-msgstr "Impossible d'inviter des utilisateurs en tant que Propriétaire."
+msgstr ""
 
 #: apps/orgs/actions.py:503
 msgid "Failed to parse CSV file."
-msgstr "Échec de l'analyse du fichier CSV."
+msgstr ""
 
 #: apps/orgs/actions.py:513
 msgid "No valid emails found."
-msgstr "Aucun e-mail valide trouvé."
+msgstr ""
 
 #: apps/orgs/actions.py:565
 #, python-format
 msgid "Sent %(count)d invitation(s)."
-msgstr "%(count)d invitation(s) envoyée(s)."
+msgstr ""
 
 #: apps/orgs/actions.py:567
 #, python-format
 msgid "Skipped %(count)d existing member(s) or pending invitation(s)."
-msgstr "%(count)d membre(s) existant(s) ou invitation(s) en attente ignoré(s)."
+msgstr ""
 
 #: apps/orgs/models.py:97 templates/orgs/detail.html:156
 #: templates/orgs/members.html:62 templates/orgs/members.html:176
 msgid "Owner"
-msgstr "Propriétaire"
+msgstr ""
 
 #: apps/orgs/models.py:98 templates/orgs/detail.html:158
 #: templates/orgs/invite_member.html:62 templates/orgs/members.html:64
 #: templates/orgs/members.html:177
 msgid "Admin"
-msgstr "Administrateur"
+msgstr ""
 
 #: apps/orgs/models.py:99 templates/orgs/detail.html:160
 #: templates/orgs/invite_member.html:66 templates/orgs/members.html:66
 #: templates/orgs/members.html:178
 msgid "Manager"
-msgstr "Gestionnaire"
+msgstr ""
 
 #: apps/orgs/models.py:100 templates/orgs/detail.html:162
 #: templates/orgs/invite_member.html:38 templates/orgs/invite_member.html:70
 #: templates/orgs/members.html:68 templates/orgs/members.html:179
 msgid "Member"
-msgstr "Membre"
+msgstr ""
 
 #: apps/orgs/models.py:101 templates/orgs/detail.html:164
 #: templates/orgs/invite_member.html:74 templates/orgs/members.html:70
 #: templates/orgs/members.html:180
 msgid "Viewer"
-msgstr "Observateur"
+msgstr ""
 
 #: apps/orgs/models.py:193
 msgid "Accepted"
-msgstr "Accepté"
+msgstr ""
 
 #: apps/orgs/models.py:194
 msgid "Declined"
-msgstr "Refusé"
+msgstr ""
 
 #: apps/orgs/models.py:195 apps/orgs/models.py:320 apps/payments/models.py:83
 #: templates/payments/list.html:95
 msgid "Expired"
-msgstr "Expiré"
+msgstr ""
 
 #: apps/orgs/models.py:196 apps/orgs/models.py:319 apps/tickets/models.py:61
 msgid "Cancelled"
-msgstr "Annulé"
+msgstr ""
 
 #: apps/orgs/models.py:204
 msgid "Optional message to include in invitation email"
-msgstr "Message optionnel à inclure dans l'e-mail d'invitation"
+msgstr ""
 
 #: apps/orgs/models.py:265
+#, python-format
 msgid "Free (2% fee)"
-msgstr "Gratuit (2%% de frais)"
+msgstr ""
 
 #: apps/orgs/models.py:266
+#, python-format
 msgid "Starter (5% fee)"
-msgstr "Débutant (5%% de frais)"
+msgstr ""
 
 #: apps/orgs/models.py:267
+#, python-format
 msgid "Pro (3% fee)"
-msgstr "Pro (3%% de frais)"
+msgstr ""
 
 #: apps/orgs/models.py:268
 msgid "Enterprise (Custom)"
-msgstr "Entreprise (Personnalisé)"
+msgstr ""
 
 #: apps/orgs/models.py:317 templates/events/coupons/detail.html:59
 #: templates/events/coupons/list.html:43 templates/events/coupons/list.html:103
@@ -781,438 +786,438 @@ msgstr "Entreprise (Personnalisé)"
 #: templates/events/manage_ticket_types.html:92
 #: templates/events/manage_ticket_types.html:178
 msgid "Active"
-msgstr "Actif"
+msgstr ""
 
 #: apps/orgs/models.py:318
 msgid "Past Due"
-msgstr "En retard"
+msgstr ""
 
 #: apps/payments/actions.py:30
 msgid "Invalid event."
-msgstr "Événement invalide."
+msgstr ""
 
 #: apps/payments/actions.py:55
 msgid "Please select at least one ticket."
-msgstr "Veuillez sélectionner au moins un billet."
+msgstr ""
 
 #: apps/payments/actions.py:87
 msgid "Please enter your email address."
-msgstr "Veuillez entrer votre adresse e-mail."
+msgstr ""
 
 #: apps/payments/actions.py:93
 msgid "Please enter your name."
-msgstr "Veuillez entrer votre nom."
+msgstr ""
 
 #: apps/payments/actions.py:191 apps/payments/actions.py:215
 msgid "Booking not found."
-msgstr "Réservation non trouvée."
+msgstr ""
 
 #: apps/payments/actions.py:220
 msgid "Please select a payment method and enter your phone number"
-msgstr "Veuillez sélectionner un mode de paiement et entrer votre numéro de téléphone"
+msgstr ""
 
 #: apps/payments/actions.py:225
 msgid "Payment initiation failed"
-msgstr "Échec de l'initiation du paiement"
+msgstr ""
 
 #: apps/payments/actions.py:254 apps/payments/actions.py:270
 #: apps/payments/actions.py:390
 msgid "Payment not found."
-msgstr "Paiement non trouvé."
+msgstr ""
 
 #: apps/payments/actions.py:393
 msgid "Invoice not available for unpaid orders."
-msgstr "Facture non disponible pour les commandes impayées."
+msgstr ""
 
 #: apps/payments/actions.py:403
 msgid "Failed to generate invoice."
-msgstr "Échec de la génération de la facture."
+msgstr ""
 
 #: apps/payments/actions.py:458
 msgid "A refund request already exists for this payment."
-msgstr "Une demande de remboursement existe déjà pour ce paiement."
+msgstr ""
 
 #: apps/payments/actions.py:473
 msgid "Refund request submitted successfully."
-msgstr "Demande de remboursement soumise avec succès."
+msgstr ""
 
 #: apps/payments/actions.py:497
 msgid "Refund approved."
-msgstr "Remboursement approuvé."
+msgstr ""
 
 #: apps/payments/actions.py:500
 msgid "Refund marked as processed."
-msgstr "Remboursement marqué comme traité."
+msgstr ""
 
 #: apps/payments/actions.py:504
 msgid "Refund rejected."
-msgstr "Remboursement rejeté."
+msgstr ""
 
 #: apps/payments/models.py:12
 msgid "Central African CFA Franc"
-msgstr "Franc CFA d'Afrique centrale"
+msgstr ""
 
 #: apps/payments/models.py:13
 msgid "West African CFA Franc"
-msgstr "Franc CFA d'Afrique de l'Ouest"
+msgstr ""
 
 #: apps/payments/models.py:14
 msgid "US Dollar"
-msgstr "Dollar américain"
+msgstr ""
 
 #: apps/payments/models.py:15
 msgid "Euro"
-msgstr "Euro"
+msgstr ""
 
 #: apps/payments/models.py:16
 msgid "British Pound"
-msgstr "Livre sterling"
+msgstr ""
 
 #: apps/payments/models.py:17
 msgid "Nigerian Naira"
-msgstr "Naira nigérian"
+msgstr ""
 
 #: apps/payments/models.py:18
 msgid "Ghanaian Cedi"
-msgstr "Cedi ghanéen"
+msgstr ""
 
 #: apps/payments/models.py:19
 msgid "Ugandan Shilling"
-msgstr "Shilling ougandais"
+msgstr ""
 
 #: apps/payments/models.py:23
 msgid "Campay"
-msgstr "Campay"
+msgstr ""
 
 #: apps/payments/models.py:24
 msgid "PawaPay"
-msgstr "PawaPay"
+msgstr ""
 
 #: apps/payments/models.py:25
 msgid "Flutterwave"
-msgstr "Flutterwave"
+msgstr ""
 
 #: apps/payments/models.py:26
 msgid "MTN Mobile Money"
-msgstr "MTN Mobile Money"
+msgstr ""
 
 #: apps/payments/models.py:27 templates/core/features.html:90
 #: templates/core/home.html:242
 msgid "Orange Money"
-msgstr "Orange Money"
+msgstr ""
 
 #: apps/payments/models.py:28
 msgid "Stripe"
-msgstr "Stripe"
+msgstr ""
 
 #: apps/payments/models.py:29
 msgid "PayPal"
-msgstr "PayPal"
+msgstr ""
 
 #: apps/payments/models.py:30
 msgid "Offline Payment"
-msgstr "Paiement hors ligne"
+msgstr ""
 
 #: apps/payments/models.py:37
 msgid "Fixed + Percentage"
-msgstr "Fixe + Pourcentage"
+msgstr ""
 
 #: apps/payments/models.py:81 apps/tickets/models.py:60
 #: templates/payments/list.html:34 templates/payments/list.html:89
 #: templates/tickets/list.html:81
 msgid "Confirmed"
-msgstr "Confirmé"
+msgstr ""
 
 #: apps/payments/models.py:152
 msgid "Pending Verification"
-msgstr "Vérification en attente"
+msgstr ""
 
 #: apps/payments/models.py:153 templates/account/email.html:31
 #: templates/core/settings.html:59
 msgid "Verified"
-msgstr "Vérifié"
+msgstr ""
 
 #: apps/payments/models.py:188 templates/payments/refunds/process.html:30
 msgid "Pending Review"
-msgstr "En attente d'examen"
+msgstr ""
 
 #: apps/payments/models.py:190 templates/payments/refunds/list.html:41
 #: templates/payments/refunds/list.html:64
 #: templates/payments/refunds/process.html:34
 msgid "Processed"
-msgstr "Traité"
+msgstr ""
 
 #: apps/payments/models.py:194 templates/payments/refunds/request.html:48
 msgid "Full Refund"
-msgstr "Remboursement complet"
+msgstr ""
 
 #: apps/payments/models.py:195 templates/payments/refunds/request.html:55
 msgid "Partial Refund"
-msgstr "Remboursement partiel"
+msgstr ""
 
 #: apps/reports/actions.py:305 apps/reports/actions.py:465
 msgid "Invalid report type"
-msgstr "Type de rapport invalide"
+msgstr ""
 
 #: apps/reports/actions.py:480
 #, python-format
 msgid "Export failed: %(error)s"
-msgstr "Échec de l'exportation : %(error)s"
+msgstr ""
 
 #: apps/reports/models.py:10 templates/reports/export_center.html:69
 #: templates/reports/pdf/attendees.html:5
 msgid "Registered Attendees"
-msgstr "Participants inscrits"
+msgstr ""
 
 #: apps/reports/models.py:11 templates/reports/export_center.html:93
 #: templates/reports/pdf/payments.html:5
 msgid "Payment Records"
-msgstr "Historique des paiements"
+msgstr ""
 
 #: apps/reports/models.py:12 templates/reports/export_center.html:105
 #: templates/reports/pdf/checkins.html:5
 msgid "Check-in Report"
-msgstr "Rapport d'enregistrement"
+msgstr ""
 
 #: apps/reports/models.py:13
 msgid "Swag Collection"
-msgstr "Collection de goodies"
+msgstr ""
 
 #: apps/reports/models.py:14 templates/reports/export_center.html:57
 msgid "Financial Summary"
-msgstr "Résumé financier"
+msgstr ""
 
 #: apps/reports/models.py:15 templates/reports/export_center.html:81
 msgid "Ticket Sales"
-msgstr "Ventes de billets"
+msgstr ""
 
 #: apps/reports/models.py:18
 msgid "CSV"
-msgstr "CSV"
+msgstr ""
 
 #: apps/reports/models.py:19 templates/reports/attendee_list.html:73
 msgid "Excel"
-msgstr "Excel"
+msgstr ""
 
 #: apps/reports/models.py:20 templates/reports/attendee_list.html:87
 msgid "PDF"
-msgstr "PDF"
+msgstr ""
 
 #: apps/reports/models.py:21
 msgid "JSON"
-msgstr "JSON"
+msgstr ""
 
 #: apps/tickets/models.py:59
 msgid "Pending Payment"
-msgstr "Paiement en attente"
+msgstr ""
 
 #: apps/tickets/models.py:62
 msgid "Refunded"
-msgstr "Remboursé"
+msgstr ""
 
 #: apps/widgets/actions.py:26
 msgid "Domain not allowed"
-msgstr "Domaine non autorisé"
+msgstr ""
 
 #: apps/widgets/models.py:9
 msgid "Light"
-msgstr "Clair"
+msgstr ""
 
 #: apps/widgets/models.py:10
 msgid "Dark"
-msgstr "Sombre"
+msgstr ""
 
 #: apps/widgets/models.py:11
 msgid "Auto (System)"
-msgstr "Auto (Système)"
+msgstr ""
 
 #: templates/account/account_inactive.html:5
 msgid "Account Inactive"
-msgstr "Compte inactif"
+msgstr ""
 
 #: templates/account/account_inactive.html:15
 msgid "Account inactive"
-msgstr "Compte inactif"
+msgstr ""
 
 #: templates/account/account_inactive.html:17
 msgid ""
 "Your account is currently inactive. This may be because your email hasn't "
 "been verified yet, or your account has been suspended."
-msgstr "Votre compte est actuellement inactif. Cela peut être dû au fait que votre e-mail n'a pas encore été vérifié, ou que votre compte a été suspendu."
+msgstr ""
 
 #: templates/account/account_inactive.html:24
 msgid "If you believe this is an error, please contact support at"
-msgstr "Si vous pensez qu'il s'agit d'une erreur, veuillez contacter le support à"
+msgstr ""
 
 #: templates/account/account_inactive.html:30
 #: templates/reports/_ai_insights.html:39
 msgid "Try again"
-msgstr "Réessayer"
+msgstr ""
 
 #: templates/account/email.html:6 templates/account/email.html:17
 msgid "Manage Email"
-msgstr "Gérer l'e-mail"
+msgstr ""
 
 #: templates/account/email.html:18
 msgid "Verify or change your email address"
-msgstr "Vérifier ou modifier votre adresse e-mail"
+msgstr ""
 
 #: templates/account/email.html:33
 msgid "Unverified"
-msgstr "Non vérifié"
+msgstr ""
 
 #: templates/account/email.html:36
 msgid "Primary"
-msgstr "Principal"
+msgstr ""
 
 #: templates/account/email.html:75
 msgid "Add Email Address"
-msgstr "Ajouter une adresse e-mail"
+msgstr ""
 
 #: templates/account/email.html:83
 msgid "Add Email"
-msgstr "Ajouter un e-mail"
+msgstr ""
 
 #: templates/account/email.html:93
 msgid "Back to Settings"
-msgstr "Retour aux paramètres"
+msgstr ""
 
 #: templates/account/email_confirm.html:6
 msgid "Confirm Email"
-msgstr "Confirmer l'e-mail"
+msgstr ""
 
 #: templates/account/email_confirm.html:17
 msgid "Confirm your email"
-msgstr "Confirmez votre e-mail"
+msgstr ""
 
 #: templates/account/email_confirm.html:19
 #, python-format
 msgid ""
 "Please confirm that <span class=\"font-medium text-"
 "foreground\">%(email_address)s</span> is your email address."
-msgstr "Veuillez confirmer que <span class=\"font-medium text-foreground\">%(email_address)s</span> est votre adresse e-mail."
+msgstr ""
 
 #: templates/account/email_confirm.html:26
 msgid "Confirm email"
-msgstr "Confirmer l'e-mail"
+msgstr ""
 
 #: templates/account/email_confirm.html:32
 msgid "Wrong email?"
-msgstr "Mauvais e-mail ?"
+msgstr ""
 
 #: templates/account/email_confirm.html:32
 msgid "Log in with a different account"
-msgstr "Se connecter avec un autre compte"
+msgstr ""
 
 #: templates/account/email_confirmed.html:5
 msgid "Email Confirmed"
-msgstr "E-mail confirmé"
+msgstr ""
 
 #: templates/account/email_confirmed.html:15
 msgid "Email confirmed"
-msgstr "E-mail confirmé"
+msgstr ""
 
 #: templates/account/email_confirmed.html:17
 msgid ""
 "Your email address has been verified. You now have full access to all Reckot "
 "features."
-msgstr "Votre adresse e-mail a été vérifiée. Vous avez maintenant accès à toutes les fonctionnalités de Reckot."
+msgstr ""
 
 #: templates/account/email_confirmed.html:23
 msgid "Get started"
-msgstr "Commencer"
+msgstr ""
 
 #: templates/account/login.html:7 templates/account/login.html:110
 msgid "Log In"
-msgstr "Connexion"
+msgstr ""
 
 #: templates/account/login.html:18
 msgid "Welcome back"
-msgstr "Bon retour"
+msgstr ""
 
 #: templates/account/login.html:19
 msgid "Log in to manage your events"
-msgstr "Connectez-vous pour gérer vos événements"
+msgstr ""
 
 #: templates/account/login.html:35 templates/account/signup.html:36
 msgid "Continue with Google"
-msgstr "Continuer avec Google"
+msgstr ""
 
 #: templates/account/login.html:43 templates/account/signup.html:44
 msgid "Or continue with"
-msgstr "Ou continuer avec"
+msgstr ""
 
 #: templates/account/login.html:61 templates/account/signup.html:62
 #: templates/events/create_event.html:398 templates/events/edit_event.html:386
 msgid "Phone"
-msgstr "Téléphone"
+msgstr ""
 
 #: templates/account/login.html:86 templates/account/signup.html:84
 #: templates/account/signup.html:145
 msgid "Password"
-msgstr "Mot de passe"
+msgstr ""
 
 #: templates/account/login.html:87
 msgid "Enter your password"
-msgstr "Entrez votre mot de passe"
+msgstr ""
 
 #: templates/account/login.html:104
 msgid "Remember me"
-msgstr "Se souvenir de moi"
+msgstr ""
 
 #: templates/account/login.html:106
 msgid "Forgot password?"
-msgstr "Mot de passe oublié ?"
+msgstr ""
 
 #: templates/account/login.html:124 templates/account/signup.html:114
 msgid "We'll send you a verification code"
-msgstr "Nous vous enverrons un code de vérification"
+msgstr ""
 
 #: templates/account/login.html:130 templates/account/signup.html:120
 msgid "Send Code"
-msgstr "Envoyer le code"
+msgstr ""
 
 #: templates/account/login.html:137 templates/account/signup.html:127
 msgid "Sending..."
-msgstr "Envoi en cours..."
+msgstr ""
 
 #: templates/account/login.html:147 templates/account/otp_verify.html:33
 #: templates/account/signup.html:138
 msgid "Verification Code"
-msgstr "Code de vérification"
+msgstr ""
 
 #: templates/account/login.html:148 templates/account/signup.html:139
 msgid "Enter 6-digit code"
-msgstr "Entrez le code à 6 chiffres"
+msgstr ""
 
 #: templates/account/login.html:153
 msgid "Verify & Log In"
-msgstr "Vérifier et se connecter"
+msgstr ""
 
 #: templates/account/login.html:158 templates/account/signup.html:159
 msgid "Change Phone Number"
-msgstr "Changer le numéro de téléphone"
+msgstr ""
 
 #: templates/account/login.html:164
 msgid "Don't have an account?"
-msgstr "Vous n'avez pas de compte ?"
+msgstr ""
 
 #: templates/account/login.html:164
 msgid "Sign up"
-msgstr "S'inscrire"
+msgstr ""
 
 #: templates/account/logout.html:6
 msgid "Log Out"
-msgstr "Déconnexion"
+msgstr ""
 
 #: templates/account/logout.html:17 templates/account/logout.html:35
 #: templates/partials/navigation.html:52 templates/partials/navigation.html:130
 msgid "Log out"
-msgstr "Se déconnecter"
+msgstr ""
 
 #: templates/account/logout.html:19
 msgid "Are you sure you want to log out of your account?"
-msgstr "Êtes-vous sûr de vouloir vous déconnecter de votre compte ?"
+msgstr ""
 
 #: templates/account/logout.html:31 templates/events/checkout_questions.html:81
 #: templates/events/coupons/create.html:234
@@ -1225,192 +1230,192 @@ msgstr "Êtes-vous sûr de vouloir vous déconnecter de votre compte ?"
 #: templates/orgs/bulk_invite.html:93 templates/orgs/create.html:105
 #: templates/orgs/edit.html:106 templates/payments/refunds/request.html:80
 msgid "Cancel"
-msgstr "Annuler"
+msgstr ""
 
 #: templates/account/otp_verify.html:6 templates/account/otp_verify.html:49
 msgid "Verify Email"
-msgstr "Vérifier l'e-mail"
+msgstr ""
 
 #: templates/account/otp_verify.html:17
 #: templates/account/verification_sent.html:15
 msgid "Verify your email"
-msgstr "Vérifiez votre e-mail"
+msgstr ""
 
 #: templates/account/otp_verify.html:18
 #, python-format
 msgid "Enter the 6-digit code sent to %(email)s"
-msgstr "Entrez le code à 6 chiffres envoyé à %(email)s"
+msgstr ""
 
 #: templates/account/otp_verify.html:52
 msgid "Verifying..."
-msgstr "Vérification en cours..."
+msgstr ""
 
 #: templates/account/otp_verify.html:58
 msgid "Didn't receive the code?"
-msgstr "Vous n'avez pas reçu le code ?"
+msgstr ""
 
 #: templates/account/otp_verify.html:78
 msgid "Failed to resend. Please try again."
-msgstr "Échec du renvoi. Veuillez réessayer."
+msgstr ""
 
 #: templates/account/otp_verify.html:83
 msgid "Resend code"
-msgstr "Renvoyer le code"
+msgstr ""
 
 #: templates/account/otp_verify.html:84
 msgid "Code sent! Wait 30s..."
-msgstr "Code envoyé ! Attendez 30s..."
+msgstr ""
 
 #: templates/account/password_change.html:6
 msgid "Change Password"
-msgstr "Changer le mot de passe"
+msgstr ""
 
 #: templates/account/password_change.html:17 templates/core/settings.html:225
 msgid "Change password"
-msgstr "Changer le mot de passe"
+msgstr ""
 
 #: templates/account/password_change.html:18 templates/core/settings.html:226
 msgid "Update your account password"
-msgstr "Mettre à jour le mot de passe de votre compte"
+msgstr ""
 
 #: templates/account/password_change.html:24
 msgid "Current password"
-msgstr "Mot de passe actuel"
+msgstr ""
 
 #: templates/account/password_change.html:25
 msgid "Enter current password"
-msgstr "Entrez le mot de passe actuel"
+msgstr ""
 
 #: templates/account/password_change.html:28
 #: templates/account/password_reset_from_key.html:38
 msgid "New password"
-msgstr "Nouveau mot de passe"
+msgstr ""
 
 #: templates/account/password_change.html:29
 #: templates/account/password_reset_from_key.html:39
 msgid "Create a new password"
-msgstr "Créer un nouveau mot de passe"
+msgstr ""
 
 #: templates/account/password_change.html:32
 #: templates/account/password_reset_from_key.html:42
 msgid "Confirm new password"
-msgstr "Confirmer le nouveau mot de passe"
+msgstr ""
 
 #: templates/account/password_change.html:33
 #: templates/account/password_reset_from_key.html:43
 msgid "Confirm your new password"
-msgstr "Confirmez votre nouveau mot de passe"
+msgstr ""
 
 #: templates/account/password_change.html:44
 #: templates/account/password_reset_from_key.html:54
 msgid "Password requirements:"
-msgstr "Exigences du mot de passe :"
+msgstr ""
 
 #: templates/account/password_change.html:48
 #: templates/account/password_reset_from_key.html:58
 msgid "At least 8 characters"
-msgstr "Au moins 8 caractères"
+msgstr ""
 
 #: templates/account/password_change.html:52
 #: templates/account/password_reset_from_key.html:62
 msgid "Not too similar to your email"
-msgstr "Pas trop similaire à votre e-mail"
+msgstr ""
 
 #: templates/account/password_change.html:56
 #: templates/account/password_reset_from_key.html:66
 msgid "Not a commonly used password"
-msgstr "Pas un mot de passe couramment utilisé"
+msgstr ""
 
 #: templates/account/password_change.html:62
 msgid "Update password"
-msgstr "Mettre à jour le mot de passe"
+msgstr ""
 
 #: templates/account/password_change.html:68
 msgid "Back to dashboard"
-msgstr "Retour au tableau de bord"
+msgstr ""
 
 #: templates/account/password_reset.html:6
 msgid "Reset Password"
-msgstr "Réinitialiser le mot de passe"
+msgstr ""
 
 #: templates/account/password_reset.html:17
 msgid "Reset your password"
-msgstr "Réinitialisez votre mot de passe"
+msgstr ""
 
 #: templates/account/password_reset.html:18
 msgid "Enter your email to receive a reset link"
-msgstr "Entrez votre e-mail pour recevoir un lien de réinitialisation"
+msgstr ""
 
 #: templates/account/password_reset.html:24 templates/core/settings.html:32
 #: templates/events/public_detail.html:319
 msgid "Email address"
-msgstr "Adresse e-mail"
+msgstr ""
 
 #: templates/account/password_reset.html:36
 msgid "Send reset link"
-msgstr "Envoyer le lien de réinitialisation"
+msgstr ""
 
 #: templates/account/password_reset.html:42
 msgid "Remember your password?"
-msgstr "Vous vous souvenez de votre mot de passe ?"
+msgstr ""
 
 #: templates/account/password_reset.html:42 templates/account/signup.html:165
 #: templates/partials/navigation.html:58 templates/partials/navigation.html:134
 msgid "Log in"
-msgstr "Se connecter"
+msgstr ""
 
 #: templates/account/password_reset_done.html:5
 msgid "Check Your Email"
-msgstr "Vérifiez votre e-mail"
+msgstr ""
 
 #: templates/account/password_reset_done.html:15
 msgid "Check your email"
-msgstr "Vérifiez votre e-mail"
+msgstr ""
 
 #: templates/account/password_reset_done.html:17
 msgid ""
 "We've sent a password reset link to your email address. Click the link in "
 "the email to reset your password."
-msgstr "Nous avons envoyé un lien de réinitialisation du mot de passe à votre adresse e-mail. Cliquez sur le lien dans l'e-mail pour réinitialiser votre mot de passe."
+msgstr ""
 
 #: templates/account/password_reset_done.html:24
 msgid ""
 "If you don't see the email, check your spam folder. The link expires in 24 "
 "hours."
-msgstr "Si vous ne voyez pas l'e-mail, vérifiez votre dossier spam. Le lien expire dans 24 heures."
+msgstr ""
 
 #: templates/account/password_reset_done.html:31
 msgid "Back to login"
-msgstr "Retour à la connexion"
+msgstr ""
 
 #: templates/account/password_reset_done.html:37
 msgid "Resend email"
-msgstr "Renvoyer l'e-mail"
+msgstr ""
 
 #: templates/account/password_reset_from_key.html:6
 msgid "Set New Password"
-msgstr "Définir un nouveau mot de passe"
+msgstr ""
 
 #: templates/account/password_reset_from_key.html:17
 msgid "Set new password"
-msgstr "Définir un nouveau mot de passe"
+msgstr ""
 
 #: templates/account/password_reset_from_key.html:18
 msgid "Create a strong password for your account"
-msgstr "Créez un mot de passe fort pour votre compte"
+msgstr ""
 
 #: templates/account/password_reset_from_key.html:25
 msgid ""
 "This password reset link is invalid or has expired. Please request a new one."
-msgstr "Ce lien de réinitialisation du mot de passe est invalide ou a expiré. Veuillez en demander un nouveau."
+msgstr ""
 
 #: templates/account/password_reset_from_key.html:30
 msgid "Request new link"
-msgstr "Demander un nouveau lien"
+msgstr ""
 
 #: templates/account/password_reset_from_key.html:72
 msgid "Reset password"
-msgstr "Réinitialiser le mot de passe"
+msgstr ""
 
 #: templates/account/password_reset_from_key_done.html:5
 msgid "Password Reset Complete"
@@ -1418,203 +1423,102 @@ msgstr ""
 
 #: templates/account/password_reset_from_key_done.html:15
 msgid "Password reset complete"
-msgstr "Réinitialisation du mot de passe terminée"
+msgstr ""
 
 #: templates/account/password_reset_from_key_done.html:17
 msgid ""
 "Your password has been successfully changed. You can now log in with your "
 "new password."
-msgstr "Votre mot de passe a été modifié avec succès. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe."
+msgstr ""
 
 #: templates/account/password_reset_from_key_done.html:23
 msgid "Log in now"
-msgstr "Se connecter maintenant"
+msgstr ""
 
 #: templates/account/signup.html:7
 msgid "Sign Up"
-msgstr "S'inscrire"
+msgstr ""
 
 #: templates/account/signup.html:18
 msgid "Create an organizer account"
-msgstr "Créer un compte organisateur"
+msgstr ""
 
 #: templates/account/signup.html:19
 msgid "Start creating and managing your events"
-msgstr "Commencez à créer et gérer vos événements"
+msgstr ""
 
 #: templates/account/signup.html:20
 msgid "No account needed to purchase tickets"
-msgstr "Aucun compte nécessaire pour acheter des billets"
+msgstr ""
 
 #: templates/account/signup.html:78
 msgid "(optional)"
-msgstr "(optionnel)"
+msgstr ""
 
 #: templates/account/signup.html:85 templates/account/signup.html:146
 msgid "Create a password"
-msgstr "Créer un mot de passe"
+msgstr ""
 
 #: templates/account/signup.html:88 templates/account/signup.html:149
 msgid "Confirm Password"
-msgstr "Confirmer le mot de passe"
+msgstr ""
 
 #: templates/account/signup.html:89 templates/account/signup.html:150
 msgid "Confirm your password"
-msgstr "Confirmez votre mot de passe"
+msgstr ""
 
 #: templates/account/signup.html:100 templates/account/signup.html:154
 msgid "Create Account"
-msgstr "Créer un compte"
+msgstr ""
 
 #: templates/account/signup.html:165
 msgid "Already have an account?"
-msgstr "Vous avez déjà un compte ?"
+msgstr ""
 
 #: templates/account/signup.html:169
 msgid "By signing up, you agree to our"
-msgstr "En vous inscrivant, vous acceptez nos"
+msgstr ""
 
 #: templates/account/signup.html:169 templates/base.html:138
 msgid "Terms"
-msgstr "Conditions"
+msgstr ""
 
 #: templates/account/signup.html:169
 msgid "and"
-msgstr "et"
+msgstr ""
 
 #: templates/account/signup.html:169 templates/core/privacy.html:5
 #: templates/core/privacy.html:16 templates/emails/base.html:277
 msgid "Privacy Policy"
-msgstr "Politique de confidentialité"
+msgstr ""
 
 #: templates/account/verification_sent.html:5
 msgid "Verify Your Email"
-msgstr "Vérifiez votre e-mail"
+msgstr ""
 
 #: templates/account/verification_sent.html:17
 msgid ""
 "We've sent a verification email to your address. Please click the link in "
 "the email to verify your account."
-msgstr "Nous avons envoyé un e-mail de vérification à votre adresse. Veuillez cliquer sur le lien dans l'e-mail pour vérifier votre compte."
+msgstr ""
 
 #: templates/account/verification_sent.html:24
 msgid ""
 "If you don't see the email, check your spam folder. You can also request a "
 "new verification email from your account settings."
-msgstr "Si vous ne voyez pas l'e-mail, vérifiez votre dossier spam. Vous pouvez également demander un nouvel e-mail de vérification depuis les paramètres de votre compte."
+msgstr ""
 
 #: templates/account/verification_sent.html:31
 msgid "Continue to Reckot"
-msgstr "Continuer vers Reckot"
+msgstr ""
 
-#: templates/base.html:118
-msgid "Modern event management for Africa."
-msgstr "Gestion d'événements moderne pour l'Afrique."
+#: templates/ai/assistant.html:5 templates/ai/assistant.html:12
+#: templates/ai/tickets/list.html:68
+msgid "AI Assistant"
+msgstr ""
 
-#: templates/base.html:121
-msgid "Product"
-msgstr "Produit"
-
-#: templates/base.html:123 templates/core/features.html:5
-#: templates/partials/navigation.html:15 templates/partials/navigation.html:112
-msgid "Features"
-msgstr "Fonctionnalités"
-
-#: templates/base.html:124 templates/partials/navigation.html:16
-#: templates/partials/navigation.html:116
-msgid "Pricing"
-msgstr "Tarifs"
-
-#: templates/base.html:125 templates/partials/navigation.html:17
-#: templates/partials/navigation.html:120
-msgid "Why Us"
-msgstr "Pourquoi nous"
-
-#: templates/base.html:129
-msgid "Company"
-msgstr "Entreprise"
-
-#: templates/base.html:131 templates/orgs/detail.html:79
-msgid "About"
-msgstr "À propos"
-
-#: templates/base.html:135
-msgid "Legal"
-msgstr "Mentions légales"
-
-#: templates/base.html:137
-msgid "Privacy"
-msgstr "Confidentialité"
-
-#: templates/base.html:143 templates/emails/base.html:273
-msgid "All rights reserved."
-msgstr "Tous droits réservés."
-
-#: templates/checkin/_checked_in_row.html:11
-#: templates/checkin/_search_results.html:15 templates/checkin/_stats.html:9
-#: templates/checkin/verify.html:77 templates/events/event_dashboard.html:105
-#: templates/reports/_live_stats.html:19 templates/reports/_summary.html:9
-#: templates/reports/attendee_list.html:129 templates/reports/dashboard.html:74
-#: templates/tickets/list.html:34 templates/tickets/list.html:79
-#: templates/tickets/my_tickets.html:62
-msgid "Checked In"
-msgstr "Enregistré"
-
-#: templates/checkin/_result_error.html:3
-msgid "Check-in Failed"
-msgstr "Échec de l'enregistrement"
-
-#: templates/checkin/_result_error.html:7
-msgid "Ticket:"
-msgstr "Billet :"
-
-#: templates/checkin/_result_error.html:9
-msgid "Checked in at:"
-msgstr "Enregistré à :"
-
-#: templates/checkin/_result_success.html:3
-msgid "Check-in Successful"
-msgstr "Enregistrement réussi"
-
-#: templates/checkin/_result_success.html:13
-msgid "Collect Swag"
-msgstr "Récupérer les goodies"
-
-#: templates/checkin/_result_success.html:25
-msgid "Collect"
-msgstr "Récupérer"
-
-#: templates/checkin/_search_results.html:24 templates/checkin/verify.html:62
-msgid "Check In"
-msgstr "Enregistrer"
-
-#: templates/checkin/_search_results.html:31
-msgid "No results found"
-msgstr "Aucun résultat trouvé"
-
-#: templates/checkin/_stats.html:5 templates/reports/_live_stats.html:6
-#: templates/reports/dashboard.html:61 templates/tickets/list.html:27
-msgid "Total Tickets"
-msgstr "Total des billets"
-
-#: templates/checkin/_stats.html:13 templates/checkin/verify.html:81
-#: templates/events/coupons/detail.html:87
-msgid "Remaining"
-msgstr "Restant"
-
-#: templates/checkin/_swag_collected.html:6
-msgid "Collected"
-msgstr "Collecté"
-
-#: templates/checkin/dashboard.html:4 templates/checkin/dashboard.html:15
-#: templates/checkin/list.html:10 templates/checkin/verify.html:16
-#: templates/core/features.html:212 templates/core/why_us.html:91
-#: templates/events/event_dashboard.html:150
-#: templates/events/event_detail.html:36 templates/events/list_events.html:78
-#: templates/layouts/dashboard.html:195 templates/reports/analytics.html:224
-msgid "Check-in"
-msgstr "Enregistrement"
-
+#: templates/ai/assistant.html:10 templates/ai/tickets/create.html:10
+#: templates/ai/tickets/detail.html:10 templates/ai/tickets/list.html:10
 #: templates/checkin/dashboard.html:9 templates/checkin/list.html:8
 #: templates/checkin/verify.html:10 templates/events/coupons/create.html:13
 #: templates/events/coupons/detail.html:9 templates/events/coupons/list.html:9
@@ -1633,7 +1537,302 @@ msgstr "Enregistrement"
 #: templates/reports/dashboard.html:10 templates/reports/export_center.html:11
 #: templates/tickets/list.html:9
 msgid "Home"
-msgstr "Accueil"
+msgstr ""
+
+#: templates/ai/assistant.html:23
+msgid "Reckot AI Assistant"
+msgstr ""
+
+#: templates/ai/assistant.html:24
+msgid "Powered by Google Gemini"
+msgstr ""
+
+#: templates/ai/assistant.html:38
+msgid "How can I help you today?"
+msgstr ""
+
+#: templates/ai/assistant.html:39
+msgid ""
+"Ask me about events, tickets, payments, or any issues you're experiencing."
+msgstr ""
+
+#: templates/ai/assistant.html:42
+msgid "How to create an event?"
+msgstr ""
+
+#: templates/ai/assistant.html:45
+msgid "Payment issue"
+msgstr ""
+
+#: templates/ai/assistant.html:48
+msgid "Check-in help"
+msgstr ""
+
+#: templates/ai/assistant.html:81
+msgid "Type your message..."
+msgstr ""
+
+#: templates/ai/assistant.html:91
+msgid "Can't resolve your issue?"
+msgstr ""
+
+#: templates/ai/assistant.html:93
+msgid "Create support ticket"
+msgstr ""
+
+#: templates/ai/assistant.html:125
+msgid "Sorry, something went wrong. Please try again."
+msgstr ""
+
+#: templates/ai/assistant.html:133
+msgid "Clear conversation history?"
+msgstr ""
+
+#: templates/ai/tickets/create.html:5 templates/ai/tickets/create.html:23
+msgid "Create Support Ticket"
+msgstr ""
+
+#: templates/ai/tickets/create.html:12 templates/ai/tickets/detail.html:12
+#: templates/ai/tickets/list.html:5 templates/ai/tickets/list.html:12
+msgid "Support Tickets"
+msgstr ""
+
+#: templates/ai/tickets/create.html:14 templates/events/coupons/create.html:17
+#: templates/events/create_event.html:19 templates/orgs/create.html:16
+msgid "Create"
+msgstr ""
+
+#: templates/ai/tickets/create.html:24
+msgid "Describe your issue and we'll help you resolve it"
+msgstr ""
+
+#: templates/ai/tickets/create.html:33
+msgid "your@email.com"
+msgstr ""
+
+#: templates/ai/tickets/create.html:38
+msgid "Category"
+msgstr ""
+
+#: templates/ai/tickets/create.html:40
+msgid "Payment Issue"
+msgstr ""
+
+#: templates/ai/tickets/create.html:41
+msgid "Ticket Issue"
+msgstr ""
+
+#: templates/ai/tickets/create.html:42
+msgid "Event Issue"
+msgstr ""
+
+#: templates/ai/tickets/create.html:43
+msgid "Account Issue"
+msgstr ""
+
+#: templates/ai/tickets/create.html:44
+msgid "Technical Issue"
+msgstr ""
+
+#: templates/ai/tickets/create.html:45
+msgid "Other"
+msgstr ""
+
+#: templates/ai/tickets/create.html:50
+#: templates/messaging/campaign_create.html:109
+#: templates/messaging/campaign_detail.html:125
+msgid "Subject"
+msgstr ""
+
+#: templates/ai/tickets/create.html:51
+msgid "Brief summary of your issue"
+msgstr ""
+
+#: templates/ai/tickets/create.html:55 templates/ai/tickets/detail.html:46
+#: templates/events/coupons/detail.html:109 templates/orgs/create.html:88
+#: templates/orgs/edit.html:88 templates/payments/invoice_pdf.html:62
+msgid "Description"
+msgstr ""
+
+#: templates/ai/tickets/create.html:56
+msgid "Please describe your issue in detail..."
+msgstr ""
+
+#: templates/ai/tickets/create.html:62
+msgid "Our AI will analyze your issue and suggest solutions automatically."
+msgstr ""
+
+#: templates/ai/tickets/create.html:67
+msgid "Submit Ticket"
+msgstr ""
+
+#: templates/ai/tickets/create.html:72
+msgid "Need quick help?"
+msgstr ""
+
+#: templates/ai/tickets/create.html:74
+msgid "Chat with AI Assistant"
+msgstr ""
+
+#: templates/ai/tickets/detail.html:5 templates/checkin/list.html:46
+#: templates/reports/attendee_list.html:124 templates/tickets/list.html:54
+msgid "Ticket"
+msgstr ""
+
+#: templates/ai/tickets/detail.html:54
+msgid "AI Analysis"
+msgstr ""
+
+#: templates/ai/tickets/detail.html:64
+msgid "Suggested Solution"
+msgstr ""
+
+#: templates/ai/tickets/detail.html:72
+msgid "Resolution"
+msgstr ""
+
+#: templates/ai/tickets/detail.html:78 templates/events/coupons/detail.html:126
+#: templates/messaging/campaign_detail.html:106
+msgid "Created"
+msgstr ""
+
+#: templates/ai/tickets/detail.html:78 templates/ai/tickets/detail.html:80
+#: templates/checkin/dashboard.html:56
+msgid "ago"
+msgstr ""
+
+#: templates/ai/tickets/detail.html:80
+msgid "Resolved"
+msgstr ""
+
+#: templates/ai/tickets/list.html:16
+msgid "My Support Tickets"
+msgstr ""
+
+#: templates/ai/tickets/list.html:20
+msgid "New Ticket"
+msgstr ""
+
+#: templates/ai/tickets/list.html:62 templates/tickets/list.html:98
+#: templates/tickets/my_tickets.html:86
+msgid "No tickets yet"
+msgstr ""
+
+#: templates/ai/tickets/list.html:63
+msgid "Need help? Create a support ticket or chat with our AI assistant."
+msgstr ""
+
+#: templates/ai/tickets/list.html:74
+msgid "Create Ticket"
+msgstr ""
+
+#: templates/base.html:118
+msgid "Modern event management for Africa."
+msgstr ""
+
+#: templates/base.html:121
+msgid "Product"
+msgstr ""
+
+#: templates/base.html:123 templates/core/features.html:5
+#: templates/partials/navigation.html:15 templates/partials/navigation.html:112
+msgid "Features"
+msgstr ""
+
+#: templates/base.html:124 templates/partials/navigation.html:16
+#: templates/partials/navigation.html:116
+msgid "Pricing"
+msgstr ""
+
+#: templates/base.html:125 templates/partials/navigation.html:17
+#: templates/partials/navigation.html:120
+msgid "Why Us"
+msgstr ""
+
+#: templates/base.html:129
+msgid "Company"
+msgstr ""
+
+#: templates/base.html:131 templates/orgs/detail.html:79
+msgid "About"
+msgstr ""
+
+#: templates/base.html:135
+msgid "Legal"
+msgstr ""
+
+#: templates/base.html:137
+msgid "Privacy"
+msgstr ""
+
+#: templates/base.html:143 templates/emails/base.html:273
+msgid "All rights reserved."
+msgstr ""
+
+#: templates/checkin/_checked_in_row.html:11
+#: templates/checkin/_search_results.html:15 templates/checkin/_stats.html:9
+#: templates/checkin/verify.html:77 templates/events/event_dashboard.html:105
+#: templates/reports/_live_stats.html:19 templates/reports/_summary.html:9
+#: templates/reports/attendee_list.html:129 templates/reports/dashboard.html:74
+#: templates/tickets/list.html:34 templates/tickets/list.html:79
+#: templates/tickets/my_tickets.html:62
+msgid "Checked In"
+msgstr ""
+
+#: templates/checkin/_result_error.html:3
+msgid "Check-in Failed"
+msgstr ""
+
+#: templates/checkin/_result_error.html:7
+msgid "Ticket:"
+msgstr ""
+
+#: templates/checkin/_result_error.html:9
+msgid "Checked in at:"
+msgstr ""
+
+#: templates/checkin/_result_success.html:3
+msgid "Check-in Successful"
+msgstr ""
+
+#: templates/checkin/_result_success.html:13
+msgid "Collect Swag"
+msgstr ""
+
+#: templates/checkin/_result_success.html:25
+msgid "Collect"
+msgstr ""
+
+#: templates/checkin/_search_results.html:24 templates/checkin/verify.html:62
+msgid "Check In"
+msgstr ""
+
+#: templates/checkin/_search_results.html:31
+msgid "No results found"
+msgstr ""
+
+#: templates/checkin/_stats.html:5 templates/reports/_live_stats.html:6
+#: templates/reports/dashboard.html:61 templates/tickets/list.html:27
+msgid "Total Tickets"
+msgstr ""
+
+#: templates/checkin/_stats.html:13 templates/checkin/verify.html:81
+#: templates/events/coupons/detail.html:87
+msgid "Remaining"
+msgstr ""
+
+#: templates/checkin/_swag_collected.html:6
+msgid "Collected"
+msgstr ""
+
+#: templates/checkin/dashboard.html:4 templates/checkin/dashboard.html:15
+#: templates/checkin/list.html:10 templates/checkin/verify.html:16
+#: templates/core/features.html:212 templates/core/why_us.html:91
+#: templates/events/event_dashboard.html:150
+#: templates/events/event_detail.html:36 templates/events/list_events.html:78
+#: templates/layouts/dashboard.html:195 templates/reports/analytics.html:224
+msgid "Check-in"
+msgstr ""
 
 #: templates/checkin/dashboard.html:11 templates/checkin/verify.html:12
 #: templates/events/create_event.html:17 templates/events/edit_event.html:18
@@ -1648,68 +1847,59 @@ msgstr "Accueil"
 #: templates/reports/custom_responses.html:12
 #: templates/reports/dashboard.html:12 templates/reports/export_center.html:13
 msgid "Events"
-msgstr "Événements"
+msgstr ""
 
 #: templates/checkin/dashboard.html:22
 msgid "Check-in Dashboard"
-msgstr "Tableau de bord d'enregistrement"
+msgstr ""
 
 #: templates/checkin/dashboard.html:30 templates/checkin/verify.html:4
 msgid "Scan Tickets"
-msgstr "Scanner les billets"
+msgstr ""
 
 #: templates/checkin/dashboard.html:44
 msgid "Recent Check-ins"
-msgstr "Enregistrements récents"
-
-#: templates/checkin/dashboard.html:56
-msgid "ago"
-msgstr "il y a"
+msgstr ""
 
 #: templates/checkin/dashboard.html:61 templates/checkin/list.html:81
 msgid "No check-ins yet"
-msgstr "Aucun enregistrement pour le moment"
+msgstr ""
 
 #: templates/checkin/dashboard.html:61
 msgid "Start scanning tickets to see check-ins here."
-msgstr "Commencez à scanner les billets pour voir les enregistrements ici."
+msgstr ""
 
 #: templates/checkin/dashboard.html:68
 msgid "Swag Items"
-msgstr "Articles promotionnels"
+msgstr ""
 
 #: templates/checkin/dashboard.html:79
 msgid "remaining"
-msgstr "restant"
+msgstr ""
 
 #: templates/checkin/dashboard.html:85
 msgid "No swag items"
-msgstr "Aucun article promotionnel"
+msgstr ""
 
 #: templates/checkin/dashboard.html:85
 msgid "Add swag items for this event."
-msgstr "Ajoutez des articles promotionnels pour cet événement."
+msgstr ""
 
 #: templates/checkin/list.html:4 templates/checkin/list.html:16
 msgid "Check-ins"
-msgstr "Enregistrements"
+msgstr ""
 
 #: templates/checkin/list.html:17
 msgid "View all check-in activity across your events"
-msgstr "Voir toute l'activité d'enregistrement de vos événements"
+msgstr ""
 
 #: templates/checkin/list.html:26
 msgid "Today's Check-ins"
-msgstr "Enregistrements d'aujourd'hui"
+msgstr ""
 
 #: templates/checkin/list.html:33 templates/reports/pdf/checkins.html:10
 msgid "Total Check-ins"
-msgstr "Total des enregistrements"
-
-#: templates/checkin/list.html:46 templates/reports/attendee_list.html:124
-#: templates/tickets/list.html:54
-msgid "Ticket"
-msgstr "Billet"
+msgstr ""
 
 #: templates/checkin/list.html:47 templates/events/coupons/detail.html:118
 #: templates/events/coupons/list.html:58 templates/payments/invoice_pdf.html:51
@@ -1718,320 +1908,314 @@ msgstr "Billet"
 #: templates/payments/success.html:27 templates/reports/analytics.html:220
 #: templates/tickets/list.html:55
 msgid "Event"
-msgstr "Événement"
+msgstr ""
 
 #: templates/checkin/list.html:48 templates/reports/pdf/ticket_sales.html:42
 #: templates/tickets/list.html:56 templates/tickets/pdf/booking_tickets.html:35
 #: templates/tickets/pdf/ticket.html:39
 msgid "Attendee"
-msgstr "Participant"
+msgstr ""
 
 #: templates/checkin/list.html:49
 msgid "Checked In By"
-msgstr "Enregistré par"
+msgstr ""
 
 #: templates/checkin/list.html:50 templates/events/event_detail.html:78
 #: templates/tickets/pdf/booking_tickets.html:26
 #: templates/tickets/pdf/ticket.html:24
 msgid "Time"
-msgstr "Heure"
+msgstr ""
 
 #: templates/checkin/list.html:66
 msgid "System"
-msgstr "Système"
+msgstr ""
 
 #: templates/checkin/list.html:82
 msgid "Check-ins will appear here when attendees are verified at your events."
-msgstr "Les enregistrements apparaîtront ici lorsque les participants seront vérifiés à vos événements."
+msgstr ""
 
 #: templates/checkin/verify.html:18
 msgid "Scanner"
-msgstr "Scanner"
+msgstr ""
 
 #: templates/checkin/verify.html:25
 msgid "Scan or search for tickets"
-msgstr "Scanner ou rechercher des billets"
+msgstr ""
 
 #: templates/checkin/verify.html:33 templates/events/edit_event.html:37
 msgid "Back to Dashboard"
-msgstr "Retour au tableau de bord"
+msgstr ""
 
 #: templates/checkin/verify.html:44
 msgid "Manual Check-in"
-msgstr "Enregistrement manuel"
+msgstr ""
 
 #: templates/checkin/verify.html:45
 msgid "Enter ticket code or scan QR"
-msgstr "Entrez le code du billet ou scannez le QR"
+msgstr ""
 
 #: templates/checkin/verify.html:55
 msgid "Ticket Code"
-msgstr "Code du billet"
+msgstr ""
 
 #: templates/checkin/verify.html:57
 msgid "Enter ticket code or UUID"
-msgstr "Entrez le code du billet ou l'UUID"
+msgstr ""
 
 #: templates/checkin/verify.html:73 templates/payments/invoice_pdf.html:65
 #: templates/reports/_summary.html:5 templates/reports/dashboard.html:259
 #: templates/reports/pdf/financial.html:48
 msgid "Total"
-msgstr "Total"
+msgstr ""
 
 #: templates/checkin/verify.html:88
 msgid "Search Attendees"
-msgstr "Rechercher des participants"
+msgstr ""
 
 #: templates/checkin/verify.html:89
 msgid "Find by name or email"
-msgstr "Rechercher par nom ou e-mail"
+msgstr ""
 
 #: templates/checkin/verify.html:94
 msgid "Search by name, email, or code..."
-msgstr "Rechercher par nom, e-mail ou code..."
+msgstr ""
 
 #: templates/core/features.html:13
 msgid "All Features"
-msgstr "Toutes les fonctionnalités"
+msgstr ""
 
 #: templates/core/features.html:16
 msgid "Everything you need to run amazing events"
-msgstr "Tout ce dont vous avez besoin pour organiser des événements exceptionnels"
+msgstr ""
 
 #: templates/core/features.html:19
 msgid ""
 "From ticket sales to check-in, analytics to refunds. Reckot gives you the "
 "complete toolkit for event success in Africa."
-msgstr "De la vente de billets à l'enregistrement, des analyses aux remboursements. Reckot vous offre la boîte à outils complète pour le succès de vos événements en Afrique."
+msgstr ""
 
 #: templates/core/features.html:31 templates/core/home.html:223
 #: templates/layouts/dashboard.html:201 templates/payments/list.html:5
 #: templates/payments/list.html:11 templates/payments/list.html:17
 msgid "Payments"
-msgstr "Paiements"
+msgstr ""
 
 #: templates/core/features.html:33 templates/core/home.html:225
 msgid "Mobile money, built-in"
-msgstr "Mobile money, intégré"
+msgstr ""
 
 #: templates/core/features.html:34
 msgid ""
 "Accept MTN MoMo and Orange Money payments instantly. No bank account needed. "
 "Your attendees pay the way they're used to."
-msgstr "Acceptez les paiements MTN MoMo et Orange Money instantanément. Aucun compte bancaire requis. Vos participants paient comme ils en ont l'habitude."
+msgstr ""
 
 #: templates/core/features.html:41
 msgid "MTN MoMo integration"
-msgstr "Intégration MTN MoMo"
+msgstr ""
 
 #: templates/core/features.html:42
 msgid "Instant payment confirmation across all MoMo-supported countries"
-msgstr "Confirmation de paiement instantanée dans tous les pays supportés par MoMo"
+msgstr ""
 
 #: templates/core/features.html:50
 msgid "Orange Money support"
-msgstr "Support Orange Money"
+msgstr ""
 
 #: templates/core/features.html:51
 msgid "Accept payments from Orange Money users seamlessly"
-msgstr "Acceptez les paiements des utilisateurs Orange Money sans problème"
+msgstr ""
 
 #: templates/core/features.html:59
 msgid "24-hour payouts"
-msgstr "Virements en 24 heures"
+msgstr ""
 
 #: templates/core/features.html:60
 msgid "Get your money fast, directly to your mobile money account"
-msgstr "Recevez votre argent rapidement, directement sur votre compte mobile money"
+msgstr ""
 
 #: templates/core/features.html:68
 msgid "Payment methods"
-msgstr "Méthodes de paiement"
+msgstr ""
 
 #: templates/core/features.html:69
 msgid "All active"
-msgstr "Tous actifs"
+msgstr ""
 
 #: templates/core/features.html:78 templates/core/home.html:233
 msgid "MTN MoMo"
-msgstr "MTN MoMo"
+msgstr ""
 
 #: templates/core/features.html:79
 msgid "Cameroon, Ghana, Uganda"
-msgstr "Cameroun, Ghana, Ouganda"
+msgstr ""
 
 #: templates/core/features.html:91
 msgid "Cameroon, Senegal, Mali"
-msgstr "Cameroun, Sénégal, Mali"
+msgstr ""
 
 #: templates/core/features.html:102
 msgid "Card payments"
-msgstr "Paiements par carte"
+msgstr ""
 
 #: templates/core/features.html:103
 msgid "Coming soon"
-msgstr "Bientôt disponible"
+msgstr ""
 
 #: templates/core/features.html:125
 msgid "Attendee list"
-msgstr "Liste des participants"
+msgstr ""
 
 #: templates/core/features.html:144 templates/core/features.html:160
 msgid "Checked in"
-msgstr "Enregistré"
+msgstr ""
 
 #: templates/core/features.html:168
 msgid "Attendee Management"
-msgstr "Gestion des participants"
+msgstr ""
 
 #: templates/core/features.html:170
 msgid "Easy attendee management"
-msgstr "Gestion facile des participants"
+msgstr ""
 
 #: templates/core/features.html:171
 msgid ""
 "Keep track of every attendee. Export data anytime. Send messages to specific "
 "groups."
 msgstr ""
-"Suivez chaque participant. Exportez les données à tout moment. Envoyez des "
-"messages à des groupes spécifiques."
 
 #: templates/core/features.html:178
 msgid "Export to CSV, Excel, PDF"
-msgstr "Exporter en CSV, Excel, PDF"
+msgstr ""
 
 #: templates/core/features.html:179
 msgid "Download your attendee list in any format"
-msgstr "Téléchargez votre liste de participants dans n'importe quel format"
+msgstr ""
 
 #: templates/core/features.html:187
 msgid "Print-friendly attendee list"
-msgstr "Liste des participants imprimable"
+msgstr ""
 
 #: templates/core/features.html:188
 msgid "Generate printable lists for registration desks"
-msgstr "Générez des listes imprimables pour les bureaux d'inscription"
+msgstr ""
 
 #: templates/core/features.html:196
 msgid "Message attendees"
-msgstr "Envoyer des messages aux participants"
+msgstr ""
 
 #: templates/core/features.html:197
 msgid "Send updates to all or specific ticket holders"
-msgstr "Envoyez des mises à jour à tous les détenteurs de billets ou à certains d'entre eux"
+msgstr ""
 
 #: templates/core/features.html:214
 msgid "Lightning-fast QR check-in"
-msgstr "Enregistrement QR ultra-rapide"
+msgstr ""
 
 #: templates/core/features.html:215
 msgid ""
 "Scan tickets in under 2 seconds. Works offline. Track swag distribution at "
 "check-in."
 msgstr ""
-"Scannez les billets en moins de 2 secondes. Fonctionne hors ligne. Suivez la "
-"distribution des goodies à l'enregistrement."
 
 #: templates/core/features.html:222
 msgid "QR code scanning"
-msgstr "Scan de code QR"
+msgstr ""
 
 #: templates/core/features.html:223
 msgid "Use any smartphone camera to scan tickets"
-msgstr "Utilisez n'importe quel appareil photo de smartphone pour scanner les billets"
+msgstr ""
 
 #: templates/core/features.html:231
 msgid "Offline mode"
-msgstr "Mode hors ligne"
+msgstr ""
 
 #: templates/core/features.html:232
 msgid "Keep checking in even without internet"
-msgstr "Continuez les enregistrements même sans internet"
+msgstr ""
 
 #: templates/core/features.html:240 templates/core/home.html:278
 msgid "Swag tracking"
-msgstr "Suivi des goodies"
+msgstr ""
 
 #: templates/core/features.html:241
 msgid "Mark swag items as distributed during check-in"
-msgstr "Marquez les goodies comme distribués lors de l'enregistrement"
+msgstr ""
 
 #: templates/core/features.html:252
 msgid "Scan ticket"
-msgstr "Scanner le billet"
+msgstr ""
 
 #: templates/core/features.html:313
 msgid "Position QR code here"
-msgstr "Positionnez le code QR ici"
+msgstr ""
 
 #: templates/core/features.html:323
 msgid "Check-in successful"
-msgstr "Enregistrement réussi"
+msgstr ""
 
 #: templates/core/features.html:324
 msgid "VIP Ticket - Row A"
-msgstr "Billet VIP - Rang A"
+msgstr ""
 
 #: templates/core/features.html:339
 msgid "Sales Analytics"
-msgstr "Analyses des ventes"
+msgstr ""
 
 #: templates/core/features.html:341 templates/events/event_dashboard.html:27
 #: templates/events/list_events.html:45 templates/reports/analytics.html:188
 #: templates/reports/analytics.html:260 templates/reports/dashboard.html:32
 msgid "Live"
-msgstr "En direct"
+msgstr ""
 
 #: templates/core/features.html:347 templates/core/home.html:74
 msgid "Tickets sold"
-msgstr "Billets vendus"
+msgstr ""
 
 #: templates/core/features.html:351 templates/reports/pdf/financial.html:29
 msgid "Revenue (XAF)"
-msgstr "Revenus (XAF)"
+msgstr ""
 
 #: templates/core/features.html:377 templates/events/event_dashboard.html:168
 #: templates/layouts/dashboard.html:167 templates/partials/navigation.html:47
 #: templates/partials/navigation.html:105 templates/reports/analytics.html:4
 #: templates/reports/analytics.html:10 templates/reports/analytics.html:16
 msgid "Analytics"
-msgstr "Analyses"
+msgstr ""
 
 #: templates/core/features.html:379 templates/core/home.html:264
 msgid "Real-time analytics"
-msgstr "Analyses en temps réel"
+msgstr ""
 
 #: templates/core/features.html:380
 msgid ""
 "Track sales, revenue, and attendance as it happens. Make data-driven "
 "decisions."
 msgstr ""
-"Suivez les ventes, les revenus et la participation en temps réel. Prenez des "
-"décisions basées sur les données."
 
 #: templates/core/features.html:387
 msgid "Live sales dashboard"
-msgstr "Tableau de bord des ventes en direct"
+msgstr ""
 
 #: templates/core/features.html:388
 msgid "Watch ticket sales happen in real-time"
-msgstr "Observez les ventes de billets en temps réel"
+msgstr ""
 
 #: templates/core/features.html:396
 msgid "Revenue breakdown"
-msgstr "Répartition des revenus"
+msgstr ""
 
 #: templates/core/features.html:397
 msgid "See revenue by ticket type, time period, or source"
-msgstr "Consultez les revenus par type de billet, période ou source"
+msgstr ""
 
 #: templates/core/features.html:405
 msgid "Attendance tracking"
-msgstr "Suivi de la participation"
+msgstr ""
 
 #: templates/core/features.html:406
 msgid "Monitor check-in rates and timing"
-msgstr "Surveillez les taux d'enregistrement et les horaires"
+msgstr ""
 
 #: templates/core/features.html:421 templates/layouts/dashboard.html:207
 #: templates/payments/refunds/list.html:5
@@ -2039,334 +2223,326 @@ msgstr "Surveillez les taux d'enregistrement et les horaires"
 #: templates/payments/refunds/list.html:17
 #: templates/payments/refunds/process.html:11
 msgid "Refunds"
-msgstr "Remboursements"
+msgstr ""
 
 #: templates/core/features.html:423
 msgid "Simple refund management"
-msgstr "Gestion simple des remboursements"
+msgstr ""
 
 #: templates/core/features.html:424
 msgid ""
 "Handle refund requests efficiently. Full or partial refunds with complete "
 "audit trails."
 msgstr ""
-"Gérez les demandes de remboursement efficacement. Remboursements complets ou "
-"partiels avec historique complet."
 
 #: templates/core/features.html:431
 msgid "Full & partial refunds"
-msgstr "Remboursements complets et partiels"
+msgstr ""
 
 #: templates/core/features.html:432
 msgid "Process refunds for any amount"
-msgstr "Traitez les remboursements pour n'importe quel montant"
+msgstr ""
 
 #: templates/core/features.html:440
 msgid "Approval workflow"
-msgstr "Flux d'approbation"
+msgstr ""
 
 #: templates/core/features.html:441
 msgid "Review and approve refund requests"
-msgstr "Examinez et approuvez les demandes de remboursement"
+msgstr ""
 
 #: templates/core/features.html:449
 msgid "Audit trail"
-msgstr "Historique d'audit"
+msgstr ""
 
 #: templates/core/features.html:450
 msgid "Complete history of all refund actions"
-msgstr "Historique complet de toutes les actions de remboursement"
+msgstr ""
 
 #: templates/core/features.html:458
 msgid "Refund request"
-msgstr "Demande de remboursement"
+msgstr ""
 
 #: templates/core/features.html:465
 msgid "John Doe"
-msgstr "Jean Dupont"
+msgstr ""
 
 #: templates/core/features.html:466
 msgid "VIP Ticket - 25,000 XAF"
-msgstr "Billet VIP - 25 000 XAF"
+msgstr ""
 
 #: templates/core/features.html:469
 msgid "Unable to attend due to travel conflict."
-msgstr "Impossible d'assister en raison d'un conflit de voyage."
+msgstr ""
 
 #: templates/core/features.html:474
 msgid "Decline"
-msgstr "Refuser"
+msgstr ""
 
 #: templates/core/features.html:478
 msgid "Approve"
-msgstr "Approuver"
+msgstr ""
 
 #: templates/core/features.html:490
 msgid "And much more"
-msgstr "Et bien plus encore"
+msgstr ""
 
 #: templates/core/features.html:491
 msgid "Everything else you need to run successful events"
-msgstr "Tout ce dont vous avez besoin pour organiser des événements réussis"
+msgstr ""
 
 #: templates/core/features.html:498
 msgid "Team collaboration"
-msgstr "Collaboration d'équipe"
+msgstr ""
 
 #: templates/core/features.html:499
 msgid "Add unlimited team members with custom permissions"
-msgstr "Ajoutez des membres d'équipe illimités avec des permissions personnalisées"
+msgstr ""
 
 #: templates/core/features.html:505
 msgid "Custom ticket types"
-msgstr "Types de billets personnalisés"
+msgstr ""
 
 #: templates/core/features.html:506
 msgid "Create unlimited ticket tiers with different prices"
-msgstr "Créez des niveaux de billets illimités avec des prix différents"
+msgstr ""
 
 #: templates/core/features.html:512
 msgid "Email notifications"
-msgstr "Notifications par e-mail"
+msgstr ""
 
 #: templates/core/features.html:513
 msgid "Automatic confirmations and reminders"
-msgstr "Confirmations et rappels automatiques"
+msgstr ""
 
 #: templates/core/features.html:519
 msgid "Public event pages"
-msgstr "Pages d'événements publiques"
+msgstr ""
 
 #: templates/core/features.html:520
 msgid "Beautiful, mobile-friendly event pages"
-msgstr "Belles pages d'événements adaptées aux mobiles"
+msgstr ""
 
 #: templates/core/features.html:526
 msgid "Swag management"
-msgstr "Gestion des goodies"
+msgstr ""
 
 #: templates/core/features.html:527
 msgid "Track merchandise and giveaways at check-in"
-msgstr "Suivez les articles et cadeaux lors de l'enregistrement"
+msgstr ""
 
 #: templates/core/features.html:533
 msgid "Unlimited events"
-msgstr "Événements illimités"
+msgstr ""
 
 #: templates/core/features.html:534
 msgid "Host as many events as you need"
-msgstr "Organisez autant d'événements que vous le souhaitez"
+msgstr ""
 
 #: templates/core/features.html:543
 msgid "Ready to try all these features?"
-msgstr "Prêt à essayer toutes ces fonctionnalités ?"
+msgstr ""
 
 #: templates/core/features.html:544
 msgid "Start for free. No credit card required."
-msgstr "Commencez gratuitement. Aucune carte de crédit requise."
+msgstr ""
 
 #: templates/core/features.html:548 templates/core/home.html:326
 msgid "Get started free"
-msgstr "Commencer gratuitement"
+msgstr ""
 
 #: templates/core/features.html:553 templates/core/why_us.html:299
 msgid "View pricing"
-msgstr "Voir les tarifs"
+msgstr ""
 
 #: templates/core/home.html:5 templates/core/why_us.html:5
 msgid "Event Management for Africa"
-msgstr "Gestion d'événements pour l'Afrique"
+msgstr ""
 
 #: templates/core/home.html:14
 msgid "MTN MoMo & Orange Money ready"
-msgstr "Compatible MTN MoMo et Orange Money"
+msgstr ""
 
 #: templates/core/home.html:17
 msgid "Event management made simple for Africa"
-msgstr "La gestion d'événements simplifiée pour l'Afrique"
+msgstr ""
 
 #: templates/core/home.html:20
 msgid ""
 "Create events, sell tickets with mobile money, and check in attendees with "
 "QR codes. Everything you need, nothing you don't."
 msgstr ""
-"Créez des événements, vendez des billets avec le mobile money et enregistrez "
-"les participants avec des codes QR. Tout ce dont vous avez besoin, rien de superflu."
 
 #: templates/core/home.html:25
 msgid "Start free"
-msgstr "Commencer gratuitement"
+msgstr ""
 
 #: templates/core/home.html:30 templates/core/why_us.html:53
 #: templates/events/checkout_questions.html:132
 msgid "How it works"
-msgstr "Comment ça marche"
+msgstr ""
 
 #: templates/core/home.html:60
 msgid "Payment received"
-msgstr "Paiement reçu"
+msgstr ""
 
 #: templates/core/home.html:61
 msgid "5,000 XAF via MoMo"
-msgstr "5 000 XAF via MoMo"
+msgstr ""
 
 #: templates/core/home.html:70
 msgid "Events hosted"
-msgstr "Événements organisés"
+msgstr ""
 
 #: templates/core/home.html:78
 msgid "Check-in rate"
-msgstr "Taux d'enregistrement"
+msgstr ""
 
 #: templates/core/home.html:82
 msgid "Payout speed"
-msgstr "Rapidité de versement"
+msgstr ""
 
 #: templates/core/home.html:90
 msgid "Trusted by leading organizations across Africa"
-msgstr "Approuvé par les principales organisations à travers l'Afrique"
+msgstr ""
 
 #: templates/core/home.html:131
 msgid "Featured Events"
-msgstr "Événements à la une"
+msgstr ""
 
 #: templates/core/home.html:132
 msgid "Discover upcoming events handpicked by our team"
-msgstr "Découvrez les événements à venir sélectionnés par notre équipe"
+msgstr ""
 
 #: templates/core/home.html:136 templates/core/home.html:193
 msgid "View all events"
-msgstr "Voir tous les événements"
+msgstr ""
 
 #: templates/core/home.html:160 templates/events/event_dashboard.html:265
 msgid "Featured"
-msgstr "À la une"
+msgstr ""
 
 #: templates/core/home.html:214
 msgid "Everything you need to run events"
-msgstr "Tout ce dont vous avez besoin pour organiser des événements"
+msgstr ""
 
 #: templates/core/home.html:215
 msgid ""
 "From ticket sales to check-in, we handle the logistics so you can focus on "
 "your event."
 msgstr ""
-"De la vente de billets à l'enregistrement, nous gérons la logistique pour que "
-"vous puissiez vous concentrer sur votre événement."
 
 #: templates/core/home.html:226
 msgid ""
 "Accept MTN MoMo and Orange Money payments instantly. No bank account needed. "
 "Get paid within 24 hours."
 msgstr ""
-"Acceptez les paiements MTN MoMo et Orange Money instantanément. Aucun compte "
-"bancaire requis. Recevez vos fonds sous 24 heures."
 
 #: templates/core/home.html:235 templates/core/home.html:244
 msgid "Instant confirmation"
-msgstr "Confirmation instantanée"
+msgstr ""
 
 #: templates/core/home.html:250
 msgid "per paid ticket"
-msgstr "par billet payant"
+msgstr ""
 
 #: templates/core/home.html:251
 msgid "Choose your plan, pay only when you sell"
-msgstr "Choisissez votre forfait, payez uniquement quand vous vendez"
+msgstr ""
 
 #: templates/core/home.html:257
 msgid "QR Check-in"
-msgstr "Enregistrement QR"
+msgstr ""
 
 #: templates/core/home.html:258
 msgid "Scan tickets in under 2 seconds. Works offline."
-msgstr "Scannez les billets en moins de 2 secondes. Fonctionne hors ligne."
+msgstr ""
 
 #: templates/core/home.html:265
 msgid "Track sales, revenue, and attendance live."
-msgstr "Suivez les ventes, les revenus et la participation en direct."
+msgstr ""
 
 #: templates/core/home.html:271
 msgid "Team access"
-msgstr "Accès équipe"
+msgstr ""
 
 #: templates/core/home.html:272
 msgid "Add collaborators with custom permissions."
-msgstr "Ajoutez des collaborateurs avec des permissions personnalisées."
+msgstr ""
 
 #: templates/core/home.html:279
 msgid "Manage giveaways at check-in."
-msgstr "Gérez les cadeaux lors de l'enregistrement."
+msgstr ""
 
 #: templates/core/home.html:288 templates/events/event_dashboard.html:177
 #: templates/events/flyer_config.html:16
 #: templates/events/flyer_generator.html:5
 msgid "I Will Be There"
-msgstr "J'y serai"
+msgstr ""
 
 #: templates/core/home.html:289
 msgid "Let attendees create personalized flyers to share on social media."
-msgstr "Permettez aux participants de créer des affiches personnalisées à partager sur les réseaux sociaux."
+msgstr ""
 
 #: templates/core/home.html:299
 msgid "Three steps to your event"
-msgstr "Trois étapes pour votre événement"
+msgstr ""
 
 #: templates/core/home.html:300
 msgid "From idea to sold-out in minutes, not days."
-msgstr "De l'idée au guichet fermé en minutes, pas en jours."
+msgstr ""
 
 #: templates/core/home.html:305
 msgid "Create your event"
-msgstr "Créez votre événement"
+msgstr ""
 
 #: templates/core/home.html:306
 msgid "Add details, set ticket types and prices. Takes about 2 minutes."
-msgstr "Ajoutez les détails, définissez les types de billets et les prix. Environ 2 minutes."
+msgstr ""
 
 #: templates/core/home.html:312
 msgid "Share your link"
-msgstr "Partagez votre lien"
+msgstr ""
 
 #: templates/core/home.html:313
 msgid "Share on WhatsApp, social media, or email. Tickets sell themselves."
-msgstr "Partagez sur WhatsApp, les réseaux sociaux ou par e-mail. Les billets se vendent tout seuls."
+msgstr ""
 
 #: templates/core/home.html:319 templates/reports/dashboard.html:318
 msgid "Check in attendees"
-msgstr "Enregistrez les participants"
+msgstr ""
 
 #: templates/core/home.html:320
 msgid "Scan QR codes at the door. Works offline. Real-time stats."
-msgstr "Scannez les codes QR à l'entrée. Fonctionne hors ligne. Statistiques en temps réel."
+msgstr ""
 
 #: templates/core/home.html:377
 msgid "Simple, transparent pricing"
-msgstr "Tarification simple et transparente"
+msgstr ""
 
 #: templates/core/home.html:378
 msgid "No monthly fees."
-msgstr "Pas de frais mensuels."
+msgstr ""
 
 #: templates/core/home.html:378
 msgid "No hidden costs."
-msgstr "Pas de coûts cachés."
+msgstr ""
 
 #: templates/core/home.html:378
 msgid "Pay only when you sell."
-msgstr "Payez uniquement quand vous vendez."
+msgstr ""
 
 #: templates/core/home.html:409
 msgid "All plans include: Team collaboration, 24-hour payouts, QR check-in"
-msgstr "Tous les forfaits incluent : Collaboration d'équipe, versements sous 24h, enregistrement QR"
+msgstr ""
 
 #: templates/core/home.html:417
 msgid "Ready to host your next event?"
-msgstr "Prêt à organiser votre prochain événement ?"
+msgstr ""
 
 #: templates/core/home.html:418
 msgid "Join 500+ organizers already using Reckot"
-msgstr "Rejoignez plus de 500 organisateurs qui utilisent déjà Reckot"
+msgstr ""
 
 #: templates/core/home.html:421
 msgid "Create your first event"
@@ -3283,11 +3459,6 @@ msgstr ""
 msgid "Coupons"
 msgstr ""
 
-#: templates/events/coupons/create.html:17
-#: templates/events/create_event.html:19 templates/orgs/create.html:16
-msgid "Create"
-msgstr ""
-
 #: templates/events/coupons/create.html:24
 msgid "Create a new discount code"
 msgstr ""
@@ -3485,11 +3656,6 @@ msgstr ""
 msgid "Code"
 msgstr ""
 
-#: templates/events/coupons/detail.html:109 templates/orgs/create.html:88
-#: templates/orgs/edit.html:88 templates/payments/invoice_pdf.html:62
-msgid "Description"
-msgstr ""
-
 #: templates/events/coupons/detail.html:119
 #: templates/events/coupons/list.html:79
 msgid "All events"
@@ -3497,11 +3663,6 @@ msgstr ""
 
 #: templates/events/coupons/detail.html:122
 msgid "Max Uses"
-msgstr ""
-
-#: templates/events/coupons/detail.html:126
-#: templates/messaging/campaign_detail.html:106
-msgid "Created"
 msgstr ""
 
 #: templates/events/coupons/detail.html:131
@@ -4991,11 +5152,6 @@ msgstr ""
 
 #: templates/messaging/campaign_create.html:98
 msgid "Choose a template..."
-msgstr ""
-
-#: templates/messaging/campaign_create.html:109
-#: templates/messaging/campaign_detail.html:125
-msgid "Subject"
 msgstr ""
 
 #: templates/messaging/campaign_create.html:110
@@ -6515,10 +6671,6 @@ msgstr ""
 
 #: templates/tickets/list.html:18
 msgid "View all tickets across your events"
-msgstr ""
-
-#: templates/tickets/list.html:98 templates/tickets/my_tickets.html:86
-msgid "No tickets yet"
 msgstr ""
 
 #: templates/tickets/list.html:99

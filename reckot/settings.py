@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'apps.messaging',
     'apps.widgets',
     'apps.marketing',
+    'apps.ai',
 ]
 
 MIDDLEWARE = [

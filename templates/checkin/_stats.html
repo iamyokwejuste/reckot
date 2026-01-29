@@ -1,15 +1,15 @@
-{% load slippers %}
+{% load slippers i18n %}
 <div class="grid grid-cols-3 gap-4">
     {% #card class="text-center" %}
         <p class="text-3xl font-bold">{{ stats.total }}</p>
-        <p class="text-sm text-muted-foreground">Total Tickets</p>
+        <p class="text-sm text-muted-foreground">{% trans "Total Tickets" %}</p>
     {% /card %}
     {% #card class="text-center" %}
         <p class="text-3xl font-bold text-success">{{ stats.checked_in }}</p>
-        <p class="text-sm text-muted-foreground">Checked In</p>
+        <p class="text-sm text-muted-foreground">{% trans "Checked In" %}</p>
     {% /card %}
     {% #card class="text-center" %}
         <p class="text-3xl font-bold text-warning">{{ stats.remaining }}</p>
-        <p class="text-sm text-muted-foreground">Remaining</p>
+        <p class="text-sm text-muted-foreground">{% trans "Remaining" %}</p>
     {% /card %}
 </div>

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load slippers %}
+{% load i18n %}
+
+{% block title %}{% trans "Support Tickets" %} - Reckot{% endblock %}
+
+{% block content %}
+<div class="container py-8">
+    {% #breadcrumb %}
+        {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
+        {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+        {% #breadcrumb_item %}{% trans "Support Tickets" %}{% /breadcrumb_item %}
+    {% /breadcrumb %}
+
+    <div class="flex items-center justify-between mt-8 mb-6">
+        <h1 class="text-2xl font-bold">{% trans "My Support Tickets" %}</h1>
+        <a href="{% url 'ai:ticket_create' %}">
+            {% #button variant="default" %}
+                <i data-lucide="plus" class="h-4 w-4 mr-2"></i>
+                {% trans "New Ticket" %}
+            {% /button %}
+        </a>
+    </div>
+
+    {% if tickets %}
+    <div class="space-y-4">
+        {% for ticket in tickets %}
+        <a href="{% url 'ai:ticket_detail' reference=ticket.reference %}" class="block">
+            {% #card class="hover:bg-accent/50 transition-colors" %}
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-xs text-muted-foreground">#{{ ticket.reference|truncatechars:13 }}</span>
+                            <span class="text-xs px-2 py-0.5 rounded-full
+                                {% if ticket.status == 'OPEN' %}bg-blue-500/10 text-blue-600
+                                {% elif ticket.status == 'IN_PROGRESS' %}bg-yellow-500/10 text-yellow-600
+                                {% elif ticket.status == 'RESOLVED' %}bg-green-500/10 text-green-600
+                                {% else %}bg-muted text-muted-foreground{% endif %}">
+                                {{ ticket.get_status_display }}
+                            </span>
+                            <span class="text-xs px-2 py-0.5 rounded-full
+                                {% if ticket.priority == 'URGENT' %}bg-red-500/10 text-red-600
+                                {% elif ticket.priority == 'HIGH' %}bg-orange-500/10 text-orange-600
+                                {% else %}bg-muted text-muted-foreground{% endif %}">
+                                {{ ticket.get_priority_display }}
+                            </span>
+                        </div>
+                        <h3 class="font-medium">{{ ticket.subject }}</h3>
+                        <p class="text-sm text-muted-foreground mt-1">{{ ticket.description|truncatewords:20 }}</p>
+                    </div>
+                    <span class="text-xs text-muted-foreground">{{ ticket.created_at|timesince }} ago</span>
+                </div>
+            {% /card %}
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-16">
+        <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
+            <i data-lucide="ticket" class="h-8 w-8 text-muted-foreground"></i>
+        </div>
+        <h3 class="font-medium mb-2">{% trans "No tickets yet" %}</h3>
+        <p class="text-sm text-muted-foreground mb-4">{% trans "Need help? Create a support ticket or chat with our AI assistant." %}</p>
+        <div class="flex justify-center gap-3">
+            <a href="{% url 'ai:assistant' %}">
+                {% #button variant="outline" %}
+                    <i data-lucide="bot" class="h-4 w-4 mr-2"></i>
+                    {% trans "AI Assistant" %}
+                {% /button %}
+            </a>
+            <a href="{% url 'ai:ticket_create' %}">
+                {% #button variant="default" %}
+                    <i data-lucide="plus" class="h-4 w-4 mr-2"></i>
+                    {% trans "Create Ticket" %}
+                {% /button %}
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

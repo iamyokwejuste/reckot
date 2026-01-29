@@ -1,5 +1,5 @@
 {% extends "layouts/dashboard.html" %}
-{% load slippers %}
+{% load slippers i18n %}
 
 {% block title %}{{ campaign.name }} - Reckot{% endblock %}
 
@@ -16,7 +16,7 @@
     {% csrf_token %}
     {% #button variant="default" type="submit" %}
         <i data-lucide="send" class="w-4 h-4"></i>
-        Send Campaign
+        {% trans "Send Campaign" %}
     {% /button %}
 </form>
 {% endif %}
@@ -32,7 +32,7 @@
                 </div>
                 <div>
                     <p class="text-2xl font-semibold">{{ campaign.total_recipients }}</p>
-                    <p class="text-xs text-muted-foreground">Recipients</p>
+                    <p class="text-xs text-muted-foreground">{% trans "Recipients" %}</p>
                 </div>
             </div>
         </div>
@@ -43,7 +43,7 @@
                 </div>
                 <div>
                     <p class="text-2xl font-semibold">{{ campaign.sent_count }}</p>
-                    <p class="text-xs text-muted-foreground">Sent</p>
+                    <p class="text-xs text-muted-foreground">{% trans "Sent" %}</p>
                 </div>
             </div>
         </div>
@@ -54,7 +54,7 @@
                 </div>
                 <div>
                     <p class="text-2xl font-semibold">0</p>
-                    <p class="text-xs text-muted-foreground">Opened</p>
+                    <p class="text-xs text-muted-foreground">{% trans "Opened" %}</p>
                 </div>
             </div>
         </div>
@@ -65,7 +65,7 @@
                 </div>
                 <div>
                     <p class="text-2xl font-semibold">{{ campaign.failed_count }}</p>
-                    <p class="text-xs text-muted-foreground">Failed</p>
+                    <p class="text-xs text-muted-foreground">{% trans "Failed" %}</p>
                 </div>
             </div>
         </div>
@@ -75,40 +75,40 @@
         <div class="card p-6">
             <h2 class="font-semibold mb-4 flex items-center gap-2">
                 <i data-lucide="info" class="w-4 h-4"></i>
-                Campaign Details
+                {% trans "Campaign Details" %}
             </h2>
             <dl class="space-y-4">
                 <div class="flex justify-between py-2 border-b border-border">
-                    <dt class="text-muted-foreground">Status</dt>
+                    <dt class="text-muted-foreground">{% trans "Status" %}</dt>
                     <dd>
                         {% if campaign.status == 'DRAFT' %}
-                        <span class="badge badge-outline">Draft</span>
+                        <span class="badge badge-outline">{% trans "Draft" %}</span>
                         {% elif campaign.status == 'SCHEDULED' %}
-                        <span class="badge badge-info">Scheduled</span>
+                        <span class="badge badge-info">{% trans "Scheduled" %}</span>
                         {% elif campaign.status == 'SENDING' %}
-                        <span class="badge badge-warning">Sending</span>
+                        <span class="badge badge-warning">{% trans "Sending" %}</span>
                         {% elif campaign.status == 'COMPLETED' %}
-                        <span class="badge badge-success">Completed</span>
+                        <span class="badge badge-success">{% trans "Completed" %}</span>
                         {% elif campaign.status == 'FAILED' %}
-                        <span class="badge badge-destructive">Failed</span>
+                        <span class="badge badge-destructive">{% trans "Failed" %}</span>
                         {% endif %}
                     </dd>
                 </div>
                 <div class="flex justify-between py-2 border-b border-border">
-                    <dt class="text-muted-foreground">Type</dt>
+                    <dt class="text-muted-foreground">{% trans "Type" %}</dt>
                     <dd class="font-medium">{{ campaign.get_message_type_display }}</dd>
                 </div>
                 <div class="flex justify-between py-2 border-b border-border">
-                    <dt class="text-muted-foreground">Recipients</dt>
+                    <dt class="text-muted-foreground">{% trans "Recipients" %}</dt>
                     <dd class="font-medium">{{ campaign.get_recipient_filter_display }}</dd>
                 </div>
                 <div class="flex justify-between py-2 border-b border-border">
-                    <dt class="text-muted-foreground">Created</dt>
+                    <dt class="text-muted-foreground">{% trans "Created" %}</dt>
                     <dd>{{ campaign.created_at|date:"M d, Y H:i" }}</dd>
                 </div>
                 {% if campaign.sent_at %}
                 <div class="flex justify-between py-2">
-                    <dt class="text-muted-foreground">Sent</dt>
+                    <dt class="text-muted-foreground">{% trans "Sent" %}</dt>
                     <dd>{{ campaign.sent_at|date:"M d, Y H:i" }}</dd>
                 </div>
                 {% endif %}
@@ -118,16 +118,16 @@
         <div class="card p-6">
             <h2 class="font-semibold mb-4 flex items-center gap-2">
                 <i data-lucide="file-text" class="w-4 h-4"></i>
-                Message Content
+                {% trans "Message Content" %}
             </h2>
             {% if campaign.subject %}
             <div class="mb-4">
-                <p class="text-xs text-muted-foreground mb-1">Subject</p>
+                <p class="text-xs text-muted-foreground mb-1">{% trans "Subject" %}</p>
                 <p class="font-medium">{{ campaign.subject }}</p>
             </div>
             {% endif %}
             <div>
-                <p class="text-xs text-muted-foreground mb-1">Body</p>
+                <p class="text-xs text-muted-foreground mb-1">{% trans "Body" %}</p>
                 <div class="p-4 rounded-lg bg-muted/50 text-sm whitespace-pre-wrap">{{ campaign.body }}</div>
             </div>
         </div>
@@ -137,7 +137,7 @@
         <div class="p-5 border-b border-border">
             <h2 class="font-semibold flex items-center gap-2">
                 <i data-lucide="list" class="w-4 h-4"></i>
-                Delivery Status
+                {% trans "Delivery Status" %}
             </h2>
         </div>
         {% if deliveries %}
@@ -157,19 +157,19 @@
                 </div>
                 <div class="flex items-center gap-3">
                     {% if delivery.status == 'PENDING' %}
-                    <span class="badge badge-outline">Pending</span>
+                    <span class="badge badge-outline">{% trans "Pending" %}</span>
                     {% elif delivery.status == 'SENT' %}
-                    <span class="badge badge-info">Sent</span>
+                    <span class="badge badge-info">{% trans "Sent" %}</span>
                     {% elif delivery.status == 'DELIVERED' %}
-                    <span class="badge badge-success">Delivered</span>
+                    <span class="badge badge-success">{% trans "Delivered" %}</span>
                     {% elif delivery.status == 'OPENED' %}
-                    <span class="badge badge-success">Opened</span>
+                    <span class="badge badge-success">{% trans "Opened" %}</span>
                     {% elif delivery.status == 'CLICKED' %}
-                    <span class="badge badge-success">Clicked</span>
+                    <span class="badge badge-success">{% trans "Clicked" %}</span>
                     {% elif delivery.status == 'BOUNCED' %}
-                    <span class="badge badge-warning">Bounced</span>
+                    <span class="badge badge-warning">{% trans "Bounced" %}</span>
                     {% elif delivery.status == 'FAILED' %}
-                    <span class="badge badge-destructive">Failed</span>
+                    <span class="badge badge-destructive">{% trans "Failed" %}</span>
                     {% endif %}
                     {% if delivery.sent_at %}
                     <span class="text-xs text-muted-foreground">{{ delivery.sent_at|date:"M d, H:i" }}</span>
@@ -180,7 +180,7 @@
         </div>
         {% else %}
         <div class="p-8 text-center text-muted-foreground">
-            <p>No deliveries yet. Send the campaign to see delivery status.</p>
+            <p>{% trans "No deliveries yet. Send the campaign to see delivery status." %}</p>
         </div>
         {% endif %}
     </div>
@@ -189,7 +189,7 @@
         <a href="{% url 'messaging:campaign_list' org_slug=organization.slug %}">
             {% #button variant="outline" %}
                 <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                Back to Campaigns
+                {% trans "Back to Campaigns" %}
             {% /button %}
         </a>
     </div>

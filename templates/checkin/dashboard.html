@@ -1,25 +1,25 @@
 {% extends "layouts/dashboard.html" %}
-{% load slippers %}
+{% load slippers i18n %}
 
-{% block title %}Check-in - {{ event.title }} - Reckot{% endblock %}
+{% block title %}{% trans "Check-in" %} - {{ event.title }} - Reckot{% endblock %}
 
 {% block breadcrumbs %}
 {% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug as event_dashboard_url %}
 {% #breadcrumb class="mb-4" %}
-    {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item href="/events/" %}Events{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/events/" %}{% trans "Events" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
     {% #breadcrumb_item href=event_dashboard_url %}{{ event.title|truncatewords:3 }}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item %}Check-in{% /breadcrumb_item %}
+    {% #breadcrumb_item %}{% trans "Check-in" %}{% /breadcrumb_item %}
 {% /breadcrumb %}
 {% endblock %}
 
 {% block header_title %}
 <div>
     <h1 class="text-lg font-semibold">{{ event.title }}</h1>
-    <p class="text-sm text-muted-foreground">Check-in Dashboard</p>
+    <p class="text-sm text-muted-foreground">{% trans "Check-in Dashboard" %}</p>
 </div>
 {% endblock %}
 
@@ -27,7 +27,7 @@
 <a href="{% url 'checkin:verify' org_slug=event.organization.slug event_slug=event.slug %}">
     {% #button variant="default" size="sm" %}
         <i data-lucide="scan" class="mr-2 h-4 w-4"></i>
-        Scan Tickets
+        {% trans "Scan Tickets" %}
     {% /button %}
 </a>
 {% endblock %}
@@ -41,7 +41,7 @@
     <div class="grid gap-6 lg:grid-cols-2">
         <div data-animate="fade-up" data-delay="0.1">
             {% #card %}
-                <h2 class="text-lg font-semibold mb-4">Recent Check-ins</h2>
+                <h2 class="text-lg font-semibold mb-4">{% trans "Recent Check-ins" %}</h2>
                 {% if recent_checkins %}
                 <div class="space-y-3">
                     {% for checkin in recent_checkins %}
@@ -53,19 +53,19 @@
                                 <p class="text-xs text-muted-foreground">{{ checkin.ticket.ticket_type.name }}</p>
                             </div>
                         </div>
-                        <span class="text-xs text-muted-foreground">{{ checkin.checked_in_at|timesince }} ago</span>
+                        <span class="text-xs text-muted-foreground">{{ checkin.checked_in_at|timesince }} {% trans "ago" %}</span>
                     </div>
                     {% endfor %}
                 </div>
                 {% else %}
-                {% #empty_state icon="users" title="No check-ins yet" description="Start scanning tickets to see check-ins here." %}{% /empty_state %}
+                {% #empty_state icon="users" title=_("No check-ins yet") description=_("Start scanning tickets to see check-ins here.") %}{% /empty_state %}
                 {% endif %}
             {% /card %}
         </div>
 
         <div data-animate="fade-up" data-delay="0.2">
             {% #card %}
-                <h2 class="text-lg font-semibold mb-4">Swag Items</h2>
+                <h2 class="text-lg font-semibold mb-4">{% trans "Swag Items" %}</h2>
                 {% if swag_items %}
                 <div class="space-y-3">
                     {% for item in swag_items %}
@@ -76,13 +76,13 @@
                         </div>
                         <div class="text-right">
                             <p class="font-semibold">{{ item.remaining }}/{{ item.quantity }}</p>
-                            <p class="text-xs text-muted-foreground">remaining</p>
+                            <p class="text-xs text-muted-foreground">{% trans "remaining" %}</p>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
                 {% else %}
-                {% #empty_state icon="gift" title="No swag items" description="Add swag items for this event." %}{% /empty_state %}
+                {% #empty_state icon="gift" title=_("No swag items") description=_("Add swag items for this event.") %}{% /empty_state %}
                 {% endif %}
             {% /card %}
         </div>

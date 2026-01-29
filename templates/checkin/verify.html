@@ -1,28 +1,28 @@
 {% extends "layouts/dashboard.html" %}
-{% load slippers %}
+{% load slippers i18n %}
 
-{% block title %}Scan Tickets - {{ event.title }} - Reckot{% endblock %}
+{% block title %}{% trans "Scan Tickets" %} - {{ event.title }} - Reckot{% endblock %}
 
 {% block breadcrumbs %}
 {% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug as event_dashboard_url %}
 {% url 'checkin:dashboard' org_slug=event.organization.slug event_slug=event.slug as checkin_dashboard_url %}
 {% #breadcrumb class="mb-4" %}
-    {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item href="/events/" %}Events{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/events/" %}{% trans "Events" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
     {% #breadcrumb_item href=event_dashboard_url %}{{ event.title|truncatewords:3 }}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item href=checkin_dashboard_url %}Check-in{% /breadcrumb_item %}
+    {% #breadcrumb_item href=checkin_dashboard_url %}{% trans "Check-in" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item %}Scanner{% /breadcrumb_item %}
+    {% #breadcrumb_item %}{% trans "Scanner" %}{% /breadcrumb_item %}
 {% /breadcrumb %}
 {% endblock %}
 
 {% block header_title %}
 <div>
     <h1 class="text-lg font-semibold">{{ event.title }}</h1>
-    <p class="text-sm text-muted-foreground">Scan or search for tickets</p>
+    <p class="text-sm text-muted-foreground">{% trans "Scan or search for tickets" %}</p>
 </div>
 {% endblock %}
 
@@ -30,7 +30,7 @@
 <a href="{% url 'checkin:dashboard' org_slug=event.organization.slug event_slug=event.slug %}">
     {% #button variant="outline" size="sm" %}
         <i data-lucide="arrow-left" class="mr-2 h-4 w-4"></i>
-        Back to Dashboard
+        {% trans "Back to Dashboard" %}
     {% /button %}
 </a>
 {% endblock %}
@@ -41,8 +41,8 @@
         <div>
             <div data-animate="fade-up" data-delay="0.1">
                 {% #card %}
-                    <h2 class="text-lg font-semibold">Manual Check-in</h2>
-                    <p class="text-sm text-muted-foreground mb-4">Enter ticket code or scan QR</p>
+                    <h2 class="text-lg font-semibold">{% trans "Manual Check-in" %}</h2>
+                    <p class="text-sm text-muted-foreground mb-4">{% trans "Enter ticket code or scan QR" %}</p>
 
                     <form
                         hx-post="{% url 'checkin:verify' org_slug=event.organization.slug event_slug=event.slug %}"
@@ -52,14 +52,14 @@
                     >
                         {% csrf_token %}
                         <div class="space-y-2">
-                            <label for="code" class="block text-sm font-medium">Ticket Code</label>
+                            <label for="code" class="block text-sm font-medium">{% trans "Ticket Code" %}</label>
                             <input type="text" name="code" id="code"
-                                   placeholder="Enter ticket code or UUID" required
+                                   placeholder="{% trans "Enter ticket code or UUID" %}" required
                                    class="input w-full font-mono">
                         </div>
                         {% #button type="submit" variant="default" class="w-full" %}
                             <i data-lucide="check" class="mr-2 h-4 w-4"></i>
-                            Check In
+                            {% trans "Check In" %}
                         {% /button %}
                     </form>
 
@@ -70,28 +70,28 @@
             <div class="mt-6 grid grid-cols-3 gap-4" data-stagger>
                 {% #card class="text-center" %}
                     <p class="text-3xl font-bold">{{ stats.total }}</p>
-                    <p class="text-sm text-muted-foreground">Total</p>
+                    <p class="text-sm text-muted-foreground">{% trans "Total" %}</p>
                 {% /card %}
                 {% #card class="text-center" %}
                     <p class="text-3xl font-bold text-success">{{ stats.checked_in }}</p>
-                    <p class="text-sm text-muted-foreground">Checked In</p>
+                    <p class="text-sm text-muted-foreground">{% trans "Checked In" %}</p>
                 {% /card %}
                 {% #card class="text-center" %}
                     <p class="text-3xl font-bold text-warning">{{ stats.remaining }}</p>
-                    <p class="text-sm text-muted-foreground">Remaining</p>
+                    <p class="text-sm text-muted-foreground">{% trans "Remaining" %}</p>
                 {% /card %}
             </div>
         </div>
 
         <div data-animate="fade-up" data-delay="0.2">
             {% #card %}
-                <h2 class="text-lg font-semibold">Search Attendees</h2>
-                <p class="text-sm text-muted-foreground mb-4">Find by name or email</p>
+                <h2 class="text-lg font-semibold">{% trans "Search Attendees" %}</h2>
+                <p class="text-sm text-muted-foreground mb-4">{% trans "Find by name or email" %}</p>
 
                 <input
                     type="search"
                     name="q"
-                    placeholder="Search by name, email, or code..."
+                    placeholder="{% trans "Search by name, email, or code..." %}"
                     class="input w-full"
                     hx-get="{% url 'checkin:search' org_slug=event.organization.slug event_slug=event.slug %}"
                     hx-trigger="keyup changed delay:300ms"
