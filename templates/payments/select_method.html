@@ -97,6 +97,9 @@
                     </div>
 
                     <div class="rounded-xl bg-muted p-4 space-y-3">
+                        <div class="text-xs text-info-foreground mb-2">
+                            {% trans "Note: The agent name that will appear for withdrawal is" %} <strong>TAKWID GROUP</strong>.
+                        </div>
                         <div class="text-sm text-muted-foreground mb-2">{% trans "Order Summary" %}</div>
                         {% for ticket in booking.tickets.all %}
                         <div class="flex items-center justify-between text-sm">
