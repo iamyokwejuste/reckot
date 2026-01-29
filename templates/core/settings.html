@@ -155,7 +155,7 @@
                 </div>
                 <i data-lucide="chevron-right" class="h-5 w-5 text-muted-foreground"></i>
             </a>
-            <a href="{% url 'account_logout' %}" class="flex items-center justify-between py-3 hover:bg-red-500/10 -mx-6 px-6 transition-colors text-red-500">
+            <a href="{% url 'account_logout' %}?next={{ request.path }}" class="flex items-center justify-between py-3 hover:bg-red-500/10 -mx-6 px-6 transition-colors text-red-500">
                 <div>
                     <p class="font-medium">Sign out</p>
                     <p class="text-sm text-red-400">Log out of your account</p>

@@ -33,7 +33,8 @@ def create_multi_ticket_booking(user, event, ticket_selections: dict, question_a
 
         total_amount = Decimal('0.00')
         tickets_to_create = []
-        now = timezone.now()
+        now = timezone.localtime(timezone.now())
+        now_naive = now.replace(tzinfo=None)
 
         for ticket_type_id, quantity in ticket_selections.items():
             if quantity <= 0:
@@ -48,10 +49,13 @@ def create_multi_ticket_booking(user, event, ticket_selections: dict, question_a
             except TicketType.DoesNotExist:
                 return None, f"Invalid ticket type selected."
 
-            if ticket_type.sales_start and now < ticket_type.sales_start:
+            sales_start = ticket_type.sales_start.replace(tzinfo=None) if ticket_type.sales_start else None
+            sales_end = ticket_type.sales_end.replace(tzinfo=None) if ticket_type.sales_end else None
+
+            if sales_start and now_naive < sales_start:
                 return None, f"{ticket_type.name} tickets are not yet available for purchase."
 
-            if ticket_type.sales_end and now > ticket_type.sales_end:
+            if sales_end and now_naive > sales_end:
                 return None, f"{ticket_type.name} tickets are no longer available for purchase."
 
             if ticket_type.available_quantity < quantity:

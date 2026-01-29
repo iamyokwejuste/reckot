@@ -109,11 +109,19 @@ class PublicEventDetailView(View):
         checkout_questions = event.checkout_questions.all()
         affiliate_code = request.session.get('affiliate_code')
 
+        flyer_enabled = False
+        try:
+            flyer_config = event.flyer_config
+            flyer_enabled = flyer_config.is_enabled and flyer_config.template_image
+        except:
+            pass
+
         return render(request, 'events/public_detail.html', {
             'event': event,
             'ticket_types': available_tickets,
             'checkout_questions': checkout_questions,
             'affiliate_code': affiliate_code,
+            'flyer_enabled': flyer_enabled,
         })
 
 
