@@ -1,13 +1,14 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 from apps.events.models import Event
 import uuid
 
 
 class EmbedWidget(models.Model):
     class Theme(models.TextChoices):
-        LIGHT = 'LIGHT', 'Light'
-        DARK = 'DARK', 'Dark'
-        AUTO = 'AUTO', 'Auto (System)'
+        LIGHT = 'LIGHT', _('Light')
+        DARK = 'DARK', _('Dark')
+        AUTO = 'AUTO', _('Auto (System)')
 
     event = models.OneToOneField(Event, on_delete=models.CASCADE, related_name='embed_widget')
     widget_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)

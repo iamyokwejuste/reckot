@@ -181,8 +181,9 @@ def get_booking_for_request(request, booking_ref):
 class PaymentSelectMethodView(View):
     def _calculate_withdrawal_fee(self, amount):
         from decimal import Decimal
-        fee = (Decimal(str(amount)) * Decimal('0.04')).quantize(Decimal('1'))
-        return max(fee, Decimal('100'))
+        if amount <= 1000:
+            return Decimal('50')
+        return (Decimal(str(amount)) * Decimal('0.04')).quantize(Decimal('1'))
 
     def get(self, request, booking_ref):
         booking, error = get_booking_for_request(request, booking_ref)

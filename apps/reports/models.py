@@ -1,23 +1,24 @@
 from django.db import models
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 from apps.events.models import Event
 import uuid
 
 
 class ReportExport(models.Model):
     class Type(models.TextChoices):
-        RSVP = 'RSVP', 'Registered Attendees'
-        PAYMENTS = 'PAYMENTS', 'Payment Records'
-        CHECKINS = 'CHECKINS', 'Check-in Report'
-        SWAG = 'SWAG', 'Swag Collection'
-        FINANCIAL = 'FINANCIAL', 'Financial Summary'
-        TICKET_SALES = 'TICKET_SALES', 'Ticket Sales'
+        RSVP = 'RSVP', _('Registered Attendees')
+        PAYMENTS = 'PAYMENTS', _('Payment Records')
+        CHECKINS = 'CHECKINS', _('Check-in Report')
+        SWAG = 'SWAG', _('Swag Collection')
+        FINANCIAL = 'FINANCIAL', _('Financial Summary')
+        TICKET_SALES = 'TICKET_SALES', _('Ticket Sales')
 
     class Format(models.TextChoices):
-        CSV = 'CSV', 'CSV'
-        EXCEL = 'EXCEL', 'Excel'
-        PDF = 'PDF', 'PDF'
-        JSON = 'JSON', 'JSON'
+        CSV = 'CSV', _('CSV')
+        EXCEL = 'EXCEL', _('Excel')
+        PDF = 'PDF', _('PDF')
+        JSON = 'JSON', _('JSON')
 
     reference = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     event = models.ForeignKey(

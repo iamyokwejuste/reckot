@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import login_required
+from django.utils.translation import gettext_lazy as _
 from apps.core.services.ai import gemini_ai
 
 
@@ -22,7 +23,7 @@ def generate_description(request):
         cover_image_mime = data.get('cover_image_mime', 'image/jpeg')
 
         if not title:
-            return JsonResponse({'error': 'Title is required'}, status=400)
+            return JsonResponse({'error': _('Title is required')}, status=400)
 
         cover_image_data = None
         if cover_image_base64:
@@ -57,7 +58,7 @@ def generate_description(request):
                     'description': result.get('description', '')
                 })
             return JsonResponse({'description': result, 'tagline': ''})
-        return JsonResponse({'error': 'Failed to generate description. Check API key.'}, status=500)
+        return JsonResponse({'error': _('Failed to generate description. Check API key.')}, status=500)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
@@ -71,13 +72,13 @@ def improve_description(request):
         description = data.get('description', '')
 
         if not description:
-            return JsonResponse({'error': 'Description required'}, status=400)
+            return JsonResponse({'error': _('Description required')}, status=400)
 
         result = gemini_ai.improve_description(description)
 
         if result:
             return JsonResponse({'description': result})
-        return JsonResponse({'error': 'Failed to improve description'}, status=500)
+        return JsonResponse({'error': _('Failed to improve description')}, status=500)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
@@ -92,13 +93,13 @@ def generate_seo(request):
         description = data.get('description', '')
 
         if not title:
-            return JsonResponse({'error': 'Title required'}, status=400)
+            return JsonResponse({'error': _('Title required')}, status=400)
 
         result = gemini_ai.generate_seo_meta(title, description)
 
         if result:
             return JsonResponse(result)
-        return JsonResponse({'error': 'Failed to generate SEO metadata'}, status=500)
+        return JsonResponse({'error': _('Failed to generate SEO metadata')}, status=500)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
@@ -114,13 +115,13 @@ def generate_social_caption(request):
         platform = data.get('platform', 'general')
 
         if not title:
-            return JsonResponse({'error': 'Title required'}, status=400)
+            return JsonResponse({'error': _('Title required')}, status=400)
 
         result = gemini_ai.generate_social_caption(title, description, platform)
 
         if result:
             return JsonResponse({'caption': result})
-        return JsonResponse({'error': 'Failed to generate caption'}, status=500)
+        return JsonResponse({'error': _('Failed to generate caption')}, status=500)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
@@ -135,13 +136,13 @@ def translate_text(request):
         target_language = data.get('language', 'French')
 
         if not text:
-            return JsonResponse({'error': 'Text required'}, status=400)
+            return JsonResponse({'error': _('Text required')}, status=400)
 
         result = gemini_ai.translate_text(text, target_language)
 
         if result:
             return JsonResponse({'translation': result})
-        return JsonResponse({'error': 'Failed to translate'}, status=500)
+        return JsonResponse({'error': _('Failed to translate')}, status=500)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
@@ -156,13 +157,13 @@ def summarize_text(request):
         max_words = data.get('max_words', 30)
 
         if not text:
-            return JsonResponse({'error': 'Text required'}, status=400)
+            return JsonResponse({'error': _('Text required')}, status=400)
 
         result = gemini_ai.summarize_description(text, max_words)
 
         if result:
             return JsonResponse({'summary': result})
-        return JsonResponse({'error': 'Failed to summarize'}, status=500)
+        return JsonResponse({'error': _('Failed to summarize')}, status=500)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
@@ -181,7 +182,7 @@ def suggest_pricing(request):
 
         if result:
             return JsonResponse(result)
-        return JsonResponse({'error': 'Failed to suggest pricing'}, status=500)
+        return JsonResponse({'error': _('Failed to suggest pricing')}, status=500)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
@@ -196,13 +197,13 @@ def suggest_tags(request):
         description = data.get('description', '')
 
         if not title:
-            return JsonResponse({'error': 'Title required'}, status=400)
+            return JsonResponse({'error': _('Title required')}, status=400)
 
         result = gemini_ai.suggest_event_tags(title, description)
 
         if result:
             return JsonResponse({'tags': result})
-        return JsonResponse({'error': 'Failed to suggest tags'}, status=500)
+        return JsonResponse({'error': _('Failed to suggest tags')}, status=500)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
@@ -216,13 +217,13 @@ def event_assistant(request):
         question = data.get('question', '')
 
         if not question:
-            return JsonResponse({'error': 'Question required'}, status=400)
+            return JsonResponse({'error': _('Question required')}, status=400)
 
         result = gemini_ai.answer_event_question(event_info, question)
 
         if result:
             return JsonResponse({'answer': result})
-        return JsonResponse({'error': 'Failed to get answer'}, status=500)
+        return JsonResponse({'error': _('Failed to get answer')}, status=500)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
@@ -236,12 +237,12 @@ def generate_insight(request):
         metrics = data.get('metrics', {})
 
         if not metrics:
-            return JsonResponse({'error': 'Metrics required'}, status=400)
+            return JsonResponse({'error': _('Metrics required')}, status=400)
 
         result = gemini_ai.generate_analytics_insight(metrics)
 
         if result:
             return JsonResponse({'insight': result})
-        return JsonResponse({'error': 'Failed to generate insight'}, status=500)
+        return JsonResponse({'error': _('Failed to generate insight')}, status=500)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)

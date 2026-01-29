@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 from apps.orgs.models import Organization
 from apps.events.models import Event
 from apps.tickets.models import Booking
@@ -8,8 +9,8 @@ import uuid
 
 class AffiliateLink(models.Model):
     class CommissionType(models.TextChoices):
-        FIXED = 'FIXED', 'Fixed Amount'
-        PERCENTAGE = 'PERCENTAGE', 'Percentage'
+        FIXED = 'FIXED', _('Fixed Amount')
+        PERCENTAGE = 'PERCENTAGE', _('Percentage')
 
     organization = models.ForeignKey(
         Organization,
@@ -65,10 +66,10 @@ class AffiliateLink(models.Model):
 
 class AffiliateConversion(models.Model):
     class Status(models.TextChoices):
-        PENDING = 'PENDING', 'Pending'
-        APPROVED = 'APPROVED', 'Approved'
-        PAID = 'PAID', 'Paid'
-        REJECTED = 'REJECTED', 'Rejected'
+        PENDING = 'PENDING', _('Pending')
+        APPROVED = 'APPROVED', _('Approved')
+        PAID = 'PAID', _('Paid')
+        REJECTED = 'REJECTED', _('Rejected')
 
     affiliate_link = models.ForeignKey(
         AffiliateLink,
@@ -99,13 +100,13 @@ class AffiliateConversion(models.Model):
 
 class SocialShare(models.Model):
     class Platform(models.TextChoices):
-        FACEBOOK = 'FACEBOOK', 'Facebook'
-        TWITTER = 'TWITTER', 'Twitter/X'
-        LINKEDIN = 'LINKEDIN', 'LinkedIn'
-        WHATSAPP = 'WHATSAPP', 'WhatsApp'
-        TELEGRAM = 'TELEGRAM', 'Telegram'
-        EMAIL = 'EMAIL', 'Email'
-        COPY_LINK = 'COPY_LINK', 'Copy Link'
+        FACEBOOK = 'FACEBOOK', _('Facebook')
+        TWITTER = 'TWITTER', _('Twitter/X')
+        LINKEDIN = 'LINKEDIN', _('LinkedIn')
+        WHATSAPP = 'WHATSAPP', _('WhatsApp')
+        TELEGRAM = 'TELEGRAM', _('Telegram')
+        EMAIL = 'EMAIL', _('Email')
+        COPY_LINK = 'COPY_LINK', _('Copy Link')
 
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='shares')
     platform = models.CharField(max_length=20, choices=Platform.choices)

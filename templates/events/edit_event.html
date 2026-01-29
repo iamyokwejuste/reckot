@@ -13,19 +13,19 @@
 {% block breadcrumbs %}
 {% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug as dashboard_url %}
 {% #breadcrumb class="mb-4" %}
-    {% #breadcrumb_item href="/" %}Home{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item href="/events/" %}Events{% /breadcrumb_item %}
+    {% #breadcrumb_item href="/events/" %}{% trans "Events" %}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
     {% #breadcrumb_item href=dashboard_url %}{{ event.title|truncatewords:3 }}{% /breadcrumb_item %}
     {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-    {% #breadcrumb_item %}Edit{% /breadcrumb_item %}
+    {% #breadcrumb_item %}{% trans "Edit" %}{% /breadcrumb_item %}
 {% /breadcrumb %}
 {% endblock %}
 
 {% block header_title %}
 <div>
-    <h1 class="text-lg font-semibold">Edit Event</h1>
+    <h1 class="text-lg font-semibold">{% trans "Edit Event" %}</h1>
     <p class="text-sm text-muted-foreground">{{ event.title }}</p>
 </div>
 {% endblock %}
@@ -34,7 +34,7 @@
 <a href="{% url 'events:dashboard' event.organization.slug event.slug %}">
     {% #button variant="outline" size="sm" %}
         <i data-lucide="arrow-left" class="w-4 h-4"></i>
-        Back to Dashboard
+        {% trans "Back to Dashboard" %}
     {% /button %}
 </a>
 {% endblock %}
@@ -124,7 +124,7 @@
     <div class="mb-8">
         <div class="flex items-center justify-between mb-2">
             <span class="text-sm font-medium">Step <span x-text="step"></span> of <span x-text="totalSteps"></span></span>
-            <span class="text-sm text-muted-foreground" x-text="['Basic Info', 'Date & Time', 'Location', 'Details'][step-1]"></span>
+            <span class="text-sm text-muted-foreground" x-text="['{% trans "Basic Info" %}', '{% trans "Date & Time" %}', '{% trans "Location" %}', '{% trans "Details" %}'][step-1]"></span>
         </div>
         <div class="h-2 bg-muted rounded-full overflow-hidden">
             <div class="h-full bg-primary transition-all duration-300 rounded-full"
@@ -152,19 +152,19 @@
         <div x-show="step === 1" x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
             <div class="card p-6 space-y-4">
-                <h2 class="text-lg font-semibold">Basic Information</h2>
+                <h2 class="text-lg font-semibold">{% trans "Basic Information" %}</h2>
 
                 <div>
-                    <label class="block text-sm font-medium mb-2">Organization</label>
+                    <label class="block text-sm font-medium mb-2">{% trans "Organization" %}</label>
                     <div class="input bg-muted text-muted-foreground cursor-not-allowed">
                         {{ event.organization.name }}
                     </div>
-                    <p class="text-xs text-muted-foreground mt-1">Organization cannot be changed</p>
+                    <p class="text-xs text-muted-foreground mt-1">{% trans "Organization cannot be changed" %}</p>
                 </div>
 
                 <div>
-                    <label for="id_title" class="block text-sm font-medium mb-2">Event Title <span class="text-red-500">*</span></label>
-                    <input type="text" name="title" id="id_title" required placeholder="e.g., Tech Conference 2026"
+                    <label for="id_title" class="block text-sm font-medium mb-2">{% trans "Event Title" %} <span class="text-red-500">*</span></label>
+                    <input type="text" name="title" id="id_title" required placeholder="{% trans "e.g., Tech Conference 2026" %}"
                            class="input" :class="{ 'border-red-500': errors.title }"
                            x-model="title" @input="clearError('title')"
                            value="{{ event.title }}">
@@ -172,16 +172,16 @@
                 </div>
 
                 <div>
-                    <label for="id_short_description" class="block text-sm font-medium mb-2">Tagline</label>
+                    <label for="id_short_description" class="block text-sm font-medium mb-2">{% trans "Tagline" %}</label>
                     <input type="text" name="short_description" id="id_short_description"
-                           placeholder="A brief description (max 300 chars)" maxlength="300" class="input"
+                           placeholder="{% trans "A brief description (max 300 chars)" %}" maxlength="300" class="input"
                            value="{{ event.short_description|default:'' }}">
                 </div>
 
                 <div>
-                    <label for="id_description" class="block text-sm font-medium mb-2">Full Description <span class="text-red-500">*</span></label>
+                    <label for="id_description" class="block text-sm font-medium mb-2">{% trans "Full Description" %} <span class="text-red-500">*</span></label>
                     <textarea name="description" id="id_description" rows="4" required
-                              placeholder="Tell attendees what to expect..."
+                              placeholder="{% trans "Tell attendees what to expect..." %}"
                               class="hidden"
                               x-model="description"
                               @input="clearError('description')"
@@ -190,14 +190,14 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium mb-2">Cover Image</label>
+                    <label class="block text-sm font-medium mb-2">{% trans "Cover Image" %}</label>
                     <div class="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-muted-foreground/50 transition-colors cursor-pointer"
                          @click="$refs.coverInput.click()">
                         <template x-if="!coverPreview">
                             <div>
                                 <i data-lucide="image-plus" class="h-10 w-10 mx-auto text-muted-foreground mb-2"></i>
-                                <p class="text-sm font-medium">Click to upload</p>
-                                <p class="text-xs text-muted-foreground mt-1">PNG, JPG. Recommended: 1200x630px</p>
+                                <p class="text-sm font-medium">{% trans "Click to upload" %}</p>
+                                <p class="text-xs text-muted-foreground mt-1">{% trans "PNG, JPG. Recommended: 1200x630px" %}</p>
                             </div>
                         </template>
                         <template x-if="coverPreview">
@@ -220,14 +220,14 @@
         <div x-show="step === 2" x-cloak x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
             <div class="card p-6 space-y-4 card-overflow-visible">
-                <h2 class="text-lg font-semibold">Date & Time</h2>
+                <h2 class="text-lg font-semibold">{% trans "Date & Time" %}</h2>
 
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div class="relative">
-                        <label for="id_start_at" class="block text-sm font-medium mb-2">Start <span class="text-red-500">*</span></label>
+                        <label for="id_start_at" class="block text-sm font-medium mb-2">{% trans "Start" %} <span class="text-red-500">*</span></label>
                         <div class="relative">
                             <input type="text" name="start_at" id="id_start_at" required
-                                   placeholder="Select date and time"
+                                   placeholder="{% trans "Select date and time" %}"
                                    class="input pl-10 flatpickr-datetime cursor-pointer" :class="{ 'border-red-500': errors.startAt }"
                                    x-model="startAt" @change="clearError('startAt')"
                                    value="{{ event.start_at|date:'Y-m-d H:i' }}">
@@ -238,10 +238,10 @@
                         <p x-show="errors.startAt" x-cloak class="text-sm text-red-500 mt-1" x-text="errors.startAt"></p>
                     </div>
                     <div class="relative">
-                        <label for="id_end_at" class="block text-sm font-medium mb-2">End <span class="text-red-500">*</span></label>
+                        <label for="id_end_at" class="block text-sm font-medium mb-2">{% trans "End" %} <span class="text-red-500">*</span></label>
                         <div class="relative">
                             <input type="text" name="end_at" id="id_end_at" required
-                                   placeholder="Select date and time"
+                                   placeholder="{% trans "Select date and time" %}"
                                    class="input pl-10 flatpickr-datetime cursor-pointer" :class="{ 'border-red-500': errors.endAt }"
                                    x-model="endAt" @change="clearError('endAt')"
                                    value="{{ event.end_at|date:'Y-m-d H:i' }}">
@@ -254,7 +254,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium mb-2">Timezone</label>
+                    <label class="block text-sm font-medium mb-2">{% trans "Timezone" %}</label>
                     <div class="custom-select-wrapper" x-data="{ open: false, value: '{{ event.timezone|default:'Africa/Douala' }}', label: '{{ event.timezone|default:'Africa/Douala' }}' }">
                         <input type="hidden" name="timezone" :value="value">
                         <button type="button" @click="open = !open" @click.outside="open = false"
@@ -294,27 +294,27 @@
         <div x-show="step === 3" x-cloak x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
             <div class="card p-6 space-y-4">
-                <h2 class="text-lg font-semibold">Location</h2>
+                <h2 class="text-lg font-semibold">{% trans "Location" %}</h2>
 
                 <div>
-                    <label for="id_event_type" class="block text-sm font-medium mb-2">Event Type</label>
+                    <label for="id_event_type" class="block text-sm font-medium mb-2">{% trans "Event Type" %}</label>
                     <select name="event_type" id="id_event_type" required class="input" x-model="eventType">
-                        <option value="IN_PERSON" {% if event.event_type == 'IN_PERSON' %}selected{% endif %}>In Person</option>
-                        <option value="ONLINE" {% if event.event_type == 'ONLINE' %}selected{% endif %}>Online</option>
-                        <option value="HYBRID" {% if event.event_type == 'HYBRID' %}selected{% endif %}>Hybrid</option>
+                        <option value="IN_PERSON" {% if event.event_type == 'IN_PERSON' %}selected{% endif %}>{% trans "In Person" %}</option>
+                        <option value="ONLINE" {% if event.event_type == 'ONLINE' %}selected{% endif %}>{% trans "Online" %}</option>
+                        <option value="HYBRID" {% if event.event_type == 'HYBRID' %}selected{% endif %}>{% trans "Hybrid" %}</option>
                     </select>
                 </div>
 
                 <div x-show="eventType !== 'ONLINE'" class="space-y-4">
                     <div>
-                        <label for="id_venue_name" class="block text-sm font-medium mb-2">Venue Name</label>
-                        <input type="text" name="venue_name" id="id_venue_name" placeholder="e.g., Convention Center" class="input"
+                        <label for="id_venue_name" class="block text-sm font-medium mb-2">{% trans "Venue Name" %}</label>
+                        <input type="text" name="venue_name" id="id_venue_name" placeholder="{% trans "e.g., Convention Center" %}" class="input"
                                value="{{ event.venue_name|default:'' }}">
                     </div>
 
                     <div>
-                        <label for="id_location" class="block text-sm font-medium mb-2">Address <span class="text-red-500">*</span></label>
-                        <input type="text" name="location" id="id_location" placeholder="Street address"
+                        <label for="id_location" class="block text-sm font-medium mb-2">{% trans "Address" %} <span class="text-red-500">*</span></label>
+                        <input type="text" name="location" id="id_location" placeholder="{% trans "Street address" %}"
                                class="input" :class="{ 'border-red-500': errors.location }"
                                :required="eventType !== 'ONLINE'"
                                x-model="location" @input="clearError('location')"
@@ -324,12 +324,12 @@
 
                     <div class="grid gap-4 sm:grid-cols-2">
                         <div>
-                            <label for="id_city" class="block text-sm font-medium mb-2">City</label>
-                            <input type="text" name="city" id="id_city" placeholder="e.g., Yaounde" class="input"
+                            <label for="id_city" class="block text-sm font-medium mb-2">{% trans "City" %}</label>
+                            <input type="text" name="city" id="id_city" placeholder="{% trans "e.g., Yaounde" %}" class="input"
                                    value="{{ event.city|default:'' }}">
                         </div>
                         <div>
-                            <label for="id_country" class="block text-sm font-medium mb-2">Country</label>
+                            <label for="id_country" class="block text-sm font-medium mb-2">{% trans "Country" %}</label>
                             <input type="text" name="country" id="id_country" class="input"
                                    value="{{ event.country|default:'Cameroon' }}">
                         </div>
@@ -338,10 +338,10 @@
 
                 <div x-show="eventType !== 'IN_PERSON'" class="space-y-4">
                     <div>
-                        <label for="id_online_url" class="block text-sm font-medium mb-2">Meeting Link</label>
+                        <label for="id_online_url" class="block text-sm font-medium mb-2">{% trans "Meeting Link" %}</label>
                         <input type="url" name="online_url" id="id_online_url" placeholder="https://zoom.us/j/..." class="input"
                                value="{{ event.online_url|default:'' }}">
-                        <p class="text-xs text-muted-foreground mt-1">Zoom, Google Meet, etc.</p>
+                        <p class="text-xs text-muted-foreground mt-1">{% trans "Zoom, Google Meet, etc." %}</p>
                     </div>
                 </div>
             </div>
@@ -350,40 +350,40 @@
         <div x-show="step === 4" x-cloak x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
             <div class="card p-6 space-y-4">
-                <h2 class="text-lg font-semibold">Additional Details</h2>
+                <h2 class="text-lg font-semibold">{% trans "Additional Details" %}</h2>
 
                 <div>
-                    <label for="id_capacity" class="block text-sm font-medium mb-2">Capacity</label>
+                    <label for="id_capacity" class="block text-sm font-medium mb-2">{% trans "Capacity" %}</label>
                     <input type="number" name="capacity" id="id_capacity" min="0" required class="input"
                            value="{{ event.capacity|default:100 }}">
-                    <p class="text-xs text-muted-foreground mt-1">0 for unlimited</p>
+                    <p class="text-xs text-muted-foreground mt-1">{% trans "0 for unlimited" %}</p>
                 </div>
 
                 <div class="flex items-center gap-3">
                     <input type="checkbox" name="is_free" id="id_is_free" class="h-4 w-4 rounded border-border"
                            {% if event.is_free %}checked{% endif %}>
-                    <label for="id_is_free" class="text-sm font-medium">This is a free event</label>
+                    <label for="id_is_free" class="text-sm font-medium">{% trans "This is a free event" %}</label>
                 </div>
 
                 <div>
-                    <label for="id_website" class="block text-sm font-medium mb-2">Event Website</label>
+                    <label for="id_website" class="block text-sm font-medium mb-2">{% trans "Event Website" %}</label>
                     <input type="url" name="website" id="id_website" placeholder="https://event.com" class="input"
                            value="{{ event.website|default:'' }}">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium mb-2">Contact Information <span class="text-red-500">*</span></label>
-                    <p class="text-xs text-muted-foreground mb-3">At least one contact method is required</p>
+                    <label class="block text-sm font-medium mb-2">{% trans "Contact Information" %} <span class="text-red-500">*</span></label>
+                    <p class="text-xs text-muted-foreground mb-3">{% trans "At least one contact method is required" %}</p>
                     <div class="grid gap-4 sm:grid-cols-2">
                         <div>
-                            <label for="id_contact_email" class="block text-xs text-muted-foreground mb-1">Email</label>
+                            <label for="id_contact_email" class="block text-xs text-muted-foreground mb-1">{% trans "Email" %}</label>
                             <input type="email" name="contact_email" id="id_contact_email" placeholder="contact@event.com"
                                    class="input" x-model="contactEmail" @input="clearError('contact')"
                                    :class="{ 'border-red-500': errors.contact }"
                                    value="{{ event.contact_email|default:'' }}">
                         </div>
                         <div>
-                            <label for="id_contact_phone" class="block text-xs text-muted-foreground mb-1">Phone</label>
+                            <label for="id_contact_phone" class="block text-xs text-muted-foreground mb-1">{% trans "Phone" %}</label>
                             <input type="tel" name="contact_phone" id="id_contact_phone" placeholder="+237 6XX XXX XXX"
                                    class="input" x-model="contactPhone" @input="clearError('contact')"
                                    :class="{ 'border-red-500': errors.contact }"
@@ -399,27 +399,27 @@
             <template x-if="step > 1">
                 {% #button type="button" variant="outline" attrs='@click="prevStep()"' %}
                     <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                    Back
+                    {% trans "Back" %}
                 {% /button %}
             </template>
             <div x-show="step === 1">
                 <a href="{% url 'events:dashboard' event.organization.slug event.slug %}">
                     {% #button type="button" variant="outline" %}
-                        Cancel
+                        {% trans "Cancel" %}
                     {% /button %}
                 </a>
             </div>
 
             <template x-if="step < totalSteps">
                 {% #button type="button" variant="default" attrs='@click="nextStep()"' %}
-                    Next
+                    {% trans "Next" %}
                     <i data-lucide="arrow-right" class="w-4 h-4"></i>
                 {% /button %}
             </template>
 
             <template x-if="step === totalSteps">
                 {% #button type="submit" variant="default" %}
-                    Save Changes
+                    {% trans "Save Changes" %}
                     <i data-lucide="check" class="w-4 h-4"></i>
                 {% /button %}
             </template>

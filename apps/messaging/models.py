@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 from apps.orgs.models import Organization
 from apps.events.models import Event
 from apps.tickets.models import Ticket
@@ -8,8 +9,8 @@ import uuid
 
 class MessageTemplate(models.Model):
     class Type(models.TextChoices):
-        EMAIL = 'EMAIL', 'Email'
-        SMS = 'SMS', 'SMS'
+        EMAIL = 'EMAIL', _('Email')
+        SMS = 'SMS', _('SMS')
 
     organization = models.ForeignKey(
         Organization,
@@ -37,17 +38,17 @@ class MessageTemplate(models.Model):
 
 class MessageCampaign(models.Model):
     class Status(models.TextChoices):
-        DRAFT = 'DRAFT', 'Draft'
-        SCHEDULED = 'SCHEDULED', 'Scheduled'
-        SENDING = 'SENDING', 'Sending'
-        COMPLETED = 'COMPLETED', 'Completed'
-        FAILED = 'FAILED', 'Failed'
+        DRAFT = 'DRAFT', _('Draft')
+        SCHEDULED = 'SCHEDULED', _('Scheduled')
+        SENDING = 'SENDING', _('Sending')
+        COMPLETED = 'COMPLETED', _('Completed')
+        FAILED = 'FAILED', _('Failed')
 
     class RecipientFilter(models.TextChoices):
-        ALL_ATTENDEES = 'ALL', 'All Attendees'
-        TICKET_TYPE = 'TICKET_TYPE', 'By Ticket Type'
-        CHECKED_IN = 'CHECKED_IN', 'Checked In Only'
-        NOT_CHECKED_IN = 'NOT_CHECKED_IN', 'Not Checked In'
+        ALL_ATTENDEES = 'ALL', _('All Attendees')
+        TICKET_TYPE = 'TICKET_TYPE', _('By Ticket Type')
+        CHECKED_IN = 'CHECKED_IN', _('Checked In Only')
+        NOT_CHECKED_IN = 'NOT_CHECKED_IN', _('Not Checked In')
 
     reference = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     organization = models.ForeignKey(
@@ -102,13 +103,13 @@ class MessageCampaign(models.Model):
 
 class MessageDelivery(models.Model):
     class Status(models.TextChoices):
-        PENDING = 'PENDING', 'Pending'
-        SENT = 'SENT', 'Sent'
-        DELIVERED = 'DELIVERED', 'Delivered'
-        OPENED = 'OPENED', 'Opened'
-        CLICKED = 'CLICKED', 'Clicked'
-        BOUNCED = 'BOUNCED', 'Bounced'
-        FAILED = 'FAILED', 'Failed'
+        PENDING = 'PENDING', _('Pending')
+        SENT = 'SENT', _('Sent')
+        DELIVERED = 'DELIVERED', _('Delivered')
+        OPENED = 'OPENED', _('Opened')
+        CLICKED = 'CLICKED', _('Clicked')
+        BOUNCED = 'BOUNCED', _('Bounced')
+        FAILED = 'FAILED', _('Failed')
 
     campaign = models.ForeignKey(
         MessageCampaign,

@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 from apps.tickets.models import Booking
 from apps.orgs.models import Organization
 import uuid
@@ -8,32 +9,32 @@ from django.utils import timezone
 
 
 class Currency(models.TextChoices):
-    XAF = 'XAF', 'Central African CFA Franc'
-    XOF = 'XOF', 'West African CFA Franc'
-    USD = 'USD', 'US Dollar'
-    EUR = 'EUR', 'Euro'
-    GBP = 'GBP', 'British Pound'
-    NGN = 'NGN', 'Nigerian Naira'
-    GHS = 'GHS', 'Ghanaian Cedi'
-    UGX = 'UGX', 'Ugandan Shilling'
+    XAF = 'XAF', _('Central African CFA Franc')
+    XOF = 'XOF', _('West African CFA Franc')
+    USD = 'USD', _('US Dollar')
+    EUR = 'EUR', _('Euro')
+    GBP = 'GBP', _('British Pound')
+    NGN = 'NGN', _('Nigerian Naira')
+    GHS = 'GHS', _('Ghanaian Cedi')
+    UGX = 'UGX', _('Ugandan Shilling')
 
 
 class PaymentProvider(models.TextChoices):
-    CAMPAY = 'CAMPAY', 'Campay'
-    PAWAPAY = 'PAWAPAY', 'PawaPay'
-    FLUTTERWAVE = 'FLUTTERWAVE', 'Flutterwave'
-    MTN_MOMO = 'MTN_MOMO', 'MTN Mobile Money'
-    ORANGE_MONEY = 'ORANGE_MONEY', 'Orange Money'
-    STRIPE = 'STRIPE', 'Stripe'
-    PAYPAL = 'PAYPAL', 'PayPal'
-    OFFLINE = 'OFFLINE', 'Offline Payment'
+    CAMPAY = 'CAMPAY', _('Campay')
+    PAWAPAY = 'PAWAPAY', _('PawaPay')
+    FLUTTERWAVE = 'FLUTTERWAVE', _('Flutterwave')
+    MTN_MOMO = 'MTN_MOMO', _('MTN Mobile Money')
+    ORANGE_MONEY = 'ORANGE_MONEY', _('Orange Money')
+    STRIPE = 'STRIPE', _('Stripe')
+    PAYPAL = 'PAYPAL', _('PayPal')
+    OFFLINE = 'OFFLINE', _('Offline Payment')
 
 
 class PaymentGatewayConfig(models.Model):
     class ServiceFeeType(models.TextChoices):
-        FIXED = 'FIXED', 'Fixed Amount'
-        PERCENTAGE = 'PERCENTAGE', 'Percentage'
-        BOTH = 'BOTH', 'Fixed + Percentage'
+        FIXED = 'FIXED', _('Fixed Amount')
+        PERCENTAGE = 'PERCENTAGE', _('Percentage')
+        BOTH = 'BOTH', _('Fixed + Percentage')
 
     organization = models.ForeignKey(
         Organization,
@@ -76,10 +77,10 @@ class PaymentGatewayConfig(models.Model):
 
 class Payment(models.Model):
     class Status(models.TextChoices):
-        PENDING = 'PENDING', 'Pending'
-        CONFIRMED = 'CONFIRMED', 'Confirmed'
-        FAILED = 'FAILED', 'Failed'
-        EXPIRED = 'EXPIRED', 'Expired'
+        PENDING = 'PENDING', _('Pending')
+        CONFIRMED = 'CONFIRMED', _('Confirmed')
+        FAILED = 'FAILED', _('Failed')
+        EXPIRED = 'EXPIRED', _('Expired')
 
     booking = models.OneToOneField(
         Booking,
@@ -148,9 +149,9 @@ class Payment(models.Model):
 
 class OfflinePayment(models.Model):
     class VerificationStatus(models.TextChoices):
-        PENDING = 'PENDING', 'Pending Verification'
-        VERIFIED = 'VERIFIED', 'Verified'
-        REJECTED = 'REJECTED', 'Rejected'
+        PENDING = 'PENDING', _('Pending Verification')
+        VERIFIED = 'VERIFIED', _('Verified')
+        REJECTED = 'REJECTED', _('Rejected')
 
     payment = models.OneToOneField(
         Payment,
@@ -184,14 +185,14 @@ class OfflinePayment(models.Model):
 
 class Refund(models.Model):
     class Status(models.TextChoices):
-        PENDING = 'PENDING', 'Pending Review'
-        APPROVED = 'APPROVED', 'Approved'
-        PROCESSED = 'PROCESSED', 'Processed'
-        REJECTED = 'REJECTED', 'Rejected'
+        PENDING = 'PENDING', _('Pending Review')
+        APPROVED = 'APPROVED', _('Approved')
+        PROCESSED = 'PROCESSED', _('Processed')
+        REJECTED = 'REJECTED', _('Rejected')
 
     class Type(models.TextChoices):
-        FULL = 'FULL', 'Full Refund'
-        PARTIAL = 'PARTIAL', 'Partial Refund'
+        FULL = 'FULL', _('Full Refund')
+        PARTIAL = 'PARTIAL', _('Partial Refund')
 
     payment = models.ForeignKey(
         Payment,
