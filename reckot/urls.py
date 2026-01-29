@@ -51,7 +51,6 @@ urlpatterns = [
     path('accounts/phone/signup/verify/', PhoneSignupVerifyView.as_view(), name='phone_signup_verify'),
 ]
 
-# Serve media files in all environments (Coolify handles reverse proxy)
 urlpatterns += [
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
 ]
