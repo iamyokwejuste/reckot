@@ -2,6 +2,7 @@ import uuid
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.db.models import Q, Count, Sum
@@ -176,9 +177,11 @@ class EventCreateView(LoginRequiredMixin, View):
 
         event, errors = create_event(request.user, organization, request.POST, request.FILES)
         if event:
+            messages.success(request, f'Event "{event.title}" created successfully!')
             return redirect('events:detail', org_slug=organization.slug, event_slug=event.slug)
         else:
             form = EventForm(request.POST, request.FILES)
+            messages.error(request, 'Failed to create event. Please check the errors below.')
             return render(request, 'events/create_event.html', {
                 'form': form,
                 'organizations': organizations,

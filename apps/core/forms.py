@@ -1,3 +1,4 @@
+import uuid
 from django import forms
 from allauth.account.forms import SignupForm
 
@@ -15,6 +16,8 @@ class CustomSignupForm(SignupForm):
 
     def save(self, request):
         user = super().save(request)
+        if not user.username:
+            user.username = user.email.split('@')[0] + '_' + uuid.uuid4().hex[:8]
         user.phone_number = self.cleaned_data.get('phone_number')
         user.save()
         return user

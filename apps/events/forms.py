@@ -32,11 +32,16 @@ class EventForm(forms.ModelForm):
         cleaned_data = super().clean()
         contact_email = cleaned_data.get('contact_email')
         contact_phone = cleaned_data.get('contact_phone')
+        event_type = cleaned_data.get('event_type')
+        location = cleaned_data.get('location')
 
         if not contact_email and not contact_phone:
             raise forms.ValidationError(
                 'At least one contact method (email or phone) is required.'
             )
+
+        if event_type in ['IN_PERSON', 'HYBRID'] and not location:
+            self.add_error('location', 'Location is required for in-person and hybrid events.')
 
         return cleaned_data
 

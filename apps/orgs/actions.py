@@ -66,25 +66,35 @@ class OrganizationCreateView(LoginRequiredMixin, View):
                 'error': 'Organization name is required.',
             })
 
-        organization = Organization.objects.create(
-            name=name,
-            description=description,
-            website=website,
-            owner=request.user,
-        )
+        try:
+            organization = Organization.objects.create(
+                name=name,
+                description=description,
+                website=website,
+                owner=request.user,
+            )
 
-        if request.FILES.get('logo'):
-            organization.logo = request.FILES['logo']
-            organization.save()
+            if request.FILES.get('logo'):
+                organization.logo = request.FILES['logo']
+                organization.save()
 
-        Membership.objects.create(
-            organization=organization,
-            user=request.user,
-            role=MemberRole.OWNER,
-        )
+            Membership.objects.create(
+                organization=organization,
+                user=request.user,
+                role=MemberRole.OWNER,
+            )
 
-        messages.success(request, f'Organization "{name}" created successfully!')
-        return redirect('orgs:detail', slug=organization.slug)
+            messages.success(request, f'Organization "{name}" created successfully!')
+            return redirect('orgs:detail', slug=organization.slug)
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"Failed to create organization: {e}")
+            return render(request, 'orgs/create.html', {
+                'error': f'Failed to create organization: {str(e)}',
+                'name': name,
+                'description': description,
+                'website': website,
+            })
 
 
 class OrganizationDetailView(LoginRequiredMixin, OrgPermissionMixin, View):

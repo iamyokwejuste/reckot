@@ -166,6 +166,7 @@ if _google_client_id and _google_client_secret:
         'AUTH_PARAMS': {'access_type': 'online'},
     }
 
+ACCOUNT_ADAPTER = 'apps.core.adapters.CustomAccountAdapter'
 ACCOUNT_FORMS = {
     'signup': 'apps.core.forms.CustomSignupForm',
 }

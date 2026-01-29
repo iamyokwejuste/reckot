@@ -26,7 +26,7 @@ class Event(models.Model):
     end_at = models.DateTimeField()
     timezone = models.CharField(max_length=50, default='Africa/Douala')
     event_type = models.CharField(max_length=20, choices=EventType.choices, default=EventType.IN_PERSON)
-    location = models.CharField(max_length=200)
+    location = models.CharField(max_length=200, blank=True)
     venue_name = models.CharField(max_length=200, blank=True)
     address_line_2 = models.CharField(max_length=200, blank=True)
     city = models.CharField(max_length=100, blank=True)

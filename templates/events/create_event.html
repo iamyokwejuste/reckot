@@ -6,6 +6,7 @@
 
 {% block extra_head %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link href="{% static 'css/richtext.css' %}" rel="stylesheet">
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -200,8 +201,8 @@
                     <label for="id_description" class="block text-sm font-medium mb-2">Full Description <span class="text-red-500">*</span></label>
                     <textarea name="description" id="id_description" rows="4" required
                               placeholder="Tell attendees what to expect..."
-                              class="input resize-none" :class="{ 'border-red-500': errors.description }"
-                              x-model="description" @input="clearError('description')"></textarea>
+                              class="hidden"
+                              data-richtext></textarea>
                     <p x-show="errors.description" x-cloak class="text-sm text-red-500 mt-1" x-text="errors.description"></p>
                 </div>
 
@@ -428,6 +429,7 @@
 
 {% block extra_scripts %}
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="{% static 'js/richtext.js' %}"></script>
 <script>
 let startPicker = null;
 let endPicker = null;
