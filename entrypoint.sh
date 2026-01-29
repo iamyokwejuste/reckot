@@ -1,9 +1,22 @@
 #!/bin/bash
 set -e
 
-echo "==> Waiting for database..."
-while ! python -c "import django; django.setup(); from django.db import connection; connection.ensure_connection()" 2>/dev/null; do
-    echo "Database unavailable, waiting..."
+echo "==> Environment check..."
+echo "DB_HOST: ${DB_HOST:-db}"
+echo "DB_PORT: ${DB_PORT:-5432}"
+echo "DB_NAME: ${DB_NAME:-reckot}"
+echo "DB_USER: ${DB_USER:-reckot}"
+
+echo "==> Waiting for database at ${DB_HOST:-db}:${DB_PORT:-5432}..."
+max_attempts=60
+attempt=0
+while ! pg_isready -h "${DB_HOST:-db}" -p "${DB_PORT:-5432}" -U "${DB_USER:-reckot}" -q 2>/dev/null; do
+    attempt=$((attempt + 1))
+    if [ $attempt -ge $max_attempts ]; then
+        echo "Database not available after $max_attempts attempts, starting anyway..."
+        break
+    fi
+    echo "Database unavailable (attempt $attempt/$max_attempts), waiting..."
     sleep 2
 done
 echo "==> Database is ready!"

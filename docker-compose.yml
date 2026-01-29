@@ -101,7 +101,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "pg_isready"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 30
@@ -117,9 +117,9 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
       SCHEDULE: ${BACKUP_SCHEDULE:-@daily}
       BACKUP_ON_START: "TRUE"
-      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-7}
-      BACKUP_KEEP_WEEKS: ${BACKUP_KEEP_WEEKS:-4}
-      BACKUP_KEEP_MONTHS: ${BACKUP_KEEP_MONTHS:-6}
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-15}
+      BACKUP_KEEP_WEEKS: ${BACKUP_KEEP_WEEKS:-0}
+      BACKUP_KEEP_MONTHS: ${BACKUP_KEEP_MONTHS:-0}
       TZ: ${TIME_ZONE:-Africa/Douala}
       HEALTHCHECK_PORT: 8080
     depends_on:
