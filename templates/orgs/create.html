@@ -85,7 +85,7 @@
                 <label for="description" class="block text-sm font-medium mb-2">Description</label>
                 <textarea name="description" id="description" rows="3"
                           placeholder="What does your organization do?" class="hidden"
-                          data-richtext>{{ description|default:'' }}</textarea>
+                          data-richtext>{{ description|default:''|safe }}</textarea>
             </div>
 
             <div>

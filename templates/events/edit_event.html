@@ -181,7 +181,7 @@
                               class="hidden"
                               x-model="description"
                               @input="clearError('description')"
-                              data-richtext>{{ event.description }}</textarea>
+                              data-richtext>{{ event.description|safe }}</textarea>
                     <p x-show="errors.description" x-cloak class="text-sm text-red-500 mt-1" x-text="errors.description"></p>
                 </div>
 
