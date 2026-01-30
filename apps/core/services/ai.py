@@ -312,5 +312,53 @@ Return ONLY the JSON array."""
                 return None
         return None
 
+    def chat(self, prompt: str, max_tokens: int = 2048) -> Optional[str]:
+        return self._generate(prompt, max_tokens=max_tokens)
+
+    def chat_with_audio(self, prompt: str, audio_data: bytes, audio_mime: str = "audio/mp3") -> Optional[str]:
+        contents = [
+            types.Part.from_bytes(data=audio_data, mime_type=audio_mime),
+            prompt
+        ]
+        return self._generate(contents, max_tokens=2048)
+
+    def chat_with_image(self, prompt: str, image_data: bytes, image_mime: str = "image/jpeg") -> Optional[str]:
+        contents = [
+            types.Part.from_bytes(data=image_data, mime_type=image_mime),
+            prompt
+        ]
+        return self._generate(contents, max_tokens=2048)
+
+    def analyze_image(self, image_data: bytes, prompt: str, image_mime: str = "image/jpeg") -> Optional[str]:
+        contents = [
+            types.Part.from_bytes(data=image_data, mime_type=image_mime),
+            prompt
+        ]
+        return self._generate(contents, max_tokens=1024)
+
+    def generate_image(self, prompt: str, aspect_ratio: str = "1:1") -> Optional[bytes]:
+        if not self.client:
+            logger.warning("Gemini client not available")
+            return None
+
+        try:
+            response = self.client.models.generate_images(
+                model='imagen-3.0-generate-001',
+                prompt=prompt,
+                config={
+                    'number_of_images': 1,
+                    'aspect_ratio': aspect_ratio,
+                    'safety_filter_level': 'block_some',
+                    'person_generation': 'allow_adult'
+                }
+            )
+
+            if response.generated_images:
+                return response.generated_images[0].image.image_bytes
+            return None
+        except Exception as e:
+            logger.error(f"Image generation error: {e}")
+            return None
+
 
 gemini_ai = GeminiAI()
