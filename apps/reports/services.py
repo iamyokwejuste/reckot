@@ -214,7 +214,6 @@ def generate_pdf_export(event, report_type: str, user, mask_emails: bool = True)
     font_config = FontConfiguration()
     css = CSS(
         string="""
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         @page {
             size: A4;
             margin: 2cm;
@@ -225,7 +224,7 @@ def generate_pdf_export(event, report_type: str, user, mask_emails: bool = True)
             }
         }
         body {
-            font-family: 'Inter', system-ui, sans-serif;
+            font-family: 'DejaVu Sans', 'Arial', 'Helvetica', sans-serif;
             font-size: 12px;
             line-height: 1.5;
             color: #1a1a1a;

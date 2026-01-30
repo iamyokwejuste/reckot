@@ -1,5 +1,6 @@
-class RichTextEditor {
-    constructor(element, options = {}) {
+if (typeof window.RichTextEditor === 'undefined') {
+    window.RichTextEditor = class RichTextEditor {
+        constructor(element, options = {}) {
         this.element = element;
 
         if (this.element._richtextInitialized) {
@@ -160,48 +161,48 @@ class RichTextEditor {
         this.editor.innerHTML = html;
         this.syncToHiddenInput();
     }
+};
 }
 
 // Initialize richtext editors
-function initializeRichTextEditors(container = document) {
-    container.querySelectorAll('[data-richtext]:not([data-richtext-initialized])').forEach(el => {
-        el.setAttribute('data-richtext-initialized', 'true');
-        new RichTextEditor(el, {
-            placeholder: el.getAttribute('placeholder') || 'Write something...',
-            hiddenInput: el.dataset.richtextTarget,
-            initialContent: el.value || '',
-        });
-    });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    initializeRichTextEditors();
-});
-
-document.addEventListener('htmx:afterSwap', (event) => {
-    initializeRichTextEditors(event.detail.target);
-});
-
-if (typeof MutationObserver !== 'undefined') {
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            mutation.addedNodes.forEach((node) => {
-                if (node.nodeType === 1) { // Element node
-                    if (node.hasAttribute && node.hasAttribute('data-richtext')) {
-                        initializeRichTextEditors(node.parentElement);
-                    } else if (node.querySelectorAll) {
-                        initializeRichTextEditors(node);
-                    }
-                }
+if (typeof window.initializeRichTextEditors === 'undefined') {
+    window.initializeRichTextEditors = function initializeRichTextEditors(container = document) {
+        container.querySelectorAll('[data-richtext]:not([data-richtext-initialized])').forEach(el => {
+            el.setAttribute('data-richtext-initialized', 'true');
+            new window.RichTextEditor(el, {
+                placeholder: el.getAttribute('placeholder') || 'Write something...',
+                hiddenInput: el.dataset.richtextTarget,
+                initialContent: el.value || '',
             });
         });
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        window.initializeRichTextEditors();
     });
 
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true
+    document.addEventListener('htmx:afterSwap', (event) => {
+        window.initializeRichTextEditors(event.detail.target);
     });
+
+    if (typeof MutationObserver !== 'undefined') {
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                    if (node.nodeType === 1) { // Element node
+                        if (node.hasAttribute && node.hasAttribute('data-richtext')) {
+                            window.initializeRichTextEditors(node.parentElement);
+                        } else if (node.querySelectorAll) {
+                            window.initializeRichTextEditors(node);
+                        }
+                    }
+                });
+            });
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
 }
-
-window.RichTextEditor = RichTextEditor;
-window.initializeRichTextEditors = initializeRichTextEditors;

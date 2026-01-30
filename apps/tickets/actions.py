@@ -1,12 +1,14 @@
 import json
 import csv
 from datetime import datetime
+from decimal import Decimal
 from io import BytesIO
 from openpyxl import Workbook
 from django.views import View
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
+from django.db import transaction
 from django.http import HttpResponse
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
@@ -15,7 +17,7 @@ from weasyprint import HTML
 
 from apps.tickets.models import Ticket, Booking
 from apps.tickets.services import generate_ticket_pdf, generate_booking_tickets_pdf
-from apps.payments.models import Payment
+from apps.payments.models import Payment, Refund
 
 
 class TicketListView(LoginRequiredMixin, View):
@@ -241,6 +243,8 @@ class TicketListView(LoginRequiredMixin, View):
             response["Content-Disposition"] = (
                 f'attachment; filename="rsvp-export-{datetime.now().strftime("%Y%m%d-%H%M%S")}.pdf"'
             )
+            response["X-Content-Type-Options"] = "nosniff"
+            response["Cache-Control"] = "no-cache, no-store, must-revalidate"
             return response
 
         return HttpResponse("Invalid export format", status=400)
@@ -259,7 +263,9 @@ class TicketPDFView(LoginRequiredMixin, View):
         pdf_content = generate_ticket_pdf(ticket)
 
         response = HttpResponse(pdf_content, content_type="application/pdf")
-        response["Content-Disposition"] = f'inline; filename="ticket-{ticket.code}.pdf"'
+        response["Content-Disposition"] = f'attachment; filename="ticket-{ticket.code}.pdf"'
+        response["X-Content-Type-Options"] = "nosniff"
+        response["Cache-Control"] = "no-cache, no-store, must-revalidate"
         return response
 
 
@@ -277,6 +283,8 @@ class BookingTicketsPDFView(LoginRequiredMixin, View):
         response["Content-Disposition"] = (
             f'attachment; filename="tickets-{booking.reference}.pdf"'
         )
+        response["X-Content-Type-Options"] = "nosniff"
+        response["Cache-Control"] = "no-cache, no-store, must-revalidate"
         return response
 
 
@@ -412,15 +420,13 @@ class PublicBookingPDFView(View):
         response["Content-Disposition"] = (
             f'attachment; filename="tickets-{booking.reference}.pdf"'
         )
+        response["X-Content-Type-Options"] = "nosniff"
+        response["Cache-Control"] = "no-cache, no-store, must-revalidate"
         return response
 
 
 class CancelBookingView(LoginRequiredMixin, View):
     def post(self, request, booking_ref):
-        from django.shortcuts import redirect
-        from apps.payments.models import Refund
-        from django.db import transaction
-
         booking = get_object_or_404(
             Booking.objects.select_related("event", "user"),
             reference=booking_ref
@@ -461,3 +467,108 @@ class CancelBookingView(LoginRequiredMixin, View):
 
         messages.success(request, _("Your booking has been cancelled successfully. Refund will be processed shortly."))
         return redirect("tickets:my_tickets")
+
+
+class RefundTicketView(LoginRequiredMixin, View):
+    def post(self, request):
+        ticket_code = request.POST.get("ticket_code")
+        refund_amount = request.POST.get("refund_amount")
+        refund_reason = request.POST.get("refund_reason", "")
+
+        if not ticket_code or not refund_amount:
+            messages.error(request, _("Missing required fields"))
+            return redirect("tickets:list")
+
+        try:
+            refund_amount = Decimal(refund_amount)
+        except (ValueError, TypeError):
+            messages.error(request, _("Invalid refund amount"))
+            return redirect("tickets:list")
+
+        # Get ticket and verify organizer has permission
+        ticket = get_object_or_404(
+            Ticket.objects.select_related(
+                "booking__event__organization",
+                "booking__user",
+                "ticket_type"
+            ),
+            code=ticket_code,
+            booking__event__organization__members=request.user,
+        )
+
+        booking = ticket.booking
+
+        # Validation: Check if booking is confirmed
+        if booking.status != Booking.Status.CONFIRMED:
+            messages.error(request, _("Only confirmed bookings can be refunded"))
+            return redirect("tickets:list")
+
+        # Get the payment for this booking
+        try:
+            payment = Payment.objects.get(
+                booking=booking,
+                status=Payment.Status.CONFIRMED
+            )
+        except Payment.DoesNotExist:
+            messages.error(request, _("No confirmed payment found for this ticket"))
+            return redirect("tickets:list")
+
+        # Validation: Minimum refund amount of 100
+        if refund_amount < Decimal("100"):
+            messages.error(
+                request,
+                _("Minimum refund amount is 100 XAF. Provided: %(amount)s XAF")
+                % {"amount": refund_amount}
+            )
+            return redirect("tickets:list")
+
+        # Validation: Cannot refund more than payment amount
+        if refund_amount > payment.amount:
+            messages.error(
+                request,
+                _("Refund amount (%(refund)s XAF) cannot exceed payment amount (%(payment)s XAF)")
+                % {"refund": refund_amount, "payment": payment.amount}
+            )
+            return redirect("tickets:list")
+
+        # Check if refund already exists for this payment
+        existing_refund = Refund.objects.filter(
+            payment=payment,
+            status__in=[Refund.Status.PENDING, Refund.Status.APPROVED, Refund.Status.PROCESSED]
+        ).first()
+
+        if existing_refund:
+            messages.error(
+                request,
+                _("A refund is already in progress for this ticket")
+            )
+            return redirect("tickets:list")
+
+        # Create refund
+        with transaction.atomic():
+            refund_type = (
+                Refund.Type.FULL
+                if refund_amount == payment.amount
+                else Refund.Type.PARTIAL
+            )
+
+            Refund.objects.create(
+                payment=payment,
+                amount=refund_amount,
+                refund_type=refund_type,
+                status=Refund.Status.APPROVED,
+                reason=refund_reason or "Refunded by event organizer",
+                requested_by=request.user,
+            )
+
+            # Update booking status only for full refunds
+            if refund_type == Refund.Type.FULL:
+                booking.status = Booking.Status.REFUNDED
+                booking.save()
+
+        messages.success(
+            request,
+            _("Refund of %(amount)s XAF initiated successfully for ticket %(code)s")
+            % {"amount": refund_amount, "code": ticket_code}
+        )
+        return redirect("tickets:list")

@@ -1,8 +1,9 @@
-const ImageCompressor = {
-    maxWidth: 1200,
-    maxHeight: 630,
-    quality: 0.85,
-    maxSizeKB: 500,
+if (typeof window.ImageCompressor === 'undefined') {
+    window.ImageCompressor = {
+        maxWidth: 1200,
+        maxHeight: 630,
+        quality: 0.85,
+        maxSizeKB: 500,
 
     async compress(file) {
         if (!file.type.startsWith('image/')) {
@@ -60,18 +61,17 @@ const ImageCompressor = {
         });
     },
 
-    async processFileInput(input) {
-        if (!input.files || !input.files[0]) return;
+        async processFileInput(input) {
+            if (!input.files || !input.files[0]) return;
 
-        const originalFile = input.files[0];
-        const compressedFile = await this.compress(originalFile);
+            const originalFile = input.files[0];
+            const compressedFile = await this.compress(originalFile);
 
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(compressedFile);
-        input.files = dataTransfer.files;
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(compressedFile);
+            input.files = dataTransfer.files;
 
-        return compressedFile;
-    }
-};
-
-window.ImageCompressor = ImageCompressor;
+            return compressedFile;
+        }
+    };
+}

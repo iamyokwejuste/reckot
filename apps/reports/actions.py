@@ -598,6 +598,8 @@ class ExportGenerateView(LoginRequiredMixin, View):
 
             response = HttpResponse(content, content_type=content_type)
             response["Content-Disposition"] = f'attachment; filename="{filename}"'
+            response["X-Content-Type-Options"] = "nosniff"
+            response["Cache-Control"] = "no-cache, no-store, must-revalidate"
             return response
         except Exception as e:
             messages.error(request, _("Export failed: %(error)s") % {"error": str(e)})

@@ -20,7 +20,7 @@
 
 {% block header_actions %}
 <div class="flex items-center gap-1 sm:gap-2">
-    <div class="custom-select-wrapper w-24 sm:w-32 md:w-40" x-data="{ open: false, value: '30d', label: '{% trans "Last 30 days" %}' }">
+    <div class="custom-select-wrapper w-24 sm:w-32 md:w-fit" x-data="{ open: false, value: '30d', label: '{% trans "Last 30 days" %}' }">
         <input type="hidden" name="date_range" :value="value">
         <button type="button" @click="open = !open" @click.outside="open = false"
                 class="custom-select-trigger" :class="{ 'custom-select-trigger-active': open }">
@@ -52,13 +52,13 @@
             class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-3"
             title="{% trans 'Withdraw' %}">
         <i data-lucide="banknote" class="h-4 w-4"></i>
-        <span class="hidden md:inline">{% trans "Withdraw" %}</span>
+        <span class="hidden sm:inline">{% trans "Withdraw" %}</span>
     </button>
     <button type="button" @click="$dispatch('open-export-modal')"
             class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-3"
             title="{% trans 'Export' %}">
         <i data-lucide="download" class="h-4 w-4"></i>
-        <span class="hidden md:inline">{% trans "Export" %}</span>
+        <span class="hidden sm:inline">{% trans "Export" %}</span>
     </button>
 </div>
 {% endblock %}

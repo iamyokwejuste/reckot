@@ -8,7 +8,7 @@
             aria-haspopup="true"
             :aria-expanded="langOpen.toString()">
         <i data-lucide="globe" class="h-4 w-4" aria-hidden="true"></i>
-        <span class="hidden sm:inline">{{ current_language|upper }}</span>
+        <span class="hidden md:inline">{{ current_language|upper }}</span>
         <i data-lucide="chevron-down" class="h-3 w-3 text-muted-foreground transition-transform" :class="langOpen && 'rotate-180'" aria-hidden="true"></i>
     </button>
 

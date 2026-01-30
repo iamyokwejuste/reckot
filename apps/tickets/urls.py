@@ -27,4 +27,9 @@ urlpatterns = [
         actions.CancelBookingView.as_view(),
         name="cancel_booking",
     ),
+    path(
+        "refund/",
+        actions.RefundTicketView.as_view(),
+        name="refund_ticket",
+    ),
 ]
