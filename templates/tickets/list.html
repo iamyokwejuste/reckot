@@ -154,7 +154,7 @@
                     {% for ticket in tickets %}
                     <tr class="hover:bg-muted/50 transition-colors">
                         <td class="p-4">
-                            <code class="text-xs bg-muted px-2 py-1 rounded">{{ ticket.code|slice:":8" }}...</code>
+                            <code class="text-xs bg-muted px-2 py-1 rounded">{{ ticket.code }}</code>
                         </td>
                         <td class="p-4">
                             <p class="text-sm font-medium">{{ ticket.booking.event.title }}</p>

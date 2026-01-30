@@ -54,7 +54,7 @@
                     {% for checkin in checkins %}
                     <tr class="hover:bg-muted/50 transition-colors">
                         <td class="p-4">
-                            <code class="text-xs bg-muted px-2 py-1 rounded">{{ checkin.ticket.code|slice:":8" }}...</code>
+                            <code class="text-xs bg-muted px-2 py-1 rounded">{{ checkin.ticket.code }}</code>
                         </td>
                         <td class="p-4">
                             <p class="text-sm font-medium">{{ checkin.ticket.booking.event.title }}</p>

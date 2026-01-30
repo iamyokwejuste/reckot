@@ -54,7 +54,7 @@
                 <div class="qr-code">
                     <img src="data:image/png;base64,{{ item.qr_code_data }}" alt="{% trans "QR Code" %}">
                 </div>
-                <p class="ticket-code">{{ item.ticket.code|slice:":8" }}</p>
+                <p class="ticket-code">{{ item.ticket.code }}</p>
             </div>
         </div>
     </div>

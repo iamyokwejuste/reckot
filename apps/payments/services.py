@@ -45,7 +45,7 @@ def calculate_organization_balance(organization):
     total_refunded = total_refunds["total"] or Decimal("0")
 
     pending_flyer_bills = FlyerBilling.objects.filter(
-        event__organization=organization, is_paid=False
+        event__organization=organization, status__in=["PENDING", "INVOICED"]
     ).aggregate(total=Sum("total_amount"))
 
     total_flyer_bills = pending_flyer_bills["total"] or Decimal("0")

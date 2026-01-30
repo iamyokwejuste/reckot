@@ -1,6 +1,7 @@
 import logging
 import qrcode
 import base64
+import json
 from django.db import transaction
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -148,6 +149,12 @@ def create_multi_ticket_booking(
                 attendee_name = attendee_info.get(name_key, "")
                 attendee_email = attendee_info.get(email_key, "")
 
+            if not attendee_name and user:
+                attendee_name = user.get_full_name() or ""
+
+            if not attendee_email and user:
+                attendee_email = user.email or ""
+
             ticket = Ticket.objects.create(
                 booking=booking,
                 ticket_type=ticket_type,
@@ -187,13 +194,37 @@ def get_organization_logo_base64(organization):
 
 
 def generate_ticket_qr_code(ticket):
+    booking = ticket.booking
+
+    attendee_name = ticket.attendee_name or (
+        booking.user.get_full_name() if booking.user else booking.guest_name
+    )
+    attendee_email = ticket.attendee_email or (
+        booking.user.email if booking.user else booking.guest_email
+    )
+    attendee_phone = ""
+    if booking.user and hasattr(booking.user, 'phone_number'):
+        attendee_phone = booking.user.phone_number or ""
+    else:
+        attendee_phone = booking.guest_phone or ""
+
+    qr_data = {
+        "code": ticket.code,
+        "name": attendee_name,
+        "email": attendee_email,
+        "phone": attendee_phone,
+        "event": ticket.ticket_type.event.title,
+        "ticket_type": ticket.ticket_type.name,
+        "purchase_date": booking.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+    }
+
     qr = qrcode.QRCode(
-        version=1,
+        version=None,
         error_correction=qrcode.constants.ERROR_CORRECT_M,
         box_size=10,
         border=4,
     )
-    qr.add_data(str(ticket.code))
+    qr.add_data(json.dumps(qr_data))
     qr.make(fit=True)
 
     img = qr.make_image(fill_color="black", back_color="white")
@@ -248,7 +279,7 @@ def generate_ticket_pdf(ticket):
         .ticket {{
             width: 4in;
             height: 6in;
-            background: linear-gradient(135deg, {primary_color} 0%, {secondary_color} 100%);
+            background: {primary_color};
             color: {text_color};
             padding: 24px;
             box-sizing: border-box;

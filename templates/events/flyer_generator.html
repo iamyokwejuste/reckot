@@ -113,7 +113,7 @@
 
                 <form id="flyer-form" method="post" enctype="multipart/form-data" class="space-y-6">
                     {% csrf_token %}
-                    <input type="hidden" name="ticket_verification" x-model="$refs.ticketInput?.value">
+                    <input type="hidden" name="ticket_verification" :value="verifiedTicketCode">
 
                     <div>
                         <label class="block text-sm font-medium mb-2">{% trans "Your Photo" %}</label>
@@ -227,9 +227,10 @@ async function generateFlyer(formData) {
     if (window.lucide) lucide.createIcons();
 
     const csrftoken = getCookie('csrftoken');
+    const cleanUrl = window.location.origin + window.location.pathname;
 
     try {
-        const response = await fetch(window.location.href, {
+        const response = await fetch(cleanUrl, {
             method: 'POST',
             body: formData,
             headers: {

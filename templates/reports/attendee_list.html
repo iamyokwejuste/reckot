@@ -152,7 +152,7 @@
                             {% endif %}
                         </td>
                         <td class="p-3 text-sm">{{ ticket.ticket_type.name }}</td>
-                        <td class="p-3 text-sm font-mono text-xs">{{ ticket.code|slice:":8" }}...</td>
+                        <td class="p-3 text-sm font-mono text-xs">{{ ticket.code }}</td>
                         {% for q in questions %}
                         <td class="p-3 text-sm">
                             {% for answer in ticket.answers.all %}

@@ -81,7 +81,7 @@
                                 </div>
                                 <div>
                                     <p class="font-medium">{{ ticket.ticket_type.name }}</p>
-                                    <p class="text-xs text-muted-foreground font-mono">{{ ticket.code|slice:":8" }}...</p>
+                                    <p class="text-xs text-muted-foreground font-mono">{{ ticket.code }}</p>
                                 </div>
                             </div>
                             {% if ticket.is_checked_in %}

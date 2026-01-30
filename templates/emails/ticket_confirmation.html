@@ -39,7 +39,7 @@
         <tr>
             <td style="vertical-align: top;">
                 <p style="margin: 0 0 4px 0; font-weight: 600;">{{ ticket.ticket_type.name }}</p>
-                <p class="email-muted" style="margin: 0; font-size: 14px;">Ticket #{{ ticket.code|slice:":8"|upper }}</p>
+                <p class="email-muted" style="margin: 0; font-size: 14px;">Ticket #{{ ticket.code|upper }}</p>
             </td>
             <td style="text-align: right; vertical-align: top;">
                 <span class="email-badge-success" style="display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 500;">

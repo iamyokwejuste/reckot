@@ -62,7 +62,7 @@
                                     {% endif %}
                                 </p>
                                 <div class="flex items-center gap-3 mt-0.5 text-sm text-muted-foreground">
-                                    <span class="font-mono">{{ ticket.code|slice:":8" }}</span>
+                                    <span class="font-mono">{{ ticket.code }}</span>
                                     {% if ticket.is_checked_in %}
                                     <span class="badge badge-success text-xs">{% trans "Checked In" %}</span>
                                     {% endif %}

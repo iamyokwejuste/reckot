@@ -1,8 +1,10 @@
+import uuid
+import random
+import string
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from apps.events.models import Event, CheckoutQuestion
-import uuid
 
 class TicketType(models.Model):
     event = models.ForeignKey(
@@ -128,7 +130,7 @@ class Ticket(models.Model):
     ticket_type = models.ForeignKey(
         TicketType, on_delete=models.CASCADE, related_name="tickets"
     )
-    code = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    code = models.CharField(max_length=20, editable=False, unique=True, db_index=True)
     attendee_name = models.CharField(max_length=200, blank=True)
     attendee_email = models.EmailField(blank=True)
     is_checked_in = models.BooleanField(default=False)
@@ -150,6 +152,22 @@ class Ticket(models.Model):
 
     def __str__(self):
         return f"Ticket {self.code} for {self.ticket_type.event.title}"
+
+    @staticmethod
+    def generate_code(event):
+        prefix = (event.ticket_prefix or "RECK").upper()[:4]
+        characters = string.ascii_uppercase + string.digits
+        while True:
+            suffix = ''.join(random.choices(characters, k=6))
+            code = f"{prefix}{suffix}"
+            if not Ticket.objects.filter(code=code).exists():
+                return code
+
+    def save(self, *args, **kwargs):
+        if not self.code:
+            event = self.ticket_type.event
+            self.code = self.generate_code(event)
+        super().save(*args, **kwargs)
 
 class TicketQuestionAnswer(models.Model):
     ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name="answers")

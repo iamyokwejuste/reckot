@@ -753,36 +753,32 @@ class FlyerTicketVerificationView(View):
             ).select_related("booking__user").first()
 
         else:
-            try:
-                uuid.UUID(ticket_verification)
-                matching_tickets = Ticket.objects.filter(
-                    code=ticket_verification,
-                    booking__event=event,
-                    booking__status=Booking.Status.CONFIRMED
-                ).select_related("booking__user").first()
+            matching_tickets = Ticket.objects.filter(
+                code__iexact=ticket_verification,
+                booking__event=event,
+                booking__status=Booking.Status.CONFIRMED
+            ).select_related("booking__user").first()
 
-                if matching_tickets:
-                    ticket_email = matching_tickets.attendee_email or matching_tickets.booking.buyer_email
-                    ticket_phone = matching_tickets.booking.user.phone_number if matching_tickets.booking.user else matching_tickets.booking.guest_phone
+            if matching_tickets:
+                ticket_email = matching_tickets.attendee_email or matching_tickets.booking.buyer_email
+                ticket_phone = matching_tickets.booking.user.phone_number if matching_tickets.booking.user else matching_tickets.booking.guest_phone
 
-                    if ticket_email and FlyerGeneration.objects.filter(event=event, email__iexact=ticket_email).exists():
-                        return JsonResponse(
-                            {
-                                "success": False,
-                                "error": "A flyer has already been generated for this ticket's attendee.",
-                            },
-                            status=403,
-                        )
-                    if ticket_phone and FlyerGeneration.objects.filter(event=event, phone=ticket_phone).exists():
-                        return JsonResponse(
-                            {
-                                "success": False,
-                                "error": "A flyer has already been generated for this ticket's attendee.",
-                            },
-                            status=403,
-                        )
-            except (ValueError, AttributeError):
-                matching_tickets = None
+                if ticket_email and FlyerGeneration.objects.filter(event=event, email__iexact=ticket_email).exists():
+                    return JsonResponse(
+                        {
+                            "success": False,
+                            "error": "A flyer has already been generated for this ticket's attendee.",
+                        },
+                        status=403,
+                    )
+                if ticket_phone and FlyerGeneration.objects.filter(event=event, phone=ticket_phone).exists():
+                    return JsonResponse(
+                        {
+                            "success": False,
+                            "error": "A flyer has already been generated for this ticket's attendee.",
+                        },
+                        status=403,
+                    )
 
         if not matching_tickets:
             return JsonResponse(
@@ -912,39 +908,35 @@ class FlyerGeneratorView(View):
             ).select_related("booking__user").first()
 
         else:
-            try:
-                uuid.UUID(ticket_verification)
-                verified_ticket = Ticket.objects.filter(
-                    code=ticket_verification,
-                    booking__event=event,
-                    booking__status=Booking.Status.CONFIRMED
-                ).select_related("booking__user").first()
+            verified_ticket = Ticket.objects.filter(
+                code__iexact=ticket_verification,
+                booking__event=event,
+                booking__status=Booking.Status.CONFIRMED
+            ).select_related("booking__user").first()
 
-                if verified_ticket:
-                    ticket_email = verified_ticket.attendee_email or verified_ticket.booking.buyer_email
-                    ticket_phone = verified_ticket.booking.user.phone_number if verified_ticket.booking.user else verified_ticket.booking.guest_phone
+            if verified_ticket:
+                ticket_email = verified_ticket.attendee_email or verified_ticket.booking.buyer_email
+                ticket_phone = verified_ticket.booking.user.phone_number if verified_ticket.booking.user else verified_ticket.booking.guest_phone
 
-                    if ticket_email and FlyerGeneration.objects.filter(event=event, email__iexact=ticket_email).exists():
-                        return JsonResponse(
-                            {
-                                "success": False,
-                                "error": "A flyer has already been generated for this ticket's attendee.",
-                            },
-                            status=403,
-                        )
-                    if ticket_phone and FlyerGeneration.objects.filter(event=event, phone=ticket_phone).exists():
-                        return JsonResponse(
-                            {
-                                "success": False,
-                                "error": "A flyer has already been generated for this ticket's attendee.",
-                            },
-                            status=403,
-                        )
+                if ticket_email and FlyerGeneration.objects.filter(event=event, email__iexact=ticket_email).exists():
+                    return JsonResponse(
+                        {
+                            "success": False,
+                            "error": "A flyer has already been generated for this ticket's attendee.",
+                        },
+                        status=403,
+                    )
+                if ticket_phone and FlyerGeneration.objects.filter(event=event, phone=ticket_phone).exists():
+                    return JsonResponse(
+                        {
+                            "success": False,
+                            "error": "A flyer has already been generated for this ticket's attendee.",
+                        },
+                        status=403,
+                    )
 
-                    attendee_email = ticket_email
-                    attendee_phone = ticket_phone or ""
-            except (ValueError, AttributeError):
-                verified_ticket = None
+                attendee_email = ticket_email
+                attendee_phone = ticket_phone or ""
 
         if not verified_ticket:
             return JsonResponse(

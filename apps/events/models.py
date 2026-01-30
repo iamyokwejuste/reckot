@@ -45,6 +45,7 @@ class Event(models.Model):
     is_public = models.BooleanField(default=False)
     is_free = models.BooleanField(default=False)
     preview_token = models.CharField(max_length=32, blank=True, db_index=True)
+    ticket_prefix = models.CharField(max_length=4, default="RECK", help_text="3-4 letter prefix for ticket codes (e.g., RECK, EVNT)")
 
     is_featured = models.BooleanField(default=False)
     feature_requested_at = models.DateTimeField(null=True, blank=True)
