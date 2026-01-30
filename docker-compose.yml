@@ -1,54 +1,4 @@
 services:
-  migrate:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: uv run python manage.py migrate --noinput
-    environment:
-      SECRET_KEY: ${SECRET_KEY:-change-me-in-production-use-a-long-random-string}
-      DEBUG: "False"
-      DB_ENGINE: django.db.backends.postgresql
-      DB_NAME: ${DB_NAME:-reckot}
-      DB_USER: ${DB_USER:-reckot}
-      DB_PASSWORD: ${DB_PASSWORD:-changeme}
-      DB_HOST: db
-      DB_PORT: 5432
-    depends_on:
-      db:
-        condition: service_healthy
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: none
-    profiles:
-      - migrate
-
-  collectstatic:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: uv run python manage.py collectstatic --noinput
-    environment:
-      SECRET_KEY: ${SECRET_KEY:-change-me-in-production-use-a-long-random-string}
-      DEBUG: "False"
-      DB_ENGINE: django.db.backends.postgresql
-      DB_NAME: ${DB_NAME:-reckot}
-      DB_USER: ${DB_USER:-reckot}
-      DB_PASSWORD: ${DB_PASSWORD:-changeme}
-      DB_HOST: db
-      DB_PORT: 5432
-    depends_on:
-      migrate:
-        condition: service_completed_successfully
-    volumes:
-      - static_data:/app/staticfiles
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: none
-    profiles:
-      - migrate
-
   web:
     build:
       context: .
@@ -56,23 +6,6 @@ services:
     restart: unless-stopped
     expose:
       - "8000"
-    deploy:
-      replicas: 2
-      update_config:
-        parallelism: 1
-        delay: 10s
-        order: start-first
-        failure_action: rollback
-        monitor: 30s
-      rollback_config:
-        parallelism: 1
-        delay: 5s
-        order: stop-first
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
     environment:
       SECRET_KEY: ${SECRET_KEY:-change-me-in-production-use-a-long-random-string}
       DEBUG: ${DEBUG:-False}
@@ -118,7 +51,7 @@ services:
       TWILIO_VERIFY_SERVICE_SID: ${TWILIO_VERIFY_SERVICE_SID:-}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       GEMINI_MODEL: ${GEMINI_MODEL:-gemini-1.5-flash}
-      RUN_MIGRATIONS: "false"
+      RUN_MIGRATIONS: "true"
     depends_on:
       db:
         condition: service_healthy
