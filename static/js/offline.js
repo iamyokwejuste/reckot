@@ -82,10 +82,9 @@ const ReckotOffline = {
         if ('serviceWorker' in navigator) {
             try {
                 const registration = await navigator.serviceWorker.register('/sw.js');
-                console.log('Service Worker registered:', registration.scope);
                 return registration;
             } catch (error) {
-                console.error('Service Worker registration failed:', error);
+
             }
         }
     },
@@ -181,7 +180,6 @@ const ReckotOffline = {
 
     async syncPendingChanges() {
         if (!navigator.onLine) {
-            console.log('Offline, skipping sync');
             return { synced: 0, failed: 0 };
         }
 
@@ -207,7 +205,6 @@ const ReckotOffline = {
                     failed++;
                 }
             } catch (error) {
-                console.error('Sync failed for item:', item.id, error);
                 failed++;
             }
         }
@@ -325,7 +322,7 @@ const FormPersistence = {
                 if (field.type === 'checkbox') {
                     field.checked = value === 'on' || value === true;
                 } else if (field.type === 'file') {
-                    // Skip file inputs
+
                 } else {
                     field.value = value;
                 }

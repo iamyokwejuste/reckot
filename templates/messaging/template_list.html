@@ -4,9 +4,9 @@
 {% block title %}{% trans "Message Templates" %} - {{ organization.name }} - Reckot{% endblock %}
 
 {% block header_title %}
-<div>
-    <h1 class="text-lg font-semibold">{% trans "Message Templates" %}</h1>
-    <p class="text-sm text-muted-foreground">{% trans "Reusable templates for your campaigns" %}</p>
+<div class="min-w-0">
+    <h1 class="text-lg font-semibold truncate">{% trans "Message Templates" %}</h1>
+    <p class="text-sm text-muted-foreground hidden md:block">{% trans "Reusable templates for your campaigns" %}</p>
 </div>
 {% endblock %}
 

@@ -4,9 +4,9 @@
 {% block title %}{{ link.name }} - Affiliate Link - Reckot{% endblock %}
 
 {% block header_title %}
-<div>
-    <h1 class="text-lg font-semibold">{{ link.name }}</h1>
-    <p class="text-sm text-muted-foreground">Affiliate link details</p>
+<div class="min-w-0">
+    <h1 class="text-lg font-semibold truncate">{{ link.name }}</h1>
+    <p class="text-sm text-muted-foreground hidden md:block">Affiliate link details</p>
 </div>
 {% endblock %}
 

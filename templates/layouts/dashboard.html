@@ -29,11 +29,13 @@
     <script defer src="{% static 'js/components.js' %}"></script>
     <script>
         function themeHandler() {
+            const mode = localStorage.getItem('theme') || 'system';
+            const initialIsDark = mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
             return {
-                isDark: false,
-                mode: localStorage.getItem('theme') || 'system',
+                isDark: initialIsDark,
+                mode: mode,
                 init() {
-                    this.updateTheme();
                     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
                         if (this.mode === 'system') this.updateTheme();
                     });
@@ -55,13 +57,11 @@
         document.addEventListener("DOMContentLoaded", () => lucide.createIcons());
         document.addEventListener("htmx:afterSwap", () => lucide.createIcons());
 
-        // Handle toast messages from HTMX responses via HX-Trigger header
         document.addEventListener("showToast", (e) => {
             const { type, message } = e.detail;
             showToast(type, message);
         });
 
-        // Global toast function for programmatic use
         window.showToast = function(type, message) {
             const container = document.getElementById('toast-container') || createToastContainer();
             const toast = document.createElement('div');
@@ -139,19 +139,19 @@
                    collapsed ? 'lg:w-[68px]' : 'lg:w-64',
                    'lg:translate-x-0'
                ]"
-               class="fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border flex flex-col transition-all duration-200 ease-in-out">
+               class="fixed inset-y-0 left-0 z-40 w-64 bg-card border-r border-border flex flex-col transition-all duration-200 ease-in-out">
 
             <div class="flex h-14 items-center border-b border-border px-4 gap-2">
                 <a href="{% url 'home' %}" hx-boost="false" class="flex items-center flex-1 min-w-0" :class="collapsed && 'justify-center'">
                     <template x-if="!collapsed">
                         <div>
-                            <img x-show="isDark" src="{% static 'images/logo/logo_dark_mode.png' %}" alt="Reckot" class="h-8 w-auto">
+                            <img x-show="isDark" x-cloak src="{% static 'images/logo/logo_dark_mode.png' %}" alt="Reckot" class="h-8 w-auto">
                             <img x-show="!isDark" x-cloak src="{% static 'images/logo/logo_light_mode.png' %}" alt="Reckot" class="h-8 w-auto">
                         </div>
                     </template>
                     <template x-if="collapsed">
                         <div class="flex h-8 w-8 items-center justify-center">
-                            <img x-show="isDark" src="{% static 'images/logo/reckto_logo_dark_mode.png' %}" alt="Reckot" class="h-7 w-7">
+                            <img x-show="isDark" x-cloak src="{% static 'images/logo/reckto_logo_dark_mode.png' %}" alt="Reckot" class="h-7 w-7">
                             <img x-show="!isDark" x-cloak src="{% static 'images/logo/reckto_logo_light_mode.png' %}" alt="Reckot" class="h-7 w-7">
                         </div>
                     </template>
@@ -255,25 +255,27 @@
             </div>
         </aside>
 
-        <div class="flex-1 flex flex-col w-full max-w-full" :class="collapsed ? 'lg:pl-[68px]' : 'lg:pl-64'" style="transition: padding-left 0.2s ease-in-out">
-            <header class="sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-border bg-card px-4 lg:px-6">
-                <button @click="sidebarOpen = true" class="lg:hidden -ml-2 p-2 rounded-md hover:bg-muted">
+        <div class="flex-1 flex flex-col w-full max-w-full overflow-x-hidden" :class="collapsed ? 'lg:pl-[68px]' : 'lg:pl-64'" style="transition: padding-left 0.2s ease-in-out">
+            <header class="sticky top-0 z-30 flex h-14 items-center gap-2 sm:gap-4 border-b border-border bg-card px-3 sm:px-4 lg:px-6 w-full max-w-full">
+                <button @click="sidebarOpen = true" class="lg:hidden -ml-2 p-2 rounded-md hover:bg-muted shrink-0">
                     <i data-lucide="menu" class="h-5 w-5"></i>
                 </button>
 
-                <div class="flex-1">
+                <div class="flex-1 min-w-0">
                     {% block header_title %}
-                    <h1 class="text-lg font-semibold">{% trans "Dashboard" %}</h1>
+                    <h1 class="text-lg font-semibold truncate">{% trans "Dashboard" %}</h1>
                     {% endblock %}
                 </div>
 
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1 sm:gap-2 shrink-0">
                     {% block header_actions %}{% endblock %}
 
-                    {% include "partials/language_switcher.html" %}
+                    <div class="hidden sm:block">
+                        {% include "partials/language_switcher.html" %}
+                    </div>
 
                     <div x-data="{ open: false }" class="relative">
-                        <button @click="open = !open" class="flex items-center gap-2 rounded-full p-1 hover:bg-muted transition-colors">
+                        <button @click="open = !open" class="flex items-center gap-2 rounded-full p-1 hover:bg-muted transition-colors shrink-0">
                             <div class="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
                                 <span class="text-sm font-medium">{{ user.email|slice:":1"|upper }}</span>
                             </div>

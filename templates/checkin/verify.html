@@ -20,9 +20,9 @@
 {% endblock %}
 
 {% block header_title %}
-<div>
-    <h1 class="text-lg font-semibold">{{ event.title }}</h1>
-    <p class="text-sm text-muted-foreground">{% trans "Scan or search for tickets" %}</p>
+<div class="min-w-0">
+    <h1 class="text-lg font-semibold truncate">{{ event.title }}</h1>
+    <p class="text-sm text-muted-foreground hidden md:block">{% trans "Scan or search for tickets" %}</p>
 </div>
 {% endblock %}
 

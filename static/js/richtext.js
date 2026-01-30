@@ -1,6 +1,12 @@
 class RichTextEditor {
     constructor(element, options = {}) {
         this.element = element;
+
+        if (this.element._richtextInitialized) {
+            return;
+        }
+        this.element._richtextInitialized = true;
+
         this.options = {
             placeholder: options.placeholder || 'Write something...',
             hiddenInput: options.hiddenInput,
@@ -10,6 +16,10 @@ class RichTextEditor {
     }
 
     init() {
+        if (this.element.previousElementSibling?.classList.contains('richtext-wrapper')) {
+            return;
+        }
+
         this.wrapper = document.createElement('div');
         this.wrapper.className = 'richtext-wrapper border border-input rounded-md overflow-hidden bg-background';
 
@@ -28,9 +38,11 @@ class RichTextEditor {
 
         this.setupEvents();
 
-        if (typeof lucide !== 'undefined') {
-            lucide.createIcons();
-        }
+        requestAnimationFrame(() => {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
     }
 
     createToolbar() {
@@ -137,7 +149,6 @@ class RichTextEditor {
         }
         this.element.value = this.editor.innerHTML;
 
-        // Dispatch input event for Alpine.js binding
         this.element.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
@@ -151,14 +162,46 @@ class RichTextEditor {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('[data-richtext]').forEach(el => {
+// Initialize richtext editors
+function initializeRichTextEditors(container = document) {
+    container.querySelectorAll('[data-richtext]:not([data-richtext-initialized])').forEach(el => {
+        el.setAttribute('data-richtext-initialized', 'true');
         new RichTextEditor(el, {
             placeholder: el.getAttribute('placeholder') || 'Write something...',
             hiddenInput: el.dataset.richtextTarget,
             initialContent: el.value || '',
         });
     });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initializeRichTextEditors();
 });
 
+document.addEventListener('htmx:afterSwap', (event) => {
+    initializeRichTextEditors(event.detail.target);
+});
+
+if (typeof MutationObserver !== 'undefined') {
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            mutation.addedNodes.forEach((node) => {
+                if (node.nodeType === 1) { // Element node
+                    if (node.hasAttribute && node.hasAttribute('data-richtext')) {
+                        initializeRichTextEditors(node.parentElement);
+                    } else if (node.querySelectorAll) {
+                        initializeRichTextEditors(node);
+                    }
+                }
+            });
+        });
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+}
+
 window.RichTextEditor = RichTextEditor;
+window.initializeRichTextEditors = initializeRichTextEditors;

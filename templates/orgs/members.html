@@ -4,9 +4,9 @@
 {% block title %}{% trans "Team Members" %} - {{ organization.name }} - Reckot{% endblock %}
 
 {% block header_title %}
-<div>
-    <h1 class="text-lg font-semibold">{% trans "Team Members" %}</h1>
-    <p class="text-sm text-muted-foreground">{{ organization.name }}</p>
+<div class="min-w-0">
+    <h1 class="text-lg font-semibold truncate">{% trans "Team Members" %}</h1>
+    <p class="text-sm text-muted-foreground hidden md:block">{{ organization.name }}</p>
 </div>
 {% endblock %}
 

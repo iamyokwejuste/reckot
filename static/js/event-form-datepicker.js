@@ -8,17 +8,41 @@ window.initDatePickers = function() {
     if (!startEl || !endEl) return false;
     if (startEl.offsetParent === null) return false;
 
+    if (startEl._eventFormPickerInitialized && endEl._eventFormPickerInitialized) {
+        return true;
+    }
+
     if (startPicker && startPicker.destroy) {
-        try { startPicker.destroy(); } catch(e) {}
+        try {
+            startPicker.destroy();
+        } catch(e) {
+            console.warn('Error destroying start picker:', e);
+        }
         startPicker = null;
     }
     if (endPicker && endPicker.destroy) {
-        try { endPicker.destroy(); } catch(e) {}
+        try {
+            endPicker.destroy();
+        } catch(e) {
+            console.warn('Error destroying end picker:', e);
+        }
         endPicker = null;
     }
 
-    if (startEl._flatpickr) startEl._flatpickr.destroy();
-    if (endEl._flatpickr) endEl._flatpickr.destroy();
+    if (startEl._flatpickr) {
+        try {
+            startEl._flatpickr.destroy();
+        } catch(e) {
+            console.warn('Error destroying flatpickr on start element:', e);
+        }
+    }
+    if (endEl._flatpickr) {
+        try {
+            endEl._flatpickr.destroy();
+        } catch(e) {
+            console.warn('Error destroying flatpickr on end element:', e);
+        }
+    }
 
     const commonConfig = {
         enableTime: true,
@@ -35,7 +59,13 @@ window.initDatePickers = function() {
     };
 
     const formContainer = document.querySelector('.max-w-2xl');
-    const getAlpineData = () => Alpine.$data(formContainer);
+    const getAlpineData = () => {
+        try {
+            return Alpine.$data(formContainer);
+        } catch(e) {
+            return null;
+        }
+    };
 
     const isEditMode = startEl.value && startEl.value.trim() !== '';
 
@@ -74,8 +104,14 @@ window.initDatePickers = function() {
             }
         });
 
+        startEl._eventFormPickerInitialized = true;
+        endEl._eventFormPickerInitialized = true;
+
         return true;
     } catch(e) {
+        console.error('Error initializing event form datepickers:', e);
+        startEl._eventFormPickerInitialized = false;
+        endEl._eventFormPickerInitialized = false;
         return false;
     }
 };

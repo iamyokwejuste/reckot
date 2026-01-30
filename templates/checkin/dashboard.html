@@ -17,17 +17,17 @@
 {% endblock %}
 
 {% block header_title %}
-<div>
-    <h1 class="text-lg font-semibold">{{ event.title }}</h1>
-    <p class="text-sm text-muted-foreground">{% trans "Check-in Dashboard" %}</p>
+<div class="min-w-0">
+    <h1 class="text-lg font-semibold truncate">{{ event.title }}</h1>
+    <p class="text-sm text-muted-foreground hidden md:block">{% trans "Check-in Dashboard" %}</p>
 </div>
 {% endblock %}
 
 {% block header_actions %}
 <a href="{% url 'checkin:verify' org_slug=event.organization.slug event_slug=event.slug %}">
     {% #button variant="default" size="sm" %}
-        <i data-lucide="scan" class="mr-2 h-4 w-4"></i>
-        {% trans "Scan Tickets" %}
+        <i data-lucide="scan" class="w-4 h-4"></i>
+        <span class="hidden md:inline">{% trans "Scan Tickets" %}</span>
     {% /button %}
 </a>
 {% endblock %}

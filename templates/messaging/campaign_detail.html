@@ -4,9 +4,9 @@
 {% block title %}{{ campaign.name }} - Reckot{% endblock %}
 
 {% block header_title %}
-<div>
-    <h1 class="text-lg font-semibold">{{ campaign.name }}</h1>
-    <p class="text-sm text-muted-foreground">{{ campaign.event.title }}</p>
+<div class="min-w-0">
+    <h1 class="text-lg font-semibold truncate">{{ campaign.name }}</h1>
+    <p class="text-sm text-muted-foreground hidden md:block">{{ campaign.event.title }}</p>
 </div>
 {% endblock %}
 

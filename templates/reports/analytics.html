@@ -12,15 +12,15 @@
 {% endblock %}
 
 {% block header_title %}
-<div>
-    <h1 class="text-lg font-semibold">{% trans "Analytics" %}</h1>
-    <p class="text-sm text-muted-foreground">{% trans "Track your event performance" %}</p>
+<div class="min-w-0">
+    <h1 class="text-lg font-semibold truncate">{% trans "Analytics" %}</h1>
+    <p class="text-sm text-muted-foreground hidden md:block">{% trans "Track your event performance" %}</p>
 </div>
 {% endblock %}
 
 {% block header_actions %}
-<div class="flex items-center gap-2">
-    <div class="custom-select-wrapper w-40" x-data="{ open: false, value: '30d', label: '{% trans "Last 30 days" %}' }">
+<div class="flex items-center gap-1 sm:gap-2">
+    <div class="custom-select-wrapper w-24 sm:w-32 md:w-40" x-data="{ open: false, value: '30d', label: '{% trans "Last 30 days" %}' }">
         <input type="hidden" name="date_range" :value="value">
         <button type="button" @click="open = !open" @click.outside="open = false"
                 class="custom-select-trigger" :class="{ 'custom-select-trigger-active': open }">
@@ -48,14 +48,18 @@
             </div>
         </div>
     </div>
-    {% #button variant="default" size="sm" attrs='@click="$dispatch(\'open-withdraw-modal\')"' %}
+    <button type="button" @click="$dispatch('open-withdraw-modal')"
+            class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-3"
+            title="{% trans 'Withdraw' %}">
         <i data-lucide="banknote" class="h-4 w-4"></i>
-        <span class="hidden sm:inline">{% trans "Withdraw" %}</span>
-    {% /button %}
-    {% #button variant="default" size="sm" attrs='@click="$dispatch(\'open-export-modal\')"' %}
+        <span class="hidden md:inline">{% trans "Withdraw" %}</span>
+    </button>
+    <button type="button" @click="$dispatch('open-export-modal')"
+            class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-3"
+            title="{% trans 'Export' %}">
         <i data-lucide="download" class="h-4 w-4"></i>
-        <span class="hidden sm:inline">{% trans "Export" %}</span>
-    {% /button %}
+        <span class="hidden md:inline">{% trans "Export" %}</span>
+    </button>
 </div>
 {% endblock %}
 
@@ -246,10 +250,7 @@
                         <i data-lucide="arrow-right" class="h-4 w-4" x-show="!loading"></i>
                         <span x-show="!loading">{% trans "Request Withdrawal" %}</span>
                         <span x-show="loading" class="flex items-center gap-2">
-                            <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
+                            <i data-lucide="loader-2" class="animate-spin h-4 w-4"></i>
                             {% trans "Processing..." %}
                         </span>
                     </button>

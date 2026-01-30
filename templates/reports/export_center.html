@@ -21,9 +21,9 @@
 {% endblock %}
 
 {% block header_title %}
-<div>
-    <h1 class="text-lg font-semibold">{% trans "Export Center" %}</h1>
-    <p class="text-sm text-muted-foreground">{{ event.title }} - {% trans "Generate and download reports" %}</p>
+<div class="min-w-0">
+    <h1 class="text-lg font-semibold truncate">{% trans "Export Center" %}</h1>
+    <p class="text-sm text-muted-foreground hidden md:block">{{ event.title }} - {% trans "Generate and download reports" %}</p>
 </div>
 {% endblock %}
 

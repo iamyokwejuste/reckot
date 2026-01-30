@@ -25,9 +25,9 @@
 {% endblock %}
 
 {% block header_title %}
-<div>
-    <h1 class="text-lg font-semibold">{% trans "Edit Ticket Type" %}</h1>
-    <p class="text-sm text-muted-foreground">{{ ticket_type.name }}</p>
+<div class="min-w-0">
+    <h1 class="text-lg font-semibold truncate">{% trans "Edit Ticket Type" %}</h1>
+    <p class="text-sm text-muted-foreground hidden md:block">{{ ticket_type.name }}</p>
 </div>
 {% endblock %}
 
@@ -93,7 +93,7 @@
                         <label for="id_sales_start" class="block text-sm font-medium mb-2">{% trans "Sales Start" %}</label>
                         <div class="relative">
                             <div class="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground z-10 flex items-center justify-center w-5 h-5">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M16 14h.01"/><path d="M12 14h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
+                                <i data-lucide="calendar" class="w-[18px] h-[18px]"></i>
                             </div>
                             <input type="text" name="sales_start" id="id_sales_start"
                                    {% if ticket_type.sales_start %}value="{{ ticket_type.sales_start|date:'Y-m-d H:i' }}"{% endif %}
@@ -108,7 +108,7 @@
                         <label for="id_sales_end" class="block text-sm font-medium mb-2">{% trans "Sales End" %}</label>
                         <div class="relative">
                             <div class="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground z-10 flex items-center justify-center w-5 h-5">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M16 14h.01"/><path d="M12 14h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
+                                <i data-lucide="calendar" class="w-[18px] h-[18px]"></i>
                             </div>
                             <input type="text" name="sales_end" id="id_sales_end"
                                    {% if ticket_type.sales_end %}value="{{ ticket_type.sales_end|date:'Y-m-d H:i' }}"{% endif %}

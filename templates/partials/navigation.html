@@ -76,11 +76,11 @@
 </header>
 
 
-<div id="mobile-menu" class="fixed inset-0 bg-background text-foreground flex-col" style="z-index: 9999; display: none;">
+<div id="mobile-menu" class="fixed inset-0 bg-background text-foreground flex-col" style="z-index: 60; display: none;">
     <div class="flex items-center justify-between h-16 px-4 border-b border-border">
         <a href="/" hx-boost="false" onclick="closeMobileMenu()" aria-label="Reckot Home" class="touch-manipulation">
-            <img id="mobile-logo-light" src="{% static 'images/logo/logo_light_mode.png' %}" alt="Reckot" width="120" height="36" class="h-9 w-auto">
-            <img id="mobile-logo-dark" src="{% static 'images/logo/logo_dark_mode.png' %}" alt="Reckot" width="120" height="36" class="h-9 w-auto">
+            <img x-show="!isDark" x-cloak src="{% static 'images/logo/logo_light_mode.png' %}" alt="Reckot" width="120" height="36" class="h-9 w-auto">
+            <img x-show="isDark" x-cloak src="{% static 'images/logo/logo_dark_mode.png' %}" alt="Reckot" width="120" height="36" class="h-9 w-auto">
         </a>
         <button onclick="closeMobileMenu()" class="p-2 rounded-lg hover:bg-muted transition-colors touch-manipulation active:scale-95" aria-label="Close menu">
             <i data-lucide="x" class="h-6 w-6" aria-hidden="true"></i>
@@ -141,15 +141,6 @@
 </div>
 
 <script>
-function updateMobileLogo() {
-    const isDark = document.documentElement.classList.contains('dark');
-    const lightLogo = document.getElementById('mobile-logo-light');
-    const darkLogo = document.getElementById('mobile-logo-dark');
-    if (lightLogo && darkLogo) {
-        lightLogo.style.display = isDark ? 'none' : 'block';
-        darkLogo.style.display = isDark ? 'block' : 'none';
-    }
-}
 function updateToggleIcon(isOpen) {
     const hamburger = document.getElementById('hamburger-icon');
     const closeIcon = document.getElementById('close-icon');
@@ -159,7 +150,6 @@ function updateToggleIcon(isOpen) {
     }
 }
 function openMobileMenu() {
-    updateMobileLogo();
     updateToggleIcon(true);
     document.getElementById('mobile-menu').style.display = 'flex';
     document.getElementById('mobile-menu-toggle').setAttribute('aria-expanded', 'true');
@@ -181,9 +171,6 @@ function toggleMobileMenu() {
     }
 }
 document.addEventListener('DOMContentLoaded', function() {
-    updateMobileLogo();
-    const observer = new MutationObserver(updateMobileLogo);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
     const toggleBtn = document.getElementById('mobile-menu-toggle');
     if (toggleBtn) {
         toggleBtn.addEventListener('click', toggleMobileMenu);

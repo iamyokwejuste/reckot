@@ -12,9 +12,9 @@
 {% endblock %}
 
 {% block header_title %}
-<div>
-    <h1 class="text-lg font-semibold">{% trans "Organizations" %}</h1>
-    <p class="text-sm text-muted-foreground">{% trans "Manage your organizations" %}</p>
+<div class="min-w-0">
+    <h1 class="text-lg font-semibold truncate">{% trans "Organizations" %}</h1>
+    <p class="text-sm text-muted-foreground hidden md:block">{% trans "Manage your organizations" %}</p>
 </div>
 {% endblock %}
 
@@ -22,7 +22,7 @@
 <a href="{% url 'orgs:create' %}">
     {% #button variant="default" size="sm" %}
         <i data-lucide="plus" class="w-4 h-4"></i>
-        {% trans "New Organization" %}
+        <span class="hidden md:inline">{% trans "New Organization" %}</span>
     {% /button %}
 </a>
 {% endblock %}

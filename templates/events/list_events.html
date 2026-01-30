@@ -13,9 +13,9 @@
 {% endblock %}
 
 {% block header_title %}
-<div>
-    <h1 class="text-lg font-semibold">{% trans "Your Events" %}</h1>
-    <p class="text-sm text-muted-foreground">{% trans "Manage your events and tickets" %}</p>
+<div class="min-w-0">
+    <h1 class="text-lg font-semibold truncate">{% trans "Your Events" %}</h1>
+    <p class="text-sm text-muted-foreground hidden md:block">{% trans "Manage your events and tickets" %}</p>
 </div>
 {% endblock %}
 
@@ -23,7 +23,7 @@
 <a href="{% url 'events:create' %}">
     {% #button variant="default" size="sm" %}
         <i data-lucide="plus" class="w-4 h-4"></i>
-        {% trans "Create Event" %}
+        <span class="hidden md:inline">{% trans "Create Event" %}</span>
     {% /button %}
 </a>
 {% endblock %}

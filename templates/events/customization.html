@@ -5,9 +5,9 @@
 {% block title %}{% trans "Customize Event" %} - {{ event.title }} - Reckot{% endblock %}
 
 {% block header_title %}
-<div>
-    <h1 class="text-lg font-semibold">{% trans "Customize Event Page" %}</h1>
-    <p class="text-sm text-muted-foreground">{{ event.title }}</p>
+<div class="min-w-0">
+    <h1 class="text-lg font-semibold truncate">{% trans "Customize Event Page" %}</h1>
+    <p class="text-sm text-muted-foreground hidden md:block">{{ event.title }}</p>
 </div>
 {% endblock %}
 

@@ -14,17 +14,17 @@
 {% endblock %}
 
 {% block header_title %}
-<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 min-w-0">
     {% if organization.logo %}
-    <img src="{{ organization.logo.url }}" alt="{{ organization.name }}" class="h-10 w-10 rounded-lg object-cover">
+    <img src="{{ organization.logo.url }}" alt="{{ organization.name }}" class="h-10 w-10 rounded-lg object-cover shrink-0">
     {% else %}
-    <div class="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
+    <div class="h-10 w-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
         <i data-lucide="building-2" class="h-5 w-5 text-muted-foreground"></i>
     </div>
     {% endif %}
-    <div>
-        <h1 class="text-lg font-semibold">{{ organization.name }}</h1>
-        <p class="text-sm text-muted-foreground">{% blocktrans count counter=memberships.count %}{{ counter }} member{% plural %}{{ counter }} members{% endblocktrans %}</p>
+    <div class="min-w-0">
+        <h1 class="text-lg font-semibold truncate">{{ organization.name }}</h1>
+        <p class="text-sm text-muted-foreground hidden md:block">{% blocktrans count counter=memberships.count %}{{ counter }} member{% plural %}{{ counter }} members{% endblocktrans %}</p>
     </div>
 </div>
 {% endblock %}

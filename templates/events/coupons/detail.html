@@ -15,9 +15,9 @@
 {% endblock %}
 
 {% block header_title %}
-<div>
-    <h1 class="text-lg font-semibold">{% trans "Coupon" %}: {{ coupon.code }}</h1>
-    <p class="text-sm text-muted-foreground">{{ coupon.organization.name }}{% if coupon.event %} / {{ coupon.event.title }}{% endif %}</p>
+<div class="min-w-0">
+    <h1 class="text-lg font-semibold truncate">{% trans "Coupon" %}: {{ coupon.code }}</h1>
+    <p class="text-sm text-muted-foreground hidden md:block">{{ coupon.organization.name }}{% if coupon.event %} / {{ coupon.event.title }}{% endif %}</p>
 </div>
 {% endblock %}
 

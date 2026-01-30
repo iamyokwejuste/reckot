@@ -4,8 +4,82 @@
 
 {% block title %}{% trans "AI Assistant" %} - Reckot{% endblock %}
 
+{% block extra_head %}
+<script>
+function aiAssistant() {
+    return {
+        messages: [],
+        inputMessage: '',
+        isLoading: false,
+        sessionId: '',
+
+        async sendMessage(preset = null) {
+            const message = preset || this.inputMessage.trim();
+            if (!message) return;
+
+            this.messages.push({ role: 'USER', content: message });
+            this.inputMessage = '';
+            this.isLoading = true;
+            this.scrollToBottom();
+
+            try {
+                const response = await fetch('/ai/chat/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: message,
+                        session_id: this.sessionId || null
+                    })
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    let errorMessage = data.error || 'Sorry, something went wrong. Please try again.';
+                    if (data.disabled) {
+                        errorMessage += '\n\nYou can enable AI features in your account settings.';
+                    }
+                    this.messages.push({ role: 'ASSISTANT', content: errorMessage });
+                } else {
+                    this.messages.push({ role: 'ASSISTANT', content: data.message });
+
+                    if (data.session_id && !this.sessionId) {
+                        this.sessionId = data.session_id;
+                        window.history.pushState({}, '', `/ai/assistant/${data.session_id}/`);
+                    }
+                }
+            } catch (error) {
+                this.messages.push({ role: 'ASSISTANT', content: 'Sorry, something went wrong. Please try again.' });
+            }
+
+            this.isLoading = false;
+            this.scrollToBottom();
+        },
+
+        async clearConversation() {
+            if (!confirm('Clear conversation history?')) return;
+            await fetch('/ai/clear/', { method: 'POST' });
+            this.messages = [];
+        },
+
+        scrollToBottom() {
+            this.$nextTick(() => {
+                const container = document.getElementById('chat-container');
+                container.scrollTop = container.scrollHeight;
+            });
+        },
+
+        init() {
+            const messagesData = {{ messages|safe|default:"[]" }};
+            this.messages = messagesData;
+            this.sessionId = '{{ session_id|default:"" }}';
+        }
+    }
+}
+</script>
+{% endblock %}
+
 {% block content %}
-<div class="container py-8" x-data="aiAssistant()">
+<div class="container py-8" x-data="aiAssistant()" x-init="init()">
     {% #breadcrumb %}
         {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
         {% #breadcrumb_separator %}{% /breadcrumb_separator %}
@@ -103,70 +177,4 @@
         {% /card %}
     </div>
 </div>
-
-<script>
-function aiAssistant() {
-    return {
-        messages: {{ messages|safe|default:"[]" }},
-        inputMessage: '',
-        isLoading: false,
-        sessionId: '{{ session_id|default:"" }}',
-
-        async sendMessage(preset = null) {
-            const message = preset || this.inputMessage.trim();
-            if (!message) return;
-
-            this.messages.push({ role: 'USER', content: message });
-            this.inputMessage = '';
-            this.isLoading = true;
-            this.scrollToBottom();
-
-            try {
-                const response = await fetch('{% url "ai:chat" %}', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        message: message,
-                        session_id: this.sessionId || null
-                    })
-                });
-                const data = await response.json();
-
-                if (!response.ok) {
-                    let errorMessage = data.error || '{% trans "Sorry, something went wrong. Please try again." %}';
-                    if (data.disabled) {
-                        errorMessage += '\n\n{% trans "You can enable AI features in your account settings." %}';
-                    }
-                    this.messages.push({ role: 'ASSISTANT', content: errorMessage });
-                } else {
-                    this.messages.push({ role: 'ASSISTANT', content: data.message });
-
-                    if (data.session_id && !this.sessionId) {
-                        this.sessionId = data.session_id;
-                        window.history.pushState({}, '', `/ai/assistant/${data.session_id}/`);
-                    }
-                }
-            } catch (error) {
-                this.messages.push({ role: 'ASSISTANT', content: '{% trans "Sorry, something went wrong. Please try again." %}' });
-            }
-
-            this.isLoading = false;
-            this.scrollToBottom();
-        },
-
-        async clearConversation() {
-            if (!confirm('{% trans "Clear conversation history?" %}')) return;
-            await fetch('{% url "ai:clear" %}', { method: 'POST' });
-            this.messages = [];
-        },
-
-        scrollToBottom() {
-            this.$nextTick(() => {
-                const container = document.getElementById('chat-container');
-                container.scrollTop = container.scrollHeight;
-            });
-        }
-    }
-}
-</script>
 {% endblock %}
