@@ -52,6 +52,22 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         user = super().save_user(request, sociallogin, form)
         user.username = user.email
 
+        if sociallogin.account.extra_data:
+            extra_data = sociallogin.account.extra_data
+
+            # Google returns 'name' field with full name
+            if not user.first_name and not user.last_name:
+                full_name = extra_data.get('name', '')
+                if full_name:
+                    name_parts = full_name.split(' ', 1)
+                    user.first_name = name_parts[0]
+                    if len(name_parts) > 1:
+                        user.last_name = name_parts[1]
+                else:
+                    # Fallback to given_name/family_name if name is not present
+                    user.first_name = extra_data.get('given_name', '')
+                    user.last_name = extra_data.get('family_name', '')
+
         email_address, created = EmailAddress.objects.get_or_create(
             user=user,
             email=user.email.lower(),
@@ -68,4 +84,18 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
     def populate_user(self, request, sociallogin, data):
         user = super().populate_user(request, sociallogin, data)
         user.username = user.email
+
+        # Google returns 'name' field with full name
+        if not user.first_name and not user.last_name:
+            full_name = data.get('name', '')
+            if full_name:
+                name_parts = full_name.split(' ', 1)
+                user.first_name = name_parts[0]
+                if len(name_parts) > 1:
+                    user.last_name = name_parts[1]
+            else:
+                # Fallback to given_name/family_name if name is not present
+                user.first_name = data.get('given_name', '')
+                user.last_name = data.get('family_name', '')
+
         return user

@@ -139,7 +139,7 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
-    command: uv run celery -A reckot beat --loglevel=info
+    command: uv run celery -A reckot beat --loglevel=info --schedule=/tmp/celerybeat-schedule
     environment:
       SECRET_KEY: ${SECRET_KEY:-change-me-in-production-use-a-long-random-string}
       DEBUG: "False"
@@ -158,6 +158,7 @@ services:
         condition: service_healthy
     volumes:
       - media_data:/app/media
+      - celery_beat_data:/tmp
 
   db:
     image: postgres:16.6-alpine3.21
@@ -207,3 +208,4 @@ volumes:
   media_data:
   backup_data:
   static_data:
+  celery_beat_data:

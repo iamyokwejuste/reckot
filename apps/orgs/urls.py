@@ -59,4 +59,9 @@ urlpatterns = [
         actions.TransferOwnershipView.as_view(),
         name="transfer_ownership",
     ),
+    path(
+        "<slug:slug>/delete/",
+        actions.OrganizationDeleteView.as_view(),
+        name="delete",
+    ),
 ]

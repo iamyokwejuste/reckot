@@ -18,7 +18,7 @@
         <div class="grid gap-4">
             {% regroup tickets by booking.event as events %}
             {% for event in events %}
-            <div class="card overflow-hidden">
+            <div class="card overflow-hidden" x-data="{ cancelModalOpen: false }">
                 <div class="p-5 border-b border-border bg-muted/30">
                     <div class="flex items-start justify-between gap-4">
                         <div>
@@ -38,12 +38,60 @@
                                 </span>
                             </div>
                         </div>
-                        <a href="{% url 'tickets:booking_pdf' booking_ref=event.list.0.booking.reference %}" class="shrink-0">
-                            {% #button variant="default" size="sm" %}
-                                <i data-lucide="download" class="w-4 h-4"></i>
-                                {% trans "Download All" %}
-                            {% /button %}
-                        </a>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <a href="{% url 'tickets:booking_pdf' booking_ref=event.list.0.booking.reference %}">
+                                {% #button variant="default" size="sm" %}
+                                    <i data-lucide="download" class="w-4 h-4"></i>
+                                    {% trans "Download All" %}
+                                {% /button %}
+                            </a>
+                            {% if event.list.0.booking.status == 'CONFIRMED' %}
+                            <button type="button" @click="cancelModalOpen = true">
+                                {% #button variant="outline" size="sm" class="text-red-500 hover:bg-red-500/10" %}
+                                    <i data-lucide="x-circle" class="w-4 h-4"></i>
+                                    {% trans "Cancel" %}
+                                {% /button %}
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cancel Booking Modal -->
+                <div x-show="cancelModalOpen"
+                     x-cloak
+                     class="fixed inset-0 z-50 overflow-y-auto"
+                     @keydown.escape.window="cancelModalOpen = false">
+                    <div class="flex min-h-screen items-center justify-center p-4">
+                        <div class="fixed inset-0 bg-black/50 transition-opacity"
+                             @click="cancelModalOpen = false"></div>
+                        <div class="relative bg-card rounded-lg shadow-xl max-w-md w-full p-6 border border-border">
+                            <div class="flex items-start gap-4 mb-4">
+                                <div class="h-12 w-12 rounded-full bg-red-500/10 flex items-center justify-center shrink-0">
+                                    <i data-lucide="alert-triangle" class="h-6 w-6 text-red-500"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold mb-1">{% trans "Cancel Booking" %}</h3>
+                                    <p class="text-sm text-muted-foreground">
+                                        {% trans "Are you sure you want to cancel this booking? Your tickets will be cancelled and a refund will be processed." %}
+                                    </p>
+                                </div>
+                            </div>
+                            <form method="post" action="{% url 'tickets:cancel_booking' booking_ref=event.list.0.booking.reference %}">
+                                {% csrf_token %}
+                                <div class="flex gap-3 justify-end">
+                                    <button type="button"
+                                            @click="cancelModalOpen = false"
+                                            class="px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors">
+                                        {% trans "Keep Booking" %}
+                                    </button>
+                                    <button type="submit"
+                                            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium">
+                                        {% trans "Cancel Booking" %}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
 

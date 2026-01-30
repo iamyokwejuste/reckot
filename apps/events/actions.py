@@ -1337,3 +1337,26 @@ class EventCustomizationView(LoginRequiredMixin, View):
         return redirect(
             "events:customization", org_slug=org_slug, event_slug=event_slug
         )
+
+
+class EventDeleteView(LoginRequiredMixin, View):
+    def post(self, request, org_slug, event_slug):
+        event = get_object_or_404(
+            Event.objects.select_related("organization"),
+            organization__slug=org_slug,
+            slug=event_slug,
+        )
+
+        if event.organization.owner != request.user:
+            messages.error(request, _("Only the organization owner can delete events."))
+            return redirect("events:dashboard", org_slug=org_slug, event_slug=event_slug)
+
+        event_title = event.title
+        org_slug = event.organization.slug
+        event.delete()
+
+        messages.success(
+            request,
+            _("Event '{}' has been deleted successfully.").format(event_title)
+        )
+        return redirect("orgs:detail", slug=org_slug)

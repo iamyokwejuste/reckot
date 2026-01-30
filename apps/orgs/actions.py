@@ -6,17 +6,15 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.db.models import Count, Sum
 from django.http import HttpResponse
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
-from django.conf import settings
 from django.utils.translation import gettext_lazy as _
+from apps.core.tasks import send_email_task
 from apps.orgs.models import Organization, Membership, Invitation, MemberRole
 from apps.payments.models import Payment
 from apps.core.models import User
 
 
 class OrgPermissionMixin:
-    required_permission = None
+    required_permission: str | None = None
 
     def get_organization(self, slug):
         return get_object_or_404(Organization, slug=slug)
@@ -249,22 +247,16 @@ class InviteMemberView(LoginRequiredMixin, OrgPermissionMixin, View):
         try:
             invite_url = request.build_absolute_uri(f"/orgs/invite/{invitation.token}/")
             subject = f"You're invited to join {organization.name} on Reckot"
-            html_message = render_to_string(
-                "emails/invitation.html",
-                {
+            send_email_task.delay(
+                to_email=email,
+                subject=subject,
+                template_name="emails/invitation.html",
+                context={
                     "organization": organization,
                     "invitation": invitation,
                     "invite_url": invite_url,
                     "inviter": request.user,
                 },
-            )
-            send_mail(
-                subject,
-                f"You've been invited to join {organization.name}. Visit: {invite_url}",
-                settings.DEFAULT_FROM_EMAIL,
-                [email],
-                html_message=html_message,
-                fail_silently=True,
             )
         except Exception:
             pass
@@ -405,22 +397,16 @@ class ResendInvitationView(LoginRequiredMixin, OrgPermissionMixin, View):
         try:
             invite_url = request.build_absolute_uri(f"/orgs/invite/{invitation.token}/")
             subject = f"Reminder: You're invited to join {organization.name} on Reckot"
-            html_message = render_to_string(
-                "emails/invitation.html",
-                {
+            send_email_task.delay(
+                to_email=invitation.email,
+                subject=subject,
+                template_name="emails/invitation.html",
+                context={
                     "organization": organization,
                     "invitation": invitation,
                     "invite_url": invite_url,
                     "inviter": request.user,
                 },
-            )
-            send_mail(
-                subject,
-                f"Reminder: You've been invited to join {organization.name}. Visit: {invite_url}",
-                settings.DEFAULT_FROM_EMAIL,
-                [invitation.email],
-                html_message=html_message,
-                fail_silently=True,
             )
             messages.success(
                 request,
@@ -648,22 +634,16 @@ class BulkInviteView(LoginRequiredMixin, OrgPermissionMixin, View):
                     f"/orgs/invite/{invitation.token}/"
                 )
                 subject = f"You're invited to join {organization.name} on Reckot"
-                html_message = render_to_string(
-                    "emails/invitation.html",
-                    {
+                send_email_task.delay(
+                    to_email=email,
+                    subject=subject,
+                    template_name="emails/invitation.html",
+                    context={
                         "organization": organization,
                         "invitation": invitation,
                         "invite_url": invite_url,
                         "inviter": request.user,
                     },
-                )
-                send_mail(
-                    subject,
-                    f"You've been invited to join {organization.name}. Visit: {invite_url}",
-                    settings.DEFAULT_FROM_EMAIL,
-                    [email],
-                    html_message=html_message,
-                    fail_silently=True,
                 )
                 sent_count += 1
             except Exception:
@@ -692,3 +672,20 @@ class DownloadInviteTemplateView(LoginRequiredMixin, View):
         writer.writerow(["user1@example.com"])
         writer.writerow(["user2@example.com"])
         return response
+
+
+class OrganizationDeleteView(LoginRequiredMixin, OrgPermissionMixin, View):
+    required_permission = "delete_organization"
+
+    def post(self, request, slug):
+        organization = get_object_or_404(Organization, slug=slug)
+
+        if organization.owner != request.user:
+            messages.error(request, _("Only the organization owner can delete it."))
+            return redirect("orgs:detail", slug=slug)
+
+        org_name = organization.name
+        organization.delete()
+
+        messages.success(request, _("Organization '{}' has been deleted successfully.").format(org_name))
+        return redirect("orgs:list")

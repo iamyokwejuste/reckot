@@ -394,3 +394,26 @@ class PhoneSignupVerifyView(View):
 
     def _normalize_phone(self, phone):
         return re.sub(r"[\s\-\(\)]", "", phone)
+
+
+class DeleteAccountView(LoginRequiredMixin, View):
+    def post(self, request):
+        from django.contrib.auth import logout
+        
+        password = request.POST.get("password", "")
+        
+        if not request.user.check_password(password):
+            messages.error(request, _("Incorrect password. Account deletion cancelled."))
+            return redirect("core:settings")
+        
+        user = request.user
+        
+        logout(request)
+
+        user.delete()
+        
+        messages.success(
+            request, 
+            _("Your account has been permanently deleted. We're sorry to see you go.")
+        )
+        return redirect("home")

@@ -12,6 +12,11 @@ urlpatterns = [
         name="toggle_ai_features",
     ),
     path(
+        "settings/delete-account/",
+        actions.DeleteAccountView.as_view(),
+        name="delete_account",
+    ),
+    path(
         "api/ai/generate-description/",
         ai.generate_description,
         name="ai_generate_description",

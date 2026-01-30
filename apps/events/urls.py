@@ -114,4 +114,9 @@ urlpatterns = [
         actions.EventCustomizationView.as_view(),
         name="customization",
     ),
+    path(
+        "<slug:org_slug>/<slug:event_slug>/delete/",
+        actions.EventDeleteView.as_view(),
+        name="delete",
+    ),
 ]

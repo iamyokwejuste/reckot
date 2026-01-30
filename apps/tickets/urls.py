@@ -22,4 +22,9 @@ urlpatterns = [
         actions.PublicBookingPDFView.as_view(),
         name="public_booking_pdf",
     ),
+    path(
+        "booking/<uuid:booking_ref>/cancel/",
+        actions.CancelBookingView.as_view(),
+        name="cancel_booking",
+    ),
 ]

@@ -35,7 +35,7 @@
             </div>
             <div>
                 <label for="phone" class="block text-sm font-medium mb-2">{% trans "Phone number" %}</label>
-                <input type="tel" name="phone" id="phone" value="{{ user.phone|default:'' }}" placeholder="6XX XXX XXX" class="input">
+                <input type="tel" name="phone" id="phone" value="{{ user.phone_number|default:'' }}" placeholder="6XX XXX XXX" class="input">
             </div>
             <div class="pt-2">
                 {% #button type="submit" variant="default" %}
@@ -184,7 +184,7 @@
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" x-model="offlineMode" @change="toggleOffline()" class="sr-only peer">
-                    <div class="w-11 h-6 bg-muted peer-focus:ring-2 peer-focus:ring-foreground/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-foreground"></div>
+                    <div class="w-11 h-6 bg-border peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer transition-colors duration-200 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-background after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-md peer-checked:bg-primary"></div>
                 </label>
             </div>
             <div x-show="offlineMode" x-cloak class="space-y-3">
@@ -234,7 +234,7 @@
                            hx-post="{% url 'core:toggle_ai_features' %}"
                            hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
                            hx-trigger="change">
-                    <div class="w-11 h-6 bg-muted peer-focus:ring-2 peer-focus:ring-foreground/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-foreground"></div>
+                    <div class="w-11 h-6 bg-border peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer transition-colors duration-200 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-background after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-md peer-checked:bg-primary"></div>
                 </label>
             </div>
             <div class="rounded-lg bg-blue-500/10 border border-blue-500/20 p-4 text-sm text-blue-600 dark:text-blue-400">
@@ -274,6 +274,77 @@
                 </div>
                 <i data-lucide="log-out" class="h-5 w-5"></i>
             </a>
+        </div>
+    </div>
+
+    <div class="card p-6 border-red-500/20" x-data="{ deleteModalOpen: false }">
+        <h2 class="text-lg font-semibold mb-4 text-red-500">{% trans "Danger Zone" %}</h2>
+        <div class="space-y-4">
+            <div class="rounded-lg bg-red-500/10 border border-red-500/20 p-4">
+                <div class="flex items-start gap-3">
+                    <i data-lucide="alert-triangle" class="w-5 h-5 shrink-0 mt-0.5 text-red-500"></i>
+                    <div class="flex-1">
+                        <p class="font-medium text-red-500 mb-1">{% trans "Delete Account" %}</p>
+                        <p class="text-sm text-red-600 dark:text-red-400 mb-3">
+                            {% trans "Permanently delete your account and all associated data. This action cannot be undone." %}
+                        </p>
+                        <button type="button"
+                                @click="deleteModalOpen = true"
+                                class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-medium">
+                            {% trans "Delete My Account" %}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Account Modal -->
+        <div x-show="deleteModalOpen"
+             x-cloak
+             class="fixed inset-0 z-50 overflow-y-auto"
+             @keydown.escape.window="deleteModalOpen = false">
+            <div class="flex min-h-screen items-center justify-center p-4">
+                <div class="fixed inset-0 bg-black/50 transition-opacity"
+                     @click="deleteModalOpen = false"></div>
+                <div class="relative bg-card rounded-lg shadow-xl max-w-md w-full p-6 border border-border">
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="h-12 w-12 rounded-full bg-red-500/10 flex items-center justify-center shrink-0">
+                            <i data-lucide="alert-triangle" class="h-6 w-6 text-red-500"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-lg font-semibold mb-1">{% trans "Delete Account" %}</h3>
+                            <p class="text-sm text-muted-foreground">
+                                {% trans "Are you absolutely sure? This will permanently delete your account, all your events, tickets, and data. This action cannot be undone." %}
+                            </p>
+                        </div>
+                    </div>
+                    <form method="post" action="{% url 'core:delete_account' %}" class="space-y-4">
+                        {% csrf_token %}
+                        <div>
+                            <label for="delete_password" class="block text-sm font-medium mb-2">
+                                {% trans "Enter your password to confirm" %}
+                            </label>
+                            <input type="password"
+                                   name="password"
+                                   id="delete_password"
+                                   required
+                                   class="input"
+                                   placeholder="{% trans 'Your password' %}">
+                        </div>
+                        <div class="flex gap-3 justify-end">
+                            <button type="button"
+                                    @click="deleteModalOpen = false"
+                                    class="px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors">
+                                {% trans "Cancel" %}
+                            </button>
+                            <button type="submit"
+                                    class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium">
+                                {% trans "Delete My Account" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </div>

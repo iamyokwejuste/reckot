@@ -413,3 +413,51 @@ class PublicBookingPDFView(View):
             f'attachment; filename="tickets-{booking.reference}.pdf"'
         )
         return response
+
+
+class CancelBookingView(LoginRequiredMixin, View):
+    def post(self, request, booking_ref):
+        from django.shortcuts import redirect
+        from apps.payments.models import Refund
+        from django.db import transaction
+
+        booking = get_object_or_404(
+            Booking.objects.select_related("event", "user"),
+            reference=booking_ref
+        )
+
+        # Check if user owns the booking
+        if booking.user != request.user:
+            messages.error(request, _("You don't have permission to cancel this booking."))
+            return redirect("tickets:my_tickets")
+
+        # Check if booking can be cancelled
+        if booking.status not in [Booking.Status.CONFIRMED]:
+            messages.error(request, _("This booking cannot be cancelled."))
+            return redirect("tickets:my_tickets")
+
+        # Find the confirmed payment for this booking
+        payment = Payment.objects.filter(
+            booking=booking,
+            status=Payment.Status.CONFIRMED
+        ).first()
+
+        with transaction.atomic():
+            # Create refund if payment exists
+            if payment:
+                Refund.objects.create(
+                    payment=payment,
+                    amount=payment.amount,
+                    refund_type=Refund.Type.FULL,
+                    status=Refund.Status.APPROVED,
+                    reason="Booking cancelled by user",
+                    requested_by=request.user
+                )
+                booking.status = Booking.Status.REFUNDED
+            else:
+                booking.status = Booking.Status.CANCELLED
+
+            booking.save()
+
+        messages.success(request, _("Your booking has been cancelled successfully. Refund will be processed shortly."))
+        return redirect("tickets:my_tickets")
