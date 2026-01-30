@@ -62,11 +62,11 @@
 
             <div class="flex md:hidden items-center gap-2">
                 {% include "partials/language_switcher.html" %}
-                <button @click="setMode(isDark ? 'light' : 'dark')" class="p-2 rounded-lg hover:bg-muted transition-colors" aria-label="Toggle theme">
+                <button @click="setMode(isDark ? 'light' : 'dark')" class="p-2 rounded-lg hover:bg-muted transition-colors touch-manipulation" aria-label="Toggle theme">
                     <i x-show="!isDark" data-lucide="moon" class="h-5 w-5" aria-hidden="true"></i>
                     <i x-show="isDark" x-cloak data-lucide="sun" class="h-5 w-5" aria-hidden="true"></i>
                 </button>
-                <button id="mobile-menu-toggle" class="p-2 rounded-lg hover:bg-muted transition-colors" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+                <button id="mobile-menu-toggle" class="p-2 rounded-lg hover:bg-muted transition-colors touch-manipulation active:scale-95" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
                     <i id="hamburger-icon" data-lucide="menu" class="h-6 w-6" aria-hidden="true"></i>
                     <i id="close-icon" data-lucide="x" class="h-6 w-6" aria-hidden="true" style="display: none;"></i>
                 </button>
@@ -76,13 +76,13 @@
 </header>
 
 
-<div id="mobile-menu" class="hidden md:hidden fixed inset-0 bg-background text-foreground flex flex-col" style="z-index: 9999; display: none;">
+<div id="mobile-menu" class="fixed inset-0 bg-background text-foreground flex-col" style="z-index: 9999; display: none;">
     <div class="flex items-center justify-between h-16 px-4 border-b border-border">
-        <a href="/" onclick="closeMobileMenu()" aria-label="Reckot Home">
+        <a href="/" hx-boost="false" onclick="closeMobileMenu()" aria-label="Reckot Home" class="touch-manipulation">
             <img id="mobile-logo-light" src="{% static 'images/logo/logo_light_mode.png' %}" alt="Reckot" width="120" height="36" class="h-9 w-auto">
             <img id="mobile-logo-dark" src="{% static 'images/logo/logo_dark_mode.png' %}" alt="Reckot" width="120" height="36" class="h-9 w-auto">
         </a>
-        <button onclick="closeMobileMenu()" class="p-2 rounded-lg hover:bg-muted transition-colors" aria-label="Close menu">
+        <button onclick="closeMobileMenu()" class="p-2 rounded-lg hover:bg-muted transition-colors touch-manipulation active:scale-95" aria-label="Close menu">
             <i data-lucide="x" class="h-6 w-6" aria-hidden="true"></i>
         </button>
     </div>
@@ -96,26 +96,26 @@
             <span class="font-medium truncate text-foreground">{{ user.email }}</span>
         </div>
         <div class="space-y-2">
-            <a href="{% url 'events:list' %}" hx-boost="false" onclick="closeMobileMenu()" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted transition-colors">
+            <a href="{% url 'events:list' %}" hx-boost="false" onclick="closeMobileMenu()" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
                 <i data-lucide="calendar" class="h-6 w-6" aria-hidden="true"></i>
                 {% trans "My Events" %}
             </a>
-            <a href="{% url 'reports:analytics' %}" hx-boost="false" onclick="closeMobileMenu()" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted transition-colors">
+            <a href="{% url 'reports:analytics' %}" hx-boost="false" onclick="closeMobileMenu()" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
                 <i data-lucide="bar-chart-3" class="h-6 w-6" aria-hidden="true"></i>
                 {% trans "Analytics" %}
             </a>
         </div>
         {% else %}
         <div class="space-y-2">
-            <a href="{% url 'features' %}" onclick="closeMobileMenu()" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted transition-colors">
+            <a href="{% url 'features' %}" hx-boost="false" onclick="closeMobileMenu()" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
                 <i data-lucide="sparkles" class="h-6 w-6" aria-hidden="true"></i>
                 {% trans "Features" %}
             </a>
-            <a href="{% url 'home' %}#pricing" onclick="closeMobileMenu()" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted transition-colors">
+            <a href="{% url 'home' %}#pricing" hx-boost="false" onclick="closeMobileMenu()" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
                 <i data-lucide="tag" class="h-6 w-6" aria-hidden="true"></i>
                 {% trans "Pricing" %}
             </a>
-            <a href="{% url 'why_us' %}" onclick="closeMobileMenu()" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted transition-colors">
+            <a href="{% url 'why_us' %}" hx-boost="false" onclick="closeMobileMenu()" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
                 <i data-lucide="heart" class="h-6 w-6" aria-hidden="true"></i>
                 {% trans "Why Us" %}
             </a>
@@ -125,15 +125,15 @@
 
     <div class="p-6 border-t border-border space-y-3">
         {% if user.is_authenticated %}
-        <a href="{% url 'account_logout' %}?next={{ request.path }}" class="flex items-center justify-center gap-2 w-full py-4 rounded-xl text-red-500 bg-red-500/10 font-semibold text-lg">
+        <a href="{% url 'account_logout' %}?next={{ request.path }}" hx-boost="false" class="flex items-center justify-center gap-2 w-full py-4 rounded-xl text-red-500 bg-red-500/10 font-semibold text-lg active:scale-95 transition-all touch-manipulation">
             <i data-lucide="log-out" class="h-5 w-5" aria-hidden="true"></i>
             {% trans "Log out" %}
         </a>
         {% else %}
-        <a href="{% url 'account_login' %}" onclick="closeMobileMenu()" class="flex items-center justify-center w-full py-4 rounded-xl border border-border text-foreground font-semibold text-lg hover:bg-muted transition-colors">
+        <a href="{% url 'account_login' %}" hx-boost="false" class="flex items-center justify-center w-full py-4 rounded-xl border border-border text-foreground font-semibold text-lg hover:bg-muted active:scale-95 transition-all touch-manipulation">
             {% trans "Log in" %}
         </a>
-        <a href="{% url 'account_signup' %}" onclick="closeMobileMenu()" class="flex items-center justify-center w-full py-4 rounded-xl bg-foreground text-background font-semibold text-lg hover:opacity-90 transition-opacity">
+        <a href="{% url 'account_signup' %}" hx-boost="false" class="flex items-center justify-center w-full py-4 rounded-xl bg-foreground text-background font-semibold text-lg hover:opacity-90 active:scale-95 transition-all touch-manipulation">
             {% trans "Get Started" %}
         </a>
         {% endif %}
