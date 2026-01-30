@@ -10,6 +10,7 @@ class User(AbstractUser):
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     email_verified = models.BooleanField(default=False)
     phone_verified = models.BooleanField(default=False)
+    ai_features_enabled = models.BooleanField(default=True)
 
     def __str__(self):
         return self.email or self.username

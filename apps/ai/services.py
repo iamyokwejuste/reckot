@@ -3,6 +3,9 @@ import logging
 from typing import Optional
 from google import genai
 from django.conf import settings
+from django.apps import apps
+from django.db.models import Count, Sum, Q, F
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +61,101 @@ class GeminiService:
 
 
 gemini = GeminiService()
+
+
+def get_model_schema():
+    schema = {
+        "Event": {
+            "description": "Events in the system",
+            "fields": {
+                "title": "Event title",
+                "description": "Event description",
+                "location": "Event location",
+                "start_at": "Start datetime",
+                "end_at": "End datetime",
+                "is_public": "Is event public (True) or private (False)",
+                "state": "DRAFT, PUBLISHED, or CANCELLED",
+                "capacity": "Maximum capacity",
+                "organization": "ForeignKey to Organization",
+            },
+            "filtering": "ALWAYS filter is_public=True when counting public events"
+        },
+        "Ticket": {
+            "description": "Individual tickets",
+            "fields": {
+                "booking": "ForeignKey to Booking",
+                "ticket_type": "ForeignKey to TicketType",
+                "status": "VALID, USED, CANCELLED, or REFUNDED",
+                "checked_in_at": "Check-in timestamp",
+            }
+        },
+        "Booking": {
+            "description": "Ticket bookings",
+            "fields": {
+                "event": "ForeignKey to Event",
+                "user": "ForeignKey to User",
+                "status": "PENDING, CONFIRMED, CANCELLED, or REFUNDED",
+                "total_amount": "Total payment amount in XAF",
+                "created_at": "Booking creation time",
+            }
+        },
+        "Payment": {
+            "description": "Payment transactions",
+            "fields": {
+                "booking": "ForeignKey to Booking",
+                "amount": "Payment amount in XAF",
+                "status": "PENDING, COMPLETED, FAILED, or REFUNDED",
+                "gateway": "Payment gateway used",
+                "created_at": "Payment timestamp",
+            }
+        },
+        "Organization": {
+            "description": "Event organizations",
+            "fields": {
+                "name": "Organization name",
+                "slug": "URL slug",
+                "members": "ManyToMany to User",
+            }
+        }
+    }
+    return schema
+
+
+def execute_django_query(query_code: str):
+    try:
+        from apps.events.models import Event, TicketType
+        from apps.tickets.models import Ticket, Booking
+        from apps.payments.models import Payment
+        from apps.orgs.models import Organization
+
+        safe_namespace = {
+            'Event': Event,
+            'Ticket': Ticket,
+            'Booking': Booking,
+            'Payment': Payment,
+            'Organization': Organization,
+            'TicketType': TicketType,
+            'Count': Count,
+            'Sum': Sum,
+            'Q': Q,
+            'F': F,
+            'timezone': timezone,
+        }
+
+        result = eval(query_code, {"__builtins__": {}}, safe_namespace)
+
+        if hasattr(result, '__iter__') and not isinstance(result, (str, dict)):
+            if hasattr(result, 'count'):
+                return list(result.values())[:100]
+            return list(result)[:100]
+        elif hasattr(result, '__dict__'):
+            return {k: str(v) for k, v in result.__dict__.items() if not k.startswith('_')}
+        else:
+            return result
+
+    except Exception as e:
+        logger.error(f"Query execution error: {str(e)}\nQuery: {query_code}")
+        return {"error": str(e), "query": query_code}
 
 
 def generate_event_description(
@@ -121,25 +219,37 @@ Return as JSON:
     return gemini.generate_json(prompt)
 
 
-SUPPORT_SYSTEM_PROMPT = """You are Reckot's AI Support Assistant. Reckot is an event ticketing platform in Cameroon.
+SUPPORT_SYSTEM_PROMPT = """You are Reckot's AI Assistant with DATABASE QUERY capabilities. Reckot is an event ticketing platform in Cameroon.
 
-Your capabilities:
-1. Answer questions about events, tickets, payments, and the platform
-2. Help debug issues users are experiencing
-3. Create support tickets when you cannot resolve an issue
-4. Provide helpful guidance for event organizers
+When users ask questions about data (counts, statistics, events, tickets, etc.), you MUST:
+1. Generate a Django ORM query to fetch the actual data
+2. Return the query in this JSON format: {"action": "execute_query", "query": "Event.objects.filter(is_public=True).count()"}
+3. For events, ALWAYS use is_public=True to exclude private events unless specifically asked
 
-Platform info:
-- Payment methods: Mobile Money (MTN, Orange) via Campay
-- Currency: XAF (Central African Franc)
-- Features: Event creation, ticket sales, check-in, analytics
+Available Models and Fields:
+{schema}
 
-When you need to create a support ticket, respond with JSON:
-{"action": "create_ticket", "category": "PAYMENT|TICKET|EVENT|ACCOUNT|TECHNICAL|OTHER", "priority": "LOW|MEDIUM|HIGH|URGENT", "subject": "...", "description": "..."}
+Query Examples:
+- "How many events?" → {{"action": "execute_query", "query": "Event.objects.filter(is_public=True).count()"}}
+- "Total tickets sold?" → {{"action": "execute_query", "query": "Ticket.objects.filter(status='VALID').count()"}}
+- "Revenue this month?" → {{"action": "execute_query", "query": "Payment.objects.filter(status='COMPLETED', created_at__month=timezone.now().month).aggregate(total=Sum('amount'))['total'] or 0"}}
 
-For normal responses, just provide helpful text.
+Rules:
+- ALWAYS filter is_public=True for events (exclude private)
+- Use Django ORM syntax only
+- No SQL, only Python/Django ORM
+- Keep queries simple and safe
+- Return single value or simple aggregate
 
-Be friendly, professional, and concise. If you don't know something, say so and offer to create a ticket."""
+Authentication Requirements:
+- Check User Context for user_id/user_email
+- If missing, user is NOT logged in
+- Users need login for: create events, withdrawals, analytics, manage tickets
+
+For support tickets:
+{{"action": "create_ticket", "category": "PAYMENT|TICKET|EVENT|OTHER", "priority": "LOW|MEDIUM|HIGH|URGENT", "subject": "...", "description": "..."}}
+
+Be concise and accurate."""
 
 
 def chat_with_assistant(
@@ -156,7 +266,10 @@ def chat_with_assistant(
         ]
     )
 
-    prompt = f"""{SUPPORT_SYSTEM_PROMPT}
+    schema = get_model_schema()
+    schema_str = json.dumps(schema, indent=2)
+
+    prompt = f"""{SUPPORT_SYSTEM_PROMPT.format(schema=schema_str)}
 {context_str}
 
 Conversation History:
@@ -164,13 +277,28 @@ Conversation History:
 
 User: {user_message}
 
-Respond helpfully. If creating a ticket is needed, use the JSON format specified."""
+If this is a data question, respond with execute_query action. Otherwise provide helpful text."""
 
     response = gemini.generate(prompt)
     result = {"message": response, "action": None}
 
     try:
-        if '{"action": "create_ticket"' in response:
+        if '{"action": "execute_query"' in response:
+            start = response.find('{"action": "execute_query"')
+            end = response.find("}", start) + 1
+            query_data = json.loads(response[start:end])
+            query_code = query_data.get("query", "")
+
+            query_result = execute_django_query(query_code)
+
+            if isinstance(query_result, dict) and "error" in query_result:
+                result["message"] = f"I encountered an error executing the query: {query_result['error']}"
+            else:
+                result["message"] = f"Result: {query_result}"
+                result["action"] = "execute_query"
+                result["query_result"] = query_result
+
+        elif '{"action": "create_ticket"' in response:
             start = response.find('{"action": "create_ticket"')
             end = response.find("}", start) + 1
             ticket_data = json.loads(response[start:end])
@@ -181,7 +309,8 @@ Respond helpfully. If creating a ticket is needed, use the JSON format specified
                 if start > 0
                 else "I'll create a support ticket for you."
             )
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON parse error: {e}\nResponse: {response}")
         pass
 
     return result

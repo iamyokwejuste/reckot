@@ -169,6 +169,18 @@ class SettingsView(LoginRequiredMixin, View):
         messages.success(request, _("Settings updated successfully."))
         return redirect("core:settings")
 
+
+class ToggleAIFeaturesView(LoginRequiredMixin, View):
+    def post(self, request):
+        user = request.user
+        user.ai_features_enabled = not user.ai_features_enabled
+        user.save(update_fields=["ai_features_enabled"])
+        return JsonResponse({
+            "success": True,
+            "enabled": user.ai_features_enabled
+        })
+
+
 class PhoneLoginRequestView(View):
     def get(self, request):
         return redirect("account_login")

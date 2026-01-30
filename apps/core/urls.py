@@ -6,6 +6,7 @@ app_name = "core"
 
 urlpatterns = [
     path("settings/", actions.SettingsView.as_view(), name="settings"),
+    path("settings/toggle-ai/", actions.ToggleAIFeaturesView.as_view(), name="toggle_ai_features"),
     path(
         "api/ai/generate-description/",
         ai.generate_description,

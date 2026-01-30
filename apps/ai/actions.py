@@ -59,6 +59,7 @@ class AIAssistantChatView(View):
         try:
             data = json.loads(request.body)
         except json.JSONDecodeError:
+            logger.error("Invalid JSON in request body")
             return JsonResponse({"error": "Invalid JSON"}, status=400)
 
         user_message = data.get("message", "").strip()
@@ -73,29 +74,38 @@ class AIAssistantChatView(View):
             conversation=conversation, role=AIMessage.Role.USER, content=user_message
         )
 
-        result = services.chat_with_assistant(user_message, history, context)
+        try:
+            result = services.chat_with_assistant(user_message, history, context)
+            logger.info(f"AI response: {result}")
 
-        if result.get("action") == "create_ticket":
-            ticket = self._create_ticket(
-                request, result.get("ticket_data", {}), conversation
+            if result.get("action") == "create_ticket":
+                ticket = self._create_ticket(
+                    request, result.get("ticket_data", {}), conversation
+                )
+                result["ticket_reference"] = str(ticket.reference)
+                result["message"] += f"\n\nTicket created: #{ticket.reference}"
+
+            AIMessage.objects.create(
+                conversation=conversation,
+                role=AIMessage.Role.ASSISTANT,
+                content=result["message"],
+                metadata={"action": result.get("action")},
             )
-            result["ticket_reference"] = str(ticket.reference)
-            result["message"] += f"\n\nTicket created: #{ticket.reference}"
 
-        AIMessage.objects.create(
-            conversation=conversation,
-            role=AIMessage.Role.ASSISTANT,
-            content=result["message"],
-            metadata={"action": result.get("action")},
-        )
-
-        return JsonResponse(
-            {
-                "message": result["message"],
-                "action": result.get("action"),
-                "ticket_reference": result.get("ticket_reference"),
-            }
-        )
+            return JsonResponse(
+                {
+                    "message": result["message"],
+                    "action": result.get("action"),
+                    "ticket_reference": result.get("ticket_reference"),
+                    "query_result": result.get("query_result"),
+                }
+            )
+        except Exception as e:
+            logger.error(f"Error in AI chat: {str(e)}", exc_info=True)
+            return JsonResponse(
+                {"error": "An error occurred processing your request", "message": "Sorry, I encountered an error. Please try again."},
+                status=500
+            )
 
     def _get_or_create_conversation(self, request):
         session_id = request.session.get("ai_session_id")

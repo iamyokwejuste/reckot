@@ -218,6 +218,46 @@
     </div>
 
     <div class="card p-6">
+        <h2 class="text-lg font-semibold mb-4">{% trans "Privacy & AI" %}</h2>
+        <div class="space-y-4">
+            <div class="flex items-center justify-between py-3 border-b border-border">
+                <div>
+                    <p class="font-medium">{% trans "AI Features" %}</p>
+                    <p class="text-sm text-muted-foreground">{% trans "Enable AI-powered tools and features" %}</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox"
+                           id="ai_features_enabled"
+                           name="ai_features_enabled"
+                           {% if user.ai_features_enabled %}checked{% endif %}
+                           class="sr-only peer"
+                           hx-post="{% url 'core:toggle_ai_features' %}"
+                           hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                           hx-trigger="change">
+                    <div class="w-11 h-6 bg-muted peer-focus:ring-2 peer-focus:ring-foreground/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-foreground"></div>
+                </label>
+            </div>
+            <div class="rounded-lg bg-blue-500/10 border border-blue-500/20 p-4 text-sm text-blue-600 dark:text-blue-400">
+                <div class="flex gap-3">
+                    <i data-lucide="shield-check" class="w-5 h-5 shrink-0 mt-0.5"></i>
+                    <div>
+                        <p class="font-medium mb-1">{% trans "About AI features" %}</p>
+                        <ul class="text-xs space-y-1 text-blue-500 dark:text-blue-300">
+                            <li>{% trans "Voice-to-Event Creator: Create events by speaking" %}</li>
+                            <li>{% trans "AI Cover Images: Generate professional event images" %}</li>
+                            <li>{% trans "Smart Descriptions: Enhance event descriptions" %}</li>
+                            <li>{% trans "Analytics Insights: Get AI-powered recommendations" %}</li>
+                        </ul>
+                        <p class="text-xs text-blue-500 dark:text-blue-300 mt-2">
+                            {% trans "Disabling AI features will hide all AI tools across the platform. Your data is never used to train AI models without permission." %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-6">
         <h2 class="text-lg font-semibold mb-4">{% trans "Security" %}</h2>
         <div class="space-y-4">
             <a href="{% url 'account_change_password' %}" class="flex items-center justify-between py-3 border-b border-border hover:bg-muted/50 -mx-6 px-6 transition-colors">
