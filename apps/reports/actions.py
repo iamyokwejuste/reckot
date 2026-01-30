@@ -9,6 +9,8 @@ from django.db.models.functions import TruncDate
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_control
 from django.utils.timesince import timesince
 from django.utils.translation import gettext_lazy as _
 from django.views import View
@@ -31,6 +33,7 @@ from apps.tickets.models import Booking, Ticket
 
 
 class AnalyticsView(LoginRequiredMixin, View):
+    @method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=True))
     def get(self, request):
         user = request.user
         now = timezone.now()

@@ -37,6 +37,7 @@ urlpatterns = [
         name="refund_process",
     ),
     path("track/<uuid:token>/", actions.TransactionStatusView.as_view(), name="track"),
+    path("transactions/", actions.TransactionHistoryView.as_view(), name="transactions"),
     path("withdrawals/", actions.WithdrawalListView.as_view(), name="withdrawals"),
     path(
         "withdrawals/balance/",

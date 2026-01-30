@@ -228,7 +228,7 @@ AUTHENTICATION_BACKENDS = [
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
-LOGIN_REDIRECT_URL = "/events/"
+LOGIN_REDIRECT_URL = "/reports/"
 LOGOUT_REDIRECT_URL = "/"
 
 

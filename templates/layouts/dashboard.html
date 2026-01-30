@@ -215,6 +215,12 @@
                         <span x-show="!collapsed" x-transition class="truncate">{% trans "Refunds" %}</span>
                     </a>
 
+                    <a href="{% url 'payments:transactions' %}"
+                       class="sidebar-item {% if 'transactions' in request.path %}sidebar-item-active{% endif %}">
+                        <i data-lucide="receipt" class="h-5 w-5 shrink-0"></i>
+                        <span x-show="!collapsed" x-transition class="truncate">{% trans "Transactions" %}</span>
+                    </a>
+
                     <a href="{% url 'events:coupons' %}"
                        class="sidebar-item {% if 'coupons' in request.path %}sidebar-item-active{% endif %}">
                         <i data-lucide="tag" class="h-5 w-5 shrink-0"></i>

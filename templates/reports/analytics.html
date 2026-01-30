@@ -66,6 +66,7 @@
         showWithdrawModal: false,
         withdrawAmount: '',
         phoneNumber: '',
+        description: '',
         loading: false,
         error: '',
         success: false,
@@ -184,14 +185,14 @@
 
                 <div x-show="error" class="bg-destructive/10 text-destructive p-3 rounded-lg text-sm" x-text="error"></div>
 
-                <div class="flex items-center justify-end gap-3">
+                <div class="flex items-center justify-end gap-3 pt-2">
                     <button
                         type="button"
-                        @click="showWithdrawModal = false; withdrawAmount = ''; phoneNumber = ''; error = ''"
-                        class="btn btn-secondary"
+                        @click="showWithdrawModal = false; withdrawAmount = ''; phoneNumber = ''; description = ''; error = ''"
+                        class="btn btn-outline"
                         :disabled="loading"
                     >
-                        {% trans "Cancel" %}
+                        {% trans "Close" %}
                     </button>
                     <button
                         type="button"
@@ -242,8 +243,15 @@
                         class="btn btn-primary"
                         :disabled="loading || !withdrawAmount || !phoneNumber"
                     >
+                        <i data-lucide="arrow-right" class="h-4 w-4" x-show="!loading"></i>
                         <span x-show="!loading">{% trans "Request Withdrawal" %}</span>
-                        <span x-show="loading">{% trans "Processing..." %}</span>
+                        <span x-show="loading" class="flex items-center gap-2">
+                            <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            {% trans "Processing..." %}
+                        </span>
                     </button>
                 </div>
             </div>

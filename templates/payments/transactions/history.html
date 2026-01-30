@@ -1,0 +1,104 @@
+{% extends "layouts/dashboard.html" %}
+{% load i18n slippers %}
+
+{% block title %}{% trans "Transaction History" %} - Reckot{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold">{% trans "Transaction History" %}</h1>
+            <p class="text-muted-foreground mt-1">{% trans "View all credits and debits for your organization" %}</p>
+        </div>
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-4">
+        <div class="rounded-lg border border-border bg-card p-4">
+            <div class="flex items-center gap-2">
+                <i data-lucide="trending-up" class="h-4 w-4 text-green-600"></i>
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Total Revenue" %}</p>
+            </div>
+            <p class="text-2xl font-bold mt-2">{{ balance_data.total_revenue|floatformat:0 }} <span class="text-sm font-normal text-muted-foreground">XAF</span></p>
+        </div>
+
+        <div class="rounded-lg border border-border bg-card p-4">
+            <div class="flex items-center gap-2">
+                <i data-lucide="trending-down" class="h-4 w-4 text-red-600"></i>
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Total Withdrawn" %}</p>
+            </div>
+            <p class="text-2xl font-bold mt-2">{{ balance_data.total_withdrawn|floatformat:0 }} <span class="text-sm font-normal text-muted-foreground">XAF</span></p>
+        </div>
+
+        <div class="rounded-lg border border-border bg-card p-4">
+            <div class="flex items-center gap-2">
+                <i data-lucide="undo-2" class="h-4 w-4 text-yellow-600"></i>
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Total Refunded" %}</p>
+            </div>
+            <p class="text-2xl font-bold mt-2">{{ balance_data.total_refunded|floatformat:0 }} <span class="text-sm font-normal text-muted-foreground">XAF</span></p>
+        </div>
+
+        <div class="rounded-lg border border-border bg-card p-4">
+            <div class="flex items-center gap-2">
+                <i data-lucide="wallet" class="h-4 w-4 text-primary"></i>
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Available Balance" %}</p>
+            </div>
+            <p class="text-2xl font-bold mt-2">{{ balance_data.available_balance|floatformat:0 }} <span class="text-sm font-normal text-muted-foreground">XAF</span></p>
+        </div>
+    </div>
+
+    <div class="rounded-lg border border-border bg-card">
+        <div class="p-6">
+            <h2 class="text-lg font-semibold mb-4">{% trans "Recent Transactions" %}</h2>
+
+            {% if transactions %}
+            <div class="space-y-2">
+                {% for transaction in transactions %}
+                <div class="flex items-center justify-between p-3 rounded-lg hover:bg-accent/50 border border-border">
+                    <div class="flex items-center gap-3">
+                        {% if transaction.type == "credit" %}
+                        <div class="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
+                            <i data-lucide="arrow-down-left" class="h-5 w-5 text-green-600"></i>
+                        </div>
+                        {% else %}
+                        <div class="h-10 w-10 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
+                            <i data-lucide="arrow-up-right" class="h-5 w-5 text-red-600"></i>
+                        </div>
+                        {% endif %}
+
+                        <div>
+                            <p class="font-medium">{{ transaction.description }}</p>
+                            <div class="flex items-center gap-2 mt-1">
+                                <p class="text-xs text-muted-foreground">{{ transaction.date|date:"M d, Y H:i" }}</p>
+                                <span class="text-xs text-muted-foreground">•</span>
+                                <p class="text-xs font-mono text-muted-foreground">{{ transaction.reference|slice:":8" }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-right">
+                        {% if transaction.type == "credit" %}
+                        <p class="text-lg font-bold text-green-600">+{{ transaction.amount|floatformat:0 }} XAF</p>
+                        {% else %}
+                        <p class="text-lg font-bold text-red-600">-{{ transaction.amount|floatformat:0 }} XAF</p>
+                        {% endif %}
+                        <p class="text-xs text-muted-foreground mt-1">
+                            {% if transaction.type == "credit" %}
+                            {% trans "Credit" %}
+                            {% else %}
+                            {% trans "Debit" %}
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-12">
+                <i data-lucide="file-text" class="h-12 w-12 text-muted-foreground mx-auto mb-4"></i>
+                <p class="text-muted-foreground">{% trans "No transactions found" %}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

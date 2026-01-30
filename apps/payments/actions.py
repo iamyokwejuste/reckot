@@ -18,6 +18,7 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views import View
+from django.views.decorators.cache import cache_control
 from django.views.decorators.csrf import csrf_exempt
 
 from apps.events.models import Coupon, Event
@@ -678,6 +679,7 @@ class TransactionStatusView(View):
 
 
 class WithdrawalBalanceView(LoginRequiredMixin, View):
+    @method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=True))
     def get(self, request):
         user_org = Organization.objects.filter(members=request.user).first()
 
@@ -709,7 +711,14 @@ class WithdrawalRequestView(LoginRequiredMixin, View):
         try:
             amount = Decimal(request.POST.get("amount", "0"))
             phone_number = request.POST.get("phone_number", "").strip()
-            description = request.POST.get("description", "Withdrawal from Reckot")
+
+            user_orgs = Organization.objects.filter(members=request.user).first()
+            if not user_orgs:
+                return JsonResponse(
+                    {"success": False, "error": "No organization found"}, status=400
+                )
+
+            description = f"{user_orgs.name[:20]}"
 
             if amount < self.MINIMUM_WITHDRAWAL_AMOUNT:
                 return JsonResponse(
@@ -732,12 +741,6 @@ class WithdrawalRequestView(LoginRequiredMixin, View):
                         "error": "Invalid phone number format. Expected Cameroon number (e.g., +237XXXXXXXXX)",
                     },
                     status=400,
-                )
-
-            user_orgs = Organization.objects.filter(members=request.user).first()
-            if not user_orgs:
-                return JsonResponse(
-                    {"success": False, "error": "No organization found"}, status=400
                 )
 
             today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
@@ -867,5 +870,74 @@ class WithdrawalListView(LoginRequiredMixin, View):
                 "withdrawals": withdrawals[:50],
                 "stats": stats,
                 "status_filter": status_filter,
+            },
+        )
+
+
+class TransactionHistoryView(LoginRequiredMixin, View):
+    @method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=True))
+    def get(self, request):
+        user_org = Organization.objects.filter(members=request.user).first()
+
+        if not user_org:
+            return render(request, "payments/transactions/history.html", {"transactions": []})
+
+        transactions = []
+
+        payments = Payment.objects.filter(
+            booking__event__organization=user_org,
+            status=Payment.Status.CONFIRMED
+        ).select_related("booking__event", "booking__user")
+
+        for payment in payments:
+            transactions.append({
+                "date": payment.confirmed_at or payment.created_at,
+                "type": "credit",
+                "description": f"Payment for {payment.booking.event.title}",
+                "amount": payment.amount,
+                "balance_change": f"+{payment.amount - payment.service_fee}",
+                "reference": str(payment.reference),
+            })
+
+        withdrawals = Withdrawal.objects.filter(
+            organization=user_org,
+            status__in=[Withdrawal.Status.COMPLETED, Withdrawal.Status.PROCESSING]
+        ).select_related("organization")
+
+        for withdrawal in withdrawals:
+            transactions.append({
+                "date": withdrawal.created_at,
+                "type": "debit",
+                "description": f"Withdrawal to {withdrawal.phone_number}",
+                "amount": withdrawal.amount,
+                "balance_change": f"-{withdrawal.amount}",
+                "reference": str(withdrawal.reference),
+            })
+
+        refunds = Refund.objects.filter(
+            payment__booking__event__organization=user_org,
+            status=Refund.Status.PROCESSED
+        ).select_related("payment__booking__event")
+
+        for refund in refunds:
+            transactions.append({
+                "date": refund.processed_at or refund.created_at,
+                "type": "debit",
+                "description": f"Refund for {refund.payment.booking.event.title}",
+                "amount": refund.amount,
+                "balance_change": f"-{refund.amount}",
+                "reference": str(refund.reference),
+            })
+
+        transactions.sort(key=lambda x: x["date"], reverse=True)
+
+        balance_data = calculate_organization_balance(user_org)
+
+        return render(
+            request,
+            "payments/transactions/history.html",
+            {
+                "transactions": transactions[:100],
+                "balance_data": balance_data,
             },
         )
