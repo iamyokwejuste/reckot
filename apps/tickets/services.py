@@ -30,17 +30,24 @@ def create_booking(user, ticket_type: TicketType, quantity: int):
 def create_multi_ticket_booking(
     user=None,
     event=None,
-    ticket_selections: dict = None,
-    question_answers: dict = None,
+    ticket_selections: dict | None = None,
+    question_answers: dict | None = None,
     coupon=None,
     guest_session=None,
-    guest_email: str = None,
-    guest_name: str = None,
-    guest_phone: str = None,
-    attendee_info: dict = None,
+    guest_email: str | None = None,
+    guest_name: str | None = None,
+    guest_phone: str | None = None,
+    attendee_info: dict | None = None,
 ):
     if not user and not guest_email:
         return None, "Either user or guest email is required."
+
+    if ticket_selections is None:
+        ticket_selections = {}
+    if question_answers is None:
+        question_answers = {}
+    if attendee_info is None:
+        attendee_info = {}
 
     with transaction.atomic():
         total_tickets = sum(ticket_selections.values())

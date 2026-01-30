@@ -21,6 +21,19 @@ class PaymentResult:
     status: PaymentStatus = PaymentStatus.PENDING
     message: str = ""
     raw_response: Optional[dict] = None
+    reference: Optional[str] = None
+    error_message: str = ""
+    requires_verification: bool = False
+    requires_redirect: bool = False
+
+
+@dataclass
+class RefundResult:
+    success: bool
+    refund_id: Optional[str] = None
+    amount: Optional[Decimal] = None
+    message: str = ""
+    raw_response: Optional[dict] = None
 
 
 class PaymentGateway(ABC):
@@ -53,7 +66,7 @@ class PaymentGateway(ABC):
         pass
 
     @abstractmethod
-    def check_status(self, external_reference: str) -> PaymentResult:
+    def check_status(self, reference: str) -> PaymentResult:
         pass
 
     def refund(self, external_reference: str, amount: Decimal) -> PaymentResult:

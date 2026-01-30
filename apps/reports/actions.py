@@ -107,7 +107,7 @@ class AnalyticsView(LoginRequiredMixin, View):
 
         analytics_metrics = json.dumps(
             {
-                "total_revenue": float(total_revenue),
+                "available_balance": float(available_balance),
                 "tickets_sold": tickets_sold,
                 "check_in_rate": round(checkin_rate, 1),
                 "total_checked_in": checked_in,

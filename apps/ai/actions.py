@@ -248,7 +248,7 @@ class AIEventInsightsView(LoginRequiredMixin, View):
 
         event_data = {
             "title": event.title,
-            "date": str(event.start_date),
+            "date": str(event.start_at),
             "location": event.location,
             "capacity": event.capacity,
             "tickets_sold": event.bookings.filter(status="CONFIRMED").count(),

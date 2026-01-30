@@ -12,7 +12,7 @@ def predict_ticket_sales(
     location: str,
     start_date: datetime,
     organizer_history: Dict,
-    market_data: List[Dict] = None,
+    market_data: List[Dict] | None = None,
 ) -> Dict:
     history_context = f"""
     Organizer History:
@@ -111,7 +111,7 @@ Base predictions on African market realities:
 
 
 def optimize_ticket_pricing(
-    event_data: Dict, competitor_events: List[Dict] = None, demand_signals: Dict = None
+    event_data: Dict, competitor_events: List[Dict] | None = None, demand_signals: Dict | None = None
 ) -> Dict:
     competitor_context = ""
     if competitor_events:
@@ -187,7 +187,7 @@ Return JSON:
 
 
 def generate_marketing_strategy(
-    event_data: Dict, budget: Decimal, target_audience: str = None
+    event_data: Dict, budget: Decimal, target_audience: str | None = None
 ) -> Dict:
     prompt = f"""Create a detailed marketing strategy for this African event.
 

@@ -161,7 +161,7 @@ Return the complete updated event JSON with changes marked."""
         return event_data
 
 
-def transcribe_audio(audio_data: bytes, language: str = "auto") -> str:
+def transcribe_audio(audio_data: bytes, language: str = "auto") -> str | None:
     prompt = f"""Transcribe this audio accurately. Language: {language}
 
 Return only the transcribed text, nothing else."""

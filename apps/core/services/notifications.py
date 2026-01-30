@@ -27,8 +27,8 @@ class NotificationService:
         subject: str,
         template_name: str,
         context: dict,
-        attachments: list = None,
-        inline_images: dict = None,
+        attachments: list | None = None,
+        inline_images: dict | None = None,
     ) -> bool:
         try:
             context["site_url"] = cls.get_site_url()
@@ -101,7 +101,7 @@ class NotificationService:
         booking,
         tickets: list,
         event,
-        qr_code_bytes: bytes = None,
+        qr_code_bytes: bytes | None = None,
     ) -> bool:
         total_amount = sum(t.ticket_type.price for t in tickets)
 
@@ -129,7 +129,7 @@ class NotificationService:
         refund,
         event,
         original_amount,
-        payment_method: str = None,
+        payment_method: str | None = None,
     ) -> bool:
         return cls.send_email(
             to_email=to_email,
@@ -193,7 +193,7 @@ class NotificationService:
 
     @classmethod
     def send_otp_sms(
-        cls, phone_number: str, otp_code: str = None, expiry_minutes: int = 10
+        cls, phone_number: str, otp_code: str | None = None, expiry_minutes: int = 10
     ) -> bool:
         try:
             verify_sid = getattr(settings, "TWILIO_VERIFY_SERVICE_SID", "")
@@ -273,7 +273,7 @@ class NotificationService:
 
     @classmethod
     def send_refund_sms(
-        cls, phone_number: str, refund, event, payment_method: str = None
+        cls, phone_number: str, refund, event, payment_method: str | None = None
     ) -> bool:
         template = (
             "sms/refund_processed.txt"

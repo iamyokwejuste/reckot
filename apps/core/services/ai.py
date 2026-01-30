@@ -62,7 +62,7 @@ class GeminiAI:
         short_description: str = "",
         event_type: str = "general",
         location: str = "",
-        cover_image_data: bytes = None,
+        cover_image_data: bytes | None = None,
         cover_image_mime: str = "image/jpeg",
     ) -> Optional[dict]:
         prompt = f"""You are a creative event copywriter with a fun, energetic style. Generate content for an event that gets people excited.

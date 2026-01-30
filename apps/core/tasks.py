@@ -18,8 +18,8 @@ def send_email_task(
     subject: str,
     template_name: str,
     context: dict,
-    attachments: list = None,
-    inline_images: dict = None,
+    attachments: list | None = None,
+    inline_images: dict | None = None,
 ):
     try:
         NotificationService.send_email(
@@ -50,7 +50,7 @@ def send_sms_task(phone_number: str, template_name: str, context: dict):
 
 @shared_task
 def send_otp_sms_task(
-    phone_number: str, otp_code: str = None, expiry_minutes: int = 10
+    phone_number: str, otp_code: str | None = None, expiry_minutes: int = 10
 ):
     try:
         NotificationService.send_otp_sms(

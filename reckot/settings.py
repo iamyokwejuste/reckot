@@ -250,6 +250,7 @@ if _google_client_id and _google_client_secret:
     }
 
 ACCOUNT_ADAPTER = "apps.core.adapters.CustomAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "apps.core.adapters.CustomSocialAccountAdapter"
 ACCOUNT_FORMS = {
     "signup": "apps.core.forms.CustomSignupForm",
 }
@@ -260,6 +261,11 @@ ACCOUNT_EMAIL_VERIFICATION = os.getenv("ACCOUNT_EMAIL_VERIFICATION", "optional")
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
+
+SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_EMAIL_VERIFICATION = "none"
+SOCIALACCOUNT_EMAIL_REQUIRED = True
+SOCIALACCOUNT_QUERY_EMAIL = True
 
 EMAIL_BACKEND = os.getenv(
     "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"

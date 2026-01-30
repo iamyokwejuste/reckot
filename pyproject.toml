@@ -32,4 +32,5 @@ dependencies = [
 [dependency-groups]
 dev = [
     "ty>=0.0.14",
+    "django-stubs[compatible-mypy]>=5.1.3",
 ]

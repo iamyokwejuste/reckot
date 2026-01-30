@@ -76,7 +76,7 @@
                 {% csrf_token %}
                 <div>
                     <label for="id_login" class="block text-sm font-medium mb-2">{% trans "Email" %}</label>
-                    <input type="email" name="login" id="id_login" placeholder="you@example.com" required autocomplete="email" class="input {% if form.login.errors %}border-red-500{% endif %}" value="{{ form.login.value|default:'' }}">
+                    <input type="email" name="login" id="id_login" placeholder="you@you@email.com" required autocomplete="email" class="input {% if form.login.errors %}border-red-500{% endif %}" value="{{ form.login.value|default:'' }}">
                     {% if form.login.errors %}
                     <p class="text-sm text-red-500 mt-1">{% for error in form.login.errors %}{{ error }}{% endfor %}</p>
                     {% endif %}

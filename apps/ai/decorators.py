@@ -2,14 +2,15 @@ import time
 import json
 from functools import wraps
 from datetime import date
-from django.http import JsonResponse
+from typing import Callable, Any
+from django.http import JsonResponse, HttpRequest, HttpResponse
 from django.db.models import F
 from apps.ai.models import AIRateLimit, AIUsageLog
 
 
-def ai_feature_required(view_func):
+def ai_feature_required(view_func: Callable[..., HttpResponse]) -> Callable[..., HttpResponse]:
     @wraps(view_func)
-    def wrapped_view(request, *args, **kwargs):
+    def wrapped_view(request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         if request.user.is_authenticated and not request.user.ai_features_enabled:
             return JsonResponse(
                 {
@@ -23,10 +24,10 @@ def ai_feature_required(view_func):
     return wrapped_view
 
 
-def ai_rate_limit(limit=30):
-    def decorator(view_func):
+def ai_rate_limit(limit: int = 30) -> Callable[[Callable[..., HttpResponse]], Callable[..., HttpResponse]]:
+    def decorator(view_func: Callable[..., HttpResponse]) -> Callable[..., HttpResponse]:
         @wraps(view_func)
-        def wrapped_view(request, *args, **kwargs):
+        def wrapped_view(request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
             if not request.user.is_authenticated:
                 return view_func(request, *args, **kwargs)
 
@@ -57,10 +58,10 @@ def ai_rate_limit(limit=30):
     return decorator
 
 
-def log_ai_usage(operation):
-    def decorator(view_func):
+def log_ai_usage(operation: str) -> Callable[[Callable[..., HttpResponse]], Callable[..., HttpResponse]]:
+    def decorator(view_func: Callable[..., HttpResponse]) -> Callable[..., HttpResponse]:
         @wraps(view_func)
-        def wrapped_view(request, *args, **kwargs):
+        def wrapped_view(request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
             start_time = time.time()
             error = ""
 
@@ -99,7 +100,7 @@ def log_ai_usage(operation):
     return decorator
 
 
-def validate_query(view_func):
+def validate_query(view_func: Callable[..., HttpResponse]) -> Callable[..., HttpResponse]:
     ALLOWED_MODELS = ["Event", "Ticket", "Payment", "Organization", "Booking"]
     FORBIDDEN_METHODS = [
         "delete",
@@ -111,7 +112,7 @@ def validate_query(view_func):
     ]
 
     @wraps(view_func)
-    def wrapped_view(request, *args, **kwargs):
+    def wrapped_view(request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         response = view_func(request, *args, **kwargs)
 
         if hasattr(response, "content"):
