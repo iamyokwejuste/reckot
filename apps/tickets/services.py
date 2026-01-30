@@ -109,6 +109,10 @@ def create_multi_ticket_booking(
             )
             coupon.use()
 
+        if total_amount == Decimal('0.00'):
+            booking.status = Booking.Status.CONFIRMED
+            booking.save(update_fields=['status'])
+
         created_tickets = []
         for ticket_type in tickets_to_create:
             ticket = Ticket.objects.create(

@@ -19,7 +19,7 @@ from apps.events.flyer_service import generate_flyer
 from apps.orgs.models import Organization
 from apps.tickets.forms import BookingForm
 from apps.tickets.services import create_booking
-from apps.tickets.models import Ticket, Booking, TicketType
+from apps.tickets.models import Ticket, TicketType
 from apps.payments.models import Payment
 
 
@@ -56,7 +56,6 @@ class PublicEventListView(View):
 class PublicEventDetailView(View):
     def get(self, request, org_slug, event_slug):
         preview_token = request.GET.get('preview')
-        is_preview = False
 
         if preview_token:
             event = get_object_or_404(

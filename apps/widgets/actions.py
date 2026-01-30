@@ -36,7 +36,7 @@ class WidgetView(View):
 
 class WidgetJSView(View):
     def get(self, request, widget_id):
-        widget = get_object_or_404(EmbedWidget, widget_id=widget_id, is_active=True)
+        get_object_or_404(EmbedWidget, widget_id=widget_id, is_active=True)
 
         base_url = request.build_absolute_uri('/').rstrip('/')
         iframe_url = f'{base_url}/widgets/{widget_id}/'
