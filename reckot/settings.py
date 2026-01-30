@@ -315,6 +315,11 @@ PAYMENT_GATEWAYS = {
     "DEFAULT_CURRENCY": os.getenv("DEFAULT_CURRENCY", "XAF"),
 }
 
+CAMPAY_USERNAME = os.getenv("CAMPAY_APP_USERNAME", "")
+CAMPAY_PASSWORD = os.getenv("CAMPAY_APP_PASSWORD", "")
+CAMPAY_TOKEN = os.getenv("CAMPAY_PERMANENT_TOKEN", "")
+CAMPAY_PRODUCTION = os.getenv("CAMPAY_IS_PRODUCTION", "False").lower() in ("true", "1", "yes")
+
 RATE_LIMITING_ENABLED = os.getenv("RATE_LIMITING_ENABLED", "True").lower() in ("true", "1", "yes")
 
 if not DEBUG:
