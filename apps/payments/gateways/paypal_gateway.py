@@ -68,7 +68,7 @@ class PayPalGateway(PaymentGateway):
             )
             if response.status_code == 201:
                 data = response.json()
-                approve_url = next((l['href'] for l in data.get('links', []) if l['rel'] == 'approve'), None)
+                approve_url = next((link['href'] for link in data.get('links', []) if link['rel'] == 'approve'), None)
                 return PaymentResult(
                     success=True,
                     reference=reference,

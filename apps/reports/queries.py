@@ -45,7 +45,6 @@ def get_rsvp_data(event_id: int, mask_emails: bool = True):
     ).prefetch_related('answers__question')
 
     questions = list(CheckoutQuestion.objects.filter(event_id=event_id).order_by('order'))
-    question_headers = [q.question for q in questions]
 
     result = []
     for ticket in tickets:
@@ -164,7 +163,6 @@ def get_swag_data(event_id: int, mask_emails: bool = True):
 
 
 def get_custom_responses_data(event_id: int, mask_emails: bool = True):
-    questions = CheckoutQuestion.objects.filter(event_id=event_id).order_by('order')
     answers = TicketQuestionAnswer.objects.filter(
         question__event_id=event_id,
         booking__status=Booking.Status.CONFIRMED

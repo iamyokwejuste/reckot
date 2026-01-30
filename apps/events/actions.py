@@ -470,7 +470,7 @@ class CouponCreateView(LoginRequiredMixin, View):
         valid_from = request.POST.get('valid_from') or None
         valid_until = request.POST.get('valid_until') or None
 
-        _ = Coupon.objects.create(
+        Coupon.objects.create(
             organization=organization,
             event=event,
             code=code,
@@ -627,7 +627,7 @@ class FlyerGeneratorView(View):
                     ip_address=request.META.get('REMOTE_ADDR'),
                     user_agent=request.META.get('HTTP_USER_AGENT', '')[:500]
                 )
-                billing, _ = FlyerBilling.objects.get_or_create(
+                billing, _created = FlyerBilling.objects.get_or_create(
                     event=event,
                     defaults={'rate_per_flyer': FLYER_PAY_PER_USE_PRICE}
                 )
@@ -700,7 +700,7 @@ class FlyerConfigView(LoginRequiredMixin, View):
 
         if 'template_image' in request.FILES:
             if config.pay_per_use_accepted and config.template_change_count > 0:
-                billing, _ = FlyerBilling.objects.get_or_create(
+                billing, _created = FlyerBilling.objects.get_or_create(
                     event=event,
                     defaults={'rate_per_flyer': FLYER_PAY_PER_USE_PRICE}
                 )
