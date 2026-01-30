@@ -43,7 +43,7 @@ def get_financial_summary(event):
             count=Count('id'),
             revenue=Sum('ticket_type__price')
         ).order_by('-count'),
-        'payment_methods': payments.values('method').annotate(
+        'payment_methods': payments.values('provider').annotate(
             count=Count('id'),
             total=Sum('amount')
         ).order_by('-total'),

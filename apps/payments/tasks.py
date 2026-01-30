@@ -25,7 +25,7 @@ def send_refund_notification_task(refund_id: int):
             return
 
         event = ticket.ticket_type.event
-        payment_method = payment.get_method_display()
+        payment_method = payment.get_provider_display()
 
         if user.email:
             NotificationService.send_refund_notification(

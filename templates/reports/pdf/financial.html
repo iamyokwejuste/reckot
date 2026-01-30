@@ -64,7 +64,7 @@
     <tbody>
         {% for method in payment_methods %}
         <tr>
-            <td>{{ method.method|default:_("Unknown") }}</td>
+            <td>{{ method.provider|default:_("Unknown") }}</td>
             <td class="text-right">{{ method.count }}</td>
             <td class="text-right">{{ method.total|floatformat:0 }}</td>
         </tr>

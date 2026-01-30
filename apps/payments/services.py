@@ -168,7 +168,7 @@ def retry_payment(payment: Payment, method: str, phone: str) -> Payment:
     with transaction.atomic():
         if payment.status not in [Payment.Status.FAILED, Payment.Status.EXPIRED]:
             return payment
-        payment.method = method
+        payment.provider = method
         payment.phone_number = phone
         payment.status = Payment.Status.PENDING
         payment.expires_at = timezone.now() + timedelta(minutes=30)
