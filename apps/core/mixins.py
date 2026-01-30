@@ -1,7 +1,3 @@
-"""
-Common mixins for views across the application.
-"""
-
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 
@@ -10,12 +6,6 @@ from apps.orgs.models import Organization
 
 
 class EventPermissionMixin:
-    """
-    Mixin for views that require event access permission.
-    Expects org_slug and event_slug in URL kwargs.
-    Sets self.event and self.organization on the view.
-    """
-
     required_permission = None
 
     def get_event(self, org_slug, event_slug):
@@ -26,7 +16,6 @@ class EventPermissionMixin:
         )
 
     def check_event_permission(self, request, event):
-        """Check if user has access to the event's organization."""
         if not event.organization.members.filter(id=request.user.id).exists():
             return False
         if self.required_permission:
@@ -51,18 +40,11 @@ class EventPermissionMixin:
 
 
 class OrgMemberQueryMixin:
-    """
-    Mixin providing common queryset filters for organization members.
-    """
-
     def get_user_organizations(self, user):
-        """Get organizations the user is a member of."""
         return Organization.objects.filter(members=user)
 
     def get_user_events(self, user):
-        """Get events from organizations the user is a member of."""
         return Event.objects.filter(organization__members=user)
 
     def filter_by_user_orgs(self, queryset, user, org_lookup="organization__members"):
-        """Filter any queryset by user's organization membership."""
         return queryset.filter(**{org_lookup: user})

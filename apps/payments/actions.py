@@ -1,12 +1,18 @@
+import hashlib
+import hmac
 import json
 import logging
+import re
 from datetime import timedelta
+from decimal import Decimal
 
 import jwt
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Q, Sum
-from django.http import HttpResponse
+from django.core.paginator import Paginator
+from django.db.models import Count, Q, Sum
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.decorators import method_decorator
@@ -15,10 +21,13 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 
 from apps.events.models import Coupon, Event
+from apps.orgs.models import Organization
+from apps.payments.gateways.campay import CampayGateway
 from apps.payments.invoice_service import create_invoice, get_invoice_pdf
 from apps.payments.models import Invoice, Payment, PaymentProvider, Refund, Withdrawal
 from apps.payments.queries import get_booking_payment, get_payment_by_id
 from apps.payments.services import (
+    calculate_organization_balance,
     confirm_payment,
     fail_payment,
     initiate_payment,
@@ -150,11 +159,17 @@ class CheckoutView(View):
 
 class PaymentListView(LoginRequiredMixin, View):
     def get(self, request):
-        payments = (
-            Payment.objects.filter(booking__event__organization__members=request.user)
-            .select_related("booking__user", "booking__event")
-            .order_by("-created_at")[:100]
-        )
+        status_filter = request.GET.get("status", "")
+        page_number = request.GET.get("page", 1)
+
+        payments_qs = Payment.objects.filter(
+            booking__event__organization__members=request.user
+        ).select_related("booking__user", "booking__event")
+
+        if status_filter:
+            payments_qs = payments_qs.filter(status=status_filter)
+
+        payments_qs = payments_qs.order_by("-created_at")
 
         confirmed_payments = Payment.objects.filter(
             booking__event__organization__members=request.user,
@@ -171,11 +186,17 @@ class PaymentListView(LoginRequiredMixin, View):
             ).count(),
         }
 
+        paginator = Paginator(payments_qs, 50)
+        page_obj = paginator.get_page(page_number)
+
         return render(
             request,
             "payments/list.html",
             {
-                "payments": payments,
+                "payments": page_obj.object_list,
+                "page_obj": page_obj,
+                "paginator": paginator,
+                "status_filter": status_filter,
                 "stats": stats,
             },
         )
@@ -202,7 +223,6 @@ def get_booking_for_request(request, booking_ref):
 
 class PaymentSelectMethodView(View):
     def _calculate_withdrawal_fee(self, amount):
-        from decimal import Decimal
 
         if amount <= 1000:
             return Decimal("50")
@@ -321,7 +341,38 @@ class PaymentSuccessView(View):
         return render(request, "payments/success.html", {"payment": payment})
 
 
+@method_decorator(csrf_exempt, name="dispatch")
 class PaymentWebhookView(View):
+    def _verify_hmac_signature(self, request, payment) -> bool:
+        signature = request.headers.get("X-Webhook-Signature", "")
+        if not signature:
+            logger.error("Generic webhook missing signature header")
+            return False
+
+        gateway_config = payment.gateway_config
+        if not gateway_config:
+            logger.error("Payment has no gateway config")
+            return False
+
+        credentials = gateway_config.credentials or {}
+        webhook_secret = credentials.get("webhook_secret", "")
+
+        if not webhook_secret:
+            logger.error("Webhook secret not configured")
+            return False
+
+        body = request.body.decode("utf-8")
+        expected_signature = hmac.new(
+            webhook_secret.encode("utf-8"), body.encode("utf-8"), hashlib.sha256
+        ).hexdigest()
+
+        if not hmac.compare_digest(signature, expected_signature):
+            logger.error("Webhook signature mismatch")
+            return False
+
+        logger.info("Generic webhook signature verified")
+        return True
+
     def post(self, request):
         reference = request.POST.get("reference")
         status = request.POST.get("status")
@@ -329,6 +380,10 @@ class PaymentWebhookView(View):
         payment = get_payment_by_id(reference)
         if not payment:
             return HttpResponse(status=404)
+
+        if not self._verify_hmac_signature(request, payment):
+            return HttpResponse("Invalid signature", status=403)
+
         if status == "SUCCESS":
             confirm_payment(payment, external_ref)
         return HttpResponse(status=200)
@@ -349,18 +404,20 @@ class CampayWebhookView(View):
 
     def _verify_signature(self, signature: str, payment) -> bool:
         if not signature:
-            logger.warning("CamPay webhook missing signature")
-            return True
+            logger.error("CamPay webhook missing signature - rejecting")
+            return False
 
         gateway_config = payment.gateway_config
         if not gateway_config:
-            return True
+            logger.error("Payment has no gateway config - rejecting webhook")
+            return False
 
         credentials = gateway_config.credentials or {}
         webhook_key = credentials.get("webhook_key", "")
 
         if not webhook_key:
-            return True
+            logger.error("Webhook key not configured - rejecting webhook")
+            return False
 
         try:
             jwt.decode(signature, webhook_key, algorithms=["HS256"])
@@ -489,6 +546,8 @@ class RefundListView(LoginRequiredMixin, View):
 
 
 class RefundRequestView(LoginRequiredMixin, View):
+    REFUND_WINDOW_DAYS = 30
+
     def get(self, request, payment_ref):
         payment = get_object_or_404(
             Payment,
@@ -506,6 +565,14 @@ class RefundRequestView(LoginRequiredMixin, View):
             status=Payment.Status.CONFIRMED,
         )
 
+        payment_age = timezone.now() - payment.created_at
+        if payment_age > timedelta(days=self.REFUND_WINDOW_DAYS):
+            messages.error(
+                request,
+                _(f"Refund requests must be made within {self.REFUND_WINDOW_DAYS} days of payment."),
+            )
+            return redirect("payments:success", payment_ref=payment_ref)
+
         existing_refund = Refund.objects.filter(
             payment=payment, status__in=[Refund.Status.PENDING, Refund.Status.APPROVED]
         ).exists()
@@ -518,9 +585,20 @@ class RefundRequestView(LoginRequiredMixin, View):
 
         refund_type = request.POST.get("refund_type", "FULL")
         amount = (
-            payment.amount if refund_type == "FULL" else request.POST.get("amount", 0)
+            payment.amount if refund_type == "FULL" else Decimal(request.POST.get("amount", "0"))
         )
         reason = request.POST.get("reason", "").strip()
+
+        if refund_type == "PARTIAL" and amount > payment.amount:
+            messages.error(
+                request,
+                _("Refund amount cannot exceed the original payment amount."),
+            )
+            return redirect("payments:success", payment_ref=payment_ref)
+
+        if refund_type == "PARTIAL" and amount <= 0:
+            messages.error(request, _("Refund amount must be greater than zero."))
+            return redirect("payments:success", payment_ref=payment_ref)
 
         Refund.objects.create(
             payment=payment,
@@ -586,64 +664,45 @@ class TransactionStatusView(View):
 
 class WithdrawalBalanceView(LoginRequiredMixin, View):
     def get(self, request):
-        from decimal import Decimal
-        from django.http import JsonResponse
-        from apps.orgs.models import Organization
+        user_org = Organization.objects.filter(members=request.user).first()
 
-        user_orgs = Organization.objects.filter(members__user=request.user)
+        if not user_org:
+            return JsonResponse(
+                {"error": "No organization found"}, status=404
+            )
 
-        confirmed_payments = Payment.objects.filter(
-            booking__event__organization__in=user_orgs, status=Payment.Status.CONFIRMED
-        ).aggregate(total_revenue=Sum("amount"), total_service_fees=Sum("service_fee"))
-
-        total_revenue = confirmed_payments["total_revenue"] or Decimal("0")
-        total_service_fees = confirmed_payments["total_service_fees"] or Decimal("0")
-
-        total_withdrawals = Withdrawal.objects.filter(
-            organization__in=user_orgs,
-            status__in=[Withdrawal.Status.COMPLETED, Withdrawal.Status.PROCESSING],
-        ).aggregate(total=Sum("amount"))
-
-        total_withdrawn = total_withdrawals["total"] or Decimal("0")
-
-        total_refunds = Refund.objects.filter(
-            payment__booking__event__organization__in=user_orgs,
-            status=Refund.Status.PROCESSED,
-        ).aggregate(total=Sum("amount"))
-
-        total_refunded = total_refunds["total"] or Decimal("0")
-
-        available_balance = (
-            total_revenue - total_service_fees - total_withdrawn - total_refunded
-        )
+        balance_data = calculate_organization_balance(user_org)
 
         return JsonResponse(
             {
-                "available_balance": float(available_balance),
-                "total_revenue": float(total_revenue),
-                "total_service_fees": float(total_service_fees),
-                "total_withdrawn": float(total_withdrawn),
-                "total_refunded": float(total_refunded),
+                "available_balance": float(balance_data["available_balance"]),
+                "total_revenue": float(balance_data["total_revenue"]),
+                "total_service_fees": float(balance_data["service_fees"]),
+                "total_withdrawn": float(balance_data["total_withdrawn"]),
+                "total_refunded": float(balance_data["total_refunded"]),
                 "currency": "XAF",
             }
         )
 
 
 class WithdrawalRequestView(LoginRequiredMixin, View):
-    def post(self, request):
-        from decimal import Decimal
-        from django.http import JsonResponse
-        from apps.orgs.models import Organization
-        from apps.payments.gateways.campay import CampayGateway
+    MINIMUM_WITHDRAWAL_AMOUNT = Decimal("200")
+    MAX_WITHDRAWALS_PER_DAY = 5
+    PHONE_NUMBER_PATTERN = re.compile(r"^(\+?237)?[26][0-9]{8}$")
 
+    def post(self, request):
         try:
             amount = Decimal(request.POST.get("amount", "0"))
             phone_number = request.POST.get("phone_number", "").strip()
             description = request.POST.get("description", "Withdrawal from Reckot")
 
-            if amount < 200:
+            if amount < self.MINIMUM_WITHDRAWAL_AMOUNT:
                 return JsonResponse(
-                    {"success": False, "error": "Minimum withdrawal amount is 200 XAF"}, status=400
+                    {
+                        "success": False,
+                        "error": f"Minimum withdrawal amount is {self.MINIMUM_WITHDRAWAL_AMOUNT} XAF",
+                    },
+                    status=400,
                 )
 
             if not phone_number:
@@ -651,46 +710,43 @@ class WithdrawalRequestView(LoginRequiredMixin, View):
                     {"success": False, "error": "Phone number is required"}, status=400
                 )
 
-            user_orgs = Organization.objects.filter(members__user=request.user).first()
+            if not self.PHONE_NUMBER_PATTERN.match(phone_number):
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "error": "Invalid phone number format. Expected Cameroon number (e.g., +237XXXXXXXXX)",
+                    },
+                    status=400,
+                )
+
+            user_orgs = Organization.objects.filter(members=request.user).first()
             if not user_orgs:
                 return JsonResponse(
                     {"success": False, "error": "No organization found"}, status=400
                 )
 
-            confirmed_payments = Payment.objects.filter(
-                booking__event__organization=user_orgs, status=Payment.Status.CONFIRMED
-            ).aggregate(
-                total_revenue=Sum("amount"), total_service_fees=Sum("service_fee")
-            )
+            today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            todays_withdrawals = Withdrawal.objects.filter(
+                organization=user_orgs, created_at__gte=today_start
+            ).count()
 
-            total_revenue = confirmed_payments["total_revenue"] or Decimal("0")
-            total_service_fees = confirmed_payments["total_service_fees"] or Decimal(
-                "0"
-            )
-
-            total_withdrawals = Withdrawal.objects.filter(
-                organization=user_orgs,
-                status__in=[Withdrawal.Status.COMPLETED, Withdrawal.Status.PROCESSING],
-            ).aggregate(total=Sum("amount"))
-
-            total_withdrawn = total_withdrawals["total"] or Decimal("0")
-
-            total_refunds = Refund.objects.filter(
-                payment__booking__event__organization=user_orgs,
-                status=Refund.Status.PROCESSED,
-            ).aggregate(total=Sum("amount"))
-
-            total_refunded = total_refunds["total"] or Decimal("0")
-
-            available_balance = (
-                total_revenue - total_service_fees - total_withdrawn - total_refunded
-            )
-
-            if available_balance < 200:
+            if todays_withdrawals >= self.MAX_WITHDRAWALS_PER_DAY:
                 return JsonResponse(
                     {
                         "success": False,
-                        "error": f"Minimum balance required for withdrawal is 200 XAF. Your balance: {available_balance} XAF",
+                        "error": f"Maximum {self.MAX_WITHDRAWALS_PER_DAY} withdrawals per day exceeded. Try again tomorrow.",
+                    },
+                    status=429,
+                )
+
+            balance_data = calculate_organization_balance(user_orgs)
+            available_balance = balance_data["available_balance"]
+
+            if available_balance < self.MINIMUM_WITHDRAWAL_AMOUNT:
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "error": f"Minimum balance required is {self.MINIMUM_WITHDRAWAL_AMOUNT} XAF. Your balance: {available_balance} XAF",
                     },
                     status=400,
                 )
@@ -703,8 +759,6 @@ class WithdrawalRequestView(LoginRequiredMixin, View):
                     },
                     status=400,
                 )
-
-            from django.conf import settings
 
             gateway_credentials = {
                 "app_username": settings.CAMPAY_USERNAME,
@@ -771,9 +825,8 @@ class WithdrawalRequestView(LoginRequiredMixin, View):
 
 class WithdrawalListView(LoginRequiredMixin, View):
     def get(self, request):
-        from apps.orgs.models import Organization
 
-        user_orgs = Organization.objects.filter(members__user=request.user)
+        user_orgs = Organization.objects.filter(members=request.user)
 
         withdrawals = Withdrawal.objects.filter(
             organization__in=user_orgs

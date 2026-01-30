@@ -6,7 +6,6 @@ import uuid
 from datetime import timedelta
 from django.utils import timezone
 
-
 class Organization(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=120, unique=True, blank=True)
@@ -50,7 +49,6 @@ class Organization(models.Model):
         super().save(*args, **kwargs)
 
     def get_member_role(self, user):
-        """Get user's role in this organization"""
         if user == self.owner:
             return MemberRole.OWNER
         try:
@@ -60,14 +58,12 @@ class Organization(models.Model):
             return None
 
     def user_can(self, user, permission):
-        """Check if user has a specific permission"""
         role = self.get_member_role(user)
         if not role:
             return False
         return Membership.has_permission(role, permission)
 
     def user_is_admin(self, user):
-        """Check if user is admin or above"""
         role = self.get_member_role(user)
         return role in [MemberRole.OWNER, MemberRole.ADMIN]
 
@@ -91,16 +87,13 @@ class Organization(models.Model):
         except OrganizationSubscription.DoesNotExist:
             return 2
 
-
 class MemberRole(models.TextChoices):
-    """Role choices for organization members"""
 
     OWNER = "OWNER", _("Owner")
     ADMIN = "ADMIN", _("Admin")
     MANAGER = "MANAGER", _("Manager")
     MEMBER = "MEMBER", _("Member")
     VIEWER = "VIEWER", _("Viewer")
-
 
 # Permission definitions for each role
 ROLE_PERMISSIONS = {
@@ -164,9 +157,7 @@ ROLE_PERMISSIONS = {
     ],
 }
 
-
 class CustomRole(models.Model):
-    """Custom roles for organizations (optional advanced feature)"""
 
     name = models.CharField(max_length=100)
     organization = models.ForeignKey(
@@ -177,7 +168,6 @@ class CustomRole(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.organization.name})"
-
 
 class Membership(models.Model):
     organization = models.ForeignKey(
@@ -220,20 +210,19 @@ class Membership(models.Model):
 
     @staticmethod
     def has_permission(role, permission):
-        """Check if a role has a specific permission"""
+
         if not role:
             return False
         return permission in ROLE_PERMISSIONS.get(role, [])
 
     @property
     def permissions(self):
-        """Get all permissions for this membership's role"""
+
         return ROLE_PERMISSIONS.get(self.role, [])
 
     def can(self, permission):
-        """Check if this membership has a specific permission"""
-        return self.has_permission(self.role, permission)
 
+        return self.has_permission(self.role, permission)
 
 class Invitation(models.Model):
     class Status(models.TextChoices):
@@ -290,7 +279,7 @@ class Invitation(models.Model):
         return self.status == self.Status.PENDING and not self.is_expired
 
     def accept(self, user):
-        """Accept the invitation and create membership"""
+
         if not self.is_valid:
             return None
 
@@ -310,25 +299,23 @@ class Invitation(models.Model):
         return membership
 
     def decline(self):
-        """Decline the invitation"""
+
         self.status = self.Status.DECLINED
         self.save()
 
     def cancel(self):
-        """Cancel the invitation"""
+
         self.status = self.Status.CANCELLED
         self.save()
 
     def __str__(self):
         return f"Invitation for {self.email} to {self.organization} as {self.get_role_display()}"
 
-
 class OrganizationPlan(models.TextChoices):
     FREE = "FREE", _("Free (2% fee)")
     STARTER = "STARTER", _("Starter (5% fee)")
     PRO = "PRO", _("Pro (3% fee)")
     ENTERPRISE = "ENTERPRISE", _("Enterprise (Custom)")
-
 
 PLAN_FEATURES = {
     OrganizationPlan.FREE: {
@@ -372,7 +359,6 @@ PLAN_FEATURES = {
         "export_formats": ["CSV", "EXCEL", "PDF", "JSON"],
     },
 }
-
 
 class OrganizationSubscription(models.Model):
     class Status(models.TextChoices):
@@ -420,7 +406,6 @@ class OrganizationSubscription(models.Model):
         if self.expires_at and timezone.now() > self.expires_at:
             return False
         return True
-
 
 # Backwards compatibility alias
 Role = CustomRole

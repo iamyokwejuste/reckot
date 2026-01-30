@@ -51,9 +51,14 @@ services:
       TWILIO_VERIFY_SERVICE_SID: ${TWILIO_VERIFY_SERVICE_SID:-}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       GEMINI_MODEL: ${GEMINI_MODEL:-gemini-1.5-flash}
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
       RUN_MIGRATIONS: "true"
     depends_on:
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     volumes:
       - media_data:/app/media
@@ -65,12 +70,25 @@ services:
       retries: 30
       start_period: 120s
 
-  worker:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 10s
+
+  celery_worker:
     build:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
-    command: uv run python manage.py db_worker
+    command: uv run celery -A reckot worker --loglevel=info --concurrency=4 -Q default,emails,payments,exports
     environment:
       SECRET_KEY: ${SECRET_KEY:-change-me-in-production-use-a-long-random-string}
       DEBUG: "False"
@@ -80,6 +98,9 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-changeme}
       DB_HOST: db
       DB_PORT: 5432
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
       EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.smtp.EmailBackend}
       EMAIL_HOST: ${EMAIL_HOST:-smtp.gmail.com}
       EMAIL_PORT: ${EMAIL_PORT:-587}
@@ -94,9 +115,46 @@ services:
       TWILIO_VERIFY_SERVICE_SID: ${TWILIO_VERIFY_SERVICE_SID:-}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       GEMINI_MODEL: ${GEMINI_MODEL:-gemini-1.5-flash}
+      CAMPAY_APP_USERNAME: ${CAMPAY_APP_USERNAME:-}
+      CAMPAY_APP_PASSWORD: ${CAMPAY_APP_PASSWORD:-}
+      CAMPAY_PERMANENT_TOKEN: ${CAMPAY_PERMANENT_TOKEN:-}
+      CAMPAY_WEBHOOK_KEY: ${CAMPAY_WEBHOOK_KEY:-}
+      CAMPAY_IS_PRODUCTION: ${CAMPAY_IS_PRODUCTION:-False}
+      PAWAPAY_API_TOKEN: ${PAWAPAY_API_TOKEN:-}
+      PAWAPAY_IS_PRODUCTION: ${PAWAPAY_IS_PRODUCTION:-False}
+      FLUTTERWAVE_SECRET_KEY: ${FLUTTERWAVE_SECRET_KEY:-}
+      FLUTTERWAVE_PUBLIC_KEY: ${FLUTTERWAVE_PUBLIC_KEY:-}
+      FLUTTERWAVE_ENCRYPTION_KEY: ${FLUTTERWAVE_ENCRYPTION_KEY:-}
       RUN_MIGRATIONS: "false"
     depends_on:
       web:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - media_data:/app/media
+
+  celery_beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    command: uv run celery -A reckot beat --loglevel=info
+    environment:
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production-use-a-long-random-string}
+      DEBUG: "False"
+      DB_ENGINE: django.db.backends.postgresql
+      DB_NAME: ${DB_NAME:-reckot}
+      DB_USER: ${DB_USER:-reckot}
+      DB_PASSWORD: ${DB_PASSWORD:-changeme}
+      DB_HOST: db
+      DB_PORT: 5432
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      RUN_MIGRATIONS: "false"
+    depends_on:
+      redis:
         condition: service_healthy
     volumes:
       - media_data:/app/media
@@ -145,6 +203,7 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:
   media_data:
   backup_data:
   static_data:

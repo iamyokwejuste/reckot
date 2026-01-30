@@ -1,10 +1,11 @@
 import logging
 from django.db import transaction
+from django.db.models import Sum
 from django.utils import timezone
 from django.conf import settings
 from datetime import timedelta
 from decimal import Decimal
-from apps.payments.models import Payment
+from apps.payments.models import Payment, Refund, Withdrawal
 from apps.payments.gateways import GatewayManager
 from apps.payments.gateways.base import PaymentStatus
 from apps.payments.invoice_service import create_invoice
@@ -18,6 +19,41 @@ def calculate_booking_amount(booking: Booking) -> Decimal:
     return sum(
         t.ticket_type.price for t in booking.tickets.select_related("ticket_type")
     )
+
+
+def calculate_organization_balance(organization):
+    confirmed_payments = Payment.objects.filter(
+        booking__event__organization=organization, status=Payment.Status.CONFIRMED
+    ).aggregate(total_revenue=Sum("amount"), total_service_fees=Sum("service_fee"))
+
+    total_revenue = confirmed_payments["total_revenue"] or Decimal("0")
+    total_service_fees = confirmed_payments["total_service_fees"] or Decimal("0")
+
+    total_withdrawals = Withdrawal.objects.filter(
+        organization=organization,
+        status__in=[Withdrawal.Status.COMPLETED, Withdrawal.Status.PROCESSING],
+    ).aggregate(total=Sum("amount"))
+
+    total_withdrawn = total_withdrawals["total"] or Decimal("0")
+
+    total_refunds = Refund.objects.filter(
+        payment__booking__event__organization=organization,
+        status=Refund.Status.PROCESSED,
+    ).aggregate(total=Sum("amount"))
+
+    total_refunded = total_refunds["total"] or Decimal("0")
+
+    available_balance = (
+        total_revenue - total_service_fees - total_withdrawn - total_refunded
+    )
+
+    return {
+        "total_revenue": total_revenue,
+        "service_fees": total_service_fees,
+        "total_withdrawn": total_withdrawn,
+        "total_refunded": total_refunded,
+        "available_balance": available_balance,
+    }
 
 
 def initiate_payment(

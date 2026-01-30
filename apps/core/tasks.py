@@ -1,12 +1,12 @@
 import logging
 from django.contrib.auth import get_user_model
-from django_tasks import task
+from celery import shared_task
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
-@task
+@shared_task
 def send_email_task(
     to_email: str,
     subject: str,
@@ -31,7 +31,7 @@ def send_email_task(
         logger.error(f"Failed to send email to {to_email}: {e}")
 
 
-@task
+@shared_task
 def send_sms_task(phone_number: str, template_name: str, context: dict):
     from .services.notifications import NotificationService
 
@@ -46,7 +46,7 @@ def send_sms_task(phone_number: str, template_name: str, context: dict):
         logger.error(f"Failed to send SMS to {phone_number}: {e}")
 
 
-@task
+@shared_task
 def send_otp_sms_task(
     phone_number: str, otp_code: str = None, expiry_minutes: int = 10
 ):
@@ -63,7 +63,7 @@ def send_otp_sms_task(
         logger.error(f"Failed to send OTP SMS to {phone_number}: {e}")
 
 
-@task
+@shared_task
 def send_otp_verification_task(user_id: int, otp_id: int):
     from .models import OTPVerification
     from .services.notifications import NotificationService
@@ -104,7 +104,7 @@ def send_otp_verification_task(user_id: int, otp_id: int):
         logger.error(f"Failed to send OTP verification: {e}")
 
 
-@task
+@shared_task
 def send_welcome_email_task(user_id: int):
     from .services.notifications import NotificationService
 
@@ -120,7 +120,7 @@ def send_welcome_email_task(user_id: int):
         logger.error(f"Failed to send welcome email: {e}")
 
 
-@task
+@shared_task
 def resend_otp_task(user_id: int, otp_type: str = "EMAIL"):
     from .models import OTPVerification
 
@@ -137,33 +137,25 @@ def resend_otp_task(user_id: int, otp_type: str = "EMAIL"):
         logger.error(f"Failed to resend OTP: {e}")
 
 
-@task
+@shared_task
 def cleanup_expired_otps_task():
     from django.utils import timezone
     from datetime import timedelta
     from .models import OTPVerification
+    from django.db.models import Q
 
     try:
-        cutoff = timezone.now() - timedelta(hours=24)
-        deleted, _ = OTPVerification.objects.filter(expires_at__lt=cutoff).delete()
+        now = timezone.now()
+        expired_cutoff = now - timedelta(hours=24)
+        used_cutoff = now - timedelta(hours=1)
+
+        deleted, details = OTPVerification.objects.filter(
+            Q(expires_at__lt=expired_cutoff) |
+            Q(is_used=True, created_at__lt=used_cutoff)
+        ).delete()
+
         if deleted:
-            logger.info(f"Cleaned up {deleted} expired OTPs")
+            logger.info(f"Cleaned up {deleted} OTP tokens (expired and used)")
+            logger.debug(f"Deletion details: {details}")
     except Exception as e:
         logger.error(f"Failed to cleanup OTPs: {e}")
-
-
-@task
-def cleanup_used_otps_task():
-    from django.utils import timezone
-    from datetime import timedelta
-    from .models import OTPVerification
-
-    try:
-        cutoff = timezone.now() - timedelta(hours=1)
-        deleted, _ = OTPVerification.objects.filter(
-            is_used=True, created_at__lt=cutoff
-        ).delete()
-        if deleted:
-            logger.info(f"Cleaned up {deleted} used OTPs")
-    except Exception as e:
-        logger.error(f"Failed to cleanup used OTPs: {e}")

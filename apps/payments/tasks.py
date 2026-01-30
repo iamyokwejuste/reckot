@@ -1,29 +1,32 @@
 import logging
-from django_tasks import task
+from celery import shared_task
 
 logger = logging.getLogger(__name__)
 
 
-@task
+@shared_task
 def send_refund_notification_task(refund_id: int):
     from .models import Refund
     from apps.core.services.notifications import NotificationService
 
     try:
         refund = Refund.objects.select_related(
-            "payment__booking__user", "payment__booking"
+            "payment__booking__user",
+            "payment__booking__event"
+        ).prefetch_related(
+            "payment__booking__tickets__ticket_type__event"
         ).get(id=refund_id)
 
         payment = refund.payment
         booking = payment.booking
         user = booking.user
 
-        ticket = booking.tickets.select_related("ticket_type__event").first()
+        ticket = list(booking.tickets.all())[0] if booking.tickets.exists() else None
         if not ticket:
             logger.warning(f"Refund {refund_id} has no associated tickets")
             return
 
-        event = ticket.ticket_type.event
+        event = booking.event
         payment_method = payment.get_provider_display()
 
         if user.email:
@@ -54,7 +57,7 @@ def send_refund_notification_task(refund_id: int):
         logger.error(f"Failed to send refund notification: {e}")
 
 
-@task
+@shared_task
 def process_expired_payments_task():
     from django.utils import timezone
     from .models import Payment
@@ -71,24 +74,29 @@ def process_expired_payments_task():
         logger.error(f"Failed to process expired payments: {e}")
 
 
-@task
+@shared_task
 def send_payment_reminder_task(payment_id: int):
     from django.utils import timezone
     from .models import Payment
     from apps.core.services.notifications import NotificationService
 
     try:
-        payment = Payment.objects.select_related("booking__user").get(id=payment_id)
+        payment = Payment.objects.select_related(
+            "booking__user",
+            "booking__event"
+        ).prefetch_related(
+            "booking__tickets__ticket_type"
+        ).get(id=payment_id)
 
         if payment.status != Payment.Status.PENDING:
             return
 
         user = payment.booking.user
-        ticket = payment.booking.tickets.select_related("ticket_type__event").first()
+        ticket = list(payment.booking.tickets.all())[0] if payment.booking.tickets.exists() else None
         if not ticket:
             return
 
-        event = ticket.ticket_type.event
+        event = payment.booking.event
         minutes_remaining = max(
             0, int((payment.expires_at - timezone.now()).total_seconds() / 60)
         )

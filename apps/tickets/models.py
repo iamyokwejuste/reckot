@@ -4,7 +4,6 @@ from django.utils.translation import gettext_lazy as _
 from apps.events.models import Event, CheckoutQuestion
 import uuid
 
-
 class TicketType(models.Model):
     event = models.ForeignKey(
         Event, on_delete=models.CASCADE, related_name="ticket_types"
@@ -31,9 +30,7 @@ class TicketType(models.Model):
         sold = self.tickets.count()
         return max(0, self.quantity - sold)
 
-
 class GuestSession(models.Model):
-    """Tracks guest checkout sessions for unauthenticated users."""
 
     token = models.UUIDField(
         default=uuid.uuid4, editable=False, unique=True, db_index=True
@@ -58,7 +55,6 @@ class GuestSession(models.Model):
         from django.utils import timezone
 
         return timezone.now() > self.expires_at
-
 
 class Booking(models.Model):
     class Status(models.TextChoices):
@@ -125,7 +121,6 @@ class Booking(models.Model):
             return self.user.get_full_name() or self.user.email
         return self.guest_name
 
-
 class Ticket(models.Model):
     booking = models.ForeignKey(
         Booking, on_delete=models.CASCADE, related_name="tickets"
@@ -155,7 +150,6 @@ class Ticket(models.Model):
 
     def __str__(self):
         return f"Ticket {self.code} for {self.ticket_type.event.title}"
-
 
 class TicketQuestionAnswer(models.Model):
     ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name="answers")

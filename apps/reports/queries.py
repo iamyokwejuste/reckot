@@ -1,4 +1,4 @@
-from django.db.models import Sum
+from django.db.models import Case, Count, Sum, When
 from apps.events.models import Event, CheckoutQuestion
 from apps.tickets.models import Ticket, Booking, TicketQuestionAnswer
 from apps.checkin.models import CheckIn, SwagCollection
@@ -45,7 +45,7 @@ def get_rsvp_data(event_id: int, mask_emails: bool = True):
         Ticket.objects.filter(
             booking__event_id=event_id, booking__status=Booking.Status.CONFIRMED
         )
-        .select_related("booking__user", "ticket_type", "booking")
+        .select_related("booking__user", "ticket_type", "booking__guest_session")
         .prefetch_related("answers__question")
     )
 
@@ -79,7 +79,7 @@ def get_rsvp_data(event_id: int, mask_emails: bool = True):
             "registered_at": str(booking.created_at),
         }
 
-        answers_dict = {a.question_id: a.answer for a in ticket.answers.all()}
+        answers_dict = {a.question_id: a.answer for a in ticket.answers.all}
         for q in questions:
             row_data[q.question] = answers_dict.get(q.id, "")
 
@@ -216,17 +216,32 @@ def get_custom_responses_data(event_id: int, mask_emails: bool = True):
 
 
 def get_questions_summary(event_id: int):
-    questions = CheckoutQuestion.objects.filter(event_id=event_id).order_by("order")
+    questions = CheckoutQuestion.objects.filter(event_id=event_id).order_by("order").prefetch_related(
+        "answers"
+    )
+
+    confirmed_answers = TicketQuestionAnswer.objects.filter(
+        question__event_id=event_id,
+        booking__status=Booking.Status.CONFIRMED
+    ).select_related("question").values("question_id", "answer")
+
+    answer_counts = {}
+    answer_breakdowns = {}
+
+    for ans in confirmed_answers:
+        q_id = ans["question_id"]
+        answer_counts[q_id] = answer_counts.get(q_id, 0) + 1
+
+        if q_id not in answer_breakdowns:
+            answer_breakdowns[q_id] = {}
+        answer_text = ans["answer"]
+        answer_breakdowns[q_id][answer_text] = answer_breakdowns[q_id].get(answer_text, 0) + 1
+
     result = []
     for q in questions:
-        answers = TicketQuestionAnswer.objects.filter(
-            question=q, booking__status=Booking.Status.CONFIRMED
-        )
-        answer_count = answers.count()
+        answer_count = answer_counts.get(q.id, 0)
         if q.field_type in ["SELECT", "RADIO", "CHECKBOX"]:
-            breakdown = {}
-            for a in answers:
-                breakdown[a.answer] = breakdown.get(a.answer, 0) + 1
+            breakdown = answer_breakdowns.get(q.id, {})
         else:
             breakdown = None
         result.append(

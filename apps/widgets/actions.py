@@ -8,7 +8,6 @@ from django.utils.translation import gettext_lazy as _
 from apps.widgets.models import EmbedWidget
 from apps.events.models import Event
 
-
 @method_decorator(xframe_options_exempt, name="dispatch")
 class WidgetView(View):
     def get(self, request, widget_id):
@@ -37,7 +36,6 @@ class WidgetView(View):
             },
         )
 
-
 class WidgetJSView(View):
     def get(self, request, widget_id):
         get_object_or_404(EmbedWidget, widget_id=widget_id, is_active=True)
@@ -45,31 +43,8 @@ class WidgetJSView(View):
         base_url = request.build_absolute_uri("/").rstrip("/")
         iframe_url = f"{base_url}/widgets/{widget_id}/"
 
-        js_content = f"""
-(function() {{
-    var container = document.getElementById('reckot-widget-{widget_id}');
-    if (!container) return;
-
-    var iframe = document.createElement('iframe');
-    iframe.src = '{iframe_url}';
-    iframe.style.width = '100%';
-    iframe.style.minHeight = '400px';
-    iframe.style.border = 'none';
-    iframe.style.borderRadius = '8px';
-    iframe.setAttribute('loading', 'lazy');
-    iframe.setAttribute('title', 'Reckot Ticket Widget');
-
-    container.appendChild(iframe);
-
-    window.addEventListener('message', function(e) {{
-        if (e.data && e.data.type === 'reckot-resize') {{
-            iframe.style.height = e.data.height + 'px';
-        }}
-    }});
-}})();
-"""
+        js_content = f
         return HttpResponse(js_content, content_type="application/javascript")
-
 
 class WidgetConfigView(View):
     def get(self, request, widget_id):
@@ -93,7 +68,6 @@ class WidgetConfigView(View):
                 },
             }
         )
-
 
 class WidgetManageView(LoginRequiredMixin, View):
     def get(self, request, org_slug, event_slug):

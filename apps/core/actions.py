@@ -15,23 +15,12 @@ from apps.core.tasks import resend_otp_task, send_otp_sms_task
 from apps.core.services.notifications import NotificationService
 from apps.events.models import Event
 
-
 def robots_txt(request):
     scheme = "https" if request.is_secure() else "http"
     host = request.get_host()
     sitemap_url = f"{scheme}://{host}/sitemap.xml"
-    content = f"""# Reckot Robots.txt
-User-agent: *
-Allow: /
-Disallow: /admin/
-Disallow: /accounts/
-Disallow: /payments/
-Disallow: /checkin/
-
-Sitemap: {sitemap_url}
-"""
+    content = f
     return HttpResponse(content, content_type="text/plain")
-
 
 def service_worker(request):
     sw_path = os.path.join(
@@ -45,7 +34,6 @@ def service_worker(request):
         return HttpResponse(content, content_type="application/javascript")
     except FileNotFoundError:
         return HttpResponse("", content_type="application/javascript", status=404)
-
 
 class HomeView(View):
     def get(self, request):
@@ -72,26 +60,21 @@ class HomeView(View):
             },
         )
 
-
 class WhyUsView(View):
     def get(self, request):
         return render(request, "core/why_us.html")
-
 
 class PrivacyView(View):
     def get(self, request):
         return render(request, "core/privacy.html")
 
-
 class TermsView(View):
     def get(self, request):
         return render(request, "core/terms.html")
 
-
 class FeaturesView(View):
     def get(self, request):
         return render(request, "core/features.html")
-
 
 class OTPVerificationView(LoginRequiredMixin, View):
     def get(self, request):
@@ -136,7 +119,6 @@ class OTPVerificationView(LoginRequiredMixin, View):
 
         return render(request, "account/otp_verify.html")
 
-
 class ResendOTPView(LoginRequiredMixin, View):
     def post(self, request):
         if request.user.email_verified:
@@ -159,7 +141,6 @@ class ResendOTPView(LoginRequiredMixin, View):
         return JsonResponse(
             {"success": True, "message": _("New code sent to your email")}
         )
-
 
 class SettingsView(LoginRequiredMixin, View):
     def get(self, request):
@@ -187,7 +168,6 @@ class SettingsView(LoginRequiredMixin, View):
         user.save()
         messages.success(request, _("Settings updated successfully."))
         return redirect("core:settings")
-
 
 class PhoneLoginRequestView(View):
     def get(self, request):
@@ -232,7 +212,6 @@ class PhoneLoginRequestView(View):
 
     def _normalize_phone(self, phone):
         return re.sub(r"[\s\-\(\)]", "", phone)
-
 
 class PhoneLoginVerifyView(View):
     def get(self, request):
@@ -294,7 +273,6 @@ class PhoneLoginVerifyView(View):
     def _normalize_phone(self, phone):
         return re.sub(r"[\s\-\(\)]", "", phone)
 
-
 class PhoneSignupRequestView(View):
     def get(self, request):
         return redirect("account_signup")
@@ -337,7 +315,6 @@ class PhoneSignupRequestView(View):
 
     def _normalize_phone(self, phone):
         return re.sub(r"[\s\-\(\)]", "", phone)
-
 
 class PhoneSignupVerifyView(View):
     def get(self, request):

@@ -3,6 +3,7 @@ from datetime import timedelta
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator
 from django.db.models import Count, Q, Sum
 from django.db.models.functions import TruncDate
 from django.http import HttpResponse
@@ -12,8 +13,10 @@ from django.utils.timesince import timesince
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 
-from apps.events.models import Event
+from apps.events.models import CheckoutQuestion, Event
+from apps.orgs.models import Organization
 from apps.payments.models import Payment, Withdrawal, Refund
+from apps.payments.services import calculate_organization_balance
 from apps.reports.queries import (
     get_event_summary,
     get_questions_summary,
@@ -36,29 +39,30 @@ class AnalyticsView(LoginRequiredMixin, View):
             "organization"
         )
 
-        total_revenue = (
-            Payment.objects.filter(
-                booking__event__organization__members=user,
-                status=Payment.Status.CONFIRMED,
-            ).aggregate(total=Sum("amount"))["total"]
-            or 0
+        payment_stats = Payment.objects.filter(
+            booking__event__organization__members=user, status=Payment.Status.CONFIRMED
+        ).aggregate(total_revenue=Sum("amount"), total_service_fees=Sum("service_fee"))
+
+        total_revenue = payment_stats["total_revenue"] or 0
+        service_fees = payment_stats["total_service_fees"] or 0
+
+        ticket_stats = Ticket.objects.filter(
+            booking__event__organization__members=user,
+            booking__status=Booking.Status.CONFIRMED,
+        ).aggregate(
+            total=Count("id"),
+            checked_in=Count("id", filter=Q(is_checked_in=True))
         )
 
-        tickets_sold = Ticket.objects.filter(
-            booking__event__organization__members=user,
-            booking__status=Booking.Status.CONFIRMED,
-        ).count()
-
-        checked_in = Ticket.objects.filter(
-            booking__event__organization__members=user,
-            booking__status=Booking.Status.CONFIRMED,
-            is_checked_in=True,
-        ).count()
+        tickets_sold = ticket_stats["total"]
+        checked_in = ticket_stats["checked_in"]
         checkin_rate = (checked_in / tickets_sold * 100) if tickets_sold > 0 else 0
 
-        active_events = user_events.filter(
-            state=Event.State.PUBLISHED, end_at__gte=now
-        ).count()
+        event_counts = user_events.aggregate(
+            active=Count("id", filter=Q(state=Event.State.PUBLISHED, end_at__gte=now)),
+            total=Count("id")
+        )
+        active_events = event_counts["active"]
 
         upcoming_events = user_events.filter(
             state=Event.State.PUBLISHED,
@@ -90,30 +94,12 @@ class AnalyticsView(LoginRequiredMixin, View):
 
         all_events = user_events.order_by("-start_at")[:20]
 
-        confirmed_payments = Payment.objects.filter(
-            booking__event__organization__members=user, status=Payment.Status.CONFIRMED
-        ).aggregate(total_revenue=Sum("amount"), total_service_fees=Sum("service_fee"))
-
-        payment_revenue = confirmed_payments["total_revenue"] or 0
-        service_fees = confirmed_payments["total_service_fees"] or 0
-
-        total_withdrawals = Withdrawal.objects.filter(
-            organization__members=user,
-            status__in=[Withdrawal.Status.COMPLETED, Withdrawal.Status.PROCESSING],
-        ).aggregate(total=Sum("amount"))
-
-        total_withdrawn = total_withdrawals["total"] or 0
-
-        total_refunds = Refund.objects.filter(
-            payment__booking__event__organization__members=user,
-            status=Refund.Status.PROCESSED,
-        ).aggregate(total=Sum("amount"))
-
-        total_refunded = total_refunds["total"] or 0
-
-        available_balance = (
-            payment_revenue - service_fees - total_withdrawn - total_refunded
-        )
+        user_org = Organization.objects.filter(members=user).first()
+        if user_org:
+            balance_data = calculate_organization_balance(user_org)
+            available_balance = balance_data["available_balance"]
+        else:
+            available_balance = 0
 
         # Convert to list to get accurate count after slicing
         upcoming_events_list = list(upcoming_events)
@@ -495,19 +481,42 @@ class LiveStatsView(LoginRequiredMixin, View):
 
 class AttendeeListView(LoginRequiredMixin, View):
     def get(self, request, org_slug, event_slug):
-        from apps.events.models import CheckoutQuestion
-
         event = get_object_or_404(Event, organization__slug=org_slug, slug=event_slug)
         print_mode = request.GET.get("print") == "1"
+        search_query = request.GET.get("search", "").strip()
+        page_number = request.GET.get("page", 1)
 
-        tickets = (
+        tickets_qs = (
             Ticket.objects.filter(
                 booking__event=event, booking__status=Booking.Status.CONFIRMED
             )
             .select_related("booking__user", "booking", "ticket_type")
             .prefetch_related("answers__question")
-            .order_by("booking__user__last_name", "booking__user__first_name")
         )
+
+        if search_query:
+            tickets_qs = tickets_qs.filter(
+                Q(booking__user__email__icontains=search_query)
+                | Q(booking__user__first_name__icontains=search_query)
+                | Q(booking__user__last_name__icontains=search_query)
+                | Q(attendee_name__icontains=search_query)
+                | Q(attendee_email__icontains=search_query)
+                | Q(code__icontains=search_query)
+            )
+
+        tickets_qs = tickets_qs.order_by("booking__user__last_name", "booking__user__first_name")
+
+        total_count = tickets_qs.count()
+        checked_in_count = tickets_qs.filter(is_checked_in=True).count()
+
+        if print_mode:
+            tickets = tickets_qs
+            paginator = None
+            page_obj = None
+        else:
+            paginator = Paginator(tickets_qs, 100)
+            page_obj = paginator.get_page(page_number)
+            tickets = page_obj.object_list
 
         questions = CheckoutQuestion.objects.filter(event=event).order_by("order")
 
@@ -519,8 +528,11 @@ class AttendeeListView(LoginRequiredMixin, View):
                 "tickets": tickets,
                 "questions": questions,
                 "print_mode": print_mode,
-                "total_count": tickets.count(),
-                "checked_in_count": tickets.filter(is_checked_in=True).count(),
+                "total_count": total_count,
+                "checked_in_count": checked_in_count,
+                "search_query": search_query,
+                "page_obj": page_obj,
+                "paginator": paginator,
             },
         )
 
@@ -539,7 +551,12 @@ class ExportCenterView(LoginRequiredMixin, View):
 
 class ExportGenerateView(LoginRequiredMixin, View):
     def post(self, request, org_slug, event_slug):
-        event = get_object_or_404(Event, organization__slug=org_slug, slug=event_slug)
+        event = get_object_or_404(
+            Event,
+            organization__slug=org_slug,
+            slug=event_slug,
+            organization__members=request.user,
+        )
         report_type = request.POST.get("report_type")
         format_type = request.POST.get("format", "PDF")
         mask_emails = request.POST.get("mask_emails", "on") == "on"

@@ -32,8 +32,6 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
     "slippers",
-    "django_tasks",
-    "django_tasks.backends.database",
     "apps.core",
     "apps.orgs",
     "apps.events",
@@ -49,6 +47,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "apps.core.middleware.RateLimitMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
@@ -59,6 +58,12 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
 ]
+
+RATE_LIMITING_ENABLED = os.getenv("RATE_LIMITING_ENABLED", "True").lower() in (
+    "true",
+    "1",
+    "yes",
+)
 
 ROOT_URLCONF = "reckot.urls"
 
@@ -95,7 +100,71 @@ DATABASES = {
         "PASSWORD": os.getenv("DB_PASSWORD", ""),
         "HOST": os.getenv("DB_HOST", ""),
         "PORT": os.getenv("DB_PORT", ""),
+        "CONN_MAX_AGE": 600,
+        "ATOMIC_REQUESTS": True,
     }
+}
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": os.getenv("REDIS_URL", "redis://127.0.0.1:6379/1"),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "PARSER_CLASS": "redis.connection.HiredisParser",
+            "CONNECTION_POOL_CLASS_KWARGS": {
+                "max_connections": 50,
+                "retry_on_timeout": True,
+            },
+        },
+        "KEY_PREFIX": "reckot",
+        "TIMEOUT": 300,
+    },
+    "analytics": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": os.getenv("REDIS_URL", "redis://127.0.0.1:6379/2"),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+        "KEY_PREFIX": "analytics",
+        "TIMEOUT": 600,
+    },
+    "reports": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": os.getenv("REDIS_URL", "redis://127.0.0.1:6379/3"),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+        "KEY_PREFIX": "reports",
+        "TIMEOUT": 900,
+    },
+}
+
+TIME_ZONE = "Africa/Douala"
+
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
+
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://127.0.0.1:6379/0")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://127.0.0.1:6379/0")
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_WORKER_PREFETCH_MULTIPLIER = 4
+CELERY_WORKER_MAX_TASKS_PER_CHILD = 1000
+
+CELERY_TASK_ROUTES = {
+    "apps.core.tasks.send_email_task": {"queue": "emails"},
+    "apps.core.tasks.send_sms_task": {"queue": "emails"},
+    "apps.core.tasks.send_otp_sms_task": {"queue": "emails"},
+    "apps.core.tasks.send_otp_verification_task": {"queue": "emails"},
+    "apps.core.tasks.send_welcome_email_task": {"queue": "emails"},
+    "apps.payments.tasks.*": {"queue": "payments"},
+    "apps.reports.tasks.*": {"queue": "exports"},
+    "apps.messaging.tasks.*": {"queue": "emails"},
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -123,8 +192,6 @@ LANGUAGES = [
 LOCALE_PATHS = [
     BASE_DIR / "locale",
 ]
-
-TIME_ZONE = "Africa/Douala"
 
 USE_I18N = True
 
@@ -245,12 +312,7 @@ PAYMENT_GATEWAYS = {
     "DEFAULT_CURRENCY": os.getenv("DEFAULT_CURRENCY", "XAF"),
 }
 
-TASKS = {
-    "default": {
-        "BACKEND": "django_tasks.backends.database.DatabaseBackend",
-        "QUEUES": ["default", "emails", "payments"],
-    }
-}
+RATE_LIMITING_ENABLED = os.getenv("RATE_LIMITING_ENABLED", "True").lower() in ("true", "1", "yes")
 
 if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True

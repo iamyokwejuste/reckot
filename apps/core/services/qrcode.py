@@ -28,12 +28,10 @@ class QRCodeService:
             border=2,
         )
 
-        # Create the check-in URL
         checkin_url = f"{settings.SITE_URL}/checkin/verify/{ticket_code}/"
         qr.add_data(checkin_url)
         qr.make(fit=True)
 
-        # Create styled image with rounded modules
         img = qr.make_image(
             image_factory=StyledPilImage,
             module_drawer=RoundedModuleDrawer(),
@@ -41,7 +39,6 @@ class QRCodeService:
             back_color="#ffffff",
         )
 
-        # Save to BytesIO
         buffer = BytesIO()
         img.save(buffer, format="PNG")
         buffer.seek(0)

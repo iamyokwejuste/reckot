@@ -6,7 +6,6 @@ from datetime import timedelta
 import random
 import string
 
-
 class User(AbstractUser):
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     email_verified = models.BooleanField(default=False)
@@ -15,9 +14,7 @@ class User(AbstractUser):
     def __str__(self):
         return self.email or self.username
 
-
 class OTPVerification(models.Model):
-    """Model for storing OTP codes for email/phone verification."""
 
     class Type(models.TextChoices):
         EMAIL = "EMAIL", _("Email Verification")
@@ -50,7 +47,7 @@ class OTPVerification(models.Model):
 
     @staticmethod
     def generate_code(length: int = 6) -> str:
-        """Generate a random numeric OTP code."""
+
         return "".join(random.choices(string.digits, k=length))
 
     @property
@@ -62,7 +59,7 @@ class OTPVerification(models.Model):
         return not self.is_used and not self.is_expired and self.attempts < 5
 
     def verify(self, code: str) -> bool:
-        """Verify the OTP code."""
+
         self.attempts += 1
         self.save(update_fields=["attempts"])
 
@@ -78,13 +75,11 @@ class OTPVerification(models.Model):
 
     @classmethod
     def create_for_user(cls, user: User, otp_type: str, expiry_minutes: int = 10):
-        """Create a new OTP for a user, invalidating previous ones."""
-        # Invalidate previous unused OTPs of the same type
+
         cls.objects.filter(user=user, otp_type=otp_type, is_used=False).update(
             is_used=True
         )
 
-        # Create new OTP
         return cls.objects.create(
             user=user,
             otp_type=otp_type,
