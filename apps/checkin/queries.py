@@ -16,6 +16,8 @@ def search_tickets(event_id: int, query: str, limit: int = 20):
         Ticket.objects.filter(ticket_type__event_id=event_id)
         .filter(
             Q(code__icontains=query)
+            | Q(attendee_name__icontains=query)
+            | Q(attendee_email__icontains=query)
             | Q(booking__user__email__icontains=query)
             | Q(booking__user__first_name__icontains=query)
             | Q(booking__user__last_name__icontains=query)

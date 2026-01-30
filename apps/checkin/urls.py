@@ -5,6 +5,12 @@ app_name = "checkin"
 
 urlpatterns = [
     path("", actions.CheckInListView.as_view(), name="list"),
+    path("ticket/<str:code>/", actions.CheckInTicketView.as_view(), name="ticket"),
+    path(
+        "swag/<uuid:checkin_ref>/<int:item_id>/",
+        actions.CollectSwagView.as_view(),
+        name="collect_swag",
+    ),
     path(
         "<slug:org_slug>/<slug:event_slug>/",
         actions.CheckInDashboardView.as_view(),
@@ -24,11 +30,5 @@ urlpatterns = [
         "<slug:org_slug>/<slug:event_slug>/stats/",
         actions.CheckInStatsView.as_view(),
         name="stats",
-    ),
-    path("ticket/<uuid:code>/", actions.CheckInTicketView.as_view(), name="ticket"),
-    path(
-        "swag/<uuid:checkin_ref>/<int:item_id>/",
-        actions.CollectSwagView.as_view(),
-        name="collect_swag",
     ),
 ]

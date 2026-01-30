@@ -108,7 +108,7 @@ class CheckInSearchView(LoginRequiredMixin, View):
     def get(self, request, org_slug, event_slug):
         event = get_object_or_404(Event, organization__slug=org_slug, slug=event_slug)
         query = request.GET.get("q", "").strip()
-        if len(query) < 2:
+        if len(query) < 1:
             return HttpResponse("")
         results = search_tickets(event.id, query)
         return render(
@@ -122,6 +122,8 @@ class CheckInSearchView(LoginRequiredMixin, View):
 
 
 class CheckInTicketView(LoginRequiredMixin, View):
+    http_method_names = ['post']
+
     def post(self, request, code):
         result = verify_and_checkin(code, request.user)
         if result["valid"]:
