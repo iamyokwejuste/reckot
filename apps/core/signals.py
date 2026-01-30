@@ -5,6 +5,7 @@ from allauth.account.signals import user_signed_up
 from allauth.socialaccount.signals import social_account_added
 
 from apps.core.models import OTPVerification
+from apps.core.tasks import send_otp_verification_task, send_welcome_email_task
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -12,8 +13,6 @@ User = get_user_model()
 
 @receiver(user_signed_up)
 def handle_user_signup(sender, request, user, **kwargs):
-    from .tasks import send_otp_verification_task, send_welcome_email_task
-
     sociallogin = kwargs.get("sociallogin")
 
     try:
