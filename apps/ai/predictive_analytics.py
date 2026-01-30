@@ -12,14 +12,14 @@ def predict_ticket_sales(
     location: str,
     start_date: datetime,
     organizer_history: Dict,
-    market_data: List[Dict] = None
+    market_data: List[Dict] = None,
 ) -> Dict:
     history_context = f"""
     Organizer History:
-    - Previous events: {organizer_history.get('total_events', 0)}
-    - Average attendance: {organizer_history.get('avg_attendance', 0)}
-    - Average price point: {organizer_history.get('avg_price', 0)} XAF
-    - Typical sell-through: {organizer_history.get('avg_sell_through', 0)}%
+    - Previous events: {organizer_history.get("total_events", 0)}
+    - Average attendance: {organizer_history.get("avg_attendance", 0)}
+    - Average price point: {organizer_history.get("avg_price", 0)} XAF
+    - Typical sell-through: {organizer_history.get("avg_sell_through", 0)}%
     """
 
     market_context = ""
@@ -95,24 +95,23 @@ Base predictions on African market realities:
 
     try:
         import json
+
         prediction = json.loads(result)
-        prediction['generated_at'] = datetime.now().isoformat()
-        prediction['model_version'] = 'gemini-predictive-v1'
+        prediction["generated_at"] = datetime.now().isoformat()
+        prediction["model_version"] = "gemini-predictive-v1"
 
         return prediction
 
     except json.JSONDecodeError:
         return {
-            'error': 'Unable to generate prediction',
-            'predicted_sales': int(capacity * 0.6),
-            'confidence': 0.3
+            "error": "Unable to generate prediction",
+            "predicted_sales": int(capacity * 0.6),
+            "confidence": 0.3,
         }
 
 
 def optimize_ticket_pricing(
-    event_data: Dict,
-    competitor_events: List[Dict] = None,
-    demand_signals: Dict = None
+    event_data: Dict, competitor_events: List[Dict] = None, demand_signals: Dict = None
 ) -> Dict:
     competitor_context = ""
     if competitor_events:
@@ -124,18 +123,18 @@ def optimize_ticket_pricing(
     if demand_signals:
         demand_context = f"""
         Demand Signals:
-        - Page views: {demand_signals.get('page_views', 0)}
-        - Wishlist adds: {demand_signals.get('wishlist', 0)}
-        - Abandoned carts: {demand_signals.get('abandoned_carts', 0)}
-        - Social shares: {demand_signals.get('shares', 0)}
+        - Page views: {demand_signals.get("page_views", 0)}
+        - Wishlist adds: {demand_signals.get("wishlist", 0)}
+        - Abandoned carts: {demand_signals.get("abandoned_carts", 0)}
+        - Social shares: {demand_signals.get("shares", 0)}
         """
 
     prompt = f"""As a pricing strategist for African events, optimize pricing for this event.
 
-Event: {event_data.get('title')}
-Type: {event_data.get('type')}
-Current Price: {event_data.get('price')} XAF
-Capacity: {event_data.get('capacity')}
+Event: {event_data.get("title")}
+Type: {event_data.get("type")}
+Current Price: {event_data.get("price")} XAF
+Capacity: {event_data.get("capacity")}
 
 {competitor_context}
 {demand_context}
@@ -181,23 +180,22 @@ Return JSON:
 
     try:
         import json
+
         return json.loads(result)
     except json.JSONDecodeError:
-        return {'error': 'Pricing optimization failed'}
+        return {"error": "Pricing optimization failed"}
 
 
 def generate_marketing_strategy(
-    event_data: Dict,
-    budget: Decimal,
-    target_audience: str = None
+    event_data: Dict, budget: Decimal, target_audience: str = None
 ) -> Dict:
     prompt = f"""Create a detailed marketing strategy for this African event.
 
-Event: {event_data.get('title')}
-Type: {event_data.get('type')}
-Location: {event_data.get('location')}
+Event: {event_data.get("title")}
+Type: {event_data.get("type")}
+Location: {event_data.get("location")}
 Budget: {budget} XAF
-Target Audience: {target_audience or 'General'}
+Target Audience: {target_audience or "General"}
 
 Focus on effective African marketing channels:
 1. WhatsApp (most important)
@@ -236,6 +234,7 @@ Return actionable strategy in JSON:
 
     try:
         import json
+
         return json.loads(result)
     except json.JSONDecodeError:
-        return {'error': 'Marketing strategy generation failed'}
+        return {"error": "Marketing strategy generation failed"}

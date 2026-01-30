@@ -5,43 +5,101 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('events', '0006_flyer_config'),
+        ("events", "0006_flyer_config"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='FlyerBilling',
+            name="FlyerBilling",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('generation_count', models.PositiveIntegerField(default=0)),
-                ('rate_per_flyer', models.DecimalField(decimal_places=2, default=25, max_digits=10)),
-                ('currency', models.CharField(default='XAF', max_length=3)),
-                ('total_amount', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
-                ('status', models.CharField(choices=[('PENDING', 'Pending'), ('INVOICED', 'Invoiced'), ('PAID', 'Paid')], default='PENDING', max_length=20)),
-                ('invoiced_at', models.DateTimeField(blank=True, null=True)),
-                ('paid_at', models.DateTimeField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('event', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='flyer_billing', to='events.event')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("generation_count", models.PositiveIntegerField(default=0)),
+                (
+                    "rate_per_flyer",
+                    models.DecimalField(decimal_places=2, default=25, max_digits=10),
+                ),
+                ("currency", models.CharField(default="XAF", max_length=3)),
+                (
+                    "total_amount",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=10),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("PENDING", "Pending"),
+                            ("INVOICED", "Invoiced"),
+                            ("PAID", "Paid"),
+                        ],
+                        default="PENDING",
+                        max_length=20,
+                    ),
+                ),
+                ("invoiced_at", models.DateTimeField(blank=True, null=True)),
+                ("paid_at", models.DateTimeField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "event",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="flyer_billing",
+                        to="events.event",
+                    ),
+                ),
             ],
             options={
-                'indexes': [models.Index(fields=['status'], name='events_flye_status_2ca621_idx'), models.Index(fields=['event'], name='events_flye_event_i_94a0f1_idx')],
+                "indexes": [
+                    models.Index(
+                        fields=["status"], name="events_flye_status_2ca621_idx"
+                    ),
+                    models.Index(
+                        fields=["event"], name="events_flye_event_i_94a0f1_idx"
+                    ),
+                ],
             },
         ),
         migrations.CreateModel(
-            name='FlyerGeneration',
+            name="FlyerGeneration",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('ip_address', models.GenericIPAddressField(blank=True, null=True)),
-                ('user_agent', models.CharField(blank=True, max_length=500)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('event', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='flyer_generations', to='events.event')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("ip_address", models.GenericIPAddressField(blank=True, null=True)),
+                ("user_agent", models.CharField(blank=True, max_length=500)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "event",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="flyer_generations",
+                        to="events.event",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
-                'indexes': [models.Index(fields=['event', 'created_at'], name='events_flye_event_i_1b00e3_idx')],
+                "ordering": ["-created_at"],
+                "indexes": [
+                    models.Index(
+                        fields=["event", "created_at"],
+                        name="events_flye_event_i_1b00e3_idx",
+                    )
+                ],
             },
         ),
     ]

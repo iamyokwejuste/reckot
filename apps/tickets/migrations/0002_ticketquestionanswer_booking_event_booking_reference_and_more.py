@@ -7,136 +7,188 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('events', '0002_checkoutquestion_event_is_public_event_slug_and_more'),
-        ('tickets', '0001_initial'),
+        ("events", "0002_checkoutquestion_event_is_public_event_slug_and_more"),
+        ("tickets", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='TicketQuestionAnswer',
+            name="TicketQuestionAnswer",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('answer', models.TextField()),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("answer", models.TextField()),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
             ],
         ),
         migrations.AddField(
-            model_name='booking',
-            name='event',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='bookings', to='events.event'),
+            model_name="booking",
+            name="event",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="bookings",
+                to="events.event",
+            ),
         ),
         migrations.AddField(
-            model_name='booking',
-            name='reference',
+            model_name="booking",
+            name="reference",
             field=models.UUIDField(default=uuid.uuid4, editable=False, unique=True),
         ),
         migrations.AddField(
-            model_name='booking',
-            name='status',
-            field=models.CharField(choices=[('PENDING', 'Pending Payment'), ('CONFIRMED', 'Confirmed'), ('CANCELLED', 'Cancelled'), ('REFUNDED', 'Refunded')], default='PENDING', max_length=20),
+            model_name="booking",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("PENDING", "Pending Payment"),
+                    ("CONFIRMED", "Confirmed"),
+                    ("CANCELLED", "Cancelled"),
+                    ("REFUNDED", "Refunded"),
+                ],
+                default="PENDING",
+                max_length=20,
+            ),
         ),
         migrations.AddField(
-            model_name='booking',
-            name='total_amount',
+            model_name="booking",
+            name="total_amount",
             field=models.DecimalField(decimal_places=2, default=0, max_digits=10),
         ),
         migrations.AddField(
-            model_name='booking',
-            name='updated_at',
+            model_name="booking",
+            name="updated_at",
             field=models.DateTimeField(auto_now=True),
         ),
         migrations.AddField(
-            model_name='ticket',
-            name='attendee_email',
+            model_name="ticket",
+            name="attendee_email",
             field=models.EmailField(blank=True, max_length=254),
         ),
         migrations.AddField(
-            model_name='ticket',
-            name='attendee_name',
+            model_name="ticket",
+            name="attendee_name",
             field=models.CharField(blank=True, max_length=200),
         ),
         migrations.AddField(
-            model_name='ticket',
-            name='checked_in_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='checked_in_tickets', to=settings.AUTH_USER_MODEL),
+            model_name="ticket",
+            name="checked_in_by",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="checked_in_tickets",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='tickettype',
-            name='description',
+            model_name="tickettype",
+            name="description",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='tickettype',
-            name='is_active',
+            model_name="tickettype",
+            name="is_active",
             field=models.BooleanField(default=True),
         ),
         migrations.AddField(
-            model_name='tickettype',
-            name='max_per_order',
+            model_name="tickettype",
+            name="max_per_order",
             field=models.PositiveSmallIntegerField(default=10),
         ),
         migrations.AddField(
-            model_name='tickettype',
-            name='sales_end',
+            model_name="tickettype",
+            name="sales_end",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='tickettype',
-            name='sales_start',
+            model_name="tickettype",
+            name="sales_start",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddIndex(
-            model_name='booking',
-            index=models.Index(fields=['reference'], name='tickets_boo_referen_4188f5_idx'),
+            model_name="booking",
+            index=models.Index(
+                fields=["reference"], name="tickets_boo_referen_4188f5_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='booking',
-            index=models.Index(fields=['user', 'status'], name='tickets_boo_user_id_b7644e_idx'),
+            model_name="booking",
+            index=models.Index(
+                fields=["user", "status"], name="tickets_boo_user_id_b7644e_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='booking',
-            index=models.Index(fields=['event', 'status'], name='tickets_boo_event_i_cb73ef_idx'),
+            model_name="booking",
+            index=models.Index(
+                fields=["event", "status"], name="tickets_boo_event_i_cb73ef_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='ticket',
-            index=models.Index(fields=['code'], name='tickets_tic_code_2520cc_idx'),
+            model_name="ticket",
+            index=models.Index(fields=["code"], name="tickets_tic_code_2520cc_idx"),
         ),
         migrations.AddIndex(
-            model_name='ticket',
-            index=models.Index(fields=['booking'], name='tickets_tic_booking_9d384c_idx'),
+            model_name="ticket",
+            index=models.Index(
+                fields=["booking"], name="tickets_tic_booking_9d384c_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='ticket',
-            index=models.Index(fields=['is_checked_in'], name='tickets_tic_is_chec_281b56_idx'),
+            model_name="ticket",
+            index=models.Index(
+                fields=["is_checked_in"], name="tickets_tic_is_chec_281b56_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='tickettype',
-            index=models.Index(fields=['event', 'is_active'], name='tickets_tic_event_i_4b23ce_idx'),
+            model_name="tickettype",
+            index=models.Index(
+                fields=["event", "is_active"], name="tickets_tic_event_i_4b23ce_idx"
+            ),
         ),
         migrations.AddField(
-            model_name='ticketquestionanswer',
-            name='booking',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='answers', to='tickets.booking'),
+            model_name="ticketquestionanswer",
+            name="booking",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="answers",
+                to="tickets.booking",
+            ),
         ),
         migrations.AddField(
-            model_name='ticketquestionanswer',
-            name='question',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='events.checkoutquestion'),
+            model_name="ticketquestionanswer",
+            name="question",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                to="events.checkoutquestion",
+            ),
         ),
         migrations.AddField(
-            model_name='ticketquestionanswer',
-            name='ticket',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='answers', to='tickets.ticket'),
+            model_name="ticketquestionanswer",
+            name="ticket",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="answers",
+                to="tickets.ticket",
+            ),
         ),
         migrations.AddIndex(
-            model_name='ticketquestionanswer',
-            index=models.Index(fields=['booking', 'question'], name='tickets_tic_booking_653be5_idx'),
+            model_name="ticketquestionanswer",
+            index=models.Index(
+                fields=["booking", "question"], name="tickets_tic_booking_653be5_idx"
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='ticketquestionanswer',
-            unique_together={('ticket', 'question')},
+            name="ticketquestionanswer",
+            unique_together={("ticket", "question")},
         ),
     ]

@@ -12,7 +12,7 @@ def handle_payment_status_change(sender, instance, created, **kwargs):
         booking = instance.booking
         if booking.status != Booking.Status.CONFIRMED:
             booking.status = Booking.Status.CONFIRMED
-            booking.save(update_fields=['status'])
+            booking.save(update_fields=["status"])
         send_ticket_confirmation_task.enqueue(booking.id)
 
 
@@ -32,30 +32,30 @@ def track_refund_status_change(sender, instance, **kwargs):
 def handle_refund_status_change(sender, instance, created, **kwargs):
     from apps.payments.tasks import send_refund_notification_task
 
-    old_status = getattr(instance, '_old_status', None)
+    old_status = getattr(instance, "_old_status", None)
 
     if created:
         RefundAuditLog.objects.create(
             refund=instance,
-            action='CREATED',
-            old_status='',
+            action="CREATED",
+            old_status="",
             new_status=instance.status,
             performed_by=instance.requested_by,
-            notes=f'Refund requested. Reason: {instance.reason}'
+            notes=f"Refund requested. Reason: {instance.reason}",
         )
         send_refund_notification_task.enqueue(instance.id)
 
     elif old_status and old_status != instance.status:
         action_map = {
-            Refund.Status.APPROVED: 'APPROVED',
-            Refund.Status.PROCESSED: 'PROCESSED',
-            Refund.Status.REJECTED: 'REJECTED',
+            Refund.Status.APPROVED: "APPROVED",
+            Refund.Status.PROCESSED: "PROCESSED",
+            Refund.Status.REJECTED: "REJECTED",
         }
-        action = action_map.get(instance.status, 'STATUS_CHANGED')
+        action = action_map.get(instance.status, "STATUS_CHANGED")
 
-        notes = ''
+        notes = ""
         if instance.status == Refund.Status.REJECTED:
-            notes = f'Rejection reason: {instance.rejection_reason}'
+            notes = f"Rejection reason: {instance.rejection_reason}"
 
         RefundAuditLog.objects.create(
             refund=instance,
@@ -63,7 +63,7 @@ def handle_refund_status_change(sender, instance, created, **kwargs):
             old_status=old_status,
             new_status=instance.status,
             performed_by=instance.processed_by,
-            notes=notes
+            notes=notes,
         )
 
         send_refund_notification_task.enqueue(instance.id)

@@ -16,7 +16,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from apps.events.models import Coupon, Event
 from apps.payments.invoice_service import create_invoice, get_invoice_pdf
-from apps.payments.models import Invoice, Payment, PaymentProvider, Refund
+from apps.payments.models import Invoice, Payment, PaymentProvider, Refund, Withdrawal
 from apps.payments.queries import get_booking_payment, get_payment_by_id
 from apps.payments.services import (
     confirm_payment,
@@ -580,5 +580,216 @@ class TransactionStatusView(View):
             {
                 "guest_session": guest_session,
                 "bookings": bookings,
+            },
+        )
+
+
+class WithdrawalBalanceView(LoginRequiredMixin, View):
+    def get(self, request):
+        from decimal import Decimal
+        from django.http import JsonResponse
+        from apps.orgs.models import Organization
+
+        user_orgs = Organization.objects.filter(members__user=request.user)
+
+        confirmed_payments = Payment.objects.filter(
+            booking__event__organization__in=user_orgs, status=Payment.Status.CONFIRMED
+        ).aggregate(total_revenue=Sum("amount"), total_service_fees=Sum("service_fee"))
+
+        total_revenue = confirmed_payments["total_revenue"] or Decimal("0")
+        total_service_fees = confirmed_payments["total_service_fees"] or Decimal("0")
+
+        total_withdrawals = Withdrawal.objects.filter(
+            organization__in=user_orgs,
+            status__in=[Withdrawal.Status.COMPLETED, Withdrawal.Status.PROCESSING],
+        ).aggregate(total=Sum("amount"))
+
+        total_withdrawn = total_withdrawals["total"] or Decimal("0")
+
+        total_refunds = Refund.objects.filter(
+            payment__booking__event__organization__in=user_orgs,
+            status=Refund.Status.PROCESSED,
+        ).aggregate(total=Sum("amount"))
+
+        total_refunded = total_refunds["total"] or Decimal("0")
+
+        available_balance = (
+            total_revenue - total_service_fees - total_withdrawn - total_refunded
+        )
+
+        return JsonResponse(
+            {
+                "available_balance": float(available_balance),
+                "total_revenue": float(total_revenue),
+                "total_service_fees": float(total_service_fees),
+                "total_withdrawn": float(total_withdrawn),
+                "total_refunded": float(total_refunded),
+                "currency": "XAF",
+            }
+        )
+
+
+class WithdrawalRequestView(LoginRequiredMixin, View):
+    def post(self, request):
+        from decimal import Decimal
+        from django.http import JsonResponse
+        from apps.orgs.models import Organization
+        from apps.payments.gateways.campay import CampayGateway
+
+        try:
+            amount = Decimal(request.POST.get("amount", "0"))
+            phone_number = request.POST.get("phone_number", "").strip()
+            description = request.POST.get("description", "Withdrawal from Reckot")
+
+            if amount <= 0:
+                return JsonResponse(
+                    {"success": False, "error": "Invalid amount"}, status=400
+                )
+
+            if not phone_number:
+                return JsonResponse(
+                    {"success": False, "error": "Phone number is required"}, status=400
+                )
+
+            user_orgs = Organization.objects.filter(members__user=request.user).first()
+            if not user_orgs:
+                return JsonResponse(
+                    {"success": False, "error": "No organization found"}, status=400
+                )
+
+            confirmed_payments = Payment.objects.filter(
+                booking__event__organization=user_orgs, status=Payment.Status.CONFIRMED
+            ).aggregate(
+                total_revenue=Sum("amount"), total_service_fees=Sum("service_fee")
+            )
+
+            total_revenue = confirmed_payments["total_revenue"] or Decimal("0")
+            total_service_fees = confirmed_payments["total_service_fees"] or Decimal(
+                "0"
+            )
+
+            total_withdrawals = Withdrawal.objects.filter(
+                organization=user_orgs,
+                status__in=[Withdrawal.Status.COMPLETED, Withdrawal.Status.PROCESSING],
+            ).aggregate(total=Sum("amount"))
+
+            total_withdrawn = total_withdrawals["total"] or Decimal("0")
+
+            total_refunds = Refund.objects.filter(
+                payment__booking__event__organization=user_orgs,
+                status=Refund.Status.PROCESSED,
+            ).aggregate(total=Sum("amount"))
+
+            total_refunded = total_refunds["total"] or Decimal("0")
+
+            available_balance = (
+                total_revenue - total_service_fees - total_withdrawn - total_refunded
+            )
+
+            if amount > available_balance:
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "error": f"Insufficient balance. Available: {available_balance} XAF",
+                    },
+                    status=400,
+                )
+
+            from django.conf import settings
+
+            gateway_credentials = {
+                "app_username": settings.CAMPAY_USERNAME,
+                "app_password": settings.CAMPAY_PASSWORD,
+                "permanent_token": getattr(settings, "CAMPAY_TOKEN", ""),
+                "is_production": getattr(settings, "CAMPAY_PRODUCTION", False),
+            }
+
+            gateway = CampayGateway(gateway_credentials)
+            gateway_fee = gateway.calculate_withdrawal_fee(amount)
+
+            platform_commission_percent = Decimal("7")
+            platform_commission = (
+                amount * platform_commission_percent / Decimal("100")
+            ).quantize(Decimal("1"))
+
+            net_amount = amount - gateway_fee - platform_commission
+
+            withdrawal = Withdrawal.objects.create(
+                organization=user_orgs,
+                amount=amount,
+                gateway_fee=gateway_fee,
+                platform_commission=platform_commission,
+                net_amount=net_amount,
+                phone_number=phone_number,
+                description=description,
+                requested_by=request.user,
+            )
+
+            withdrawal.mark_processing()
+
+            result = gateway.disburse(
+                amount=amount,
+                currency="XAF",
+                phone_number=phone_number,
+                description=description,
+                external_reference=str(withdrawal.external_reference),
+                wait_for_completion=False,
+            )
+
+            if result.success:
+                withdrawal.gateway_response = result.raw_response or {}
+                withdrawal.save(update_fields=["gateway_response", "updated_at"])
+
+                return JsonResponse(
+                    {
+                        "success": True,
+                        "message": "Withdrawal request submitted successfully",
+                        "reference": str(withdrawal.reference),
+                        "net_amount": float(net_amount),
+                        "gateway_fee": float(gateway_fee),
+                        "platform_commission": float(platform_commission),
+                    }
+                )
+            else:
+                withdrawal.mark_failed(result.message)
+                return JsonResponse(
+                    {"success": False, "error": result.message}, status=400
+                )
+
+        except Exception as e:
+            logger.error(f"Withdrawal request failed: {str(e)}")
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+
+class WithdrawalListView(LoginRequiredMixin, View):
+    def get(self, request):
+        from apps.orgs.models import Organization
+
+        user_orgs = Organization.objects.filter(members__user=request.user)
+
+        withdrawals = Withdrawal.objects.filter(
+            organization__in=user_orgs
+        ).select_related("organization", "requested_by")
+
+        status_filter = request.GET.get("status")
+        if status_filter:
+            withdrawals = withdrawals.filter(status=status_filter)
+
+        stats = {
+            "pending": withdrawals.filter(status=Withdrawal.Status.PENDING).count(),
+            "processing": withdrawals.filter(
+                status=Withdrawal.Status.PROCESSING
+            ).count(),
+            "completed": withdrawals.filter(status=Withdrawal.Status.COMPLETED).count(),
+            "failed": withdrawals.filter(status=Withdrawal.Status.FAILED).count(),
+        }
+
+        return render(
+            request,
+            "payments/withdrawals/list.html",
+            {
+                "withdrawals": withdrawals[:50],
+                "stats": stats,
+                "status_filter": status_filter,
             },
         )

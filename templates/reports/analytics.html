@@ -48,6 +48,10 @@
             </div>
         </div>
     </div>
+    {% #button variant="default" size="sm" attrs='@click="$dispatch(\'open-withdraw-modal\')"' %}
+        <i data-lucide="banknote" class="h-4 w-4"></i>
+        <span class="hidden sm:inline">{% trans "Withdraw" %}</span>
+    {% /button %}
     {% #button variant="default" size="sm" attrs='@click="$dispatch(\'open-export-modal\')"' %}
         <i data-lucide="download" class="h-4 w-4"></i>
         <span class="hidden sm:inline">{% trans "Export" %}</span>
@@ -56,7 +60,21 @@
 {% endblock %}
 
 {% block content %}
-<div class="space-y-6" x-data="{ showExportModal: false }" @open-export-modal.window="showExportModal = true">
+<div class="space-y-6"
+     x-data="{
+        showExportModal: false,
+        showWithdrawModal: false,
+        withdrawAmount: '',
+        phoneNumber: '',
+        loading: false,
+        error: '',
+        success: false,
+        platformCommission: 7,
+        gatewayFee: 0,
+        netAmount: 0
+     }"
+     @open-export-modal.window="showExportModal = true"
+     @open-withdraw-modal.window="showWithdrawModal = true">
     {% #modal trigger="showExportModal" title=_("Export Event Data") description=_("Select an event to export data from") size="md" %}
         {% if all_events %}
         <div class="space-y-2 max-h-80 overflow-y-auto">
@@ -83,6 +101,146 @@
         </div>
         {% endif %}
     {% /modal %}
+
+    {% #modal trigger="showWithdrawModal" title=_("Withdraw Funds") description=_("Enter withdrawal details") size="md" %}
+        <div x-show="!success">
+            <div class="space-y-4">
+                <div class="bg-muted/50 p-4 rounded-lg">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm text-muted-foreground">{% trans "Available Balance" %}</span>
+                        <span class="text-lg font-bold">{{ available_balance }} <span class="text-sm font-normal text-muted-foreground">XAF</span></span>
+                    </div>
+                    <p class="text-xs text-muted-foreground">{% trans "This is your available balance from confirmed payments, minus service fees and previous withdrawals" %}</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-2">{% trans "Withdrawal Amount (XAF)" %}</label>
+                    <input
+                        type="number"
+                        x-model="withdrawAmount"
+                        @input="
+                            const amount = parseFloat(withdrawAmount) || 0;
+                            gatewayFee = amount <= 1000 ? 50 : Math.floor(amount * 0.04);
+                            const commission = Math.floor(amount * platformCommission / 100);
+                            netAmount = amount - gatewayFee - commission;
+                        "
+                        class="input w-full"
+                        placeholder="{% trans "Enter amount" %}"
+                        min="1"
+                        max="{{ available_balance }}"
+                        required
+                    >
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-2">{% trans "Phone Number (with country code)" %}</label>
+                    <input
+                        type="text"
+                        x-model="phoneNumber"
+                        class="input w-full"
+                        placeholder="{% trans "e.g., 237679587525" %}"
+                        required
+                    >
+                    <p class="text-xs text-muted-foreground mt-1">{% trans "Include country code (e.g., 237 for Cameroon)" %}</p>
+                </div>
+
+                <div class="bg-muted/50 p-4 rounded-lg space-y-2" x-show="withdrawAmount > 0">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-muted-foreground">{% trans "Withdrawal Amount" %}</span>
+                        <span class="font-medium" x-text="withdrawAmount + ' XAF'"></span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-muted-foreground">{% trans "Gateway Fee" %}</span>
+                        <span class="font-medium text-red-500" x-text="'- ' + gatewayFee + ' XAF'"></span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-muted-foreground">{% trans "Platform Commission" %} (<span x-text="platformCommission"></span>%)</span>
+                        <span class="font-medium text-red-500" x-text="'- ' + Math.floor(withdrawAmount * platformCommission / 100) + ' XAF'"></span>
+                    </div>
+                    <div class="border-t border-border pt-2 mt-2">
+                        <div class="flex justify-between">
+                            <span class="font-semibold">{% trans "You will receive" %}</span>
+                            <span class="text-lg font-bold text-green-600" x-text="netAmount + ' XAF'"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div x-show="error" class="bg-destructive/10 text-destructive p-3 rounded-lg text-sm" x-text="error"></div>
+
+                <div class="flex items-center justify-end gap-3">
+                    <button
+                        type="button"
+                        @click="showWithdrawModal = false; withdrawAmount = ''; phoneNumber = ''; error = ''"
+                        class="btn btn-secondary"
+                        :disabled="loading"
+                    >
+                        {% trans "Cancel" %}
+                    </button>
+                    <button
+                        type="button"
+                        @click="
+                            if (!withdrawAmount || parseFloat(withdrawAmount) <= 0) {
+                                error = '{% trans "Please enter a valid amount" %}';
+                                return;
+                            }
+                            if (parseFloat(withdrawAmount) > {{ available_balance }}) {
+                                error = '{% trans "Amount exceeds available balance" %}';
+                                return;
+                            }
+                            if (!phoneNumber) {
+                                error = '{% trans "Please enter your phone number" %}';
+                                return;
+                            }
+                            loading = true;
+                            error = '';
+                            fetch('{% url "payments:withdrawal_request" %}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                    'X-CSRFToken': '{{ csrf_token }}'
+                                },
+                                body: new URLSearchParams({
+                                    amount: withdrawAmount,
+                                    phone_number: phoneNumber
+                                })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                loading = false;
+                                if (data.success) {
+                                    success = true;
+                                    setTimeout(() => {
+                                        window.location.reload();
+                                    }, 2000);
+                                } else {
+                                    error = data.error || '{% trans "Failed to process withdrawal" %}';
+                                }
+                            })
+                            .catch(err => {
+                                loading = false;
+                                error = '{% trans "Network error. Please try again." %}';
+                            });
+                        "
+                        class="btn btn-primary"
+                        :disabled="loading || !withdrawAmount || !phoneNumber"
+                    >
+                        <span x-show="!loading">{% trans "Request Withdrawal" %}</span>
+                        <span x-show="loading">{% trans "Processing..." %}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="success" class="text-center py-8">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="check" class="w-8 h-8 text-green-600"></i>
+            </div>
+            <h3 class="text-lg font-semibold mb-2">{% trans "Withdrawal Requested!" %}</h3>
+            <p class="text-sm text-muted-foreground mb-4">{% trans "Your withdrawal request has been submitted successfully. You will receive the funds shortly." %}</p>
+            <p class="text-xs text-muted-foreground">{% trans "Redirecting..." %}</p>
+        </div>
+    {% /modal %}
+
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div class="stat-card">
             <div class="flex items-center justify-between">

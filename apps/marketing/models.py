@@ -9,20 +9,18 @@ import uuid
 
 class AffiliateLink(models.Model):
     class CommissionType(models.TextChoices):
-        FIXED = 'FIXED', _('Fixed Amount')
-        PERCENTAGE = 'PERCENTAGE', _('Percentage')
+        FIXED = "FIXED", _("Fixed Amount")
+        PERCENTAGE = "PERCENTAGE", _("Percentage")
 
     organization = models.ForeignKey(
-        Organization,
-        on_delete=models.CASCADE,
-        related_name='affiliate_links'
+        Organization, on_delete=models.CASCADE, related_name="affiliate_links"
     )
     event = models.ForeignKey(
         Event,
         on_delete=models.CASCADE,
-        related_name='affiliate_links',
+        related_name="affiliate_links",
         null=True,
-        blank=True
+        blank=True,
     )
     name = models.CharField(max_length=100)
     code = models.CharField(max_length=50, unique=True)
@@ -31,12 +29,10 @@ class AffiliateLink(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='affiliate_links'
+        related_name="affiliate_links",
     )
     commission_type = models.CharField(
-        max_length=20,
-        choices=CommissionType.choices,
-        default=CommissionType.PERCENTAGE
+        max_length=20, choices=CommissionType.choices, default=CommissionType.PERCENTAGE
     )
     commission_value = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     is_active = models.BooleanField(default=True)
@@ -46,12 +42,12 @@ class AffiliateLink(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=['code']),
-            models.Index(fields=['organization', 'is_active']),
+            models.Index(fields=["code"]),
+            models.Index(fields=["organization", "is_active"]),
         ]
 
     def __str__(self):
-        return f'{self.name} ({self.code})'
+        return f"{self.name} ({self.code})"
 
     def save(self, *args, **kwargs):
         if not self.code:
@@ -66,60 +62,51 @@ class AffiliateLink(models.Model):
 
 class AffiliateConversion(models.Model):
     class Status(models.TextChoices):
-        PENDING = 'PENDING', _('Pending')
-        APPROVED = 'APPROVED', _('Approved')
-        PAID = 'PAID', _('Paid')
-        REJECTED = 'REJECTED', _('Rejected')
+        PENDING = "PENDING", _("Pending")
+        APPROVED = "APPROVED", _("Approved")
+        PAID = "PAID", _("Paid")
+        REJECTED = "REJECTED", _("Rejected")
 
     affiliate_link = models.ForeignKey(
-        AffiliateLink,
-        on_delete=models.CASCADE,
-        related_name='conversions'
+        AffiliateLink, on_delete=models.CASCADE, related_name="conversions"
     )
     booking = models.OneToOneField(
-        Booking,
-        on_delete=models.CASCADE,
-        related_name='affiliate_conversion'
+        Booking, on_delete=models.CASCADE, related_name="affiliate_conversion"
     )
     order_amount = models.DecimalField(max_digits=10, decimal_places=2)
     commission_amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(
-        max_length=20,
-        choices=Status.choices,
-        default=Status.PENDING
+        max_length=20, choices=Status.choices, default=Status.PENDING
     )
     paid_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         indexes = [
-            models.Index(fields=['affiliate_link', 'status']),
-            models.Index(fields=['status', 'created_at']),
+            models.Index(fields=["affiliate_link", "status"]),
+            models.Index(fields=["status", "created_at"]),
         ]
 
 
 class SocialShare(models.Model):
     class Platform(models.TextChoices):
-        FACEBOOK = 'FACEBOOK', _('Facebook')
-        TWITTER = 'TWITTER', _('Twitter/X')
-        LINKEDIN = 'LINKEDIN', _('LinkedIn')
-        WHATSAPP = 'WHATSAPP', _('WhatsApp')
-        TELEGRAM = 'TELEGRAM', _('Telegram')
-        EMAIL = 'EMAIL', _('Email')
-        COPY_LINK = 'COPY_LINK', _('Copy Link')
+        FACEBOOK = "FACEBOOK", _("Facebook")
+        TWITTER = "TWITTER", _("Twitter/X")
+        LINKEDIN = "LINKEDIN", _("LinkedIn")
+        WHATSAPP = "WHATSAPP", _("WhatsApp")
+        TELEGRAM = "TELEGRAM", _("Telegram")
+        EMAIL = "EMAIL", _("Email")
+        COPY_LINK = "COPY_LINK", _("Copy Link")
 
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='shares')
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="shares")
     platform = models.CharField(max_length=20, choices=Platform.choices)
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
     )
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         indexes = [
-            models.Index(fields=['event', 'platform']),
+            models.Index(fields=["event", "platform"]),
         ]

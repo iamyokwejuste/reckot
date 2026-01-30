@@ -3,7 +3,7 @@ from datetime import datetime
 from apps.core.services.ai import gemini_ai
 
 
-def create_event_from_voice(audio_data: bytes, user_language: str = 'auto') -> Dict:
+def create_event_from_voice(audio_data: bytes, user_language: str = "auto") -> Dict:
     prompt = """You are an expert event planner for Africa. A user has described an event in their own words (possibly in French or English). Extract structured event information.
 
 Your task:
@@ -54,35 +54,38 @@ Context for pricing (Cameroon/Africa):
     try:
         result = gemini_ai.chat_with_audio(prompt, audio_data)
         import json
+
         event_data = json.loads(result)
 
-        if event_data.get('confidence', 0) < 0.6:
-            event_data['warnings'] = [
+        if event_data.get("confidence", 0) < 0.6:
+            event_data["warnings"] = [
                 "Low confidence in extraction",
-                "Please review and confirm all details"
+                "Please review and confirm all details",
             ]
 
-        event_data['created_at'] = datetime.now().isoformat()
-        event_data['ai_generated'] = True
+        event_data["created_at"] = datetime.now().isoformat()
+        event_data["ai_generated"] = True
 
         return event_data
 
     except json.JSONDecodeError:
         return {
-            'error': 'Unable to parse voice input',
-            'suggestion': 'Please try again with clearer audio',
-            'confidence': 0
+            "error": "Unable to parse voice input",
+            "suggestion": "Please try again with clearer audio",
+            "confidence": 0,
         }
 
 
-def enhance_voice_created_event(event_data: Dict, cover_image_data: Optional[bytes] = None) -> Dict:
+def enhance_voice_created_event(
+    event_data: Dict, cover_image_data: Optional[bytes] = None
+) -> Dict:
     prompt = f"""Enhance this AI-generated event with professional marketing content.
 
 Original Event:
-Title: {event_data.get('title')}
-Description: {event_data.get('description')}
-Type: {event_data.get('event_type')}
-Location: {event_data.get('location')}
+Title: {event_data.get("title")}
+Description: {event_data.get("description")}
+Type: {event_data.get("event_type")}
+Location: {event_data.get("location")}
 
 Create:
 1. Improved description (250-300 words, engaging, professional)
@@ -110,20 +113,17 @@ Return JSON:
 
     try:
         import json
+
         enhancements = json.loads(result)
 
         if cover_image_data:
             image_context = gemini_ai.analyze_image(
                 cover_image_data,
-                "Describe this event image. What vibe, theme, and audience does it suggest?"
+                "Describe this event image. What vibe, theme, and audience does it suggest?",
             )
-            enhancements['image_context'] = image_context
+            enhancements["image_context"] = image_context
 
-        return {
-            **event_data,
-            **enhancements,
-            'fully_enhanced': True
-        }
+        return {**event_data, **enhancements, "fully_enhanced": True}
 
     except json.JSONDecodeError:
         return event_data
@@ -148,9 +148,10 @@ Return the complete updated event JSON with changes marked."""
 
     try:
         import json
+
         updated_event = json.loads(result)
-        updated_event['revision_count'] = event_data.get('revision_count', 0) + 1
-        updated_event['last_modified_via'] = 'voice'
+        updated_event["revision_count"] = event_data.get("revision_count", 0) + 1
+        updated_event["last_modified_via"] = "voice"
 
         return updated_event
 
@@ -158,7 +159,7 @@ Return the complete updated event JSON with changes marked."""
         return event_data
 
 
-def transcribe_audio(audio_data: bytes, language: str = 'auto') -> str:
+def transcribe_audio(audio_data: bytes, language: str = "auto") -> str:
     prompt = f"""Transcribe this audio accurately. Language: {language}
 
 Return only the transcribed text, nothing else."""

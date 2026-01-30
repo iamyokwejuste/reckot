@@ -4,20 +4,44 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payments', '0003_remove_payment_method_payment_currency_and_more'),
+        ("payments", "0003_remove_payment_method_payment_currency_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='payment',
-            name='provider',
-            field=models.CharField(choices=[('CAMPAY', 'Campay'), ('PAWAPAY', 'PawaPay'), ('FLUTTERWAVE', 'Flutterwave'), ('MTN_MOMO', 'MTN Mobile Money'), ('ORANGE_MONEY', 'Orange Money'), ('STRIPE', 'Stripe'), ('PAYPAL', 'PayPal'), ('OFFLINE', 'Offline Payment')], default='MTN_MOMO', max_length=20),
+            model_name="payment",
+            name="provider",
+            field=models.CharField(
+                choices=[
+                    ("CAMPAY", "Campay"),
+                    ("PAWAPAY", "PawaPay"),
+                    ("FLUTTERWAVE", "Flutterwave"),
+                    ("MTN_MOMO", "MTN Mobile Money"),
+                    ("ORANGE_MONEY", "Orange Money"),
+                    ("STRIPE", "Stripe"),
+                    ("PAYPAL", "PayPal"),
+                    ("OFFLINE", "Offline Payment"),
+                ],
+                default="MTN_MOMO",
+                max_length=20,
+            ),
         ),
         migrations.AlterField(
-            model_name='paymentgatewayconfig',
-            name='provider',
-            field=models.CharField(choices=[('CAMPAY', 'Campay'), ('PAWAPAY', 'PawaPay'), ('FLUTTERWAVE', 'Flutterwave'), ('MTN_MOMO', 'MTN Mobile Money'), ('ORANGE_MONEY', 'Orange Money'), ('STRIPE', 'Stripe'), ('PAYPAL', 'PayPal'), ('OFFLINE', 'Offline Payment')], max_length=20),
+            model_name="paymentgatewayconfig",
+            name="provider",
+            field=models.CharField(
+                choices=[
+                    ("CAMPAY", "Campay"),
+                    ("PAWAPAY", "PawaPay"),
+                    ("FLUTTERWAVE", "Flutterwave"),
+                    ("MTN_MOMO", "MTN Mobile Money"),
+                    ("ORANGE_MONEY", "Orange Money"),
+                    ("STRIPE", "Stripe"),
+                    ("PAYPAL", "PayPal"),
+                    ("OFFLINE", "Offline Payment"),
+                ],
+                max_length=20,
+            ),
         ),
     ]

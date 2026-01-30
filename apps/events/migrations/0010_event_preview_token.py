@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('events', '0009_add_template_change_count'),
+        ("events", "0009_add_template_change_count"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='event',
-            name='preview_token',
+            model_name="event",
+            name="preview_token",
             field=models.CharField(blank=True, db_index=True, max_length=32),
         ),
     ]

@@ -7,60 +7,96 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('events', '0010_event_preview_token'),
-        ('tickets', '0002_ticketquestionanswer_booking_event_booking_reference_and_more'),
+        ("events", "0010_event_preview_token"),
+        (
+            "tickets",
+            "0002_ticketquestionanswer_booking_event_booking_reference_and_more",
+        ),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='booking',
-            name='guest_email',
+            model_name="booking",
+            name="guest_email",
             field=models.EmailField(blank=True, max_length=254),
         ),
         migrations.AddField(
-            model_name='booking',
-            name='guest_name',
+            model_name="booking",
+            name="guest_name",
             field=models.CharField(blank=True, max_length=200),
         ),
         migrations.AddField(
-            model_name='booking',
-            name='guest_phone',
+            model_name="booking",
+            name="guest_phone",
             field=models.CharField(blank=True, max_length=20),
         ),
         migrations.AlterField(
-            model_name='booking',
-            name='user',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='bookings', to=settings.AUTH_USER_MODEL),
+            model_name="booking",
+            name="user",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="bookings",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.CreateModel(
-            name='GuestSession',
+            name="GuestSession",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('token', models.UUIDField(db_index=True, default=uuid.uuid4, editable=False, unique=True)),
-                ('email', models.EmailField(max_length=254)),
-                ('name', models.CharField(max_length=200)),
-                ('phone', models.CharField(blank=True, max_length=20)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('expires_at', models.DateTimeField()),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "token",
+                    models.UUIDField(
+                        db_index=True, default=uuid.uuid4, editable=False, unique=True
+                    ),
+                ),
+                ("email", models.EmailField(max_length=254)),
+                ("name", models.CharField(max_length=200)),
+                ("phone", models.CharField(blank=True, max_length=20)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("expires_at", models.DateTimeField()),
             ],
             options={
-                'indexes': [models.Index(fields=['email'], name='tickets_gue_email_f774e3_idx'), models.Index(fields=['expires_at'], name='tickets_gue_expires_7886bb_idx')],
+                "indexes": [
+                    models.Index(fields=["email"], name="tickets_gue_email_f774e3_idx"),
+                    models.Index(
+                        fields=["expires_at"], name="tickets_gue_expires_7886bb_idx"
+                    ),
+                ],
             },
         ),
         migrations.AddField(
-            model_name='booking',
-            name='guest_session',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='bookings', to='tickets.guestsession'),
+            model_name="booking",
+            name="guest_session",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="bookings",
+                to="tickets.guestsession",
+            ),
         ),
         migrations.AddIndex(
-            model_name='booking',
-            index=models.Index(fields=['guest_session'], name='tickets_boo_guest_s_58392d_idx'),
+            model_name="booking",
+            index=models.Index(
+                fields=["guest_session"], name="tickets_boo_guest_s_58392d_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='booking',
-            index=models.Index(fields=['guest_email'], name='tickets_boo_guest_e_3f03ae_idx'),
+            model_name="booking",
+            index=models.Index(
+                fields=["guest_email"], name="tickets_boo_guest_e_3f03ae_idx"
+            ),
         ),
     ]

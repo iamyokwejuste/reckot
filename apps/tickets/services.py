@@ -34,7 +34,7 @@ def create_multi_ticket_booking(
     guest_session=None,
     guest_email: str = None,
     guest_name: str = None,
-    guest_phone: str = None
+    guest_phone: str = None,
 ):
     if not user and not guest_email:
         return None, "Either user or guest email is required."
@@ -44,7 +44,7 @@ def create_multi_ticket_booking(
         if total_tickets == 0:
             return None, "Please select at least one ticket."
 
-        total_amount = Decimal('0.00')
+        total_amount = Decimal("0.00")
         tickets_to_create = []
         now = timezone.localtime(timezone.now())
         now_naive = now.replace(tzinfo=None)
@@ -55,49 +55,69 @@ def create_multi_ticket_booking(
 
             try:
                 ticket_type = TicketType.objects.select_for_update().get(
-                    id=ticket_type_id,
-                    event=event,
-                    is_active=True
+                    id=ticket_type_id, event=event, is_active=True
                 )
             except TicketType.DoesNotExist:
                 return None, "Invalid ticket type selected."
 
-            sales_start = ticket_type.sales_start.replace(tzinfo=None) if ticket_type.sales_start else None
-            sales_end = ticket_type.sales_end.replace(tzinfo=None) if ticket_type.sales_end else None
+            sales_start = (
+                ticket_type.sales_start.replace(tzinfo=None)
+                if ticket_type.sales_start
+                else None
+            )
+            sales_end = (
+                ticket_type.sales_end.replace(tzinfo=None)
+                if ticket_type.sales_end
+                else None
+            )
 
             if sales_start and now_naive < sales_start:
-                return None, f"{ticket_type.name} tickets are not yet available for purchase."
+                return (
+                    None,
+                    f"{ticket_type.name} tickets are not yet available for purchase.",
+                )
 
             if sales_end and now_naive > sales_end:
-                return None, f"{ticket_type.name} tickets are no longer available for purchase."
+                return (
+                    None,
+                    f"{ticket_type.name} tickets are no longer available for purchase.",
+                )
 
             if ticket_type.available_quantity < quantity:
-                return None, f"Not enough {ticket_type.name} tickets available. Only {ticket_type.available_quantity} left."
+                return (
+                    None,
+                    f"Not enough {ticket_type.name} tickets available. Only {ticket_type.available_quantity} left.",
+                )
 
             if quantity > ticket_type.max_per_order:
-                return None, f"Maximum {ticket_type.max_per_order} {ticket_type.name} tickets per order."
+                return (
+                    None,
+                    f"Maximum {ticket_type.max_per_order} {ticket_type.name} tickets per order.",
+                )
 
             for _ in range(quantity):
                 tickets_to_create.append(ticket_type)
 
             total_amount += ticket_type.price * quantity
 
-        discount_amount = Decimal('0.00')
+        discount_amount = Decimal("0.00")
         if coupon and coupon.is_valid:
-            if coupon.discount_type == 'PERCENTAGE':
-                discount_amount = total_amount * (coupon.discount_value / Decimal('100'))
+            if coupon.discount_type == "PERCENTAGE":
+                discount_amount = total_amount * (
+                    coupon.discount_value / Decimal("100")
+                )
             else:
                 discount_amount = min(coupon.discount_value, total_amount)
-            total_amount = max(Decimal('0.00'), total_amount - discount_amount)
+            total_amount = max(Decimal("0.00"), total_amount - discount_amount)
 
         booking = Booking.objects.create(
             user=user,
             event=event,
             total_amount=total_amount,
             guest_session=guest_session,
-            guest_email=guest_email or '',
-            guest_name=guest_name or '',
-            guest_phone=guest_phone or ''
+            guest_email=guest_email or "",
+            guest_name=guest_name or "",
+            guest_phone=guest_phone or "",
         )
 
         if coupon and discount_amount > 0:
@@ -105,20 +125,17 @@ def create_multi_ticket_booking(
                 coupon=coupon,
                 booking=booking,
                 used_by=user,
-                discount_amount=discount_amount
+                discount_amount=discount_amount,
             )
             coupon.use()
 
-        if total_amount == Decimal('0.00'):
+        if total_amount == Decimal("0.00"):
             booking.status = Booking.Status.CONFIRMED
-            booking.save(update_fields=['status'])
+            booking.save(update_fields=["status"])
 
         created_tickets = []
         for ticket_type in tickets_to_create:
-            ticket = Ticket.objects.create(
-                booking=booking,
-                ticket_type=ticket_type
-            )
+            ticket = Ticket.objects.create(booking=booking, ticket_type=ticket_type)
             created_tickets.append(ticket)
 
         if question_answers:
@@ -132,7 +149,7 @@ def create_multi_ticket_booking(
                             ticket=ticket,
                             booking=booking,
                             question=question,
-                            answer=answer
+                            answer=answer,
                         )
                         break
                 except CheckoutQuestion.DoesNotExist:
@@ -145,7 +162,7 @@ def get_organization_logo_base64(organization):
     if not organization.logo:
         return None
     try:
-        with organization.logo.open('rb') as image_file:
+        with organization.logo.open("rb") as image_file:
             return base64.b64encode(image_file.read()).decode()
     except Exception:
         return None
@@ -163,7 +180,7 @@ def generate_ticket_qr_code(ticket):
 
     img = qr.make_image(fill_color="black", back_color="white")
     buffer = BytesIO()
-    img.save(buffer, format='PNG')
+    img.save(buffer, format="PNG")
     buffer.seek(0)
     return base64.b64encode(buffer.getvalue()).decode()
 
@@ -180,18 +197,19 @@ def generate_ticket_pdf(ticket):
         customization = None
 
     context = {
-        'ticket': ticket,
-        'event': event,
-        'organization': org,
-        'qr_code_data': qr_code_data,
-        'org_logo_base64': org_logo_base64,
-        'customization': customization,
+        "ticket": ticket,
+        "event": event,
+        "organization": org,
+        "qr_code_data": qr_code_data,
+        "org_logo_base64": org_logo_base64,
+        "customization": customization,
     }
 
-    html_content = render_to_string('tickets/pdf/ticket.html', context)
+    html_content = render_to_string("tickets/pdf/ticket.html", context)
 
     font_config = FontConfiguration()
-    css = CSS(string='''
+    css = CSS(
+        string="""
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         @page {
             size: 4in 6in;
@@ -273,7 +291,9 @@ def generate_ticket_pdf(ticket):
             margin-top: 8px;
             opacity: 0.6;
         }
-    ''', font_config=font_config)
+    """,
+        font_config=font_config,
+    )
 
     html = HTML(string=html_content)
     pdf_content = html.write_pdf(stylesheets=[css], font_config=font_config)
@@ -281,7 +301,9 @@ def generate_ticket_pdf(ticket):
 
 
 def generate_booking_tickets_pdf(booking):
-    tickets = booking.tickets.select_related('ticket_type', 'ticket_type__event', 'ticket_type__event__organization')
+    tickets = booking.tickets.select_related(
+        "ticket_type", "ticket_type__event", "ticket_type__event__organization"
+    )
     event = booking.event
     org = event.organization
     org_logo_base64 = get_organization_logo_base64(org)
@@ -294,24 +316,27 @@ def generate_booking_tickets_pdf(booking):
     tickets_data = []
     for ticket in tickets:
         qr_code_data = generate_ticket_qr_code(ticket)
-        tickets_data.append({
-            'ticket': ticket,
-            'qr_code_data': qr_code_data,
-        })
+        tickets_data.append(
+            {
+                "ticket": ticket,
+                "qr_code_data": qr_code_data,
+            }
+        )
 
     context = {
-        'booking': booking,
-        'event': event,
-        'organization': org,
-        'tickets_data': tickets_data,
-        'org_logo_base64': org_logo_base64,
-        'customization': customization,
+        "booking": booking,
+        "event": event,
+        "organization": org,
+        "tickets_data": tickets_data,
+        "org_logo_base64": org_logo_base64,
+        "customization": customization,
     }
 
-    html_content = render_to_string('tickets/pdf/booking_tickets.html', context)
+    html_content = render_to_string("tickets/pdf/booking_tickets.html", context)
 
     font_config = FontConfiguration()
-    css = CSS(string='''
+    css = CSS(
+        string="""
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         @page {
             size: A4;
@@ -404,7 +429,9 @@ def generate_booking_tickets_pdf(booking):
             color: #888;
             margin-top: 4px;
         }
-    ''', font_config=font_config)
+    """,
+        font_config=font_config,
+    )
 
     html = HTML(string=html_content)
     pdf_content = html.write_pdf(stylesheets=[css], font_config=font_config)

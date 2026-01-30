@@ -6,10 +6,10 @@ from enum import Enum
 
 
 class PaymentStatus(Enum):
-    PENDING = 'PENDING'
-    SUCCESS = 'SUCCESS'
-    FAILED = 'FAILED'
-    CANCELLED = 'CANCELLED'
+    PENDING = "PENDING"
+    SUCCESS = "SUCCESS"
+    FAILED = "FAILED"
+    CANCELLED = "CANCELLED"
 
 
 @dataclass
@@ -19,14 +19,14 @@ class PaymentResult:
     external_reference: Optional[str] = None
     redirect_url: Optional[str] = None
     status: PaymentStatus = PaymentStatus.PENDING
-    message: str = ''
+    message: str = ""
     raw_response: Optional[dict] = None
 
 
 class PaymentGateway(ABC):
-    name: str = 'base'
-    display_name: str = 'Base Gateway'
-    supported_currencies: list = ['XAF']
+    name: str = "base"
+    display_name: str = "Base Gateway"
+    supported_currencies: list = ["XAF"]
 
     def __init__(self, credentials: dict):
         self.credentials = credentials
@@ -42,9 +42,9 @@ class PaymentGateway(ABC):
         currency: str,
         phone_number: str,
         reference: str,
-        description: str = '',
-        callback_url: str = '',
-        **kwargs
+        description: str = "",
+        callback_url: str = "",
+        **kwargs,
     ) -> PaymentResult:
         pass
 
@@ -58,15 +58,14 @@ class PaymentGateway(ABC):
 
     def refund(self, external_reference: str, amount: Decimal) -> PaymentResult:
         return PaymentResult(
-            success=False,
-            message='Refunds not supported by this gateway'
+            success=False, message="Refunds not supported by this gateway"
         )
 
-    def format_phone(self, phone: str, country_code: str = '237') -> str:
-        phone = ''.join(filter(str.isdigit, phone))
-        if phone.startswith('00'):
+    def format_phone(self, phone: str, country_code: str = "237") -> str:
+        phone = "".join(filter(str.isdigit, phone))
+        if phone.startswith("00"):
             phone = phone[2:]
-        if phone.startswith('+'):
+        if phone.startswith("+"):
             phone = phone[1:]
         if not phone.startswith(country_code):
             phone = country_code + phone
@@ -74,37 +73,61 @@ class PaymentGateway(ABC):
 
     @staticmethod
     def detect_carrier(phone: str) -> str:
-        phone = ''.join(filter(str.isdigit, phone))
-        if phone.startswith('237'):
+        phone = "".join(filter(str.isdigit, phone))
+        if phone.startswith("237"):
             phone = phone[3:]
 
         if len(phone) < 2:
-            return 'UNKNOWN'
+            return "UNKNOWN"
 
-        mtn_prefixes = ['67', '650', '651', '652', '653', '654', '680', '681', '682', '683']
-        orange_prefixes = ['640', '655', '656', '657', '658', '659', '686', '687', '688', '689', '69']
+        mtn_prefixes = [
+            "67",
+            "650",
+            "651",
+            "652",
+            "653",
+            "654",
+            "680",
+            "681",
+            "682",
+            "683",
+        ]
+        orange_prefixes = [
+            "640",
+            "655",
+            "656",
+            "657",
+            "658",
+            "659",
+            "686",
+            "687",
+            "688",
+            "689",
+            "69",
+        ]
 
         for p in mtn_prefixes:
             if phone.startswith(p):
-                return 'MTN'
+                return "MTN"
 
         for p in orange_prefixes:
             if phone.startswith(p):
-                return 'ORANGE'
+                return "ORANGE"
 
-        return 'UNKNOWN'
+        return "UNKNOWN"
 
     @staticmethod
     def validate_cameroon_phone(phone: str) -> tuple[bool, str]:
         import re
-        phone = ''.join(filter(str.isdigit, phone))
 
-        if phone.startswith('237'):
+        phone = "".join(filter(str.isdigit, phone))
+
+        if phone.startswith("237"):
             phone = phone[3:]
 
-        pattern = r'^6[4-9]\d{7}$'
+        pattern = r"^6[4-9]\d{7}$"
         if re.match(pattern, phone):
             carrier = PaymentGateway.detect_carrier(phone)
             return True, carrier
 
-        return False, 'INVALID'
+        return False, "INVALID"

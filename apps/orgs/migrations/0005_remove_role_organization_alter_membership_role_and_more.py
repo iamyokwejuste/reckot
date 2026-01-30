@@ -6,113 +6,201 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('orgs', '0004_organization_description_organization_logo_and_more'),
+        ("orgs", "0004_organization_description_organization_logo_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='role',
-            name='organization',
+            model_name="role",
+            name="organization",
         ),
         migrations.AlterField(
-            model_name='membership',
-            name='role',
-            field=models.CharField(choices=[('OWNER', 'Owner'), ('ADMIN', 'Admin'), ('MANAGER', 'Manager'), ('MEMBER', 'Member'), ('VIEWER', 'Viewer')], default='MEMBER', max_length=20),
+            model_name="membership",
+            name="role",
+            field=models.CharField(
+                choices=[
+                    ("OWNER", "Owner"),
+                    ("ADMIN", "Admin"),
+                    ("MANAGER", "Manager"),
+                    ("MEMBER", "Member"),
+                    ("VIEWER", "Viewer"),
+                ],
+                default="MEMBER",
+                max_length=20,
+            ),
         ),
         migrations.AlterField(
-            model_name='invitation',
-            name='role',
-            field=models.CharField(choices=[('OWNER', 'Owner'), ('ADMIN', 'Admin'), ('MANAGER', 'Manager'), ('MEMBER', 'Member'), ('VIEWER', 'Viewer')], default='MEMBER', max_length=20),
+            model_name="invitation",
+            name="role",
+            field=models.CharField(
+                choices=[
+                    ("OWNER", "Owner"),
+                    ("ADMIN", "Admin"),
+                    ("MANAGER", "Manager"),
+                    ("MEMBER", "Member"),
+                    ("VIEWER", "Viewer"),
+                ],
+                default="MEMBER",
+                max_length=20,
+            ),
         ),
         migrations.AddField(
-            model_name='invitation',
-            name='accepted_at',
+            model_name="invitation",
+            name="accepted_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='invitation',
-            name='message',
-            field=models.TextField(blank=True, help_text='Optional message to include in invitation email'),
+            model_name="invitation",
+            name="message",
+            field=models.TextField(
+                blank=True, help_text="Optional message to include in invitation email"
+            ),
         ),
         migrations.AddField(
-            model_name='invitation',
-            name='status',
-            field=models.CharField(choices=[('PENDING', 'Pending'), ('ACCEPTED', 'Accepted'), ('DECLINED', 'Declined'), ('EXPIRED', 'Expired'), ('CANCELLED', 'Cancelled')], default='PENDING', max_length=20),
+            model_name="invitation",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("PENDING", "Pending"),
+                    ("ACCEPTED", "Accepted"),
+                    ("DECLINED", "Declined"),
+                    ("EXPIRED", "Expired"),
+                    ("CANCELLED", "Cancelled"),
+                ],
+                default="PENDING",
+                max_length=20,
+            ),
         ),
         migrations.AddField(
-            model_name='membership',
-            name='invited_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='invited_members', to=settings.AUTH_USER_MODEL),
+            model_name="membership",
+            name="invited_by",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="invited_members",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='membership',
-            name='updated_at',
+            model_name="membership",
+            name="updated_at",
             field=models.DateTimeField(auto_now=True),
         ),
         migrations.AlterField(
-            model_name='invitation',
-            name='invited_by',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sent_invitations', to=settings.AUTH_USER_MODEL),
+            model_name="invitation",
+            name="invited_by",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="sent_invitations",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AlterField(
-            model_name='membership',
-            name='organization',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='memberships', to='orgs.organization'),
+            model_name="membership",
+            name="organization",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="memberships",
+                to="orgs.organization",
+            ),
         ),
         migrations.AlterField(
-            model_name='membership',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='memberships', to=settings.AUTH_USER_MODEL),
+            model_name="membership",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="memberships",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AlterField(
-            model_name='organization',
-            name='members',
-            field=models.ManyToManyField(related_name='organizations', through='orgs.Membership', through_fields=('organization', 'user'), to=settings.AUTH_USER_MODEL),
+            model_name="organization",
+            name="members",
+            field=models.ManyToManyField(
+                related_name="organizations",
+                through="orgs.Membership",
+                through_fields=("organization", "user"),
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.CreateModel(
-            name='CustomRole',
+            name="CustomRole",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('permissions', models.JSONField(blank=True, default=list)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('organization', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='custom_roles', to='orgs.organization')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
+                ("permissions", models.JSONField(blank=True, default=list)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "organization",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="custom_roles",
+                        to="orgs.organization",
+                    ),
+                ),
             ],
         ),
         migrations.AddField(
-            model_name='invitation',
-            name='custom_role',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='orgs.customrole'),
+            model_name="invitation",
+            name="custom_role",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="orgs.customrole",
+            ),
         ),
         migrations.AddField(
-            model_name='membership',
-            name='custom_role',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='memberships', to='orgs.customrole'),
+            model_name="membership",
+            name="custom_role",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="memberships",
+                to="orgs.customrole",
+            ),
         ),
         migrations.AddIndex(
-            model_name='invitation',
-            index=models.Index(fields=['organization', 'status'], name='orgs_invita_organiz_8c56c0_idx'),
+            model_name="invitation",
+            index=models.Index(
+                fields=["organization", "status"], name="orgs_invita_organiz_8c56c0_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='invitation',
-            index=models.Index(fields=['email', 'status'], name='orgs_invita_email_97e6d8_idx'),
+            model_name="invitation",
+            index=models.Index(
+                fields=["email", "status"], name="orgs_invita_email_97e6d8_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='invitation',
-            index=models.Index(fields=['token'], name='orgs_invita_token_f5960e_idx'),
+            model_name="invitation",
+            index=models.Index(fields=["token"], name="orgs_invita_token_f5960e_idx"),
         ),
         migrations.AddIndex(
-            model_name='membership',
-            index=models.Index(fields=['organization', 'role'], name='orgs_member_organiz_a461de_idx'),
+            model_name="membership",
+            index=models.Index(
+                fields=["organization", "role"], name="orgs_member_organiz_a461de_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='membership',
-            index=models.Index(fields=['user', 'role'], name='orgs_member_user_id_9c52e6_idx'),
+            model_name="membership",
+            index=models.Index(
+                fields=["user", "role"], name="orgs_member_user_id_9c52e6_idx"
+            ),
         ),
         migrations.DeleteModel(
-            name='Role',
+            name="Role",
         ),
     ]

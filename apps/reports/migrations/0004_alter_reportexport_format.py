@@ -4,15 +4,22 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('reports', '0003_alter_reportexport_format_and_more'),
+        ("reports", "0003_alter_reportexport_format_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='reportexport',
-            name='format',
-            field=models.CharField(choices=[('CSV', 'CSV'), ('EXCEL', 'Excel'), ('PDF', 'PDF'), ('JSON', 'JSON')], max_length=10),
+            model_name="reportexport",
+            name="format",
+            field=models.CharField(
+                choices=[
+                    ("CSV", "CSV"),
+                    ("EXCEL", "Excel"),
+                    ("PDF", "PDF"),
+                    ("JSON", "JSON"),
+                ],
+                max_length=10,
+            ),
         ),
     ]

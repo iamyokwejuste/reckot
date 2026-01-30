@@ -5,28 +5,21 @@ from django.db import migrations
 
 def ensure_owner_memberships(apps, schema_editor):
     """Ensure all existing organizations have OWNER membership for their owner."""
-    Organization = apps.get_model('orgs', 'Organization')
-    Membership = apps.get_model('orgs', 'Membership')
+    Organization = apps.get_model("orgs", "Organization")
+    Membership = apps.get_model("orgs", "Membership")
 
     for org in Organization.objects.all():
         # Check if owner already has a membership
-        membership = Membership.objects.filter(
-            organization=org,
-            user=org.owner
-        ).first()
+        membership = Membership.objects.filter(organization=org, user=org.owner).first()
 
         if membership:
             # Update to OWNER role if not already
-            if membership.role != 'OWNER':
-                membership.role = 'OWNER'
+            if membership.role != "OWNER":
+                membership.role = "OWNER"
                 membership.save()
         else:
             # Create OWNER membership
-            Membership.objects.create(
-                organization=org,
-                user=org.owner,
-                role='OWNER'
-            )
+            Membership.objects.create(organization=org, user=org.owner, role="OWNER")
 
 
 def reverse_migration(apps, schema_editor):
@@ -35,9 +28,8 @@ def reverse_migration(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('orgs', '0005_remove_role_organization_alter_membership_role_and_more'),
+        ("orgs", "0005_remove_role_organization_alter_membership_role_and_more"),
     ]
 
     operations = [

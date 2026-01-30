@@ -7,60 +7,142 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payments', '0001_initial'),
+        ("payments", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Refund',
+            name="Refund",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('reference', models.UUIDField(default=uuid.uuid4, editable=False, unique=True)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('refund_type', models.CharField(choices=[('FULL', 'Full Refund'), ('PARTIAL', 'Partial Refund')], default='FULL', max_length=10)),
-                ('status', models.CharField(choices=[('PENDING', 'Pending Review'), ('APPROVED', 'Approved'), ('PROCESSED', 'Processed'), ('REJECTED', 'Rejected')], default='PENDING', max_length=20)),
-                ('reason', models.TextField(blank=True)),
-                ('rejection_reason', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('processed_at', models.DateTimeField(blank=True, null=True)),
-                ('payment', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='refunds', to='payments.payment')),
-                ('processed_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='processed_refunds', to=settings.AUTH_USER_MODEL)),
-                ('requested_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='refund_requests', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "reference",
+                    models.UUIDField(default=uuid.uuid4, editable=False, unique=True),
+                ),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=10)),
+                (
+                    "refund_type",
+                    models.CharField(
+                        choices=[
+                            ("FULL", "Full Refund"),
+                            ("PARTIAL", "Partial Refund"),
+                        ],
+                        default="FULL",
+                        max_length=10,
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("PENDING", "Pending Review"),
+                            ("APPROVED", "Approved"),
+                            ("PROCESSED", "Processed"),
+                            ("REJECTED", "Rejected"),
+                        ],
+                        default="PENDING",
+                        max_length=20,
+                    ),
+                ),
+                ("reason", models.TextField(blank=True)),
+                ("rejection_reason", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("processed_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "payment",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="refunds",
+                        to="payments.payment",
+                    ),
+                ),
+                (
+                    "processed_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="processed_refunds",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "requested_by",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="refund_requests",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='RefundAuditLog',
+            name="RefundAuditLog",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('action', models.CharField(max_length=50)),
-                ('old_status', models.CharField(blank=True, max_length=20)),
-                ('new_status', models.CharField(max_length=20)),
-                ('notes', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('performed_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
-                ('refund', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='audit_logs', to='payments.refund')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("action", models.CharField(max_length=50)),
+                ("old_status", models.CharField(blank=True, max_length=20)),
+                ("new_status", models.CharField(max_length=20)),
+                ("notes", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "performed_by",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "refund",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="audit_logs",
+                        to="payments.refund",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
+                "ordering": ["-created_at"],
             },
         ),
         migrations.AddIndex(
-            model_name='refund',
-            index=models.Index(fields=['reference'], name='payments_re_referen_c08f34_idx'),
+            model_name="refund",
+            index=models.Index(
+                fields=["reference"], name="payments_re_referen_c08f34_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='refund',
-            index=models.Index(fields=['status'], name='payments_re_status_715c3a_idx'),
+            model_name="refund",
+            index=models.Index(fields=["status"], name="payments_re_status_715c3a_idx"),
         ),
         migrations.AddIndex(
-            model_name='refund',
-            index=models.Index(fields=['payment'], name='payments_re_payment_0f5ef3_idx'),
+            model_name="refund",
+            index=models.Index(
+                fields=["payment"], name="payments_re_payment_0f5ef3_idx"
+            ),
         ),
     ]

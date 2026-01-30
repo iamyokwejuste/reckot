@@ -5,52 +5,106 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('events', '0005_event_feature_approved_at_event_feature_expires_at_and_more'),
+        ("events", "0005_event_feature_approved_at_event_feature_expires_at_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='EventFlyerConfig',
+            name="EventFlyerConfig",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('is_enabled', models.BooleanField(default=False)),
-                ('template_image', models.ImageField(upload_to='flyer_templates/')),
-                ('photo_x', models.PositiveIntegerField(default=50)),
-                ('photo_y', models.PositiveIntegerField(default=50)),
-                ('photo_width', models.PositiveIntegerField(default=200)),
-                ('photo_height', models.PositiveIntegerField(default=200)),
-                ('photo_shape', models.CharField(choices=[('CIRCLE', 'Circle'), ('SQUARE', 'Square'), ('ROUNDED', 'Rounded Rectangle')], default='CIRCLE', max_length=10)),
-                ('photo_border_width', models.PositiveSmallIntegerField(default=0)),
-                ('photo_border_color', models.CharField(default='#ffffff', max_length=7)),
-                ('output_width', models.PositiveIntegerField(default=1080)),
-                ('output_height', models.PositiveIntegerField(default=1080)),
-                ('output_quality', models.PositiveSmallIntegerField(default=90)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('event', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='flyer_config', to='events.event')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("is_enabled", models.BooleanField(default=False)),
+                ("template_image", models.ImageField(upload_to="flyer_templates/")),
+                ("photo_x", models.PositiveIntegerField(default=50)),
+                ("photo_y", models.PositiveIntegerField(default=50)),
+                ("photo_width", models.PositiveIntegerField(default=200)),
+                ("photo_height", models.PositiveIntegerField(default=200)),
+                (
+                    "photo_shape",
+                    models.CharField(
+                        choices=[
+                            ("CIRCLE", "Circle"),
+                            ("SQUARE", "Square"),
+                            ("ROUNDED", "Rounded Rectangle"),
+                        ],
+                        default="CIRCLE",
+                        max_length=10,
+                    ),
+                ),
+                ("photo_border_width", models.PositiveSmallIntegerField(default=0)),
+                (
+                    "photo_border_color",
+                    models.CharField(default="#ffffff", max_length=7),
+                ),
+                ("output_width", models.PositiveIntegerField(default=1080)),
+                ("output_height", models.PositiveIntegerField(default=1080)),
+                ("output_quality", models.PositiveSmallIntegerField(default=90)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "event",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="flyer_config",
+                        to="events.event",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='FlyerTextField',
+            name="FlyerTextField",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('label', models.CharField(max_length=50)),
-                ('placeholder', models.CharField(blank=True, max_length=100)),
-                ('is_required', models.BooleanField(default=True)),
-                ('order', models.PositiveSmallIntegerField(default=0)),
-                ('x', models.PositiveIntegerField(default=0)),
-                ('y', models.PositiveIntegerField(default=0)),
-                ('max_width', models.PositiveIntegerField(default=400)),
-                ('font_size', models.PositiveSmallIntegerField(default=32)),
-                ('font_color', models.CharField(default='#ffffff', max_length=7)),
-                ('font_weight', models.CharField(default='bold', max_length=10)),
-                ('text_align', models.CharField(choices=[('LEFT', 'Left'), ('CENTER', 'Center'), ('RIGHT', 'Right')], default='CENTER', max_length=10)),
-                ('flyer_config', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='text_fields', to='events.eventflyerconfig')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("label", models.CharField(max_length=50)),
+                ("placeholder", models.CharField(blank=True, max_length=100)),
+                ("is_required", models.BooleanField(default=True)),
+                ("order", models.PositiveSmallIntegerField(default=0)),
+                ("x", models.PositiveIntegerField(default=0)),
+                ("y", models.PositiveIntegerField(default=0)),
+                ("max_width", models.PositiveIntegerField(default=400)),
+                ("font_size", models.PositiveSmallIntegerField(default=32)),
+                ("font_color", models.CharField(default="#ffffff", max_length=7)),
+                ("font_weight", models.CharField(default="bold", max_length=10)),
+                (
+                    "text_align",
+                    models.CharField(
+                        choices=[
+                            ("LEFT", "Left"),
+                            ("CENTER", "Center"),
+                            ("RIGHT", "Right"),
+                        ],
+                        default="CENTER",
+                        max_length=10,
+                    ),
+                ),
+                (
+                    "flyer_config",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="text_fields",
+                        to="events.eventflyerconfig",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['order'],
+                "ordering": ["order"],
             },
         ),
     ]

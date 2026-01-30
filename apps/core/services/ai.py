@@ -10,8 +10,8 @@ logger = logging.getLogger(__name__)
 
 class GeminiAI:
     def __init__(self):
-        self.api_key = getattr(settings, 'GEMINI_API_KEY', '')
-        self.model = getattr(settings, 'GEMINI_MODEL', 'gemini-2.0-flash')
+        self.api_key = getattr(settings, "GEMINI_API_KEY", "")
+        self.model = getattr(settings, "GEMINI_MODEL", "gemini-2.0-flash")
         self._client = None
 
     @property
@@ -32,10 +32,7 @@ class GeminiAI:
             response = self.client.models.generate_content(
                 model=self.model,
                 contents=contents,
-                config={
-                    "max_output_tokens": max_tokens,
-                    "temperature": 0.7
-                }
+                config={"max_output_tokens": max_tokens, "temperature": 0.7},
             )
             return response.text
         except Exception as e:
@@ -49,14 +46,14 @@ class GeminiAI:
         event_type: str = "general",
         location: str = "",
         cover_image_data: bytes = None,
-        cover_image_mime: str = "image/jpeg"
+        cover_image_mime: str = "image/jpeg",
     ) -> Optional[dict]:
         prompt = f"""You are a creative event copywriter with a fun, energetic style. Generate content for an event that gets people excited.
 
 Event Title: {title}
 Event Type: {event_type}
-{f'Current Tagline: {short_description}' if short_description else ''}
-{f'Location: {location}' if location else ''}
+{f"Current Tagline: {short_description}" if short_description else ""}
+{f"Location: {location}" if location else ""}
 
 Generate TWO things:
 
@@ -78,7 +75,7 @@ IMPORTANT RULES:
 - Use vivid, descriptive language instead of emojis
 - Sound human and enthusiastic, not corporate
 
-{'Analyze the cover image to understand the event theme and atmosphere, and incorporate relevant visual elements into both the tagline and description.' if cover_image_data else ''}
+{"Analyze the cover image to understand the event theme and atmosphere, and incorporate relevant visual elements into both the tagline and description." if cover_image_data else ""}
 
 Return as JSON: {{"tagline": "your tagline here", "description": "your description here"}}"""
 
@@ -94,14 +91,18 @@ Return as JSON: {{"tagline": "your tagline here", "description": "your descripti
         result = self._generate(contents, max_tokens=2048)
         if result:
             try:
-                clean = result.strip().replace('```json', '').replace('```', '').strip()
+                clean = result.strip().replace("```json", "").replace("```", "").strip()
                 return json.loads(clean)
             except json.JSONDecodeError:
-                logger.warning(f"Failed to parse AI response as JSON: {result[:200]}...")
+                logger.warning(
+                    f"Failed to parse AI response as JSON: {result[:200]}..."
+                )
                 return {"description": result, "tagline": ""}
         return None
 
-    def generate_event_description(self, title: str, bullet_points: str, event_type: str = "general") -> Optional[str]:
+    def generate_event_description(
+        self, title: str, bullet_points: str, event_type: str = "general"
+    ) -> Optional[str]:
         prompt = f"""You are a creative event copywriter with a fun, energetic style. Generate an event description that gets people pumped.
 
 Event Title: {title}
@@ -165,19 +166,21 @@ Return ONLY valid JSON, no markdown."""
         result = self._generate(prompt, max_tokens=500)
         if result:
             try:
-                clean = result.strip().replace('```json', '').replace('```', '').strip()
+                clean = result.strip().replace("```json", "").replace("```", "").strip()
                 return json.loads(clean)
             except json.JSONDecodeError:
                 return None
         return None
 
-    def generate_social_caption(self, title: str, description: str, platform: str = "general") -> Optional[str]:
+    def generate_social_caption(
+        self, title: str, description: str, platform: str = "general"
+    ) -> Optional[str]:
         char_limits = {
             "twitter": 280,
             "instagram": 2200,
             "facebook": 500,
             "linkedin": 700,
-            "general": 300
+            "general": 300,
         }
         limit = char_limits.get(platform, 300)
 
@@ -207,7 +210,9 @@ Return ONLY the translated text."""
 
         return self._generate(prompt)
 
-    def summarize_description(self, description: str, max_words: int = 30) -> Optional[str]:
+    def summarize_description(
+        self, description: str, max_words: int = 30
+    ) -> Optional[str]:
         prompt = f"""Summarize this event description in {max_words} words or less:
 
 {description}
@@ -216,7 +221,9 @@ Return ONLY the summary."""
 
         return self._generate(prompt, max_tokens=150)
 
-    def suggest_ticket_pricing(self, event_type: str, location: str, description: str) -> Optional[dict]:
+    def suggest_ticket_pricing(
+        self, event_type: str, location: str, description: str
+    ) -> Optional[dict]:
         prompt = f"""Suggest ticket pricing for this event in Cameroon (XAF currency):
 
 Type: {event_type}
@@ -234,13 +241,15 @@ Consider local market conditions in Cameroon. Return ONLY valid JSON."""
         result = self._generate(prompt, max_tokens=500)
         if result:
             try:
-                clean = result.strip().replace('```json', '').replace('```', '').strip()
+                clean = result.strip().replace("```json", "").replace("```", "").strip()
                 return json.loads(clean)
             except json.JSONDecodeError:
                 return None
         return None
 
-    def generate_image_alt_text(self, image_data: bytes, mime_type: str = "image/jpeg") -> Optional[str]:
+    def generate_image_alt_text(
+        self, image_data: bytes, mime_type: str = "image/jpeg"
+    ) -> Optional[str]:
         contents = [
             types.Part.from_bytes(data=image_data, mime_type=mime_type),
             """Generate accessible alt text for this event cover image.
@@ -250,7 +259,7 @@ Write concise, descriptive alt text (max 125 chars) that:
 - Is useful for screen readers
 - Avoids "image of" or "picture of"
 
-Return ONLY the alt text."""
+Return ONLY the alt text.""",
         ]
 
         return self._generate(contents, max_tokens=100)
@@ -259,11 +268,11 @@ Return ONLY the alt text."""
         prompt = f"""You are a helpful assistant for an event ticketing platform.
 
 Event Details:
-- Title: {event_info.get('title', 'N/A')}
-- Date: {event_info.get('date', 'N/A')}
-- Location: {event_info.get('location', 'N/A')}
-- Description: {event_info.get('description', 'N/A')}
-- Ticket Types: {event_info.get('tickets', 'N/A')}
+- Title: {event_info.get("title", "N/A")}
+- Date: {event_info.get("date", "N/A")}
+- Location: {event_info.get("location", "N/A")}
+- Description: {event_info.get("description", "N/A")}
+- Ticket Types: {event_info.get("tickets", "N/A")}
 
 User Question: {question}
 
@@ -306,7 +315,7 @@ Return ONLY the JSON array."""
         result = self._generate(prompt, max_tokens=200)
         if result:
             try:
-                clean = result.strip().replace('```json', '').replace('```', '').strip()
+                clean = result.strip().replace("```json", "").replace("```", "").strip()
                 return json.loads(clean)
             except json.JSONDecodeError:
                 return None
@@ -315,24 +324,30 @@ Return ONLY the JSON array."""
     def chat(self, prompt: str, max_tokens: int = 2048) -> Optional[str]:
         return self._generate(prompt, max_tokens=max_tokens)
 
-    def chat_with_audio(self, prompt: str, audio_data: bytes, audio_mime: str = "audio/mp3") -> Optional[str]:
+    def chat_with_audio(
+        self, prompt: str, audio_data: bytes, audio_mime: str = "audio/mp3"
+    ) -> Optional[str]:
         contents = [
             types.Part.from_bytes(data=audio_data, mime_type=audio_mime),
-            prompt
+            prompt,
         ]
         return self._generate(contents, max_tokens=2048)
 
-    def chat_with_image(self, prompt: str, image_data: bytes, image_mime: str = "image/jpeg") -> Optional[str]:
+    def chat_with_image(
+        self, prompt: str, image_data: bytes, image_mime: str = "image/jpeg"
+    ) -> Optional[str]:
         contents = [
             types.Part.from_bytes(data=image_data, mime_type=image_mime),
-            prompt
+            prompt,
         ]
         return self._generate(contents, max_tokens=2048)
 
-    def analyze_image(self, image_data: bytes, prompt: str, image_mime: str = "image/jpeg") -> Optional[str]:
+    def analyze_image(
+        self, image_data: bytes, prompt: str, image_mime: str = "image/jpeg"
+    ) -> Optional[str]:
         contents = [
             types.Part.from_bytes(data=image_data, mime_type=image_mime),
-            prompt
+            prompt,
         ]
         return self._generate(contents, max_tokens=1024)
 
@@ -343,14 +358,14 @@ Return ONLY the JSON array."""
 
         try:
             response = self.client.models.generate_images(
-                model='imagen-3.0-generate-001',
+                model="imagen-3.0-generate-001",
                 prompt=prompt,
                 config={
-                    'number_of_images': 1,
-                    'aspect_ratio': aspect_ratio,
-                    'safety_filter_level': 'block_some',
-                    'person_generation': 'allow_adult'
-                }
+                    "number_of_images": 1,
+                    "aspect_ratio": aspect_ratio,
+                    "safety_filter_level": "block_some",
+                    "person_generation": "allow_adult",
+                },
             )
 
             if response.generated_images:

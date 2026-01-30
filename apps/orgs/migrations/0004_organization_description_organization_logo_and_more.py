@@ -5,35 +5,34 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('orgs', '0003_role_alter_invitation_role_alter_membership_role'),
+        ("orgs", "0003_role_alter_invitation_role_alter_membership_role"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='organization',
-            name='description',
+            model_name="organization",
+            name="description",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='organization',
-            name='logo',
-            field=models.ImageField(blank=True, upload_to='org_logos/'),
+            model_name="organization",
+            name="logo",
+            field=models.ImageField(blank=True, upload_to="org_logos/"),
         ),
         migrations.AddField(
-            model_name='organization',
-            name='slug',
+            model_name="organization",
+            name="slug",
             field=models.SlugField(blank=True, max_length=120, unique=True),
         ),
         migrations.AddField(
-            model_name='organization',
-            name='website',
+            model_name="organization",
+            name="website",
             field=models.URLField(blank=True),
         ),
         migrations.AddIndex(
-            model_name='organization',
-            index=models.Index(fields=['slug'], name='orgs_organi_slug_296f56_idx'),
+            model_name="organization",
+            index=models.Index(fields=["slug"], name="orgs_organi_slug_296f56_idx"),
         ),
     ]

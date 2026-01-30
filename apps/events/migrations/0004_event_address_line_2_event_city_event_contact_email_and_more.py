@@ -6,135 +6,243 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('events', '0003_eventcustomization'),
-        ('orgs', '0003_role_alter_invitation_role_alter_membership_role'),
-        ('tickets', '0002_ticketquestionanswer_booking_event_booking_reference_and_more'),
+        ("events", "0003_eventcustomization"),
+        ("orgs", "0003_role_alter_invitation_role_alter_membership_role"),
+        (
+            "tickets",
+            "0002_ticketquestionanswer_booking_event_booking_reference_and_more",
+        ),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='event',
-            name='address_line_2',
+            model_name="event",
+            name="address_line_2",
             field=models.CharField(blank=True, max_length=200),
         ),
         migrations.AddField(
-            model_name='event',
-            name='city',
+            model_name="event",
+            name="city",
             field=models.CharField(blank=True, max_length=100),
         ),
         migrations.AddField(
-            model_name='event',
-            name='contact_email',
+            model_name="event",
+            name="contact_email",
             field=models.EmailField(blank=True, max_length=254),
         ),
         migrations.AddField(
-            model_name='event',
-            name='contact_phone',
+            model_name="event",
+            name="contact_phone",
             field=models.CharField(blank=True, max_length=20),
         ),
         migrations.AddField(
-            model_name='event',
-            name='country',
-            field=models.CharField(default='Cameroon', max_length=100),
+            model_name="event",
+            name="country",
+            field=models.CharField(default="Cameroon", max_length=100),
         ),
         migrations.AddField(
-            model_name='event',
-            name='cover_image',
-            field=models.ImageField(blank=True, upload_to='event_covers/'),
+            model_name="event",
+            name="cover_image",
+            field=models.ImageField(blank=True, upload_to="event_covers/"),
         ),
         migrations.AddField(
-            model_name='event',
-            name='event_type',
-            field=models.CharField(choices=[('IN_PERSON', 'In Person'), ('ONLINE', 'Online'), ('HYBRID', 'Hybrid')], default='IN_PERSON', max_length=20),
+            model_name="event",
+            name="event_type",
+            field=models.CharField(
+                choices=[
+                    ("IN_PERSON", "In Person"),
+                    ("ONLINE", "Online"),
+                    ("HYBRID", "Hybrid"),
+                ],
+                default="IN_PERSON",
+                max_length=20,
+            ),
         ),
         migrations.AddField(
-            model_name='event',
-            name='is_free',
+            model_name="event",
+            name="is_free",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='event',
-            name='online_url',
+            model_name="event",
+            name="online_url",
             field=models.URLField(blank=True),
         ),
         migrations.AddField(
-            model_name='event',
-            name='short_description',
+            model_name="event",
+            name="short_description",
             field=models.CharField(blank=True, max_length=300),
         ),
         migrations.AddField(
-            model_name='event',
-            name='timezone',
-            field=models.CharField(default='Africa/Douala', max_length=50),
+            model_name="event",
+            name="timezone",
+            field=models.CharField(default="Africa/Douala", max_length=50),
         ),
         migrations.AddField(
-            model_name='event',
-            name='venue_name',
+            model_name="event",
+            name="venue_name",
             field=models.CharField(blank=True, max_length=200),
         ),
         migrations.AddField(
-            model_name='event',
-            name='website',
+            model_name="event",
+            name="website",
             field=models.URLField(blank=True),
         ),
         migrations.CreateModel(
-            name='Coupon',
+            name="Coupon",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(max_length=50)),
-                ('description', models.CharField(blank=True, max_length=200)),
-                ('discount_type', models.CharField(choices=[('PERCENTAGE', 'Percentage'), ('FIXED', 'Fixed Amount')], default='PERCENTAGE', max_length=20)),
-                ('discount_value', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('assignment_type', models.CharField(choices=[('PUBLIC', 'Public (Anyone)'), ('INDIVIDUAL', 'Assigned to Individual'), ('GROUP', 'Assigned to Group')], default='PUBLIC', max_length=20)),
-                ('assigned_email', models.EmailField(blank=True, max_length=254)),
-                ('assigned_emails', models.JSONField(blank=True, default=list)),
-                ('max_uses', models.PositiveIntegerField(default=1)),
-                ('use_count', models.PositiveIntegerField(default=0)),
-                ('valid_from', models.DateTimeField(blank=True, null=True)),
-                ('valid_until', models.DateTimeField(blank=True, null=True)),
-                ('is_active', models.BooleanField(default=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('created_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='created_coupons', to=settings.AUTH_USER_MODEL)),
-                ('event', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='coupons', to='events.event')),
-                ('organization', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='coupons', to='orgs.organization')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("code", models.CharField(max_length=50)),
+                ("description", models.CharField(blank=True, max_length=200)),
+                (
+                    "discount_type",
+                    models.CharField(
+                        choices=[
+                            ("PERCENTAGE", "Percentage"),
+                            ("FIXED", "Fixed Amount"),
+                        ],
+                        default="PERCENTAGE",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "discount_value",
+                    models.DecimalField(decimal_places=2, max_digits=10),
+                ),
+                (
+                    "assignment_type",
+                    models.CharField(
+                        choices=[
+                            ("PUBLIC", "Public (Anyone)"),
+                            ("INDIVIDUAL", "Assigned to Individual"),
+                            ("GROUP", "Assigned to Group"),
+                        ],
+                        default="PUBLIC",
+                        max_length=20,
+                    ),
+                ),
+                ("assigned_email", models.EmailField(blank=True, max_length=254)),
+                ("assigned_emails", models.JSONField(blank=True, default=list)),
+                ("max_uses", models.PositiveIntegerField(default=1)),
+                ("use_count", models.PositiveIntegerField(default=0)),
+                ("valid_from", models.DateTimeField(blank=True, null=True)),
+                ("valid_until", models.DateTimeField(blank=True, null=True)),
+                ("is_active", models.BooleanField(default=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="created_coupons",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "event",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="coupons",
+                        to="events.event",
+                    ),
+                ),
+                (
+                    "organization",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="coupons",
+                        to="orgs.organization",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='CouponUsage',
+            name="CouponUsage",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('discount_amount', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('used_at', models.DateTimeField(auto_now_add=True)),
-                ('booking', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='coupon_usages', to='tickets.booking')),
-                ('coupon', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='usages', to='events.coupon')),
-                ('used_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='used_coupons', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "discount_amount",
+                    models.DecimalField(decimal_places=2, max_digits=10),
+                ),
+                ("used_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "booking",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="coupon_usages",
+                        to="tickets.booking",
+                    ),
+                ),
+                (
+                    "coupon",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="usages",
+                        to="events.coupon",
+                    ),
+                ),
+                (
+                    "used_by",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="used_coupons",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.AddIndex(
-            model_name='coupon',
-            index=models.Index(fields=['organization', 'is_active'], name='events_coup_organiz_7a7bf0_idx'),
+            model_name="coupon",
+            index=models.Index(
+                fields=["organization", "is_active"],
+                name="events_coup_organiz_7a7bf0_idx",
+            ),
         ),
         migrations.AddIndex(
-            model_name='coupon',
-            index=models.Index(fields=['code'], name='events_coup_code_625788_idx'),
+            model_name="coupon",
+            index=models.Index(fields=["code"], name="events_coup_code_625788_idx"),
         ),
         migrations.AddIndex(
-            model_name='coupon',
-            index=models.Index(fields=['event', 'is_active'], name='events_coup_event_i_efa5f2_idx'),
+            model_name="coupon",
+            index=models.Index(
+                fields=["event", "is_active"], name="events_coup_event_i_efa5f2_idx"
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='coupon',
-            unique_together={('organization', 'code')},
+            name="coupon",
+            unique_together={("organization", "code")},
         ),
         migrations.AddIndex(
-            model_name='couponusage',
-            index=models.Index(fields=['coupon', 'used_at'], name='events_coup_coupon__b256c4_idx'),
+            model_name="couponusage",
+            index=models.Index(
+                fields=["coupon", "used_at"], name="events_coup_coupon__b256c4_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='couponusage',
-            index=models.Index(fields=['booking'], name='events_coup_booking_552935_idx'),
+            model_name="couponusage",
+            index=models.Index(
+                fields=["booking"], name="events_coup_booking_552935_idx"
+            ),
         ),
     ]

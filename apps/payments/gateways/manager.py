@@ -12,17 +12,17 @@ logger = logging.getLogger(__name__)
 
 
 GATEWAY_CLASSES = {
-    'CAMPAY': CampayGateway,
-    'PAWAPAY': PawapayGateway,
-    'FLUTTERWAVE': FlutterwaveGateway,
+    "CAMPAY": CampayGateway,
+    "PAWAPAY": PawapayGateway,
+    "FLUTTERWAVE": FlutterwaveGateway,
 }
 
 
 class GatewayManager:
     def __init__(self):
-        self.config = getattr(settings, 'PAYMENT_GATEWAYS', {})
-        self.primary = self.config.get('PRIMARY', 'CAMPAY')
-        self.fallbacks = self.config.get('FALLBACKS', ['PAWAPAY', 'FLUTTERWAVE'])
+        self.config = getattr(settings, "PAYMENT_GATEWAYS", {})
+        self.primary = self.config.get("PRIMARY", "CAMPAY")
+        self.fallbacks = self.config.get("FALLBACKS", ["PAWAPAY", "FLUTTERWAVE"])
         self._gateways = {}
 
     def _get_gateway(self, provider: str) -> Optional[PaymentGateway]:
@@ -31,12 +31,12 @@ class GatewayManager:
 
         gateway_class = GATEWAY_CLASSES.get(provider)
         if not gateway_class:
-            logger.warning(f'Unknown payment provider: {provider}')
+            logger.warning(f"Unknown payment provider: {provider}")
             return None
 
-        credentials = self.config.get('CREDENTIALS', {}).get(provider, {})
+        credentials = self.config.get("CREDENTIALS", {}).get(provider, {})
         if not credentials:
-            logger.warning(f'No credentials configured for {provider}')
+            logger.warning(f"No credentials configured for {provider}")
             return None
 
         try:
@@ -44,7 +44,7 @@ class GatewayManager:
             self._gateways[provider] = gateway
             return gateway
         except Exception as e:
-            logger.error(f'Failed to initialize {provider} gateway: {e}')
+            logger.error(f"Failed to initialize {provider} gateway: {e}")
             return None
 
     def get_available_gateways(self) -> List[str]:
@@ -61,10 +61,10 @@ class GatewayManager:
         currency: str,
         phone_number: str,
         reference: str,
-        description: str = '',
-        callback_url: str = '',
+        description: str = "",
+        callback_url: str = "",
         preferred_provider: Optional[str] = None,
-        **kwargs
+        **kwargs,
     ) -> tuple[PaymentResult, str]:
         providers = [preferred_provider] if preferred_provider else []
         providers.extend([self.primary] + self.fallbacks)
@@ -79,10 +79,10 @@ class GatewayManager:
                 continue
 
             if currency not in gateway.supported_currencies:
-                logger.info(f'{provider} does not support {currency}')
+                logger.info(f"{provider} does not support {currency}")
                 continue
 
-            logger.info(f'Attempting payment with {provider}')
+            logger.info(f"Attempting payment with {provider}")
 
             result = gateway.initiate_payment(
                 amount=amount,
@@ -91,16 +91,16 @@ class GatewayManager:
                 reference=reference,
                 description=description,
                 callback_url=callback_url,
-                **kwargs
+                **kwargs,
             )
 
             if result.success:
-                logger.info(f'Payment initiated successfully with {provider}')
+                logger.info(f"Payment initiated successfully with {provider}")
                 return result, provider
 
             last_result = result
             used_provider = provider
-            logger.warning(f'{provider} payment failed: {result.message}')
+            logger.warning(f"{provider} payment failed: {result.message}")
 
         if last_result:
             return last_result, used_provider or self.primary
@@ -108,50 +108,38 @@ class GatewayManager:
         return PaymentResult(
             success=False,
             status=PaymentStatus.FAILED,
-            message='No payment gateway available'
-        ), ''
+            message="No payment gateway available",
+        ), ""
 
-    def verify_payment(
-        self,
-        reference: str,
-        provider: str
-    ) -> PaymentResult:
+    def verify_payment(self, reference: str, provider: str) -> PaymentResult:
         gateway = self._get_gateway(provider)
         if not gateway:
             return PaymentResult(
                 success=False,
                 status=PaymentStatus.FAILED,
-                message=f'Gateway {provider} not available'
+                message=f"Gateway {provider} not available",
             )
 
         return gateway.verify_payment(reference)
 
-    def check_status(
-        self,
-        external_reference: str,
-        provider: str
-    ) -> PaymentResult:
+    def check_status(self, external_reference: str, provider: str) -> PaymentResult:
         gateway = self._get_gateway(provider)
         if not gateway:
             return PaymentResult(
                 success=False,
                 status=PaymentStatus.FAILED,
-                message=f'Gateway {provider} not available'
+                message=f"Gateway {provider} not available",
             )
 
         return gateway.check_status(external_reference)
 
     def process_refund(
-        self,
-        external_reference: str,
-        amount: Decimal,
-        provider: str
+        self, external_reference: str, amount: Decimal, provider: str
     ) -> PaymentResult:
         gateway = self._get_gateway(provider)
         if not gateway:
             return PaymentResult(
-                success=False,
-                message=f'Gateway {provider} not available'
+                success=False, message=f"Gateway {provider} not available"
             )
 
         return gateway.refund(external_reference, amount)

@@ -5,23 +5,66 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('orgs', '0006_ensure_owner_memberships'),
+        ("orgs", "0006_ensure_owner_memberships"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='OrganizationSubscription',
+            name="OrganizationSubscription",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('plan', models.CharField(choices=[('FREE', 'Free (2% fee)'), ('STARTER', 'Starter (5% fee)'), ('PRO', 'Pro (3% fee)'), ('ENTERPRISE', 'Enterprise (Custom)')], default='FREE', max_length=20)),
-                ('status', models.CharField(choices=[('ACTIVE', 'Active'), ('PAST_DUE', 'Past Due'), ('CANCELLED', 'Cancelled'), ('EXPIRED', 'Expired')], default='ACTIVE', max_length=20)),
-                ('started_at', models.DateTimeField(auto_now_add=True)),
-                ('expires_at', models.DateTimeField(blank=True, null=True)),
-                ('cancelled_at', models.DateTimeField(blank=True, null=True)),
-                ('custom_service_fee', models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True)),
-                ('organization', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='subscription', to='orgs.organization')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "plan",
+                    models.CharField(
+                        choices=[
+                            ("FREE", "Free (2% fee)"),
+                            ("STARTER", "Starter (5% fee)"),
+                            ("PRO", "Pro (3% fee)"),
+                            ("ENTERPRISE", "Enterprise (Custom)"),
+                        ],
+                        default="FREE",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("ACTIVE", "Active"),
+                            ("PAST_DUE", "Past Due"),
+                            ("CANCELLED", "Cancelled"),
+                            ("EXPIRED", "Expired"),
+                        ],
+                        default="ACTIVE",
+                        max_length=20,
+                    ),
+                ),
+                ("started_at", models.DateTimeField(auto_now_add=True)),
+                ("expires_at", models.DateTimeField(blank=True, null=True)),
+                ("cancelled_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "custom_service_fee",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=5, null=True
+                    ),
+                ),
+                (
+                    "organization",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="subscription",
+                        to="orgs.organization",
+                    ),
+                ),
             ],
         ),
     ]

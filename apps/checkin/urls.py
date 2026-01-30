@@ -1,38 +1,34 @@
 from django.urls import path
 from apps.checkin import actions
 
-app_name = 'checkin'
+app_name = "checkin"
 
 urlpatterns = [
-    path('', actions.CheckInListView.as_view(), name='list'),
+    path("", actions.CheckInListView.as_view(), name="list"),
     path(
-        '<slug:org_slug>/<slug:event_slug>/',
+        "<slug:org_slug>/<slug:event_slug>/",
         actions.CheckInDashboardView.as_view(),
-        name='dashboard'
+        name="dashboard",
     ),
     path(
-        '<slug:org_slug>/<slug:event_slug>/verify/',
+        "<slug:org_slug>/<slug:event_slug>/verify/",
         actions.CheckInVerifyView.as_view(),
-        name='verify'
+        name="verify",
     ),
     path(
-        '<slug:org_slug>/<slug:event_slug>/search/',
+        "<slug:org_slug>/<slug:event_slug>/search/",
         actions.CheckInSearchView.as_view(),
-        name='search'
+        name="search",
     ),
     path(
-        '<slug:org_slug>/<slug:event_slug>/stats/',
+        "<slug:org_slug>/<slug:event_slug>/stats/",
         actions.CheckInStatsView.as_view(),
-        name='stats'
+        name="stats",
     ),
+    path("ticket/<uuid:code>/", actions.CheckInTicketView.as_view(), name="ticket"),
     path(
-        'ticket/<uuid:code>/',
-        actions.CheckInTicketView.as_view(),
-        name='ticket'
-    ),
-    path(
-        'swag/<uuid:checkin_ref>/<int:item_id>/',
+        "swag/<uuid:checkin_ref>/<int:item_id>/",
         actions.CollectSwagView.as_view(),
-        name='collect_swag'
+        name="collect_swag",
     ),
 ]

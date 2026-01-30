@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('events', '0007_add_flyer_usage_tracking'),
+        ("events", "0007_add_flyer_usage_tracking"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='eventflyerconfig',
-            name='pay_per_use_accepted',
+            model_name="eventflyerconfig",
+            name="pay_per_use_accepted",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='eventflyerconfig',
-            name='pay_per_use_accepted_at',
+            model_name="eventflyerconfig",
+            name="pay_per_use_accepted_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
     ]

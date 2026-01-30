@@ -11,12 +11,11 @@ def send_ticket_confirmation_task(booking_id: int):
     from apps.core.services.qrcode import QRCodeService
 
     try:
-        booking = Booking.objects.select_related(
-            'user',
-            'payment'
-        ).prefetch_related(
-            'tickets__ticket_type__event'
-        ).get(id=booking_id)
+        booking = (
+            Booking.objects.select_related("user", "payment")
+            .prefetch_related("tickets__ticket_type__event")
+            .get(id=booking_id)
+        )
 
         tickets = list(booking.tickets.all())
         if not tickets:
@@ -37,7 +36,7 @@ def send_ticket_confirmation_task(booking_id: int):
                 booking=booking,
                 tickets=tickets,
                 event=event,
-                qr_code_bytes=qr_bytes
+                qr_code_bytes=qr_bytes,
             )
 
         if user.phone_number:
@@ -45,7 +44,7 @@ def send_ticket_confirmation_task(booking_id: int):
                 phone_number=user.phone_number,
                 booking=booking,
                 tickets=tickets,
-                event=event
+                event=event,
             )
 
         logger.info(f"Ticket confirmation sent for booking {booking_id}")

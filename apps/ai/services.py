@@ -19,13 +19,13 @@ class GeminiService:
 
     @classmethod
     def _init_client(cls):
-        api_key = getattr(settings, 'GEMINI_API_KEY', '')
+        api_key = getattr(settings, "GEMINI_API_KEY", "")
         if api_key:
             cls._client = genai.Client(api_key=api_key)
 
     @property
     def model(self):
-        return getattr(settings, 'GEMINI_MODEL', 'gemini-2.0-flash')
+        return getattr(settings, "GEMINI_MODEL", "gemini-2.0-flash")
 
     def is_available(self) -> bool:
         return self._client is not None
@@ -37,7 +37,7 @@ class GeminiService:
             response = self._client.models.generate_content(
                 model=self.model,
                 contents=prompt,
-                config={"max_output_tokens": max_tokens, "temperature": 0.7}
+                config={"max_output_tokens": max_tokens, "temperature": 0.7},
             )
             return response.text
         except Exception as e:
@@ -47,10 +47,10 @@ class GeminiService:
     def generate_json(self, prompt: str, max_tokens: int = 1024) -> dict:
         response = self.generate(prompt, max_tokens)
         try:
-            clean = response.strip().replace('```json', '').replace('```', '').strip()
-            if '{' in clean and '}' in clean:
-                start = clean.find('{')
-                end = clean.rfind('}') + 1
+            clean = response.strip().replace("```json", "").replace("```", "").strip()
+            if "{" in clean and "}" in clean:
+                start = clean.find("{")
+                end = clean.rfind("}") + 1
                 return json.loads(clean[start:end])
         except json.JSONDecodeError:
             pass
@@ -60,7 +60,9 @@ class GeminiService:
 gemini = GeminiService()
 
 
-def generate_event_description(title: str, category: str, location: str, date: str, details: str = "") -> dict:
+def generate_event_description(
+    title: str, category: str, location: str, date: str, details: str = ""
+) -> dict:
     prompt = f"""Generate a compelling event description in English and French for:
 
 Title: {title}
@@ -81,7 +83,9 @@ Return as JSON:
     return gemini.generate_json(prompt, 2048)
 
 
-def generate_social_posts(event_title: str, event_date: str, event_location: str, ticket_price: str = "") -> dict:
+def generate_social_posts(
+    event_title: str, event_date: str, event_location: str, ticket_price: str = ""
+) -> dict:
     prompt = f"""Create 3 social media posts for this event:
 
 Event: {event_title}
@@ -138,13 +142,19 @@ For normal responses, just provide helpful text.
 Be friendly, professional, and concise. If you don't know something, say so and offer to create a ticket."""
 
 
-def chat_with_assistant(user_message: str, conversation_history: list, context: Optional[dict] = None) -> dict:
-    context_str = f"\n\nUser Context:\n{json.dumps(context, indent=2)}" if context else ""
+def chat_with_assistant(
+    user_message: str, conversation_history: list, context: Optional[dict] = None
+) -> dict:
+    context_str = (
+        f"\n\nUser Context:\n{json.dumps(context, indent=2)}" if context else ""
+    )
 
-    history_str = "\n".join([
-        f"{'User' if m['role'] == 'user' else 'Assistant'}: {m['content']}"
-        for m in conversation_history[-10:]
-    ])
+    history_str = "\n".join(
+        [
+            f"{'User' if m['role'] == 'user' else 'Assistant'}: {m['content']}"
+            for m in conversation_history[-10:]
+        ]
+    )
 
     prompt = f"""{SUPPORT_SYSTEM_PROMPT}
 {context_str}
@@ -162,11 +172,15 @@ Respond helpfully. If creating a ticket is needed, use the JSON format specified
     try:
         if '{"action": "create_ticket"' in response:
             start = response.find('{"action": "create_ticket"')
-            end = response.find('}', start) + 1
+            end = response.find("}", start) + 1
             ticket_data = json.loads(response[start:end])
             result["action"] = "create_ticket"
             result["ticket_data"] = ticket_data
-            result["message"] = response[:start].strip() if start > 0 else "I'll create a support ticket for you."
+            result["message"] = (
+                response[:start].strip()
+                if start > 0
+                else "I'll create a support ticket for you."
+            )
     except json.JSONDecodeError:
         pass
 
@@ -190,7 +204,13 @@ Return as JSON:
 
     result = gemini.generate_json(prompt)
     if "error" in result:
-        return {"cause": "Unable to analyze", "solutions": [], "needs_human": True, "priority": "MEDIUM", "summary": result.get("raw", "")}
+        return {
+            "cause": "Unable to analyze",
+            "solutions": [],
+            "needs_human": True,
+            "priority": "MEDIUM",
+            "summary": result.get("raw", ""),
+        }
     return result
 
 

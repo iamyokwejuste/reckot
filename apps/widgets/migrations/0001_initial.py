@@ -6,32 +6,64 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('events', '0002_checkoutquestion_event_is_public_event_slug_and_more'),
+        ("events", "0002_checkoutquestion_event_is_public_event_slug_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='EmbedWidget',
+            name="EmbedWidget",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('widget_id', models.UUIDField(default=uuid.uuid4, editable=False, unique=True)),
-                ('is_active', models.BooleanField(default=True)),
-                ('allowed_domains', models.JSONField(blank=True, default=list)),
-                ('theme', models.CharField(choices=[('LIGHT', 'Light'), ('DARK', 'Dark'), ('AUTO', 'Auto (System)')], default='AUTO', max_length=10)),
-                ('button_text', models.CharField(default='Get Tickets', max_length=50)),
-                ('button_color', models.CharField(default='#000000', max_length=7)),
-                ('show_price', models.BooleanField(default=True)),
-                ('show_description', models.BooleanField(default=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('event', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='embed_widget', to='events.event')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "widget_id",
+                    models.UUIDField(default=uuid.uuid4, editable=False, unique=True),
+                ),
+                ("is_active", models.BooleanField(default=True)),
+                ("allowed_domains", models.JSONField(blank=True, default=list)),
+                (
+                    "theme",
+                    models.CharField(
+                        choices=[
+                            ("LIGHT", "Light"),
+                            ("DARK", "Dark"),
+                            ("AUTO", "Auto (System)"),
+                        ],
+                        default="AUTO",
+                        max_length=10,
+                    ),
+                ),
+                ("button_text", models.CharField(default="Get Tickets", max_length=50)),
+                ("button_color", models.CharField(default="#000000", max_length=7)),
+                ("show_price", models.BooleanField(default=True)),
+                ("show_description", models.BooleanField(default=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "event",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="embed_widget",
+                        to="events.event",
+                    ),
+                ),
             ],
             options={
-                'indexes': [models.Index(fields=['widget_id'], name='widgets_emb_widget__54ca78_idx')],
+                "indexes": [
+                    models.Index(
+                        fields=["widget_id"], name="widgets_emb_widget__54ca78_idx"
+                    )
+                ],
             },
         ),
     ]

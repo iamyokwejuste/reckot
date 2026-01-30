@@ -1,60 +1,51 @@
 from django.urls import path
 from apps.payments import actions
 
-app_name = 'payments'
+app_name = "payments"
 
 urlpatterns = [
-    path('', actions.PaymentListView.as_view(), name='list'),
-    path('checkout/', actions.CheckoutView.as_view(), name='checkout'),
+    path("", actions.PaymentListView.as_view(), name="list"),
+    path("checkout/", actions.CheckoutView.as_view(), name="checkout"),
     path(
-        '<uuid:booking_ref>/select/',
+        "<uuid:booking_ref>/select/",
         actions.PaymentSelectMethodView.as_view(),
-        name='select'
+        name="select",
     ),
+    path("<uuid:booking_ref>/start/", actions.PaymentStartView.as_view(), name="start"),
+    path("<uuid:payment_ref>/poll/", actions.PaymentPollView.as_view(), name="poll"),
     path(
-        '<uuid:booking_ref>/start/',
-        actions.PaymentStartView.as_view(),
-        name='start'
-    ),
-    path(
-        '<uuid:payment_ref>/poll/',
-        actions.PaymentPollView.as_view(),
-        name='poll'
-    ),
-    path(
-        '<uuid:payment_ref>/success/',
+        "<uuid:payment_ref>/success/",
         actions.PaymentSuccessView.as_view(),
-        name='success'
+        name="success",
     ),
+    path("webhook/", actions.PaymentWebhookView.as_view(), name="webhook"),
+    path("webhook/campay/", actions.CampayWebhookView.as_view(), name="webhook_campay"),
     path(
-        'webhook/',
-        actions.PaymentWebhookView.as_view(),
-        name='webhook'
-    ),
-    path(
-        'webhook/campay/',
-        actions.CampayWebhookView.as_view(),
-        name='webhook_campay'
-    ),
-    path(
-        '<uuid:payment_ref>/invoice/',
+        "<uuid:payment_ref>/invoice/",
         actions.InvoiceDownloadView.as_view(),
-        name='invoice'
+        name="invoice",
     ),
     path(
-        '<uuid:payment_ref>/refund/',
+        "<uuid:payment_ref>/refund/",
         actions.RefundRequestView.as_view(),
-        name='refund_request'
+        name="refund_request",
     ),
-    path('refunds/', actions.RefundListView.as_view(), name='refunds'),
+    path("refunds/", actions.RefundListView.as_view(), name="refunds"),
     path(
-        'refunds/<int:refund_id>/process/',
+        "refunds/<int:refund_id>/process/",
         actions.RefundProcessView.as_view(),
-        name='refund_process'
+        name="refund_process",
+    ),
+    path("track/<uuid:token>/", actions.TransactionStatusView.as_view(), name="track"),
+    path("withdrawals/", actions.WithdrawalListView.as_view(), name="withdrawals"),
+    path(
+        "withdrawals/balance/",
+        actions.WithdrawalBalanceView.as_view(),
+        name="withdrawal_balance",
     ),
     path(
-        'track/<uuid:token>/',
-        actions.TransactionStatusView.as_view(),
-        name='track'
+        "withdrawals/request/",
+        actions.WithdrawalRequestView.as_view(),
+        name="withdrawal_request",
     ),
 ]

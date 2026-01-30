@@ -16,6 +16,7 @@ def send_email_task(
     inline_images: dict = None,
 ):
     from .services.notifications import NotificationService
+
     try:
         NotificationService.send_email(
             to_email=to_email,
@@ -33,6 +34,7 @@ def send_email_task(
 @task
 def send_sms_task(phone_number: str, template_name: str, context: dict):
     from .services.notifications import NotificationService
+
     try:
         NotificationService.send_sms(
             phone_number=phone_number,
@@ -45,8 +47,11 @@ def send_sms_task(phone_number: str, template_name: str, context: dict):
 
 
 @task
-def send_otp_sms_task(phone_number: str, otp_code: str = None, expiry_minutes: int = 10):
+def send_otp_sms_task(
+    phone_number: str, otp_code: str = None, expiry_minutes: int = 10
+):
     from .services.notifications import NotificationService
+
     try:
         NotificationService.send_otp_sms(
             phone_number=phone_number,
@@ -72,20 +77,21 @@ def send_otp_verification_task(user_id: int, otp_id: int):
             return
 
         from django.utils import timezone
-        expiry_minutes = max(1, int((otp.expires_at - timezone.now()).total_seconds() / 60))
+
+        expiry_minutes = max(
+            1, int((otp.expires_at - timezone.now()).total_seconds() / 60)
+        )
 
         if user.email:
             NotificationService.send_otp_email(
-                to_email=user.email,
-                otp_code=otp.code,
-                expiry_minutes=expiry_minutes
+                to_email=user.email, otp_code=otp.code, expiry_minutes=expiry_minutes
             )
 
         if user.phone_number:
             NotificationService.send_otp_sms(
                 phone_number=user.phone_number,
                 otp_code=otp.code,
-                expiry_minutes=expiry_minutes
+                expiry_minutes=expiry_minutes,
             )
 
         logger.info(f"OTP verification sent to user {user_id}")
@@ -115,15 +121,13 @@ def send_welcome_email_task(user_id: int):
 
 
 @task
-def resend_otp_task(user_id: int, otp_type: str = 'EMAIL'):
+def resend_otp_task(user_id: int, otp_type: str = "EMAIL"):
     from .models import OTPVerification
 
     try:
         user = User.objects.get(id=user_id)
         otp = OTPVerification.create_for_user(
-            user=user,
-            otp_type=otp_type,
-            expiry_minutes=10
+            user=user, otp_type=otp_type, expiry_minutes=10
         )
         send_otp_verification_task.enqueue(user_id, otp.id)
         logger.info(f"New OTP created and sent to user {user_id}")
@@ -141,9 +145,7 @@ def cleanup_expired_otps_task():
 
     try:
         cutoff = timezone.now() - timedelta(hours=24)
-        deleted, _ = OTPVerification.objects.filter(
-            expires_at__lt=cutoff
-        ).delete()
+        deleted, _ = OTPVerification.objects.filter(expires_at__lt=cutoff).delete()
         if deleted:
             logger.info(f"Cleaned up {deleted} expired OTPs")
     except Exception as e:
@@ -159,8 +161,7 @@ def cleanup_used_otps_task():
     try:
         cutoff = timezone.now() - timedelta(hours=1)
         deleted, _ = OTPVerification.objects.filter(
-            is_used=True,
-            created_at__lt=cutoff
+            is_used=True, created_at__lt=cutoff
         ).delete()
         if deleted:
             logger.info(f"Cleaned up {deleted} used OTPs")

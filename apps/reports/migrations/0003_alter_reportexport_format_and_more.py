@@ -4,20 +4,32 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('reports', '0002_reportexport_reference'),
+        ("reports", "0002_reportexport_reference"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='reportexport',
-            name='format',
-            field=models.CharField(choices=[('CSV', 'CSV'), ('EXCEL', 'Excel'), ('PDF', 'PDF')], max_length=10),
+            model_name="reportexport",
+            name="format",
+            field=models.CharField(
+                choices=[("CSV", "CSV"), ("EXCEL", "Excel"), ("PDF", "PDF")],
+                max_length=10,
+            ),
         ),
         migrations.AlterField(
-            model_name='reportexport',
-            name='report_type',
-            field=models.CharField(choices=[('RSVP', 'Registered Attendees'), ('PAYMENTS', 'Payment Records'), ('CHECKINS', 'Check-in Report'), ('SWAG', 'Swag Collection'), ('FINANCIAL', 'Financial Summary'), ('TICKET_SALES', 'Ticket Sales')], max_length=20),
+            model_name="reportexport",
+            name="report_type",
+            field=models.CharField(
+                choices=[
+                    ("RSVP", "Registered Attendees"),
+                    ("PAYMENTS", "Payment Records"),
+                    ("CHECKINS", "Check-in Report"),
+                    ("SWAG", "Swag Collection"),
+                    ("FINANCIAL", "Financial Summary"),
+                    ("TICKET_SALES", "Ticket Sales"),
+                ],
+                max_length=20,
+            ),
         ),
     ]

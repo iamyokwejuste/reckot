@@ -6,7 +6,9 @@ import uuid
 
 
 class TicketType(models.Model):
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='ticket_types')
+    event = models.ForeignKey(
+        Event, on_delete=models.CASCADE, related_name="ticket_types"
+    )
     name = models.CharField(max_length=100)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     quantity = models.PositiveIntegerField()
@@ -18,11 +20,11 @@ class TicketType(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=['event', 'is_active']),
+            models.Index(fields=["event", "is_active"]),
         ]
 
     def __str__(self):
-        return f'{self.name} for {self.event.title}'
+        return f"{self.name} for {self.event.title}"
 
     @property
     def available_quantity(self):
@@ -32,7 +34,10 @@ class TicketType(models.Model):
 
 class GuestSession(models.Model):
     """Tracks guest checkout sessions for unauthenticated users."""
-    token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, db_index=True)
+
+    token = models.UUIDField(
+        default=uuid.uuid4, editable=False, unique=True, db_index=True
+    )
     email = models.EmailField()
     name = models.CharField(max_length=200)
     phone = models.CharField(max_length=20, blank=True)
@@ -41,63 +46,68 @@ class GuestSession(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=['email']),
-            models.Index(fields=['expires_at']),
+            models.Index(fields=["email"]),
+            models.Index(fields=["expires_at"]),
         ]
 
     def __str__(self):
-        return f'Guest {self.email} ({self.token})'
+        return f"Guest {self.email} ({self.token})"
 
     @property
     def is_expired(self):
         from django.utils import timezone
+
         return timezone.now() > self.expires_at
 
 
 class Booking(models.Model):
     class Status(models.TextChoices):
-        PENDING = 'PENDING', _('Pending Payment')
-        CONFIRMED = 'CONFIRMED', _('Confirmed')
-        CANCELLED = 'CANCELLED', _('Cancelled')
-        REFUNDED = 'REFUNDED', _('Refunded')
+        PENDING = "PENDING", _("Pending Payment")
+        CONFIRMED = "CONFIRMED", _("Confirmed")
+        CANCELLED = "CANCELLED", _("Cancelled")
+        REFUNDED = "REFUNDED", _("Refunded")
 
     reference = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='bookings', null=True)
+    event = models.ForeignKey(
+        Event, on_delete=models.CASCADE, related_name="bookings", null=True
+    )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='bookings',
+        related_name="bookings",
         null=True,
-        blank=True
+        blank=True,
     )
     guest_session = models.ForeignKey(
         GuestSession,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='bookings'
+        related_name="bookings",
     )
     guest_email = models.EmailField(blank=True)
     guest_name = models.CharField(max_length=200, blank=True)
     guest_phone = models.CharField(max_length=20, blank=True)
-    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.PENDING
+    )
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         indexes = [
-            models.Index(fields=['reference']),
-            models.Index(fields=['user', 'status']),
-            models.Index(fields=['event', 'status']),
-            models.Index(fields=['guest_session']),
-            models.Index(fields=['guest_email']),
+            models.Index(fields=["reference"]),
+            models.Index(fields=["user", "status"]),
+            models.Index(fields=["event", "status"]),
+            models.Index(fields=["guest_session"]),
+            models.Index(fields=["guest_email"]),
         ]
 
     def __str__(self):
         if self.user:
-            return f'Booking {self.reference} for {self.user}'
-        return f'Booking {self.reference} for {self.guest_email or "Guest"}'
+            return f"Booking {self.reference} for {self.user}"
+        return f"Booking {self.reference} for {self.guest_email or 'Guest'}"
 
     @property
     def is_guest(self):
@@ -117,8 +127,12 @@ class Booking(models.Model):
 
 
 class Ticket(models.Model):
-    booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='tickets')
-    ticket_type = models.ForeignKey(TicketType, on_delete=models.CASCADE, related_name='tickets')
+    booking = models.ForeignKey(
+        Booking, on_delete=models.CASCADE, related_name="tickets"
+    )
+    ticket_type = models.ForeignKey(
+        TicketType, on_delete=models.CASCADE, related_name="tickets"
+    )
     code = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     attendee_name = models.CharField(max_length=200, blank=True)
     attendee_email = models.EmailField(blank=True)
@@ -129,29 +143,31 @@ class Ticket(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='checked_in_tickets'
+        related_name="checked_in_tickets",
     )
 
     class Meta:
         indexes = [
-            models.Index(fields=['code']),
-            models.Index(fields=['booking']),
-            models.Index(fields=['is_checked_in']),
+            models.Index(fields=["code"]),
+            models.Index(fields=["booking"]),
+            models.Index(fields=["is_checked_in"]),
         ]
 
     def __str__(self):
-        return f'Ticket {self.code} for {self.ticket_type.event.title}'
+        return f"Ticket {self.code} for {self.ticket_type.event.title}"
 
 
 class TicketQuestionAnswer(models.Model):
-    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name='answers')
-    booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='answers')
+    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name="answers")
+    booking = models.ForeignKey(
+        Booking, on_delete=models.CASCADE, related_name="answers"
+    )
     question = models.ForeignKey(CheckoutQuestion, on_delete=models.CASCADE)
     answer = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         indexes = [
-            models.Index(fields=['booking', 'question']),
+            models.Index(fields=["booking", "question"]),
         ]
-        unique_together = [['ticket', 'question']]
+        unique_together = [["ticket", "question"]]

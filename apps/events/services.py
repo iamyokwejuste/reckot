@@ -14,6 +14,6 @@ def create_event(user, organization, data, files=None):
             return event, None
         except Exception as e:
             logger.error(f"Failed to create event: {e}")
-            return None, {'__all__': [f'Failed to create event: {str(e)}']}
+            return None, {"__all__": [f"Failed to create event: {str(e)}"]}
     logger.warning(f"Event form validation failed: {form.errors}")
     return None, form.errors

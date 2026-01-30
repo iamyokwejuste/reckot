@@ -6,32 +6,81 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('tickets', '0001_initial'),
+        ("tickets", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Payment',
+            name="Payment",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('reference', models.UUIDField(default=uuid.uuid4, editable=False, unique=True)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('method', models.CharField(choices=[('MTN_MOMO', 'MTN Mobile Money'), ('ORANGE_MONEY', 'Orange Money')], max_length=20)),
-                ('phone_number', models.CharField(max_length=20)),
-                ('status', models.CharField(choices=[('PENDING', 'Pending'), ('CONFIRMED', 'Confirmed'), ('FAILED', 'Failed'), ('EXPIRED', 'Expired')], default='PENDING', max_length=20)),
-                ('external_reference', models.CharField(blank=True, max_length=100)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('confirmed_at', models.DateTimeField(blank=True, null=True)),
-                ('expires_at', models.DateTimeField()),
-                ('booking', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='payment', to='tickets.booking')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "reference",
+                    models.UUIDField(default=uuid.uuid4, editable=False, unique=True),
+                ),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=10)),
+                (
+                    "method",
+                    models.CharField(
+                        choices=[
+                            ("MTN_MOMO", "MTN Mobile Money"),
+                            ("ORANGE_MONEY", "Orange Money"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                ("phone_number", models.CharField(max_length=20)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("PENDING", "Pending"),
+                            ("CONFIRMED", "Confirmed"),
+                            ("FAILED", "Failed"),
+                            ("EXPIRED", "Expired"),
+                        ],
+                        default="PENDING",
+                        max_length=20,
+                    ),
+                ),
+                ("external_reference", models.CharField(blank=True, max_length=100)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("confirmed_at", models.DateTimeField(blank=True, null=True)),
+                ("expires_at", models.DateTimeField()),
+                (
+                    "booking",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="payment",
+                        to="tickets.booking",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
-                'indexes': [models.Index(fields=['reference'], name='payments_pa_referen_75358f_idx'), models.Index(fields=['status', 'expires_at'], name='payments_pa_status_04c3f6_idx'), models.Index(fields=['booking'], name='payments_pa_booking_8fd3de_idx')],
+                "ordering": ["-created_at"],
+                "indexes": [
+                    models.Index(
+                        fields=["reference"], name="payments_pa_referen_75358f_idx"
+                    ),
+                    models.Index(
+                        fields=["status", "expires_at"],
+                        name="payments_pa_status_04c3f6_idx",
+                    ),
+                    models.Index(
+                        fields=["booking"], name="payments_pa_booking_8fd3de_idx"
+                    ),
+                ],
             },
         ),
     ]

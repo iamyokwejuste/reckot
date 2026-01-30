@@ -14,18 +14,16 @@ User = get_user_model()
 def handle_user_signup(sender, request, user, **kwargs):
     from .tasks import send_otp_verification_task, send_welcome_email_task
 
-    sociallogin = kwargs.get('sociallogin')
+    sociallogin = kwargs.get("sociallogin")
 
     try:
         if sociallogin:
             user.email_verified = True
-            user.save(update_fields=['email_verified'])
+            user.save(update_fields=["email_verified"])
             send_welcome_email_task.enqueue(user.id)
         else:
             otp = OTPVerification.create_for_user(
-                user=user,
-                otp_type=OTPVerification.Type.EMAIL,
-                expiry_minutes=10
+                user=user, otp_type=OTPVerification.Type.EMAIL, expiry_minutes=10
             )
             send_otp_verification_task.enqueue(user.id, otp.id)
     except Exception as e:
@@ -35,6 +33,6 @@ def handle_user_signup(sender, request, user, **kwargs):
 @receiver(social_account_added)
 def handle_social_account_added(sender, request, sociallogin, **kwargs):
     user = sociallogin.user
-    if not user.email_verified and sociallogin.account.provider == 'google':
+    if not user.email_verified and sociallogin.account.provider == "google":
         user.email_verified = True
-        user.save(update_fields=['email_verified'])
+        user.save(update_fields=["email_verified"])

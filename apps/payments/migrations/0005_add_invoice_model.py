@@ -5,40 +5,83 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payments', '0004_alter_payment_provider_and_more'),
+        ("payments", "0004_alter_payment_provider_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Invoice',
+            name="Invoice",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('invoice_number', models.CharField(max_length=50, unique=True)),
-                ('issued_at', models.DateTimeField(auto_now_add=True)),
-                ('due_date', models.DateField(blank=True, null=True)),
-                ('subtotal', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('service_fee', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
-                ('tax_amount', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
-                ('total_amount', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('currency', models.CharField(choices=[('XAF', 'Central African CFA Franc'), ('XOF', 'West African CFA Franc'), ('USD', 'US Dollar'), ('EUR', 'Euro'), ('GBP', 'British Pound'), ('NGN', 'Nigerian Naira'), ('GHS', 'Ghanaian Cedi'), ('UGX', 'Ugandan Shilling')], default='XAF', max_length=3)),
-                ('billing_name', models.CharField(max_length=255)),
-                ('billing_email', models.EmailField(max_length=254)),
-                ('billing_address', models.TextField(blank=True)),
-                ('organization_name', models.CharField(max_length=255)),
-                ('organization_address', models.TextField(blank=True)),
-                ('organization_email', models.EmailField(blank=True, max_length=254)),
-                ('organization_phone', models.CharField(blank=True, max_length=50)),
-                ('organization_logo', models.URLField(blank=True)),
-                ('notes', models.TextField(blank=True)),
-                ('pdf_file', models.FileField(blank=True, upload_to='invoices/')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('payment', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='invoice', to='payments.payment')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("invoice_number", models.CharField(max_length=50, unique=True)),
+                ("issued_at", models.DateTimeField(auto_now_add=True)),
+                ("due_date", models.DateField(blank=True, null=True)),
+                ("subtotal", models.DecimalField(decimal_places=2, max_digits=10)),
+                (
+                    "service_fee",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=10),
+                ),
+                (
+                    "tax_amount",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=10),
+                ),
+                ("total_amount", models.DecimalField(decimal_places=2, max_digits=10)),
+                (
+                    "currency",
+                    models.CharField(
+                        choices=[
+                            ("XAF", "Central African CFA Franc"),
+                            ("XOF", "West African CFA Franc"),
+                            ("USD", "US Dollar"),
+                            ("EUR", "Euro"),
+                            ("GBP", "British Pound"),
+                            ("NGN", "Nigerian Naira"),
+                            ("GHS", "Ghanaian Cedi"),
+                            ("UGX", "Ugandan Shilling"),
+                        ],
+                        default="XAF",
+                        max_length=3,
+                    ),
+                ),
+                ("billing_name", models.CharField(max_length=255)),
+                ("billing_email", models.EmailField(max_length=254)),
+                ("billing_address", models.TextField(blank=True)),
+                ("organization_name", models.CharField(max_length=255)),
+                ("organization_address", models.TextField(blank=True)),
+                ("organization_email", models.EmailField(blank=True, max_length=254)),
+                ("organization_phone", models.CharField(blank=True, max_length=50)),
+                ("organization_logo", models.URLField(blank=True)),
+                ("notes", models.TextField(blank=True)),
+                ("pdf_file", models.FileField(blank=True, upload_to="invoices/")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "payment",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="invoice",
+                        to="payments.payment",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-issued_at'],
-                'indexes': [models.Index(fields=['invoice_number'], name='payments_in_invoice_3fa711_idx'), models.Index(fields=['payment'], name='payments_in_payment_670970_idx')],
+                "ordering": ["-issued_at"],
+                "indexes": [
+                    models.Index(
+                        fields=["invoice_number"], name="payments_in_invoice_3fa711_idx"
+                    ),
+                    models.Index(
+                        fields=["payment"], name="payments_in_payment_670970_idx"
+                    ),
+                ],
             },
         ),
     ]

@@ -7,104 +7,242 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('events', '0001_initial'),
-        ('orgs', '0003_role_alter_invitation_role_alter_membership_role'),
-        ('tickets', '0001_initial'),
+        ("events", "0001_initial"),
+        ("orgs", "0003_role_alter_invitation_role_alter_membership_role"),
+        ("tickets", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='MessageCampaign',
+            name="MessageCampaign",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('reference', models.UUIDField(default=uuid.uuid4, editable=False, unique=True)),
-                ('name', models.CharField(max_length=100)),
-                ('message_type', models.CharField(choices=[('EMAIL', 'Email'), ('SMS', 'SMS')], max_length=10)),
-                ('subject', models.CharField(blank=True, max_length=255)),
-                ('body', models.TextField()),
-                ('recipient_filter', models.CharField(choices=[('ALL', 'All Attendees'), ('TICKET_TYPE', 'By Ticket Type'), ('CHECKED_IN', 'Checked In Only'), ('NOT_CHECKED_IN', 'Not Checked In')], default='ALL', max_length=20)),
-                ('ticket_types', models.JSONField(blank=True, default=list)),
-                ('status', models.CharField(choices=[('DRAFT', 'Draft'), ('SCHEDULED', 'Scheduled'), ('SENDING', 'Sending'), ('COMPLETED', 'Completed'), ('FAILED', 'Failed')], default='DRAFT', max_length=20)),
-                ('scheduled_at', models.DateTimeField(blank=True, null=True)),
-                ('sent_at', models.DateTimeField(blank=True, null=True)),
-                ('total_recipients', models.PositiveIntegerField(default=0)),
-                ('sent_count', models.PositiveIntegerField(default=0)),
-                ('failed_count', models.PositiveIntegerField(default=0)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('created_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
-                ('event', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='message_campaigns', to='events.event')),
-                ('organization', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='message_campaigns', to='orgs.organization')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "reference",
+                    models.UUIDField(default=uuid.uuid4, editable=False, unique=True),
+                ),
+                ("name", models.CharField(max_length=100)),
+                (
+                    "message_type",
+                    models.CharField(
+                        choices=[("EMAIL", "Email"), ("SMS", "SMS")], max_length=10
+                    ),
+                ),
+                ("subject", models.CharField(blank=True, max_length=255)),
+                ("body", models.TextField()),
+                (
+                    "recipient_filter",
+                    models.CharField(
+                        choices=[
+                            ("ALL", "All Attendees"),
+                            ("TICKET_TYPE", "By Ticket Type"),
+                            ("CHECKED_IN", "Checked In Only"),
+                            ("NOT_CHECKED_IN", "Not Checked In"),
+                        ],
+                        default="ALL",
+                        max_length=20,
+                    ),
+                ),
+                ("ticket_types", models.JSONField(blank=True, default=list)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("DRAFT", "Draft"),
+                            ("SCHEDULED", "Scheduled"),
+                            ("SENDING", "Sending"),
+                            ("COMPLETED", "Completed"),
+                            ("FAILED", "Failed"),
+                        ],
+                        default="DRAFT",
+                        max_length=20,
+                    ),
+                ),
+                ("scheduled_at", models.DateTimeField(blank=True, null=True)),
+                ("sent_at", models.DateTimeField(blank=True, null=True)),
+                ("total_recipients", models.PositiveIntegerField(default=0)),
+                ("sent_count", models.PositiveIntegerField(default=0)),
+                ("failed_count", models.PositiveIntegerField(default=0)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "event",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="message_campaigns",
+                        to="events.event",
+                    ),
+                ),
+                (
+                    "organization",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="message_campaigns",
+                        to="orgs.organization",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='MessageDelivery',
+            name="MessageDelivery",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('recipient_email', models.EmailField(blank=True, max_length=254)),
-                ('recipient_phone', models.CharField(blank=True, max_length=20)),
-                ('status', models.CharField(choices=[('PENDING', 'Pending'), ('SENT', 'Sent'), ('DELIVERED', 'Delivered'), ('OPENED', 'Opened'), ('CLICKED', 'Clicked'), ('BOUNCED', 'Bounced'), ('FAILED', 'Failed')], default='PENDING', max_length=20)),
-                ('tracking_id', models.UUIDField(default=uuid.uuid4, editable=False)),
-                ('sent_at', models.DateTimeField(blank=True, null=True)),
-                ('delivered_at', models.DateTimeField(blank=True, null=True)),
-                ('opened_at', models.DateTimeField(blank=True, null=True)),
-                ('clicked_at', models.DateTimeField(blank=True, null=True)),
-                ('error_message', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('campaign', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='deliveries', to='messaging.messagecampaign')),
-                ('ticket', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='message_deliveries', to='tickets.ticket')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("recipient_email", models.EmailField(blank=True, max_length=254)),
+                ("recipient_phone", models.CharField(blank=True, max_length=20)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("PENDING", "Pending"),
+                            ("SENT", "Sent"),
+                            ("DELIVERED", "Delivered"),
+                            ("OPENED", "Opened"),
+                            ("CLICKED", "Clicked"),
+                            ("BOUNCED", "Bounced"),
+                            ("FAILED", "Failed"),
+                        ],
+                        default="PENDING",
+                        max_length=20,
+                    ),
+                ),
+                ("tracking_id", models.UUIDField(default=uuid.uuid4, editable=False)),
+                ("sent_at", models.DateTimeField(blank=True, null=True)),
+                ("delivered_at", models.DateTimeField(blank=True, null=True)),
+                ("opened_at", models.DateTimeField(blank=True, null=True)),
+                ("clicked_at", models.DateTimeField(blank=True, null=True)),
+                ("error_message", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "campaign",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="deliveries",
+                        to="messaging.messagecampaign",
+                    ),
+                ),
+                (
+                    "ticket",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="message_deliveries",
+                        to="tickets.ticket",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='MessageTemplate',
+            name="MessageTemplate",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('template_type', models.CharField(choices=[('EMAIL', 'Email'), ('SMS', 'SMS')], max_length=10)),
-                ('subject', models.CharField(blank=True, max_length=255)),
-                ('body', models.TextField()),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('created_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
-                ('organization', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='message_templates', to='orgs.organization')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
+                (
+                    "template_type",
+                    models.CharField(
+                        choices=[("EMAIL", "Email"), ("SMS", "SMS")], max_length=10
+                    ),
+                ),
+                ("subject", models.CharField(blank=True, max_length=255)),
+                ("body", models.TextField()),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "organization",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="message_templates",
+                        to="orgs.organization",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
+                "ordering": ["-created_at"],
             },
         ),
         migrations.AddIndex(
-            model_name='messagecampaign',
-            index=models.Index(fields=['organization', 'status'], name='messaging_m_organiz_3e70d1_idx'),
+            model_name="messagecampaign",
+            index=models.Index(
+                fields=["organization", "status"], name="messaging_m_organiz_3e70d1_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='messagecampaign',
-            index=models.Index(fields=['event', 'status'], name='messaging_m_event_i_077126_idx'),
+            model_name="messagecampaign",
+            index=models.Index(
+                fields=["event", "status"], name="messaging_m_event_i_077126_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='messagecampaign',
-            index=models.Index(fields=['scheduled_at'], name='messaging_m_schedul_f75680_idx'),
+            model_name="messagecampaign",
+            index=models.Index(
+                fields=["scheduled_at"], name="messaging_m_schedul_f75680_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='messagedelivery',
-            index=models.Index(fields=['campaign', 'status'], name='messaging_m_campaig_1fff72_idx'),
+            model_name="messagedelivery",
+            index=models.Index(
+                fields=["campaign", "status"], name="messaging_m_campaig_1fff72_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='messagedelivery',
-            index=models.Index(fields=['tracking_id'], name='messaging_m_trackin_09f07c_idx'),
+            model_name="messagedelivery",
+            index=models.Index(
+                fields=["tracking_id"], name="messaging_m_trackin_09f07c_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='messagetemplate',
-            index=models.Index(fields=['organization', 'template_type'], name='messaging_m_organiz_6a4f6a_idx'),
+            model_name="messagetemplate",
+            index=models.Index(
+                fields=["organization", "template_type"],
+                name="messaging_m_organiz_6a4f6a_idx",
+            ),
         ),
     ]

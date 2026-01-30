@@ -1,24 +1,62 @@
 from django.urls import path
 from apps.ai import actions, hackathon_views
 
-app_name = 'ai'
+app_name = "ai"
 
 urlpatterns = [
-    path('assistant/', actions.AIAssistantView.as_view(), name='assistant'),
-    path('assistant/chat/', actions.AIAssistantChatView.as_view(), name='chat'),
-    path('assistant/clear/', actions.ClearConversationView.as_view(), name='clear'),
-    path('generate/', actions.AIGenerateContentView.as_view(), name='generate'),
-    path('analyze/', actions.AIAnalyzeIssueView.as_view(), name='analyze'),
-    path('insights/<int:event_id>/', actions.AIEventInsightsView.as_view(), name='insights'),
-    path('tickets/', actions.SupportTicketListView.as_view(), name='tickets'),
-    path('tickets/create/', actions.SupportTicketCreateView.as_view(), name='ticket_create'),
-    path('tickets/<uuid:reference>/', actions.SupportTicketDetailView.as_view(), name='ticket_detail'),
-    path('verify-event/', hackathon_views.VerifyEventView.as_view(), name='verify_event'),
-    path('fraud-prevention-tips/', hackathon_views.FraudPreventionTipsView.as_view(), name='fraud_prevention_tips'),
-    path('voice-to-event/', hackathon_views.VoiceToEventView.as_view(), name='voice_to_event'),
-    path('predict-sales/', hackathon_views.PredictSalesView.as_view(), name='predict_sales'),
-    path('optimize-pricing/', hackathon_views.OptimizePricingView.as_view(), name='optimize_pricing'),
-    path('marketing-strategy/', hackathon_views.MarketingStrategyView.as_view(), name='marketing_strategy'),
-    path('generate-cover-image/', hackathon_views.GenerateCoverImageView.as_view(), name='generate_cover_image'),
-    path('demo/', hackathon_views.AIFeaturesDemoView.as_view(), name='demo'),
+    path("assistant/", actions.AIAssistantView.as_view(), name="assistant"),
+    path("assistant/chat/", actions.AIAssistantChatView.as_view(), name="chat"),
+    path("assistant/clear/", actions.ClearConversationView.as_view(), name="clear"),
+    path("generate/", actions.AIGenerateContentView.as_view(), name="generate"),
+    path("analyze/", actions.AIAnalyzeIssueView.as_view(), name="analyze"),
+    path(
+        "insights/<int:event_id>/",
+        actions.AIEventInsightsView.as_view(),
+        name="insights",
+    ),
+    path("tickets/", actions.SupportTicketListView.as_view(), name="tickets"),
+    path(
+        "tickets/create/",
+        actions.SupportTicketCreateView.as_view(),
+        name="ticket_create",
+    ),
+    path(
+        "tickets/<uuid:reference>/",
+        actions.SupportTicketDetailView.as_view(),
+        name="ticket_detail",
+    ),
+    path(
+        "verify-event/", hackathon_views.VerifyEventView.as_view(), name="verify_event"
+    ),
+    path(
+        "fraud-prevention-tips/",
+        hackathon_views.FraudPreventionTipsView.as_view(),
+        name="fraud_prevention_tips",
+    ),
+    path(
+        "voice-to-event/",
+        hackathon_views.VoiceToEventView.as_view(),
+        name="voice_to_event",
+    ),
+    path(
+        "predict-sales/",
+        hackathon_views.PredictSalesView.as_view(),
+        name="predict_sales",
+    ),
+    path(
+        "optimize-pricing/",
+        hackathon_views.OptimizePricingView.as_view(),
+        name="optimize_pricing",
+    ),
+    path(
+        "marketing-strategy/",
+        hackathon_views.MarketingStrategyView.as_view(),
+        name="marketing_strategy",
+    ),
+    path(
+        "generate-cover-image/",
+        hackathon_views.GenerateCoverImageView.as_view(),
+        name="generate_cover_image",
+    ),
+    path("demo/", hackathon_views.AIFeaturesDemoView.as_view(), name="demo"),
 ]

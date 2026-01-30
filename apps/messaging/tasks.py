@@ -7,8 +7,7 @@ from apps.messaging.services import prepare_campaign, execute_campaign
 @task
 def process_scheduled_campaigns():
     campaigns = MessageCampaign.objects.filter(
-        status=MessageCampaign.Status.SCHEDULED,
-        scheduled_at__lte=timezone.now()
+        status=MessageCampaign.Status.SCHEDULED, scheduled_at__lte=timezone.now()
     )
 
     for campaign in campaigns:

@@ -11,25 +11,25 @@ class Organization(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=120, unique=True, blank=True)
     description = models.TextField(blank=True)
-    logo = models.ImageField(upload_to='org_logos/', blank=True)
+    logo = models.ImageField(upload_to="org_logos/", blank=True)
     website = models.URLField(blank=True)
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='owned_organizations'
+        related_name="owned_organizations",
     )
     members = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
-        through='Membership',
-        through_fields=('organization', 'user'),
-        related_name='organizations'
+        through="Membership",
+        through_fields=("organization", "user"),
+        related_name="organizations",
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         indexes = [
-            models.Index(fields=['slug']),
+            models.Index(fields=["slug"]),
         ]
 
     def __str__(self):
@@ -94,51 +94,84 @@ class Organization(models.Model):
 
 class MemberRole(models.TextChoices):
     """Role choices for organization members"""
-    OWNER = 'OWNER', _('Owner')
-    ADMIN = 'ADMIN', _('Admin')
-    MANAGER = 'MANAGER', _('Manager')
-    MEMBER = 'MEMBER', _('Member')
-    VIEWER = 'VIEWER', _('Viewer')
+
+    OWNER = "OWNER", _("Owner")
+    ADMIN = "ADMIN", _("Admin")
+    MANAGER = "MANAGER", _("Manager")
+    MEMBER = "MEMBER", _("Member")
+    VIEWER = "VIEWER", _("Viewer")
 
 
 # Permission definitions for each role
 ROLE_PERMISSIONS = {
     MemberRole.OWNER: [
-        'manage_organization', 'delete_organization',
-        'manage_members', 'invite_members', 'remove_members',
-        'manage_events', 'create_events', 'edit_events', 'delete_events', 'publish_events',
-        'manage_tickets', 'view_reports', 'export_reports',
-        'manage_payments', 'process_refunds',
-        'manage_coupons', 'checkin_attendees',
+        "manage_organization",
+        "delete_organization",
+        "manage_members",
+        "invite_members",
+        "remove_members",
+        "manage_events",
+        "create_events",
+        "edit_events",
+        "delete_events",
+        "publish_events",
+        "manage_tickets",
+        "view_reports",
+        "export_reports",
+        "manage_payments",
+        "process_refunds",
+        "manage_coupons",
+        "checkin_attendees",
     ],
     MemberRole.ADMIN: [
-        'manage_organization',
-        'manage_members', 'invite_members', 'remove_members',
-        'manage_events', 'create_events', 'edit_events', 'delete_events', 'publish_events',
-        'manage_tickets', 'view_reports', 'export_reports',
-        'manage_payments', 'process_refunds',
-        'manage_coupons', 'checkin_attendees',
+        "manage_organization",
+        "manage_members",
+        "invite_members",
+        "remove_members",
+        "manage_events",
+        "create_events",
+        "edit_events",
+        "delete_events",
+        "publish_events",
+        "manage_tickets",
+        "view_reports",
+        "export_reports",
+        "manage_payments",
+        "process_refunds",
+        "manage_coupons",
+        "checkin_attendees",
     ],
     MemberRole.MANAGER: [
-        'manage_events', 'create_events', 'edit_events', 'publish_events',
-        'manage_tickets', 'view_reports', 'export_reports',
-        'manage_coupons', 'checkin_attendees',
+        "manage_events",
+        "create_events",
+        "edit_events",
+        "publish_events",
+        "manage_tickets",
+        "view_reports",
+        "export_reports",
+        "manage_coupons",
+        "checkin_attendees",
     ],
     MemberRole.MEMBER: [
-        'create_events', 'edit_events',
-        'manage_tickets', 'view_reports',
-        'checkin_attendees',
+        "create_events",
+        "edit_events",
+        "manage_tickets",
+        "view_reports",
+        "checkin_attendees",
     ],
     MemberRole.VIEWER: [
-        'view_reports',
+        "view_reports",
     ],
 }
 
 
 class CustomRole(models.Model):
     """Custom roles for organizations (optional advanced feature)"""
+
     name = models.CharField(max_length=100)
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='custom_roles')
+    organization = models.ForeignKey(
+        Organization, on_delete=models.CASCADE, related_name="custom_roles"
+    )
     permissions = models.JSONField(default=list, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -147,28 +180,43 @@ class CustomRole(models.Model):
 
 
 class Membership(models.Model):
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='memberships')
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='memberships')
-    role = models.CharField(max_length=20, choices=MemberRole.choices, default=MemberRole.MEMBER)
-    custom_role = models.ForeignKey(CustomRole, on_delete=models.SET_NULL, null=True, blank=True, related_name='memberships')
+    organization = models.ForeignKey(
+        Organization, on_delete=models.CASCADE, related_name="memberships"
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="memberships"
+    )
+    role = models.CharField(
+        max_length=20, choices=MemberRole.choices, default=MemberRole.MEMBER
+    )
+    custom_role = models.ForeignKey(
+        CustomRole,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="memberships",
+    )
     invited_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
-        null=True, blank=True,
-        related_name='invited_members'
+        null=True,
+        blank=True,
+        related_name="invited_members",
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ('organization', 'user')
+        unique_together = ("organization", "user")
         indexes = [
-            models.Index(fields=['organization', 'role']),
-            models.Index(fields=['user', 'role']),
+            models.Index(fields=["organization", "role"]),
+            models.Index(fields=["user", "role"]),
         ]
 
     def __str__(self):
-        return f'{self.user.email} - {self.organization.name} ({self.get_role_display()})'
+        return (
+            f"{self.user.email} - {self.organization.name} ({self.get_role_display()})"
+        )
 
     @staticmethod
     def has_permission(role, permission):
@@ -189,29 +237,43 @@ class Membership(models.Model):
 
 class Invitation(models.Model):
     class Status(models.TextChoices):
-        PENDING = 'PENDING', _('Pending')
-        ACCEPTED = 'ACCEPTED', _('Accepted')
-        DECLINED = 'DECLINED', _('Declined')
-        EXPIRED = 'EXPIRED', _('Expired')
-        CANCELLED = 'CANCELLED', _('Cancelled')
+        PENDING = "PENDING", _("Pending")
+        ACCEPTED = "ACCEPTED", _("Accepted")
+        DECLINED = "DECLINED", _("Declined")
+        EXPIRED = "EXPIRED", _("Expired")
+        CANCELLED = "CANCELLED", _("Cancelled")
 
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='invitations')
+    organization = models.ForeignKey(
+        Organization, on_delete=models.CASCADE, related_name="invitations"
+    )
     email = models.EmailField()
-    role = models.CharField(max_length=20, choices=MemberRole.choices, default=MemberRole.MEMBER)
-    custom_role = models.ForeignKey(CustomRole, on_delete=models.SET_NULL, null=True, blank=True)
+    role = models.CharField(
+        max_length=20, choices=MemberRole.choices, default=MemberRole.MEMBER
+    )
+    custom_role = models.ForeignKey(
+        CustomRole, on_delete=models.SET_NULL, null=True, blank=True
+    )
     token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
-    message = models.TextField(blank=True, help_text=_("Optional message to include in invitation email"))
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.PENDING
+    )
+    message = models.TextField(
+        blank=True, help_text=_("Optional message to include in invitation email")
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
-    invited_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='sent_invitations')
+    invited_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="sent_invitations",
+    )
     accepted_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         indexes = [
-            models.Index(fields=['organization', 'status']),
-            models.Index(fields=['email', 'status']),
-            models.Index(fields=['token']),
+            models.Index(fields=["organization", "status"]),
+            models.Index(fields=["email", "status"]),
+            models.Index(fields=["token"]),
         ]
 
     def save(self, *args, **kwargs):
@@ -236,9 +298,9 @@ class Invitation(models.Model):
             organization=self.organization,
             user=user,
             defaults={
-                'role': self.role,
-                'invited_by': self.invited_by,
-            }
+                "role": self.role,
+                "invited_by": self.invited_by,
+            },
         )
 
         self.status = self.Status.ACCEPTED
@@ -258,77 +320,85 @@ class Invitation(models.Model):
         self.save()
 
     def __str__(self):
-        return f'Invitation for {self.email} to {self.organization} as {self.get_role_display()}'
+        return f"Invitation for {self.email} to {self.organization} as {self.get_role_display()}"
 
 
 class OrganizationPlan(models.TextChoices):
-    FREE = 'FREE', _('Free (2% fee)')
-    STARTER = 'STARTER', _('Starter (5% fee)')
-    PRO = 'PRO', _('Pro (3% fee)')
-    ENTERPRISE = 'ENTERPRISE', _('Enterprise (Custom)')
+    FREE = "FREE", _("Free (2% fee)")
+    STARTER = "STARTER", _("Starter (5% fee)")
+    PRO = "PRO", _("Pro (3% fee)")
+    ENTERPRISE = "ENTERPRISE", _("Enterprise (Custom)")
 
 
 PLAN_FEATURES = {
     OrganizationPlan.FREE: {
-        'service_fee_percent': 2,
-        'max_events_per_month': 2,
-        'max_tickets_per_event': 100,
-        'flyer_generator': False,
-        'custom_branding': False,
-        'priority_support': False,
-        'analytics_advanced': False,
-        'export_formats': ['CSV'],
+        "service_fee_percent": 2,
+        "max_events_per_month": 2,
+        "max_tickets_per_event": 100,
+        "flyer_generator": False,
+        "custom_branding": False,
+        "priority_support": False,
+        "analytics_advanced": False,
+        "export_formats": ["CSV"],
     },
     OrganizationPlan.STARTER: {
-        'service_fee_percent': 5,
-        'max_events_per_month': 10,
-        'max_tickets_per_event': 500,
-        'flyer_generator': True,
-        'custom_branding': False,
-        'priority_support': False,
-        'analytics_advanced': True,
-        'export_formats': ['CSV', 'EXCEL', 'PDF'],
+        "service_fee_percent": 5,
+        "max_events_per_month": 10,
+        "max_tickets_per_event": 500,
+        "flyer_generator": True,
+        "custom_branding": False,
+        "priority_support": False,
+        "analytics_advanced": True,
+        "export_formats": ["CSV", "EXCEL", "PDF"],
     },
     OrganizationPlan.PRO: {
-        'service_fee_percent': 3,
-        'max_events_per_month': None,
-        'max_tickets_per_event': None,
-        'flyer_generator': True,
-        'custom_branding': True,
-        'priority_support': True,
-        'analytics_advanced': True,
-        'export_formats': ['CSV', 'EXCEL', 'PDF', 'JSON'],
+        "service_fee_percent": 3,
+        "max_events_per_month": None,
+        "max_tickets_per_event": None,
+        "flyer_generator": True,
+        "custom_branding": True,
+        "priority_support": True,
+        "analytics_advanced": True,
+        "export_formats": ["CSV", "EXCEL", "PDF", "JSON"],
     },
     OrganizationPlan.ENTERPRISE: {
-        'service_fee_percent': 0,
-        'max_events_per_month': None,
-        'max_tickets_per_event': None,
-        'flyer_generator': True,
-        'custom_branding': True,
-        'priority_support': True,
-        'analytics_advanced': True,
-        'export_formats': ['CSV', 'EXCEL', 'PDF', 'JSON'],
+        "service_fee_percent": 0,
+        "max_events_per_month": None,
+        "max_tickets_per_event": None,
+        "flyer_generator": True,
+        "custom_branding": True,
+        "priority_support": True,
+        "analytics_advanced": True,
+        "export_formats": ["CSV", "EXCEL", "PDF", "JSON"],
     },
 }
 
 
 class OrganizationSubscription(models.Model):
     class Status(models.TextChoices):
-        ACTIVE = 'ACTIVE', _('Active')
-        PAST_DUE = 'PAST_DUE', _('Past Due')
-        CANCELLED = 'CANCELLED', _('Cancelled')
-        EXPIRED = 'EXPIRED', _('Expired')
+        ACTIVE = "ACTIVE", _("Active")
+        PAST_DUE = "PAST_DUE", _("Past Due")
+        CANCELLED = "CANCELLED", _("Cancelled")
+        EXPIRED = "EXPIRED", _("Expired")
 
-    organization = models.OneToOneField(Organization, on_delete=models.CASCADE, related_name='subscription')
-    plan = models.CharField(max_length=20, choices=OrganizationPlan.choices, default=OrganizationPlan.FREE)
-    status = models.CharField(max_length=20, choices=Status.choices, default=Status.ACTIVE)
+    organization = models.OneToOneField(
+        Organization, on_delete=models.CASCADE, related_name="subscription"
+    )
+    plan = models.CharField(
+        max_length=20, choices=OrganizationPlan.choices, default=OrganizationPlan.FREE
+    )
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.ACTIVE
+    )
     started_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField(null=True, blank=True)
     cancelled_at = models.DateTimeField(null=True, blank=True)
-    custom_service_fee = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    custom_service_fee = models.DecimalField(
+        max_digits=5, decimal_places=2, null=True, blank=True
+    )
 
     def __str__(self):
-        return f'{self.organization.name} - {self.get_plan_display()}'
+        return f"{self.organization.name} - {self.get_plan_display()}"
 
     @property
     def features(self):
@@ -338,7 +408,7 @@ class OrganizationSubscription(models.Model):
     def service_fee_percent(self):
         if self.custom_service_fee is not None:
             return self.custom_service_fee
-        return self.features.get('service_fee_percent', 2)
+        return self.features.get("service_fee_percent", 2)
 
     def has_feature(self, feature_name):
         return self.features.get(feature_name, False)

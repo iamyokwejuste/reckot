@@ -10,16 +10,16 @@ def verify_event_authenticity(
     capacity: int,
     location: str,
     organizer_history: Optional[Dict] = None,
-    cover_image_data: Optional[bytes] = None
+    cover_image_data: Optional[bytes] = None,
 ) -> Dict:
     organizer_context = ""
     if organizer_history:
         organizer_context = f"""
         Organizer History:
-        - Total events: {organizer_history.get('total_events', 0)}
-        - Successful events: {organizer_history.get('successful_events', 0)}
-        - Average rating: {organizer_history.get('avg_rating', 0)}/5
-        - Refund rate: {organizer_history.get('refund_rate', 0)}%
+        - Total events: {organizer_history.get("total_events", 0)}
+        - Successful events: {organizer_history.get("successful_events", 0)}
+        - Average rating: {organizer_history.get("avg_rating", 0)}/5
+        - Refund rate: {organizer_history.get("refund_rate", 0)}%
         """
 
     prompt = f"""You are an event fraud detection expert for African markets. Analyze this event for authenticity and potential scam indicators.
@@ -56,33 +56,34 @@ Focus on African market context - events here often use mobile money, smaller ve
 
     try:
         import json
+
         analysis = json.loads(result)
 
         if cover_image_data:
             image_analysis = _analyze_event_image(cover_image_data, title, description)
-            analysis['image_analysis'] = image_analysis
+            analysis["image_analysis"] = image_analysis
 
-            if image_analysis.get('suspicious', False):
-                analysis['trust_score'] = max(0, analysis['trust_score'] - 20)
-                analysis['flags'].extend(image_analysis.get('concerns', []))
+            if image_analysis.get("suspicious", False):
+                analysis["trust_score"] = max(0, analysis["trust_score"] - 20)
+                analysis["flags"].extend(image_analysis.get("concerns", []))
 
-        if analysis['trust_score'] < 40:
-            analysis['risk_level'] = 'HIGH'
-        elif analysis['trust_score'] < 70:
-            analysis['risk_level'] = 'MEDIUM'
+        if analysis["trust_score"] < 40:
+            analysis["risk_level"] = "HIGH"
+        elif analysis["trust_score"] < 70:
+            analysis["risk_level"] = "MEDIUM"
         else:
-            analysis['risk_level'] = 'LOW'
+            analysis["risk_level"] = "LOW"
 
         return analysis
 
     except json.JSONDecodeError:
         return {
-            'trust_score': 50,
-            'risk_level': 'MEDIUM',
-            'flags': ['Unable to complete full analysis'],
-            'recommendations': ['Manual review recommended'],
-            'verified': False,
-            'error': 'Analysis parsing failed'
+            "trust_score": 50,
+            "risk_level": "MEDIUM",
+            "flags": ["Unable to complete full analysis"],
+            "recommendations": ["Manual review recommended"],
+            "verified": False,
+            "error": "Analysis parsing failed",
         }
 
 
@@ -110,9 +111,15 @@ Return JSON:
     try:
         result = gemini_ai.chat_with_image(prompt, image_data)
         import json
+
         return json.loads(result)
     except Exception:
-        return {'suspicious': False, 'quality_score': 50, 'concerns': [], 'analysis': 'Image analysis unavailable'}
+        return {
+            "suspicious": False,
+            "quality_score": 50,
+            "concerns": [],
+            "analysis": "Image analysis unavailable",
+        }
 
 
 def get_fraud_prevention_tips() -> list[str]:
@@ -123,5 +130,5 @@ def get_fraud_prevention_tips() -> list[str]:
         "Look for organizer's previous event history",
         "Avoid events demanding urgent payment or 'limited slots'",
         "Verify celebrity/VIP appearances through official channels",
-        "Use Reckot's trusted organizers for added security"
+        "Use Reckot's trusted organizers for added security",
     ]

@@ -13,7 +13,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views import View
 
 from apps.events.models import Event
-from apps.payments.models import Payment
+from apps.payments.models import Payment, Withdrawal, Refund
 from apps.reports.queries import (
     get_event_summary,
     get_questions_summary,
@@ -90,6 +90,31 @@ class AnalyticsView(LoginRequiredMixin, View):
 
         all_events = user_events.order_by("-start_at")[:20]
 
+        confirmed_payments = Payment.objects.filter(
+            booking__event__organization__members=user, status=Payment.Status.CONFIRMED
+        ).aggregate(total_revenue=Sum("amount"), total_service_fees=Sum("service_fee"))
+
+        payment_revenue = confirmed_payments["total_revenue"] or 0
+        service_fees = confirmed_payments["total_service_fees"] or 0
+
+        total_withdrawals = Withdrawal.objects.filter(
+            organization__members=user,
+            status__in=[Withdrawal.Status.COMPLETED, Withdrawal.Status.PROCESSING],
+        ).aggregate(total=Sum("amount"))
+
+        total_withdrawn = total_withdrawals["total"] or 0
+
+        total_refunds = Refund.objects.filter(
+            payment__booking__event__organization__members=user,
+            status=Refund.Status.PROCESSED,
+        ).aggregate(total=Sum("amount"))
+
+        total_refunded = total_refunds["total"] or 0
+
+        available_balance = (
+            payment_revenue - service_fees - total_withdrawn - total_refunded
+        )
+
         # Convert to list to get accurate count after slicing
         upcoming_events_list = list(upcoming_events)
 
@@ -110,6 +135,7 @@ class AnalyticsView(LoginRequiredMixin, View):
             "reports/analytics.html",
             {
                 "total_revenue": f"{total_revenue:,.0f}",
+                "available_balance": f"{available_balance:,.0f}",
                 "tickets_sold": f"{tickets_sold:,}",
                 "checkin_rate": f"{checkin_rate:.1f}",
                 "active_events": active_events,
@@ -338,7 +364,14 @@ class GenerateReportView(LoginRequiredMixin, View):
         report_type = request.POST.get("report_type")
         format_type = request.POST.get("format", "CSV")
         mask_emails = request.POST.get("mask_emails", "on") == "on"
-        valid_types = ['RSVP', 'PAYMENTS', 'CHECKINS', 'SWAG', 'FINANCIAL', 'TICKET_SALES']
+        valid_types = [
+            "RSVP",
+            "PAYMENTS",
+            "CHECKINS",
+            "SWAG",
+            "FINANCIAL",
+            "TICKET_SALES",
+        ]
         if report_type not in valid_types:
             return render(
                 request, "reports/_error.html", {"error": _("Invalid report type")}
@@ -511,7 +544,14 @@ class ExportGenerateView(LoginRequiredMixin, View):
         format_type = request.POST.get("format", "PDF")
         mask_emails = request.POST.get("mask_emails", "on") == "on"
 
-        valid_types = ['RSVP', 'PAYMENTS', 'CHECKINS', 'SWAG', 'FINANCIAL', 'TICKET_SALES']
+        valid_types = [
+            "RSVP",
+            "PAYMENTS",
+            "CHECKINS",
+            "SWAG",
+            "FINANCIAL",
+            "TICKET_SALES",
+        ]
         if report_type not in valid_types:
             messages.error(request, _("Invalid report type"))
             return redirect(
@@ -537,7 +577,7 @@ class ExportGenerateView(LoginRequiredMixin, View):
                 )
 
             response = HttpResponse(content, content_type=content_type)
-            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            response["Content-Disposition"] = f'attachment; filename="{filename}"'
             return response
         except Exception as e:
             messages.error(request, _("Export failed: %(error)s") % {"error": str(e)})

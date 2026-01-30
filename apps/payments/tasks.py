@@ -11,15 +11,14 @@ def send_refund_notification_task(refund_id: int):
 
     try:
         refund = Refund.objects.select_related(
-            'payment__booking__user',
-            'payment__booking'
+            "payment__booking__user", "payment__booking"
         ).get(id=refund_id)
 
         payment = refund.payment
         booking = payment.booking
         user = booking.user
 
-        ticket = booking.tickets.select_related('ticket_type__event').first()
+        ticket = booking.tickets.select_related("ticket_type__event").first()
         if not ticket:
             logger.warning(f"Refund {refund_id} has no associated tickets")
             return
@@ -33,15 +32,18 @@ def send_refund_notification_task(refund_id: int):
                 refund=refund,
                 event=event,
                 original_amount=payment.amount,
-                payment_method=payment_method
+                payment_method=payment_method,
             )
 
-        if user.phone_number and refund.status in [Refund.Status.APPROVED, Refund.Status.PROCESSED]:
+        if user.phone_number and refund.status in [
+            Refund.Status.APPROVED,
+            Refund.Status.PROCESSED,
+        ]:
             NotificationService.send_refund_sms(
                 phone_number=user.phone_number,
                 refund=refund,
                 event=event,
-                payment_method=payment_method
+                payment_method=payment_method,
             )
 
         logger.info(f"Refund notification sent for refund {refund_id}")
@@ -59,8 +61,7 @@ def process_expired_payments_task():
 
     try:
         expired_count = Payment.objects.filter(
-            status=Payment.Status.PENDING,
-            expires_at__lt=timezone.now()
+            status=Payment.Status.PENDING, expires_at__lt=timezone.now()
         ).update(status=Payment.Status.EXPIRED)
 
         if expired_count > 0:
@@ -77,30 +78,30 @@ def send_payment_reminder_task(payment_id: int):
     from apps.core.services.notifications import NotificationService
 
     try:
-        payment = Payment.objects.select_related(
-            'booking__user'
-        ).get(id=payment_id)
+        payment = Payment.objects.select_related("booking__user").get(id=payment_id)
 
         if payment.status != Payment.Status.PENDING:
             return
 
         user = payment.booking.user
-        ticket = payment.booking.tickets.select_related('ticket_type__event').first()
+        ticket = payment.booking.tickets.select_related("ticket_type__event").first()
         if not ticket:
             return
 
         event = ticket.ticket_type.event
-        minutes_remaining = max(0, int((payment.expires_at - timezone.now()).total_seconds() / 60))
+        minutes_remaining = max(
+            0, int((payment.expires_at - timezone.now()).total_seconds() / 60)
+        )
 
         if user.phone_number and minutes_remaining > 0:
             NotificationService.send_sms(
                 phone_number=user.phone_number,
-                template_name='sms/payment_reminder.txt',
+                template_name="sms/payment_reminder.txt",
                 context={
-                    'event': event,
-                    'booking': payment.booking,
-                    'minutes_remaining': minutes_remaining,
-                }
+                    "event": event,
+                    "booking": payment.booking,
+                    "minutes_remaining": minutes_remaining,
+                },
             )
             logger.info(f"Payment reminder sent for payment {payment_id}")
 

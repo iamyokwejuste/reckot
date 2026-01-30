@@ -6,76 +6,208 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('events', '0002_checkoutquestion_event_is_public_event_slug_and_more'),
-        ('orgs', '0003_role_alter_invitation_role_alter_membership_role'),
-        ('tickets', '0002_ticketquestionanswer_booking_event_booking_reference_and_more'),
+        ("events", "0002_checkoutquestion_event_is_public_event_slug_and_more"),
+        ("orgs", "0003_role_alter_invitation_role_alter_membership_role"),
+        (
+            "tickets",
+            "0002_ticketquestionanswer_booking_event_booking_reference_and_more",
+        ),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='AffiliateLink',
+            name="AffiliateLink",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('code', models.CharField(max_length=50, unique=True)),
-                ('commission_type', models.CharField(choices=[('FIXED', 'Fixed Amount'), ('PERCENTAGE', 'Percentage')], default='PERCENTAGE', max_length=20)),
-                ('commission_value', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
-                ('is_active', models.BooleanField(default=True)),
-                ('clicks', models.PositiveIntegerField(default=0)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('expires_at', models.DateTimeField(blank=True, null=True)),
-                ('affiliate_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='affiliate_links', to=settings.AUTH_USER_MODEL)),
-                ('event', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='affiliate_links', to='events.event')),
-                ('organization', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='affiliate_links', to='orgs.organization')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
+                ("code", models.CharField(max_length=50, unique=True)),
+                (
+                    "commission_type",
+                    models.CharField(
+                        choices=[
+                            ("FIXED", "Fixed Amount"),
+                            ("PERCENTAGE", "Percentage"),
+                        ],
+                        default="PERCENTAGE",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "commission_value",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=10),
+                ),
+                ("is_active", models.BooleanField(default=True)),
+                ("clicks", models.PositiveIntegerField(default=0)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("expires_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "affiliate_user",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="affiliate_links",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "event",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="affiliate_links",
+                        to="events.event",
+                    ),
+                ),
+                (
+                    "organization",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="affiliate_links",
+                        to="orgs.organization",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='AffiliateConversion',
+            name="AffiliateConversion",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('order_amount', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('commission_amount', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('status', models.CharField(choices=[('PENDING', 'Pending'), ('APPROVED', 'Approved'), ('PAID', 'Paid'), ('REJECTED', 'Rejected')], default='PENDING', max_length=20)),
-                ('paid_at', models.DateTimeField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('booking', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='affiliate_conversion', to='tickets.booking')),
-                ('affiliate_link', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='conversions', to='marketing.affiliatelink')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("order_amount", models.DecimalField(decimal_places=2, max_digits=10)),
+                (
+                    "commission_amount",
+                    models.DecimalField(decimal_places=2, max_digits=10),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("PENDING", "Pending"),
+                            ("APPROVED", "Approved"),
+                            ("PAID", "Paid"),
+                            ("REJECTED", "Rejected"),
+                        ],
+                        default="PENDING",
+                        max_length=20,
+                    ),
+                ),
+                ("paid_at", models.DateTimeField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "booking",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="affiliate_conversion",
+                        to="tickets.booking",
+                    ),
+                ),
+                (
+                    "affiliate_link",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="conversions",
+                        to="marketing.affiliatelink",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='SocialShare',
+            name="SocialShare",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('platform', models.CharField(choices=[('FACEBOOK', 'Facebook'), ('TWITTER', 'Twitter/X'), ('LINKEDIN', 'LinkedIn'), ('WHATSAPP', 'WhatsApp'), ('TELEGRAM', 'Telegram'), ('EMAIL', 'Email'), ('COPY_LINK', 'Copy Link')], max_length=20)),
-                ('ip_address', models.GenericIPAddressField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('event', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='shares', to='events.event')),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "platform",
+                    models.CharField(
+                        choices=[
+                            ("FACEBOOK", "Facebook"),
+                            ("TWITTER", "Twitter/X"),
+                            ("LINKEDIN", "LinkedIn"),
+                            ("WHATSAPP", "WhatsApp"),
+                            ("TELEGRAM", "Telegram"),
+                            ("EMAIL", "Email"),
+                            ("COPY_LINK", "Copy Link"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                ("ip_address", models.GenericIPAddressField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "event",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="shares",
+                        to="events.event",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.AddIndex(
-            model_name='affiliatelink',
-            index=models.Index(fields=['code'], name='marketing_a_code_e0cedc_idx'),
+            model_name="affiliatelink",
+            index=models.Index(fields=["code"], name="marketing_a_code_e0cedc_idx"),
         ),
         migrations.AddIndex(
-            model_name='affiliatelink',
-            index=models.Index(fields=['organization', 'is_active'], name='marketing_a_organiz_644cdb_idx'),
+            model_name="affiliatelink",
+            index=models.Index(
+                fields=["organization", "is_active"],
+                name="marketing_a_organiz_644cdb_idx",
+            ),
         ),
         migrations.AddIndex(
-            model_name='affiliateconversion',
-            index=models.Index(fields=['affiliate_link', 'status'], name='marketing_a_affilia_cfc2b2_idx'),
+            model_name="affiliateconversion",
+            index=models.Index(
+                fields=["affiliate_link", "status"],
+                name="marketing_a_affilia_cfc2b2_idx",
+            ),
         ),
         migrations.AddIndex(
-            model_name='affiliateconversion',
-            index=models.Index(fields=['status', 'created_at'], name='marketing_a_status_9cc23a_idx'),
+            model_name="affiliateconversion",
+            index=models.Index(
+                fields=["status", "created_at"], name="marketing_a_status_9cc23a_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='socialshare',
-            index=models.Index(fields=['event', 'platform'], name='marketing_s_event_i_533e8f_idx'),
+            model_name="socialshare",
+            index=models.Index(
+                fields=["event", "platform"], name="marketing_s_event_i_533e8f_idx"
+            ),
         ),
     ]

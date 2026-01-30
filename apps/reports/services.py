@@ -201,12 +201,12 @@ def generate_pdf_export(event, report_type: str, user, mask_emails: bool = True)
     context["organization"] = event.organization
     context["report_type"] = report_type
     report_titles = {
-        'RSVP': 'Registered Attendees',
-        'PAYMENTS': 'Payment Records',
-        'CHECKINS': 'Check-in Report',
-        'SWAG': 'Swag Collection',
-        'FINANCIAL': 'Financial Summary',
-        'TICKET_SALES': 'Ticket Sales',
+        "RSVP": "Registered Attendees",
+        "PAYMENTS": "Payment Records",
+        "CHECKINS": "Check-in Report",
+        "SWAG": "Swag Collection",
+        "FINANCIAL": "Financial Summary",
+        "TICKET_SALES": "Ticket Sales",
     }
     context["report_title"] = report_titles.get(report_type, report_type)
 

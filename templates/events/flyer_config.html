@@ -218,8 +218,11 @@
                         </template>
 
                         <div x-show="templateUrl"
-                             class="absolute border-2 transition-all group"
-                             :class="selectedElement === 'photo' ? 'border-primary bg-primary/10 shadow-lg' : 'border-dashed border-white/40 bg-white/5 hover:border-primary/50 hover:bg-primary/5'"
+                             class="absolute border-2 transition-all group overflow-hidden"
+                             :class="[
+                                 selectedElement === 'photo' ? 'border-primary bg-primary/10 shadow-lg' : 'border-dashed border-white/40 bg-white/5 hover:border-primary/50 hover:bg-primary/5',
+                                 photo.shape === 'CIRCLE' ? 'rounded-full' : photo.shape === 'ROUNDED' ? 'rounded-xl' : ''
+                             ]"
                              :style="`left: ${photoPercent.x}%; top: ${photoPercent.y}%; width: ${photoPercent.w}%; height: ${photoPercent.h}%; cursor: ${dragging === 'photo' ? 'grabbing' : 'grab'};`"
                              @mousedown.prevent="startDrag($event, 'photo')"
                              @click="selectElement('photo')">
@@ -234,12 +237,15 @@
 
                         <template x-for="(field, index) in fields" :key="index">
                             <div x-show="templateUrl"
-                                 class="absolute px-2 py-1 text-center transition-all rounded"
-                                 :class="selectedElement === 'field-' + index ? 'bg-primary/30 ring-2 ring-primary shadow-lg' : 'bg-black/30 hover:bg-black/50 hover:ring-1 hover:ring-white/30'"
-                                 :style="`left: ${field.xPercent}%; top: ${field.yPercent}%; font-size: ${Math.max(8, field.font_size * canvasScale)}px; color: ${field.font_color}; max-width: ${field.max_width * canvasScale}px; cursor: ${dragging === 'field-' + index ? 'grabbing' : 'grab'};`"
+                                 class="absolute px-2 py-1 transition-all rounded"
+                                 :class="[
+                                     selectedElement === 'field-' + index ? 'ring-2 ring-primary shadow-lg' : 'hover:ring-1 hover:ring-white/30',
+                                     field.text_align === 'LEFT' ? 'text-left' : field.text_align === 'RIGHT' ? 'text-right' : 'text-center'
+                                 ]"
+                                 :style="`left: ${field.xPercent}%; top: ${field.yPercent}%; font-size: ${Math.max(8, field.font_size * canvasScale)}px; color: ${field.font_color}; background-color: ${field.bg_color || 'rgba(0,0,0,0.3)'}; max-width: ${field.max_width * canvasScale}px; cursor: ${dragging === 'field-' + index ? 'grabbing' : 'grab'};`"
                                  @mousedown.prevent="startDrag($event, 'field-' + index)"
                                  @click="selectElement('field-' + index)">
-                                <span class="whitespace-nowrap" x-text="field.label || 'Text Field'"></span>
+                                <span class="whitespace-nowrap" x-text="field.placeholder || field.label || 'Text Field'"></span>
                             </div>
                         </template>
                     </div>
@@ -316,6 +322,33 @@
                                     <label class="block text-xs font-medium mb-1">{% trans "Border Color" %}</label>
                                     <input type="color" x-model="photo.borderColor" class="w-full h-8 rounded cursor-pointer">
                                 </div>
+                                <div>
+                                    <label class="block text-xs font-medium mb-1">{% trans "Background Color" %}</label>
+                                    <div class="flex gap-2">
+                                        <input type="color"
+                                            :value="photo.bgColor.startsWith('rgba') ? '#' + photo.bgColor.match(/\d+/g).slice(0,3).map(x => parseInt(x).toString(16).padStart(2,'0')).join('') : photo.bgColor"
+                                            @input="
+                                                const hex = $event.target.value;
+                                                const r = parseInt(hex.slice(1,3), 16);
+                                                const g = parseInt(hex.slice(3,5), 16);
+                                                const b = parseInt(hex.slice(5,7), 16);
+                                                const alpha = photo.bgColor.startsWith('rgba') ? parseFloat(photo.bgColor.match(/[\d.]+/g)[3]) : 1;
+                                                photo.bgColor = `rgba(${r},${g},${b},${alpha})`
+                                            "
+                                            class="w-16 h-8 rounded cursor-pointer">
+                                        <div class="flex-1">
+                                            <input type="range" min="0" max="100"
+                                                :value="photo.bgColor.startsWith('rgba') ? parseFloat(photo.bgColor.match(/[\d.]+/g)[3]) * 100 : (photo.bgColor === 'transparent' ? 0 : 100)"
+                                                @input="
+                                                    const color = photo.bgColor.startsWith('rgba') ? photo.bgColor : photo.bgColor === 'transparent' ? 'rgba(0,0,0,0)' : photo.bgColor;
+                                                    const rgb = color.startsWith('rgba') ? color.match(/\d+/g).slice(0,3) : [0,0,0];
+                                                    photo.bgColor = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${$event.target.value/100})`
+                                                "
+                                                class="w-full">
+                                            <div class="text-xs text-muted-foreground">{% trans "Opacity" %}: <span x-text="Math.round((photo.bgColor.startsWith('rgba') ? parseFloat(photo.bgColor.match(/[\d.]+/g)[3]) : (photo.bgColor === 'transparent' ? 0 : 1)) * 100) + '%'"></span></div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </template>
@@ -348,6 +381,33 @@
                                 <div>
                                     <label class="block text-xs font-medium mb-1">{% trans "Font Color" %}</label>
                                     <input type="color" x-model="field.font_color" class="w-full h-8 rounded cursor-pointer">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium mb-1">{% trans "Background" %}</label>
+                                    <div class="flex gap-2">
+                                        <input type="color"
+                                            :value="field.bg_color.startsWith('rgba') ? '#' + field.bg_color.match(/\d+/g).slice(0,3).map(x => parseInt(x).toString(16).padStart(2,'0')).join('') : field.bg_color"
+                                            @input="
+                                                const hex = $event.target.value;
+                                                const r = parseInt(hex.slice(1,3), 16);
+                                                const g = parseInt(hex.slice(3,5), 16);
+                                                const b = parseInt(hex.slice(5,7), 16);
+                                                const alpha = field.bg_color.startsWith('rgba') ? parseFloat(field.bg_color.match(/[\d.]+/g)[3]) : 1;
+                                                field.bg_color = `rgba(${r},${g},${b},${alpha})`
+                                            "
+                                            class="w-16 h-8 rounded cursor-pointer">
+                                        <div class="flex-1">
+                                            <input type="range" min="0" max="100"
+                                                :value="field.bg_color.startsWith('rgba') ? parseFloat(field.bg_color.match(/[\d.]+/g)[3]) * 100 : (field.bg_color === 'transparent' ? 0 : 100)"
+                                                @input="
+                                                    const color = field.bg_color.startsWith('rgba') ? field.bg_color : field.bg_color === 'transparent' ? 'rgba(0,0,0,0)' : field.bg_color;
+                                                    const rgb = color.startsWith('rgba') ? color.match(/\d+/g).slice(0,3) : [0,0,0];
+                                                    field.bg_color = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${$event.target.value/100})`
+                                                "
+                                                class="w-full">
+                                            <div class="text-xs text-muted-foreground">{% trans "Opacity" %}: <span x-text="Math.round((field.bg_color.startsWith('rgba') ? parseFloat(field.bg_color.match(/[\d.]+/g)[3]) : (field.bg_color === 'transparent' ? 0 : 1)) * 100) + '%'"></span></div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium mb-1">{% trans "Max Width" %}</label>
@@ -413,6 +473,7 @@
         <input type="hidden" name="photo_shape" :value="photo.shape">
         <input type="hidden" name="photo_border_width" :value="photo.borderWidth">
         <input type="hidden" name="photo_border_color" :value="photo.borderColor">
+        <input type="hidden" name="photo_bg_color" :value="photo.bgColor">
         <input type="hidden" name="output_width" :value="output.width">
         <input type="hidden" name="output_height" :value="output.height">
         <input type="hidden" name="fields_json" :value="JSON.stringify(fields)">
@@ -456,7 +517,8 @@ function flyerEditor() {
             height: {{ config.photo_height|default:200 }},
             shape: '{{ config.photo_shape|default:"CIRCLE" }}',
             borderWidth: {{ config.photo_border_width|default:0 }},
-            borderColor: '{{ config.photo_border_color|default:"#ffffff" }}'
+            borderColor: '{{ config.photo_border_color|default:"#ffffff" }}',
+            bgColor: '{{ config.photo_bg_color|default:"transparent" }}'
         },
 
         photoPercent: { x: 0, y: 0, w: 0, h: 0 },
@@ -473,6 +535,7 @@ function flyerEditor() {
                 yPercent: {{ field.y }} / {{ config.output_height|default:1080 }} * 100,
                 font_size: {{ field.font_size }},
                 font_color: '{{ field.font_color }}',
+                bg_color: '{{ field.bg_color|default:"rgba(0,0,0,0.3)" }}',
                 max_width: {{ field.max_width }},
                 text_align: '{{ field.text_align }}',
                 required: {{ field.is_required|yesno:"true,false" }}
@@ -610,6 +673,7 @@ function flyerEditor() {
                 font_color: '#ffffff',
                 max_width: 400,
                 text_align: 'CENTER',
+                bg_color: 'rgba(0,0,0,0.3)',
                 required: true
             });
             this.selectedElement = 'field-' + (this.fields.length - 1);

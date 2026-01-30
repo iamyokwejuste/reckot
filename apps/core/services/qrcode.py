@@ -43,7 +43,7 @@ class QRCodeService:
 
         # Save to BytesIO
         buffer = BytesIO()
-        img.save(buffer, format='PNG')
+        img.save(buffer, format="PNG")
         buffer.seek(0)
 
         return buffer
@@ -60,7 +60,7 @@ class QRCodeService:
             Base64 encoded string of the PNG image
         """
         buffer = QRCodeService.generate_ticket_qr(ticket_code)
-        return base64.b64encode(buffer.getvalue()).decode('utf-8')
+        return base64.b64encode(buffer.getvalue()).decode("utf-8")
 
     @staticmethod
     def generate_booking_qr(booking_id: int, ticket_codes: list[str]) -> BytesIO:
@@ -81,7 +81,9 @@ class QRCodeService:
             border=2,
         )
 
-        qr_data = f"RECKOT:B{booking_id}:" + ",".join(str(code)[:8] for code in ticket_codes)
+        qr_data = f"RECKOT:B{booking_id}:" + ",".join(
+            str(code)[:8] for code in ticket_codes
+        )
         qr.add_data(qr_data)
         qr.make(fit=True)
 
@@ -93,7 +95,7 @@ class QRCodeService:
         )
 
         buffer = BytesIO()
-        img.save(buffer, format='PNG')
+        img.save(buffer, format="PNG")
         buffer.seek(0)
 
         return buffer

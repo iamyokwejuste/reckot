@@ -20,14 +20,12 @@ class OTPVerification(models.Model):
     """Model for storing OTP codes for email/phone verification."""
 
     class Type(models.TextChoices):
-        EMAIL = 'EMAIL', _('Email Verification')
-        PHONE = 'PHONE', _('Phone Verification')
-        PASSWORD_RESET = 'PASSWORD_RESET', _('Password Reset')
+        EMAIL = "EMAIL", _("Email Verification")
+        PHONE = "PHONE", _("Phone Verification")
+        PASSWORD_RESET = "PASSWORD_RESET", _("Password Reset")
 
     user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='otp_verifications'
+        User, on_delete=models.CASCADE, related_name="otp_verifications"
     )
     otp_type = models.CharField(max_length=20, choices=Type.choices)
     code = models.CharField(max_length=6)
@@ -38,10 +36,10 @@ class OTPVerification(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=['user', 'otp_type', 'is_used']),
-            models.Index(fields=['code', 'expires_at']),
+            models.Index(fields=["user", "otp_type", "is_used"]),
+            models.Index(fields=["code", "expires_at"]),
         ]
-        ordering = ['-created_at']
+        ordering = ["-created_at"]
 
     def save(self, *args, **kwargs):
         if not self.code:
@@ -53,7 +51,7 @@ class OTPVerification(models.Model):
     @staticmethod
     def generate_code(length: int = 6) -> str:
         """Generate a random numeric OTP code."""
-        return ''.join(random.choices(string.digits, k=length))
+        return "".join(random.choices(string.digits, k=length))
 
     @property
     def is_expired(self) -> bool:
@@ -66,14 +64,14 @@ class OTPVerification(models.Model):
     def verify(self, code: str) -> bool:
         """Verify the OTP code."""
         self.attempts += 1
-        self.save(update_fields=['attempts'])
+        self.save(update_fields=["attempts"])
 
         if not self.is_valid:
             return False
 
         if self.code == code:
             self.is_used = True
-            self.save(update_fields=['is_used'])
+            self.save(update_fields=["is_used"])
             return True
 
         return False
@@ -82,15 +80,13 @@ class OTPVerification(models.Model):
     def create_for_user(cls, user: User, otp_type: str, expiry_minutes: int = 10):
         """Create a new OTP for a user, invalidating previous ones."""
         # Invalidate previous unused OTPs of the same type
-        cls.objects.filter(
-            user=user,
-            otp_type=otp_type,
-            is_used=False
-        ).update(is_used=True)
+        cls.objects.filter(user=user, otp_type=otp_type, is_used=False).update(
+            is_used=True
+        )
 
         # Create new OTP
         return cls.objects.create(
             user=user,
             otp_type=otp_type,
-            expires_at=timezone.now() + timedelta(minutes=expiry_minutes)
+            expires_at=timezone.now() + timedelta(minutes=expiry_minutes),
         )

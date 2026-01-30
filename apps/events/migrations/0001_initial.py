@@ -5,28 +5,54 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('orgs', '0001_initial'),
+        ("orgs", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Event',
+            name="Event",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=200)),
-                ('description', models.TextField()),
-                ('start_at', models.DateTimeField()),
-                ('end_at', models.DateTimeField()),
-                ('location', models.CharField(max_length=200)),
-                ('capacity', models.PositiveIntegerField(default=0)),
-                ('state', models.CharField(choices=[('DRAFT', 'Draft'), ('PUBLISHED', 'Published'), ('CLOSED', 'Closed'), ('ARCHIVED', 'Archived')], default='DRAFT', max_length=10)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('organization', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='events', to='orgs.organization')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=200)),
+                ("description", models.TextField()),
+                ("start_at", models.DateTimeField()),
+                ("end_at", models.DateTimeField()),
+                ("location", models.CharField(max_length=200)),
+                ("capacity", models.PositiveIntegerField(default=0)),
+                (
+                    "state",
+                    models.CharField(
+                        choices=[
+                            ("DRAFT", "Draft"),
+                            ("PUBLISHED", "Published"),
+                            ("CLOSED", "Closed"),
+                            ("ARCHIVED", "Archived"),
+                        ],
+                        default="DRAFT",
+                        max_length=10,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "organization",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="events",
+                        to="orgs.organization",
+                    ),
+                ),
             ],
         ),
     ]

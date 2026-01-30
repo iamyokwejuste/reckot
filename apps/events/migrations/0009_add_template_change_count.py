@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('events', '0008_add_pay_per_use_accepted_fields'),
+        ("events", "0008_add_pay_per_use_accepted_fields"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='eventflyerconfig',
-            name='template_change_count',
+            model_name="eventflyerconfig",
+            name="template_change_count",
             field=models.PositiveSmallIntegerField(default=0),
         ),
     ]
