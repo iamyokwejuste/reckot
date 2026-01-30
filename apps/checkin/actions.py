@@ -2,7 +2,6 @@ from django.views import View
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
-from django.db.models import Count
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from apps.events.models import Event

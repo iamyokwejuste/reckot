@@ -81,13 +81,6 @@ class QRCodeService:
             border=2,
         )
 
-        # Create data with booking and all ticket codes
-        data = {
-            'booking': booking_id,
-            'tickets': ticket_codes,
-        }
-
-        # Use a simple format for the QR data
         qr_data = f"RECKOT:B{booking_id}:" + ",".join(str(code)[:8] for code in ticket_codes)
         qr.add_data(qr_data)
         qr.make(fit=True)

@@ -1,5 +1,5 @@
 from typing import Dict, List
-from datetime import datetime, timedelta
+from datetime import datetime
 from decimal import Decimal
 from apps.core.services.ai import gemini_ai
 

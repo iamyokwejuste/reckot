@@ -65,7 +65,6 @@ class PublicEventDetailView(View):
                 slug=event_slug,
                 preview_token=preview_token
             )
-            is_preview = event.state != Event.State.PUBLISHED
         else:
             event = get_object_or_404(
                 Event.objects.select_related('organization'),
@@ -115,7 +114,7 @@ class PublicEventDetailView(View):
         try:
             flyer_config = event.flyer_config
             flyer_enabled = flyer_config.is_enabled and flyer_config.template_image
-        except:
+        except Exception:
             pass
 
         return render(request, 'events/public_detail.html', {
@@ -305,7 +304,6 @@ class EventDashboardView(LoginRequiredMixin, View):
             organization__members=request.user
         )
 
-        bookings = Booking.objects.filter(event=event)
         tickets = Ticket.objects.filter(booking__event=event)
 
         tickets_sold = tickets.count()

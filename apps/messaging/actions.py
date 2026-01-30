@@ -1,12 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 from apps.orgs.models import Organization, Membership
 from apps.events.models import Event
-from apps.messaging.models import MessageTemplate, MessageCampaign, MessageDelivery
+from apps.messaging.models import MessageTemplate, MessageCampaign
 from apps.messaging.services import prepare_campaign, track_open, track_click
 from apps.messaging.tasks import send_campaign_task
 

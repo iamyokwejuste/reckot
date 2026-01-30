@@ -1,4 +1,3 @@
-import json
 from django.db.models import Sum
 from apps.events.models import Event, CheckoutQuestion
 from apps.tickets.models import Ticket, Booking, TicketQuestionAnswer

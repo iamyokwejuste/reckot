@@ -5,7 +5,6 @@ from django.views import View
 from django.views.decorators.csrf import csrf_protect
 from django.utils.decorators import method_decorator
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.utils.translation import gettext_lazy as _
 
 from apps.ai.verification import verify_event_authenticity, get_fraud_prevention_tips
 from apps.ai.voice_creator import create_event_from_voice, enhance_voice_created_event

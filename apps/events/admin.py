@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils import timezone
-from apps.events.models import Event, EventFlyerConfig, CheckoutQuestion, EventCustomization
+from apps.events.models import Event, EventFlyerConfig, CheckoutQuestion
 from apps.tickets.models import TicketType
 
 

@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.conf import settings
 from datetime import timedelta
 from decimal import Decimal
-from apps.payments.models import Payment, PaymentProvider
+from apps.payments.models import Payment
 from apps.payments.gateways import GatewayManager
 from apps.payments.gateways.base import PaymentStatus
 from apps.payments.invoice_service import create_invoice

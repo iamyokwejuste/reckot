@@ -1,10 +1,10 @@
 from typing import Dict, Optional
-from datetime import datetime, timedelta
+from datetime import datetime
 from apps.core.services.ai import gemini_ai
 
 
 def create_event_from_voice(audio_data: bytes, user_language: str = 'auto') -> Dict:
-    prompt = f"""You are an expert event planner for Africa. A user has described an event in their own words (possibly in French or English). Extract structured event information.
+    prompt = """You are an expert event planner for Africa. A user has described an event in their own words (possibly in French or English). Extract structured event information.
 
 Your task:
 1. Transcribe the audio to text
@@ -24,7 +24,7 @@ Extract these fields:
 - Ticket types (VIP, Regular, Early Bird, etc.)
 
 Return ONLY valid JSON:
-{{
+{
     "title": "Professional event title",
     "description": "Detailed, engaging description (200+ words)",
     "event_type": "category",
@@ -34,15 +34,15 @@ Return ONLY valid JSON:
     "capacity": 100,
     "suggested_price": 5000,
     "ticket_types": [
-        {{"name": "Regular", "price": 5000, "quantity": 80}},
-        {{"name": "VIP", "price": 10000, "quantity": 20}}
+        {"name": "Regular", "price": 5000, "quantity": 80},
+        {"name": "VIP", "price": 10000, "quantity": 20}
     ],
     "confidence": 0.95,
     "original_text": "transcribed audio",
     "language_detected": "fr",
     "missing_fields": ["list", "of", "fields", "we", "inferred"],
     "suggestions": ["helpful tips for organizer"]
-}}
+}
 
 Context for pricing (Cameroon/Africa):
 - Small workshop: 1,000-5,000 XAF

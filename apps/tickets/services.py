@@ -7,7 +7,7 @@ import qrcode
 import base64
 from weasyprint import HTML, CSS
 from weasyprint.text.fonts import FontConfiguration
-from apps.tickets.models import TicketType, Booking, Ticket, TicketQuestionAnswer, GuestSession
+from apps.tickets.models import TicketType, Booking, Ticket, TicketQuestionAnswer
 from apps.events.models import CouponUsage, CheckoutQuestion
 
 
@@ -60,7 +60,7 @@ def create_multi_ticket_booking(
                     is_active=True
                 )
             except TicketType.DoesNotExist:
-                return None, f"Invalid ticket type selected."
+                return None, "Invalid ticket type selected."
 
             sales_start = ticket_type.sales_start.replace(tzinfo=None) if ticket_type.sales_start else None
             sales_end = ticket_type.sales_end.replace(tzinfo=None) if ticket_type.sales_end else None

@@ -1,6 +1,5 @@
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont, ImageOps
-from django.conf import settings
 import os
 
 

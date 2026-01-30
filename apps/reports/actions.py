@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, Q, Sum
 from django.db.models.functions import TruncDate
-from django.http import FileResponse, Http404, HttpResponse
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.timesince import timesince
@@ -338,7 +338,8 @@ class GenerateReportView(LoginRequiredMixin, View):
         report_type = request.POST.get("report_type")
         format_type = request.POST.get("format", "CSV")
         mask_emails = request.POST.get("mask_emails", "on") == "on"
-        if report_type not in dict(ReportExport.Type.choices):
+        valid_types = ['RSVP', 'PAYMENTS', 'CHECKINS', 'SWAG', 'FINANCIAL', 'TICKET_SALES']
+        if report_type not in valid_types:
             return render(
                 request, "reports/_error.html", {"error": _("Invalid report type")}
             )
