@@ -186,7 +186,9 @@ self.addEventListener('sync', (event) => {
 async function syncChanges() {
     const clients = await self.clients.matchAll();
     clients.forEach(client => {
-        client.postMessage({ type: 'SYNC_STARTED' });
+        try {
+            client.postMessage({ type: 'SYNC_STARTED' });
+        } catch (error) {}
     });
 }
 

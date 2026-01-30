@@ -144,7 +144,7 @@ const AIComponents = {
             text = 'AI Generate',
             icon = 'sparkles',
             size = 'sm',
-            variant = 'outline',
+            variant = 'default',
             className = ''
         } = options;
 
@@ -636,7 +636,6 @@ ${result.reasoning || ''}
     },
 
     createVoiceEventCreator(options = {}) {
-        console.log('Creating Voice Event Creator...');
         const wrapper = document.createElement('div');
         wrapper.className = 'voice-event-creator card p-4 mb-4';
 
@@ -776,12 +775,10 @@ ${result.reasoning || ''}
             }
         });
 
-        console.log('Voice Event Creator created successfully');
         return wrapper;
     },
 
     createCoverImageGenerator(options = {}) {
-        console.log('Creating Cover Image Generator...');
         const coverInput = document.querySelector('[name="cover_image"]');
         if (!coverInput) {
             console.error('Cover input not found');
@@ -794,7 +791,6 @@ ${result.reasoning || ''}
             return;
         }
 
-        console.log('Found cover section:', coverSection);
         const wrapper = document.createElement('div');
         wrapper.className = 'mt-3 p-3 rounded-lg bg-primary/5 border border-primary/20';
 
@@ -866,7 +862,6 @@ ${result.reasoning || ''}
         });
 
         coverSection.appendChild(wrapper);
-        console.log('Cover Image Generator created and appended successfully');
         return wrapper;
     }
 };

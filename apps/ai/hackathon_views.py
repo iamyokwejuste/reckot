@@ -283,37 +283,56 @@ class GenerateCoverImageView(LoginRequiredMixin, View):
             title = data.get("title", "")
             description = data.get("description", "")
             event_type = data.get("event_type", "general")
-            style = data.get("style", "professional")
             aspect_ratio = data.get("aspect_ratio", "16:9")
 
-            style_prompts = {
-                "professional": "professional, modern, clean design",
-                "vibrant": "vibrant, colorful, energetic, eye-catching",
-                "elegant": "elegant, sophisticated, minimalist, premium",
-                "fun": "fun, playful, dynamic, exciting",
-                "cultural": "African cultural elements, traditional patterns, authentic",
+            event_visuals = {
+                "concert": "stage with musical instruments, professional lighting, audience atmosphere",
+                "workshop": "modern workspace, learning environment, professional setting",
+                "conference": "professional conference hall, business setting, modern architecture",
+                "seminar": "presentation setup, professional audience, modern venue",
+                "party": "celebration setup, festive decorations, social gathering space",
+                "sports": "sports venue, athletic equipment, competition setting",
+                "food": "dining setup, food presentation, restaurant or catering atmosphere",
+                "business": "corporate environment, office setting, professional meeting space",
+                "cultural": "cultural venue, traditional and modern elements, community gathering",
+                "general": "modern event venue, professional setup, welcoming atmosphere"
             }
 
-            style_descriptor = style_prompts.get(style, "professional, modern")
+            visual_guide = event_visuals.get(event_type, event_visuals["general"])
 
-            image_prompt = f"""Create a high-quality event poster for: {title}
+            aspect_ratios = {
+                "16:9": "1920x1080 pixels (landscape, 16:9 ratio)",
+                "1:1": "1080x1080 pixels (square, 1:1 ratio)",
+                "4:3": "1600x1200 pixels (landscape, 4:3 ratio)",
+                "3:2": "1800x1200 pixels (landscape, 3:2 ratio)"
+            }
+            dimension_spec = aspect_ratios.get(aspect_ratio, aspect_ratios["16:9"])
 
-Event Type: {event_type}
-Description: {description[:300]}
+            image_prompt = f"""Create a realistic, professional event cover image.
 
-Style: {style_descriptor}
-Requirements:
-- Professional event poster design
-- Eye-catching and suitable for social media
-- Include visual elements related to the event theme
-- African context and aesthetics
-- No text or typography (will be added separately)
-- High quality, suitable for printing
-- Vibrant colors that work well for promotional materials"""
+Event: {title}
+Type: {event_type}
+Context: {description[:200]}
 
-            image_bytes = gemini_ai.generate_image(
-                image_prompt, aspect_ratio=aspect_ratio
-            )
+Image Specifications:
+- Dimensions: {dimension_spec}
+- Orientation: Landscape, suitable for event covers and social media banners
+
+Visual Requirements:
+- Photorealistic style (NOT illustrated, NOT abstract, NOT surreal, NOT fantasy)
+- Show: {visual_guide}
+- African context: Black people attending/participating in the event, African venue/setting
+- Modern, clean, professional composition
+- Natural lighting and realistic colors
+- High resolution, print-quality
+- People should be Black/African, representing African event attendees
+- No text, no typography, no logos, no graphic overlays
+- No fantasy elements, no abstract art, no surrealism, no artistic interpretation
+- Professional photography style, as if taken by a professional event photographer
+- Focus on real, tangible elements that clearly represent the event type
+- Realistic perspective and proportions"""
+
+            image_bytes = gemini_ai.generate_image(image_prompt)
 
             if image_bytes:
                 image_base64 = base64.b64encode(image_bytes).decode("utf-8")
@@ -326,11 +345,12 @@ Requirements:
                 )
             else:
                 return JsonResponse(
-                    {"success": False, "error": "Failed to generate image"}, status=500
+                    {"success": False, "error": "AI did not generate any image. Please try again."}, status=500
                 )
 
         except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)}, status=500)
+            error_message = str(e)
+            return JsonResponse({"success": False, "error": error_message}, status=500)
 
 
 class AIFeaturesDemoView(View):
