@@ -632,7 +632,7 @@ class FlyerGeneratorView(View):
                 )
                 billing.update_totals()
 
-            response = HttpResponse(flyer_image.getvalue(), content_type='image/jpeg')
+            response = FileResponse(flyer_image, content_type='image/jpeg')
             response['Content-Disposition'] = f'inline; filename="{event.slug}-flyer.jpg"'
             return response
         except Exception as e:

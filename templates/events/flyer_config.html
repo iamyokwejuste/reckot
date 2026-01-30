@@ -182,7 +182,14 @@
 
         <div class="card p-6">
             <h3 class="font-semibold mb-4">{% trans "Visual Editor" %}</h3>
-            <p class="text-sm text-muted-foreground mb-4">{% trans "Drag elements to position them on your flyer. Click on an element to select and edit it." %}</p>
+            <div class="space-y-2 mb-4">
+                <p class="text-sm text-muted-foreground">{% trans "Position elements on your flyer template:" %}</p>
+                <ul class="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                    <li>{% trans "Click and drag the photo area to move where attendee photos will appear" %}</li>
+                    <li>{% trans "Drag the resize handle (bottom-right corner) to adjust photo size" %}</li>
+                    <li>{% trans "Click any element to select and edit its properties on the right" %}</li>
+                </ul>
+            </div>
 
             <div class="flex flex-col lg:flex-row gap-6">
                 <div class="flex-1">
@@ -211,23 +218,25 @@
                         </template>
 
                         <div x-show="templateUrl"
-                             class="absolute border-2 border-dashed cursor-move transition-colors"
-                             :class="selectedElement === 'photo' ? 'border-primary bg-primary/20' : 'border-white/50 bg-white/10 hover:border-white'"
-                             :style="`left: ${photoPercent.x}%; top: ${photoPercent.y}%; width: ${photoPercent.w}%; height: ${photoPercent.h}%;`"
+                             class="absolute border-2 transition-all group"
+                             :class="selectedElement === 'photo' ? 'border-primary bg-primary/10 shadow-lg' : 'border-dashed border-white/40 bg-white/5 hover:border-primary/50 hover:bg-primary/5'"
+                             :style="`left: ${photoPercent.x}%; top: ${photoPercent.y}%; width: ${photoPercent.w}%; height: ${photoPercent.h}%; cursor: ${dragging === 'photo' ? 'grabbing' : 'grab'};`"
                              @mousedown.prevent="startDrag($event, 'photo')"
                              @click="selectElement('photo')">
-                            <div class="absolute inset-0 flex items-center justify-center">
-                                <i data-lucide="user" class="w-8 h-8 text-white/70"></i>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center gap-1 pointer-events-none">
+                                <i data-lucide="user" class="w-8 h-8 text-white/60 group-hover:text-white/80 transition-colors"></i>
+                                <span class="text-[10px] text-white/50 group-hover:text-white/70 font-medium px-2 py-0.5 bg-black/30 rounded">Attendee Photo</span>
                             </div>
-                            <div class="absolute -right-1 -bottom-1 w-3 h-3 bg-primary rounded-full cursor-se-resize"
-                                 @mousedown.prevent.stop="startResize($event, 'photo')"></div>
+                            <div class="absolute -right-1 -bottom-1 w-4 h-4 bg-primary rounded-full cursor-se-resize border-2 border-white shadow-md hover:scale-110 transition-transform"
+                                 @mousedown.prevent.stop="startResize($event, 'photo')"
+                                 title="Drag to resize"></div>
                         </div>
 
                         <template x-for="(field, index) in fields" :key="index">
                             <div x-show="templateUrl"
-                                 class="absolute px-2 py-1 cursor-move text-center transition-colors rounded"
-                                 :class="selectedElement === 'field-' + index ? 'bg-primary/30 ring-2 ring-primary' : 'bg-black/30 hover:bg-black/50'"
-                                 :style="`left: ${field.xPercent}%; top: ${field.yPercent}%; font-size: ${Math.max(8, field.font_size * canvasScale)}px; color: ${field.font_color}; max-width: ${field.max_width * canvasScale}px;`"
+                                 class="absolute px-2 py-1 text-center transition-all rounded"
+                                 :class="selectedElement === 'field-' + index ? 'bg-primary/30 ring-2 ring-primary shadow-lg' : 'bg-black/30 hover:bg-black/50 hover:ring-1 hover:ring-white/30'"
+                                 :style="`left: ${field.xPercent}%; top: ${field.yPercent}%; font-size: ${Math.max(8, field.font_size * canvasScale)}px; color: ${field.font_color}; max-width: ${field.max_width * canvasScale}px; cursor: ${dragging === 'field-' + index ? 'grabbing' : 'grab'};`"
                                  @mousedown.prevent="startDrag($event, 'field-' + index)"
                                  @click="selectElement('field-' + index)">
                                 <span class="whitespace-nowrap" x-text="field.label || 'Text Field'"></span>
