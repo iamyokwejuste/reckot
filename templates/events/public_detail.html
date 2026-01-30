@@ -367,7 +367,7 @@
                                            min="0"
                                            max="{{ ticket_type.max_per_order }}"
                                            value="0"
-                                           @input="if (quantity > {{ ticket_type.max_per_order }}) quantity = {{ ticket_type.max_per_order }}; if (quantity < 0) quantity = 0; showAttendees = quantity > 0"
+                                           @input="if (quantity > {{ ticket_type.max_per_order }}) quantity = {{ ticket_type.max_per_order }}; if (quantity < 0) quantity = 0; showAttendees = quantity > 1"
                                            @change="if (quantity > {{ ticket_type.max_per_order }}) quantity = {{ ticket_type.max_per_order }}; if (quantity < 0) quantity = 0"
                                            class="h-10 w-20 rounded-md border border-input bg-background px-3 py-2 text-sm text-center ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                            placeholder="0">
@@ -379,26 +379,28 @@
                                     {% endif %}
                                 </div>
 
-                                <div x-show="showAttendees && quantity > 0" x-collapse x-cloak class="space-y-2 pt-3 border-t border-border">
+                                <div x-show="showAttendees && quantity > 1" x-collapse x-cloak class="space-y-3 pt-3 border-t border-border">
                                     <div class="flex items-center justify-between">
-                                        <div class="flex items-center gap-2 text-xs font-medium">
-                                            <i data-lucide="users" class="w-3.5 h-3.5"></i>
-                                            <span>{% trans "Attendee Details" %}</span>
+                                        <div class="flex items-center gap-2 text-sm font-medium">
+                                            <i data-lucide="users" class="w-4 h-4"></i>
+                                            <span x-text="quantity + ' {% trans "Attendees" %}'"></span>
                                         </div>
-                                        <span class="text-[10px] text-muted-foreground">{% trans "Optional - can use same email" %}</span>
+                                        <span class="text-xs text-muted-foreground">{% trans "Optional" %}</span>
                                     </div>
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <div class="space-y-2 max-h-80 overflow-y-auto pr-1">
                                         <template x-for="i in quantity" :key="i">
-                                            <div class="bg-muted/20 rounded-md p-2 space-y-1.5">
-                                                <div class="text-[10px] font-medium text-muted-foreground uppercase tracking-wide" x-text="'{% trans "Attendee" %} ' + i"></div>
-                                                <input type="text"
-                                                       :name="'attendee_name_{{ ticket_type.id }}_' + (i-1)"
-                                                       class="input w-full text-xs h-7"
-                                                       :placeholder="'{% trans "Name" %}'">
-                                                <input type="email"
-                                                       :name="'attendee_email_{{ ticket_type.id }}_' + (i-1)"
-                                                       class="input w-full text-xs h-7"
-                                                       :placeholder="'{% trans "Email" %}'">
+                                            <div class="bg-muted/30 rounded-lg p-3 space-y-2 border border-border">
+                                                <div class="text-xs font-medium text-muted-foreground" x-text="'{% trans "Person" %} ' + i"></div>
+                                                <div class="grid grid-cols-1 gap-2">
+                                                    <input type="text"
+                                                           :name="'attendee_name_{{ ticket_type.id }}_' + (i-1)"
+                                                           class="input w-full text-sm h-9"
+                                                           :placeholder="'{% trans "Full name" %}'">
+                                                    <input type="email"
+                                                           :name="'attendee_email_{{ ticket_type.id }}_' + (i-1)"
+                                                           class="input w-full text-sm h-9"
+                                                           :placeholder="'{% trans "Email address" %}'">
+                                                </div>
                                             </div>
                                         </template>
                                     </div>

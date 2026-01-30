@@ -1,10 +1,11 @@
+import logging
+import qrcode
+import base64
 from django.db import transaction
 from django.template.loader import render_to_string
 from django.utils import timezone
 from decimal import Decimal
 from io import BytesIO
-import qrcode
-import base64
 from weasyprint import HTML, CSS
 from weasyprint.text.fonts import FontConfiguration
 from apps.tickets.models import TicketType, Booking, Ticket, TicketQuestionAnswer
@@ -203,6 +204,9 @@ def generate_ticket_qr_code(ticket):
 
 
 def generate_ticket_pdf(ticket):
+    logging.getLogger('fontTools').setLevel(logging.WARNING)
+    logging.getLogger('weasyprint').setLevel(logging.WARNING)
+
     qr_code_data = generate_ticket_qr_code(ticket)
     event = ticket.ticket_type.event
     org = event.organization
@@ -210,8 +214,14 @@ def generate_ticket_pdf(ticket):
 
     try:
         customization = event.customization
+        primary_color = customization.primary_color or "#1a1a1a"
+        secondary_color = customization.secondary_color or "#2d2d2d"
+        text_color = customization.text_color or "#ffffff"
     except Exception:
         customization = None
+        primary_color = "#1a1a1a"
+        secondary_color = "#2d2d2d"
+        text_color = "#ffffff"
 
     context = {
         "ticket": ticket,
@@ -225,92 +235,91 @@ def generate_ticket_pdf(ticket):
     html_content = render_to_string("tickets/pdf/ticket.html", context)
 
     font_config = FontConfiguration()
-    css = CSS(
-        string="""
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        @page {
+    css_content = f"""
+        @page {{
             size: 4in 6in;
             margin: 0;
-        }
-        body {
-            font-family: 'Inter', system-ui, sans-serif;
+        }}
+        body {{
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             margin: 0;
             padding: 0;
-        }
-        .ticket {
+        }}
+        .ticket {{
             width: 4in;
             height: 6in;
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-            color: white;
+            background: linear-gradient(135deg, {primary_color} 0%, {secondary_color} 100%);
+            color: {text_color};
             padding: 24px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-        }
-        .ticket-header {
+            overflow: hidden;
+        }}
+        .ticket-header {{
             text-align: center;
             padding-bottom: 16px;
             border-bottom: 1px dashed rgba(255,255,255,0.2);
-        }
-        .ticket-logo {
+        }}
+        .ticket-logo {{
             max-height: 40px;
             max-width: 120px;
             margin-bottom: 8px;
-        }
-        .event-title {
-            font-size: 20px;
+        }}
+        .event-title {{
+            font-size: 18px;
             font-weight: 700;
             margin: 0;
             line-height: 1.2;
-        }
-        .ticket-type {
-            font-size: 12px;
+        }}
+        .ticket-type {{
+            font-size: 11px;
             opacity: 0.7;
             margin-top: 4px;
-        }
-        .ticket-details {
+        }}
+        .ticket-details {{
             flex: 1;
             padding: 16px 0;
-        }
-        .detail-row {
+        }}
+        .detail-row {{
             display: flex;
             justify-content: space-between;
-            margin-bottom: 12px;
-        }
-        .detail-label {
-            font-size: 10px;
+            margin-bottom: 10px;
+        }}
+        .detail-label {{
+            font-size: 9px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             opacity: 0.6;
-        }
-        .detail-value {
-            font-size: 13px;
+        }}
+        .detail-value {{
+            font-size: 12px;
             font-weight: 500;
-        }
-        .qr-section {
+        }}
+        .qr-section {{
             text-align: center;
-            padding-top: 16px;
+            padding-top: 12px;
             border-top: 1px dashed rgba(255,255,255,0.2);
-        }
-        .qr-code {
+        }}
+        .qr-code {{
             background: white;
-            padding: 12px;
+            padding: 10px;
             display: inline-block;
             border-radius: 8px;
-        }
-        .qr-code img {
-            width: 100px;
-            height: 100px;
-        }
-        .ticket-code {
+        }}
+        .qr-code img {{
+            width: 90px;
+            height: 90px;
+        }}
+        .ticket-code {{
             font-family: monospace;
-            font-size: 10px;
-            margin-top: 8px;
+            font-size: 9px;
+            margin-top: 6px;
             opacity: 0.6;
-        }
-    """,
-        font_config=font_config,
-    )
+        }}
+    """
+
+    css = CSS(string=css_content, font_config=font_config)
 
     html = HTML(string=html_content)
     pdf_content = html.write_pdf(stylesheets=[css], font_config=font_config)
@@ -318,6 +327,9 @@ def generate_ticket_pdf(ticket):
 
 
 def generate_booking_tickets_pdf(booking):
+    logging.getLogger('fontTools').setLevel(logging.WARNING)
+    logging.getLogger('weasyprint').setLevel(logging.WARNING)
+
     tickets = booking.tickets.select_related(
         "ticket_type", "ticket_type__event", "ticket_type__event__organization"
     )
@@ -327,8 +339,10 @@ def generate_booking_tickets_pdf(booking):
 
     try:
         customization = event.customization
+        primary_color = customization.primary_color or "#1a1a1a"
     except Exception:
         customization = None
+        primary_color = "#1a1a1a"
 
     tickets_data = []
     for ticket in tickets:
@@ -352,103 +366,102 @@ def generate_booking_tickets_pdf(booking):
     html_content = render_to_string("tickets/pdf/booking_tickets.html", context)
 
     font_config = FontConfiguration()
-    css = CSS(
-        string="""
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        @page {
+    css_content = f"""
+        @page {{
             size: A4;
             margin: 1cm;
-        }
-        body {
-            font-family: 'Inter', system-ui, sans-serif;
+        }}
+        body {{
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             font-size: 12px;
             color: #1a1a1a;
-        }
-        .page-break {
+        }}
+        .page-break {{
             page-break-before: always;
-        }
-        .ticket-card {
+        }}
+        .ticket-card {{
             border: 2px solid #e5e5e5;
             border-radius: 12px;
             padding: 24px;
             margin-bottom: 24px;
             background: #fafafa;
-        }
-        .ticket-header {
+            page-break-inside: avoid;
+        }}
+        .ticket-header {{
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
             margin-bottom: 20px;
             padding-bottom: 16px;
             border-bottom: 1px dashed #e5e5e5;
-        }
-        .org-logo {
+        }}
+        .org-logo {{
             max-height: 50px;
             max-width: 150px;
             margin-bottom: 8px;
-        }
-        .event-info h2 {
+        }}
+        .event-info h2 {{
             margin: 0 0 4px;
             font-size: 18px;
-        }
-        .event-info p {
+        }}
+        .event-info p {{
             margin: 0;
             color: #666;
             font-size: 12px;
-        }
-        .ticket-type-badge {
-            background: #1a1a1a;
+        }}
+        .ticket-type-badge {{
+            background: {primary_color};
             color: white;
             padding: 6px 12px;
             border-radius: 6px;
             font-size: 11px;
             font-weight: 600;
-        }
-        .ticket-body {
+        }}
+        .ticket-body {{
             display: flex;
             gap: 24px;
-        }
-        .ticket-details {
+        }}
+        .ticket-details {{
             flex: 1;
-        }
-        .detail-grid {
+        }}
+        .detail-grid {{
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
-        }
-        .detail-item label {
+        }}
+        .detail-item label {{
             display: block;
             font-size: 10px;
             text-transform: uppercase;
             color: #888;
             margin-bottom: 2px;
-        }
-        .detail-item span {
+        }}
+        .detail-item span {{
             font-weight: 500;
-        }
-        .qr-section {
+        }}
+        .qr-section {{
             text-align: center;
-        }
-        .qr-code {
+        }}
+        .qr-code {{
             padding: 8px;
             background: white;
             border: 1px solid #e5e5e5;
             border-radius: 8px;
             display: inline-block;
-        }
-        .qr-code img {
+        }}
+        .qr-code img {{
             width: 80px;
             height: 80px;
-        }
-        .ticket-code {
+        }}
+        .ticket-code {{
             font-family: monospace;
             font-size: 9px;
             color: #888;
             margin-top: 4px;
-        }
-    """,
-        font_config=font_config,
-    )
+        }}
+    """
+
+    css = CSS(string=css_content, font_config=font_config)
 
     html = HTML(string=html_content)
     pdf_content = html.write_pdf(stylesheets=[css], font_config=font_config)

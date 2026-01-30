@@ -194,7 +194,7 @@
                     <a href="{% url 'tickets:list' %}"
                        class="sidebar-item {% if request.resolver_match.url_name == 'list' and 'tickets' in request.path %}sidebar-item-active{% endif %}">
                         <i data-lucide="ticket" class="h-5 w-5 shrink-0"></i>
-                        <span x-show="!collapsed" x-transition class="truncate">{% trans "Tickets" %}</span>
+                        <span x-show="!collapsed" x-transition class="truncate">{% trans "RSVP" %}</span>
                     </a>
 
                     <a href="{% url 'checkin:list' %}"

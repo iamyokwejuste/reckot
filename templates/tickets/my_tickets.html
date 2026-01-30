@@ -55,7 +55,12 @@
                                 <i data-lucide="ticket" class="w-6 h-6 text-primary"></i>
                             </div>
                             <div>
-                                <p class="font-medium">{{ ticket.ticket_type.name }}</p>
+                                <p class="font-medium">
+                                    {{ ticket.ticket_type.name }}
+                                    {% if ticket.attendee_name %}
+                                        <span class="text-muted-foreground font-normal">({{ ticket.attendee_name }})</span>
+                                    {% endif %}
+                                </p>
                                 <div class="flex items-center gap-3 mt-0.5 text-sm text-muted-foreground">
                                     <span class="font-mono">{{ ticket.code|slice:":8" }}</span>
                                     {% if ticket.is_checked_in %}

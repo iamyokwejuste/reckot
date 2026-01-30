@@ -45,6 +45,98 @@
         </div>
     </div>
 
+    <div class="card p-4" x-data="{ showFilters: false, exportOpen: false }">
+        <div class="space-y-4">
+            <div class="flex flex-col sm:flex-row gap-3">
+                <div class="flex-1">
+                    <form method="get" class="flex gap-2">
+                        <div class="relative flex-1">
+                            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"></i>
+                            <input type="text" name="search" placeholder="{% trans 'Search by name, email, or ticket code...' %}"
+                                   value="{{ request.GET.search }}"
+                                   class="input pl-10 w-full">
+                        </div>
+                        {% #button type="submit" variant="default" %}
+                            <i data-lucide="search" class="h-4 w-4"></i>
+                        {% /button %}
+                        {% #button type="button" variant="outline" attrs='@click="showFilters = !showFilters"' %}
+                            <i data-lucide="filter" class="h-4 w-4 mr-2"></i>
+                            {% trans "Filters" %}
+                        {% /button %}
+                    </form>
+                </div>
+                <div class="relative">
+                    {% #button type="button" variant="default" attrs='@click="exportOpen = !exportOpen"' %}
+                        <i data-lucide="download" class="h-4 w-4 mr-2"></i>
+                        {% trans "Export" %}
+                        <i data-lucide="chevron-down" class="h-4 w-4 ml-2"></i>
+                    {% /button %}
+                    <div x-show="exportOpen" @click.away="exportOpen = false" x-transition
+                         class="absolute right-0 mt-2 w-48 bg-popover border border-border rounded-md shadow-lg z-10">
+                        <a href="?export=pdf&{{ request.GET.urlencode }}" class="block px-4 py-2 text-sm hover:bg-muted transition-colors">
+                            <i data-lucide="file-text" class="h-4 w-4 inline mr-2"></i>
+                            {% trans "Export as PDF" %}
+                        </a>
+                        <a href="?export=excel&{{ request.GET.urlencode }}" class="block px-4 py-2 text-sm hover:bg-muted transition-colors">
+                            <i data-lucide="file-spreadsheet" class="h-4 w-4 inline mr-2"></i>
+                            {% trans "Export as Excel" %}
+                        </a>
+                        <a href="?export=csv&{{ request.GET.urlencode }}" class="block px-4 py-2 text-sm hover:bg-muted transition-colors">
+                            <i data-lucide="file-text" class="h-4 w-4 inline mr-2"></i>
+                            {% trans "Export as CSV" %}
+                        </a>
+                        <a href="?export=json&{{ request.GET.urlencode }}" class="block px-4 py-2 text-sm hover:bg-muted transition-colors">
+                            <i data-lucide="braces" class="h-4 w-4 inline mr-2"></i>
+                            {% trans "Export as JSON" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="showFilters" x-collapse class="border-t border-border pt-4">
+                <form method="get" class="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
+                    <input type="hidden" name="search" value="{{ request.GET.search }}">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">{% trans "Event" %}</label>
+                        <select name="event" class="input w-full">
+                            <option value="">{% trans "All Events" %}</option>
+                            {% for event in events %}
+                            <option value="{{ event.id }}" {% if request.GET.event == event.id|stringformat:"s" %}selected{% endif %}>
+                                {{ event.title }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">{% trans "Status" %}</label>
+                        <select name="status" class="input w-full">
+                            <option value="">{% trans "All Statuses" %}</option>
+                            <option value="CONFIRMED" {% if request.GET.status == "CONFIRMED" %}selected{% endif %}>{% trans "Confirmed" %}</option>
+                            <option value="PENDING" {% if request.GET.status == "PENDING" %}selected{% endif %}>{% trans "Pending" %}</option>
+                            <option value="CANCELLED" {% if request.GET.status == "CANCELLED" %}selected{% endif %}>{% trans "Cancelled" %}</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">{% trans "Checked In" %}</label>
+                        <select name="checked_in" class="input w-full">
+                            <option value="">{% trans "All" %}</option>
+                            <option value="yes" {% if request.GET.checked_in == "yes" %}selected{% endif %}>{% trans "Yes" %}</option>
+                            <option value="no" {% if request.GET.checked_in == "no" %}selected{% endif %}>{% trans "No" %}</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end gap-2">
+                        {% #button type="submit" variant="default" class="flex-1" %}
+                            {% trans "Apply" %}
+                        {% /button %}
+                        <a href="?" class="btn btn-outline flex-1 text-center">
+                            {% trans "Clear" %}
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="card">
         {% if tickets %}
         <div class="overflow-x-auto">
@@ -69,10 +161,24 @@
                             <p class="text-xs text-muted-foreground">{{ ticket.booking.event.start_at|date:"M d, Y" }}</p>
                         </td>
                         <td class="p-4">
-                            <p class="text-sm">{{ ticket.booking.user.email }}</p>
+                            {% if ticket.attendee_name %}
+                                <p class="text-sm font-medium">{{ ticket.attendee_name }}</p>
+                                <p class="text-xs text-muted-foreground">{{ ticket.attendee_email|default:"-" }}</p>
+                            {% elif ticket.booking.user %}
+                                <p class="text-sm">{{ ticket.booking.user.get_full_name|default:ticket.booking.user.email }}</p>
+                                <p class="text-xs text-muted-foreground">{{ ticket.booking.user.email }}</p>
+                            {% else %}
+                                <p class="text-sm">{{ ticket.booking.guest_name|default:ticket.booking.guest_email }}</p>
+                                <p class="text-xs text-muted-foreground">{{ ticket.booking.guest_email }}</p>
+                            {% endif %}
                         </td>
                         <td class="p-4">
-                            <span class="text-sm">{{ ticket.ticket_type.name }}</span>
+                            <span class="text-sm">
+                                {{ ticket.ticket_type.name }}
+                                {% if ticket.attendee_name %}
+                                    <span class="text-muted-foreground">({{ ticket.attendee_name }})</span>
+                                {% endif %}
+                            </span>
                         </td>
                         <td class="p-4">
                             {% if ticket.is_checked_in %}
