@@ -7,8 +7,8 @@
 <body>
     <div class="ticket">
         <div class="ticket-header">
-            {% if organization.logo %}
-            <img src="{{ organization.logo.url }}" alt="{{ organization.name }}" class="ticket-logo">
+            {% if org_logo_base64 %}
+            <img src="data:image/png;base64,{{ org_logo_base64 }}" alt="{{ organization.name }}" class="ticket-logo">
             {% endif %}
             <h1 class="event-title">{{ event.title }}</h1>
             <p class="ticket-type">{{ ticket.ticket_type.name }}</p>

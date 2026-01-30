@@ -9,6 +9,9 @@
     <div class="ticket-card {% if not forloop.first %}page-break{% endif %}">
         <div class="ticket-header">
             <div class="event-info">
+                {% if org_logo_base64 %}
+                <img src="data:image/png;base64,{{ org_logo_base64 }}" alt="{{ organization.name }}" class="org-logo">
+                {% endif %}
                 <h2>{{ event.title }}</h2>
                 <p>{{ organization.name }}</p>
             </div>

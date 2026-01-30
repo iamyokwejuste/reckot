@@ -137,6 +137,16 @@ def create_multi_ticket_booking(
         return booking, None
 
 
+def get_organization_logo_base64(organization):
+    if not organization.logo:
+        return None
+    try:
+        with organization.logo.open('rb') as image_file:
+            return base64.b64encode(image_file.read()).decode()
+    except Exception:
+        return None
+
+
 def generate_ticket_qr_code(ticket):
     qr = qrcode.QRCode(
         version=1,
@@ -158,6 +168,7 @@ def generate_ticket_pdf(ticket):
     qr_code_data = generate_ticket_qr_code(ticket)
     event = ticket.ticket_type.event
     org = event.organization
+    org_logo_base64 = get_organization_logo_base64(org)
 
     try:
         customization = event.customization
@@ -169,6 +180,7 @@ def generate_ticket_pdf(ticket):
         'event': event,
         'organization': org,
         'qr_code_data': qr_code_data,
+        'org_logo_base64': org_logo_base64,
         'customization': customization,
     }
 
@@ -268,6 +280,7 @@ def generate_booking_tickets_pdf(booking):
     tickets = booking.tickets.select_related('ticket_type', 'ticket_type__event', 'ticket_type__event__organization')
     event = booking.event
     org = event.organization
+    org_logo_base64 = get_organization_logo_base64(org)
 
     try:
         customization = event.customization
@@ -287,6 +300,7 @@ def generate_booking_tickets_pdf(booking):
         'event': event,
         'organization': org,
         'tickets_data': tickets_data,
+        'org_logo_base64': org_logo_base64,
         'customization': customization,
     }
 
@@ -321,6 +335,11 @@ def generate_booking_tickets_pdf(booking):
             margin-bottom: 20px;
             padding-bottom: 16px;
             border-bottom: 1px dashed #e5e5e5;
+        }
+        .org-logo {
+            max-height: 50px;
+            max-width: 150px;
+            margin-bottom: 8px;
         }
         .event-info h2 {
             margin: 0 0 4px;
