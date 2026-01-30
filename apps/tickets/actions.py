@@ -446,19 +446,6 @@ class CancelBookingView(LoginRequiredMixin, View):
             status=Payment.Status.CONFIRMED
         ).first()
 
-        if payment:
-            organization = booking.event.organization
-            balance_data = calculate_organization_balance(organization)
-            available_balance = balance_data["available_balance"]
-
-            if payment.amount > available_balance:
-                messages.error(
-                    request,
-                    _("Insufficient organization balance. Available: %(balance)s XAF, Required: %(amount)s XAF")
-                    % {"balance": available_balance, "amount": payment.amount}
-                )
-                return redirect("tickets:my_tickets")
-
         with transaction.atomic():
             if payment:
                 Refund.objects.create(
