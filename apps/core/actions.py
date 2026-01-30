@@ -4,7 +4,7 @@ import re
 from django.shortcuts import render, redirect
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
 from django.conf import settings
@@ -398,8 +398,6 @@ class PhoneSignupVerifyView(View):
 
 class DeleteAccountView(LoginRequiredMixin, View):
     def post(self, request):
-        from django.contrib.auth import logout
-        
         password = request.POST.get("password", "")
         
         if not request.user.check_password(password):

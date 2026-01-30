@@ -6,6 +6,11 @@ from django.conf import settings
 from django.db.models import Count, Sum, Q, F
 from django.utils import timezone
 
+from apps.events.models import Event
+from apps.tickets.models import Ticket, Booking, TicketType
+from apps.payments.models import Payment
+from apps.orgs.models import Organization
+
 logger = logging.getLogger(__name__)
 
 
@@ -122,11 +127,6 @@ def get_model_schema():
 
 def execute_django_query(query_code: str):
     try:
-        from apps.events.models import Event
-        from apps.tickets.models import Ticket, Booking, TicketType
-        from apps.payments.models import Payment
-        from apps.orgs.models import Organization
-
         safe_namespace = {
             "Event": Event,
             "Ticket": Ticket,

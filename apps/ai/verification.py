@@ -1,3 +1,4 @@
+import json
 from typing import Dict, Optional
 from decimal import Decimal
 from apps.core.services.ai import gemini_ai
@@ -55,8 +56,6 @@ Focus on African market context - events here often use mobile money, smaller ve
     result = gemini_ai.chat(prompt)
 
     try:
-        import json
-
         analysis = json.loads(result)
 
         if cover_image_data:

@@ -1,9 +1,10 @@
 import logging
 import requests
+from email.mime.image import MIMEImage
+from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
-from django.conf import settings
-from email.mime.image import MIMEImage
+from django.utils.html import strip_tags
 
 logger = logging.getLogger(__name__)
 
@@ -34,8 +35,6 @@ class NotificationService:
             context["site_url"] = cls.get_site_url()
 
             html_content = render_to_string(template_name, context)
-
-            from django.utils.html import strip_tags
 
             text_content = strip_tags(html_content)
 

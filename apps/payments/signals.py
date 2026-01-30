@@ -2,6 +2,7 @@ from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
 from apps.payments.models import Payment, Refund, RefundAuditLog
+from apps.payments.tasks import send_refund_notification_task
 from apps.tickets.models import Booking
 from apps.tickets.tasks import send_ticket_confirmation_task
 
@@ -30,8 +31,6 @@ def track_refund_status_change(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Refund)
 def handle_refund_status_change(sender, instance, created, **kwargs):
-    from apps.payments.tasks import send_refund_notification_task
-
     old_status = getattr(instance, "_old_status", None)
 
     if created:

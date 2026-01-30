@@ -1,3 +1,4 @@
+from datetime import timedelta
 from django.db import transaction
 from django.utils import timezone
 
@@ -21,8 +22,6 @@ def verify_and_checkin(code: str, staff_user) -> dict:
         now = timezone.now()
         event_start = event.start_at
         event_end = event.end_at
-        from datetime import timedelta
-
         window_start = event_start - timedelta(days=1)
         window_end = event_end + timedelta(days=1)
         if not (window_start <= now <= window_end):

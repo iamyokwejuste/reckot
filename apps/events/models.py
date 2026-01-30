@@ -1,8 +1,9 @@
+import uuid
 from django.db import models
+from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from apps.orgs.models import Organization
-import uuid
 
 
 class Event(models.Model):
@@ -207,8 +208,6 @@ class Coupon(models.Model):
 
     @property
     def is_valid(self):
-        from django.utils import timezone
-
         now = timezone.now()
         if not self.is_active:
             return False
