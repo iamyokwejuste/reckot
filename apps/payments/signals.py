@@ -13,7 +13,7 @@ def handle_payment_status_change(sender, instance, created, **kwargs):
         if booking.status != Booking.Status.CONFIRMED:
             booking.status = Booking.Status.CONFIRMED
             booking.save(update_fields=["status"])
-        send_ticket_confirmation_task.enqueue(booking.id)
+        send_ticket_confirmation_task.delay(booking.id)
 
 
 @receiver(pre_save, sender=Refund)
@@ -43,7 +43,7 @@ def handle_refund_status_change(sender, instance, created, **kwargs):
             performed_by=instance.requested_by,
             notes=f"Refund requested. Reason: {instance.reason}",
         )
-        send_refund_notification_task.enqueue(instance.id)
+        send_refund_notification_task.delay(instance.id)
 
     elif old_status and old_status != instance.status:
         action_map = {
@@ -66,4 +66,4 @@ def handle_refund_status_change(sender, instance, created, **kwargs):
             notes=notes,
         )
 
-        send_refund_notification_task.enqueue(instance.id)
+        send_refund_notification_task.delay(instance.id)

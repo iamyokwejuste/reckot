@@ -18,6 +18,7 @@ from weasyprint import HTML
 from apps.tickets.models import Ticket, Booking
 from apps.tickets.services import generate_ticket_pdf, generate_booking_tickets_pdf
 from apps.payments.models import Payment, Refund
+from apps.payments.services import calculate_organization_balance
 
 
 class TicketListView(LoginRequiredMixin, View):
@@ -432,24 +433,33 @@ class CancelBookingView(LoginRequiredMixin, View):
             reference=booking_ref
         )
 
-        # Check if user owns the booking
         if booking.user != request.user:
             messages.error(request, _("You don't have permission to cancel this booking."))
             return redirect("tickets:my_tickets")
 
-        # Check if booking can be cancelled
         if booking.status not in [Booking.Status.CONFIRMED]:
             messages.error(request, _("This booking cannot be cancelled."))
             return redirect("tickets:my_tickets")
 
-        # Find the confirmed payment for this booking
         payment = Payment.objects.filter(
             booking=booking,
             status=Payment.Status.CONFIRMED
         ).first()
 
+        if payment:
+            organization = booking.event.organization
+            balance_data = calculate_organization_balance(organization)
+            available_balance = balance_data["available_balance"]
+
+            if payment.amount > available_balance:
+                messages.error(
+                    request,
+                    _("Insufficient organization balance. Available: %(balance)s XAF, Required: %(amount)s XAF")
+                    % {"balance": available_balance, "amount": payment.amount}
+                )
+                return redirect("tickets:my_tickets")
+
         with transaction.atomic():
-            # Create refund if payment exists
             if payment:
                 Refund.objects.create(
                     payment=payment,
@@ -485,7 +495,6 @@ class RefundTicketView(LoginRequiredMixin, View):
             messages.error(request, _("Invalid refund amount"))
             return redirect("tickets:list")
 
-        # Get ticket and verify organizer has permission
         ticket = get_object_or_404(
             Ticket.objects.select_related(
                 "booking__event__organization",
@@ -498,12 +507,10 @@ class RefundTicketView(LoginRequiredMixin, View):
 
         booking = ticket.booking
 
-        # Validation: Check if booking is confirmed
         if booking.status != Booking.Status.CONFIRMED:
             messages.error(request, _("Only confirmed bookings can be refunded"))
             return redirect("tickets:list")
 
-        # Get the payment for this booking
         try:
             payment = Payment.objects.get(
                 booking=booking,
@@ -513,7 +520,6 @@ class RefundTicketView(LoginRequiredMixin, View):
             messages.error(request, _("No confirmed payment found for this ticket"))
             return redirect("tickets:list")
 
-        # Validation: Minimum refund amount of 100
         if refund_amount < Decimal("100"):
             messages.error(
                 request,
@@ -522,7 +528,18 @@ class RefundTicketView(LoginRequiredMixin, View):
             )
             return redirect("tickets:list")
 
-        # Validation: Cannot refund more than payment amount
+        organization = ticket.booking.event.organization
+        balance_data = calculate_organization_balance(organization)
+        available_balance = balance_data["available_balance"]
+
+        if refund_amount > available_balance:
+            messages.error(
+                request,
+                _("Insufficient organization balance. Available: %(balance)s XAF, Required: %(amount)s XAF")
+                % {"balance": available_balance, "amount": refund_amount}
+            )
+            return redirect("tickets:list")
+
         if refund_amount > payment.amount:
             messages.error(
                 request,
@@ -531,7 +548,6 @@ class RefundTicketView(LoginRequiredMixin, View):
             )
             return redirect("tickets:list")
 
-        # Check if refund already exists for this payment
         existing_refund = Refund.objects.filter(
             payment=payment,
             status__in=[Refund.Status.PENDING, Refund.Status.APPROVED, Refund.Status.PROCESSED]
@@ -544,7 +560,6 @@ class RefundTicketView(LoginRequiredMixin, View):
             )
             return redirect("tickets:list")
 
-        # Create refund
         with transaction.atomic():
             refund_type = (
                 Refund.Type.FULL
@@ -561,7 +576,6 @@ class RefundTicketView(LoginRequiredMixin, View):
                 requested_by=request.user,
             )
 
-            # Update booking status only for full refunds
             if refund_type == Refund.Type.FULL:
                 booking.status = Booking.Status.REFUNDED
                 booking.save()

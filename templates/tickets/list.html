@@ -45,7 +45,26 @@
         </div>
     </div>
 
-    <div class="card p-4" x-data="{ showFilters: false, exportOpen: false }">
+    <div class="card p-4" x-data="{
+        showFilters: false,
+        exportOpen: false,
+        downloadExport(url) {
+            fetch(url)
+                .then(response => response.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = '';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    this.exportOpen = false;
+                });
+        }
+    }">
         <div class="space-y-4">
             <div class="flex flex-col sm:flex-row gap-3">
                 <div class="flex-1">
@@ -73,22 +92,22 @@
                     {% /button %}
                     <div x-show="exportOpen" @click.away="exportOpen = false" x-transition
                          class="absolute right-0 mt-2 w-48 bg-popover border border-border rounded-md shadow-lg z-10">
-                        <a href="?export=pdf&{{ request.GET.urlencode }}" class="block px-4 py-2 text-sm hover:bg-muted transition-colors">
+                        <button @click="downloadExport('?export=pdf&{{ request.GET.urlencode }}')" type="button" class="w-full text-left block px-4 py-2 text-sm hover:bg-muted transition-colors">
                             <i data-lucide="file-text" class="h-4 w-4 inline mr-2"></i>
                             {% trans "Export as PDF" %}
-                        </a>
-                        <a href="?export=excel&{{ request.GET.urlencode }}" class="block px-4 py-2 text-sm hover:bg-muted transition-colors">
+                        </button>
+                        <button @click="downloadExport('?export=excel&{{ request.GET.urlencode }}')" type="button" class="w-full text-left block px-4 py-2 text-sm hover:bg-muted transition-colors">
                             <i data-lucide="file-spreadsheet" class="h-4 w-4 inline mr-2"></i>
                             {% trans "Export as Excel" %}
-                        </a>
-                        <a href="?export=csv&{{ request.GET.urlencode }}" class="block px-4 py-2 text-sm hover:bg-muted transition-colors">
+                        </button>
+                        <button @click="downloadExport('?export=csv&{{ request.GET.urlencode }}')" type="button" class="w-full text-left block px-4 py-2 text-sm hover:bg-muted transition-colors">
                             <i data-lucide="file-text" class="h-4 w-4 inline mr-2"></i>
                             {% trans "Export as CSV" %}
-                        </a>
-                        <a href="?export=json&{{ request.GET.urlencode }}" class="block px-4 py-2 text-sm hover:bg-muted transition-colors">
+                        </button>
+                        <button @click="downloadExport('?export=json&{{ request.GET.urlencode }}')" type="button" class="w-full text-left block px-4 py-2 text-sm hover:bg-muted transition-colors">
                             <i data-lucide="braces" class="h-4 w-4 inline mr-2"></i>
                             {% trans "Export as JSON" %}
-                        </a>
+                        </button>
                     </div>
                 </div>
             </div>

@@ -42,7 +42,60 @@
     selectedFormat: 'PDF',
     generating: false,
     error: '',
-    success: ''
+    success: '',
+    async downloadExport(event) {
+        event.preventDefault();
+        this.generating = true;
+        this.error = '';
+        this.success = '';
+
+        const formData = new FormData(event.target);
+
+        try {
+            const response = await fetch(event.target.action, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error('Export failed');
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = '';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            this.success = 'Export downloaded successfully';
+        } catch (error) {
+            this.error = 'Failed to generate export. Please try again.';
+        } finally {
+            this.generating = false;
+        }
+    },
+    async downloadFile(url) {
+        try {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = downloadUrl;
+            a.download = '';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(downloadUrl);
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('Download failed:', error);
+        }
+    }
 }">
     <div class="card p-6">
         <h2 class="text-lg font-semibold mb-4">{% trans "Select Report Type" %}</h2>
@@ -163,7 +216,7 @@
     </div>
 
     <form method="post" action="{% url 'reports:export_generate' event.organization.slug event.slug %}"
-          @submit="generating = true" x-show="selectedType" x-cloak hx-boost="false">
+          @submit="downloadExport($event)" x-show="selectedType" x-cloak>
         {% csrf_token %}
         <input type="hidden" name="report_type" :value="selectedType">
         <input type="hidden" name="format" :value="selectedFormat">
@@ -201,12 +254,10 @@
                         <p class="text-xs text-muted-foreground">{{ export.created_at|date:"M j, Y g:i A" }}</p>
                     </div>
                 </div>
-                <a href="{% url 'reports:download' export.reference %}" hx-boost="false">
-                    {% #button variant="outline" size="sm" %}
-                        <i data-lucide="download" class="w-4 h-4"></i>
-                        {% trans "Download" %}
-                    {% /button %}
-                </a>
+                {% #button type="button" variant="outline" size="sm" attrs="@click=\"downloadFile('{% url 'reports:download' export.reference %}')\"" %}
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    {% trans "Download" %}
+                {% /button %}
             </div>
             {% endfor %}
         </div>
