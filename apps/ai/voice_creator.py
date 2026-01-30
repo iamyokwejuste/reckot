@@ -15,6 +15,7 @@ Your task:
 
 Extract these fields:
 - Event title (catchy, professional)
+- Short tagline (one sentence, compelling hook)
 - Full description (professional, engaging)
 - Event type (conference, concert, workshop, party, sports, etc.)
 - Date and time (if mentioned, else suggest)
@@ -26,6 +27,7 @@ Extract these fields:
 Return ONLY valid JSON:
 {
     "title": "Professional event title",
+    "tagline": "One compelling sentence about the event",
     "description": "Detailed, engaging description (200+ words)",
     "event_type": "category",
     "date": "2026-02-15",

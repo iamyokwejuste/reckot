@@ -657,6 +657,19 @@ ${result.reasoning || ''}
                         <span class="text-xs text-muted-foreground ml-auto" id="voice-timer">0:00</span>
                     </div>
                 </div>
+                <div class="space-y-2 p-3 rounded-lg bg-muted/30 border border-border">
+                    <p class="text-xs font-medium">AI Enhancements</p>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="flex items-center gap-2 text-xs cursor-pointer">
+                            <input type="checkbox" id="voice-enhance-description" class="rounded">
+                            <span>Enhance description with AI</span>
+                        </label>
+                        <label class="flex items-center gap-2 text-xs cursor-pointer">
+                            <input type="checkbox" id="voice-generate-cover" class="rounded">
+                            <span>Generate cover image automatically</span>
+                        </label>
+                    </div>
+                </div>
                 <div class="flex gap-2">
                     <button type="button" id="voice-start-btn" class="btn btn-default flex-1">
                         <i data-lucide="mic" class="w-4 h-4"></i>
@@ -705,18 +718,19 @@ ${result.reasoning || ''}
                     try {
                         const result = await ReckotAI.voiceToEvent(audioBlob);
 
+                        if (result.error) {
+                            this.showToast('error', result.error || 'Failed to understand audio');
+                            return;
+                        }
+
+                        let updated = [];
+
                         if (result.title) {
                             const titleField = document.querySelector('#id_title, [name="title"]');
                             if (titleField) {
                                 titleField.value = result.title;
                                 titleField.dispatchEvent(new Event('input', { bubbles: true }));
-                            }
-                        }
-
-                        if (result.description) {
-                            const descField = document.querySelector('#id_description, [name="description"]');
-                            if (descField) {
-                                this.setEditorContent(descField, result.description);
+                                updated.push('title');
                             }
                         }
 
@@ -725,6 +739,15 @@ ${result.reasoning || ''}
                             if (taglineField) {
                                 taglineField.value = result.tagline;
                                 taglineField.dispatchEvent(new Event('input', { bubbles: true }));
+                                updated.push('tagline');
+                            }
+                        }
+
+                        if (result.description) {
+                            const descField = document.querySelector('#id_description, [name="description"]');
+                            if (descField) {
+                                this.setEditorContent(descField, result.description);
+                                updated.push('description');
                             }
                         }
 
@@ -733,10 +756,104 @@ ${result.reasoning || ''}
                             if (locationField) {
                                 locationField.value = result.location;
                                 locationField.dispatchEvent(new Event('input', { bubbles: true }));
+                                updated.push('location');
                             }
                         }
 
-                        this.showToast('success', 'Event details created from your voice!');
+                        if (result.event_type) {
+                            const typeField = document.querySelector('[name="event_type"]');
+                            if (typeField) {
+                                typeField.value = result.event_type;
+                                typeField.dispatchEvent(new Event('change', { bubbles: true }));
+                                updated.push('type');
+                            }
+                        }
+
+                        if (result.date) {
+                            const dateField = document.querySelector('[name="start_date"]');
+                            if (dateField) {
+                                dateField.value = result.date;
+                                dateField.dispatchEvent(new Event('input', { bubbles: true }));
+                                updated.push('date');
+                            }
+                        }
+
+                        if (result.time) {
+                            const timeField = document.querySelector('[name="start_time"]');
+                            if (timeField) {
+                                timeField.value = result.time;
+                                timeField.dispatchEvent(new Event('input', { bubbles: true }));
+                                updated.push('time');
+                            }
+                        }
+
+                        const enhanceDesc = wrapper.querySelector('#voice-enhance-description')?.checked;
+                        const generateCover = wrapper.querySelector('#voice-generate-cover')?.checked;
+
+                        if (enhanceDesc && result.title) {
+                            this.showPageOverlay('Enhancing description with AI...');
+                            try {
+                                const context = await this.collectEventContext(options);
+                                const enhanced = await ReckotAI.generateDescription(context);
+
+                                if (enhanced.description) {
+                                    const descField = document.querySelector('#id_description, [name="description"]');
+                                    if (descField) {
+                                        this.setEditorContent(descField, enhanced.description);
+                                        updated.push('enhanced description');
+                                    }
+                                }
+
+                                if (enhanced.tagline) {
+                                    const taglineField = document.querySelector('#id_short_description, [name="short_description"]');
+                                    if (taglineField) {
+                                        taglineField.value = enhanced.tagline;
+                                        taglineField.dispatchEvent(new Event('input', { bubbles: true }));
+                                        if (!updated.includes('tagline')) updated.push('enhanced tagline');
+                                    }
+                                }
+                            } catch (error) {
+                                this.showToast('warning', 'Description enhancement failed');
+                            }
+                        }
+
+                        if (generateCover && result.title) {
+                            this.showPageOverlay('Generating cover image with AI...');
+                            try {
+                                const title = document.querySelector('#id_title, [name="title"]')?.value;
+                                const description = this.getEditorContent(document.querySelector('#id_description, [name="description"]')) || '';
+                                const eventType = document.querySelector('[name="event_type"]')?.value || result.event_type || 'general';
+
+                                const coverResult = await ReckotAI.generateCoverImage({
+                                    title,
+                                    description,
+                                    event_type: eventType
+                                });
+
+                                if (coverResult.image) {
+                                    const response = await fetch(coverResult.image);
+                                    const blob = await response.blob();
+                                    const file = new File([blob], 'ai-generated-cover.png', { type: 'image/png' });
+                                    const dataTransfer = new DataTransfer();
+                                    dataTransfer.items.add(file);
+
+                                    const coverInput = document.querySelector('[name="cover_image"], [x-ref="coverInput"]');
+                                    if (coverInput) {
+                                        coverInput.files = dataTransfer.files;
+                                        coverInput.dispatchEvent(new Event('change', { bubbles: true }));
+                                        updated.push('cover image');
+                                    }
+                                }
+                            } catch (error) {
+                                this.showToast('warning', 'Cover image generation failed: ' + (error.message || 'Unknown error'));
+                            }
+                        }
+
+                        if (updated.length > 0) {
+                            this.showToast('success', `Updated: ${updated.join(', ')}`);
+                        } else {
+                            this.showToast('warning', 'No event details extracted from audio');
+                        }
                     } catch (error) {
                         this.showToast('error', error.message || 'Failed to convert voice to event');
                     } finally {
