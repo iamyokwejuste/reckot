@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib.sitemaps.views import sitemap
 from django.http import JsonResponse
 from django.views.static import serve
+from django.views.generic import RedirectView
 from apps.core.actions import (
     HomeView,
     WhyUsView,
@@ -34,6 +35,7 @@ def health_check(request):
 urlpatterns = [
     path("i18n/", include("django.conf.urls.i18n")),
     path("health/", health_check, name="health_check"),
+    path("favicon.ico", RedirectView.as_view(url=settings.STATIC_URL + "favicon.ico", permanent=True)),
     path("robots.txt", robots_txt, name="robots_txt"),
     path("sw.js", service_worker, name="service_worker"),
     path(

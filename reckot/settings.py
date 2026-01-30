@@ -215,6 +215,8 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
+WHITENOISE_MANIFEST_STRICT = False
+WHITENOISE_KEEP_ONLY_HASHED_FILES = False
 
 AUTH_USER_MODEL = "core.User"
 
