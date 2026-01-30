@@ -12,62 +12,157 @@
             <p class="text-muted-foreground">{% blocktrans with title=event.title %}Create your personalized flyer for {{ title }}{% endblocktrans %}</p>
         </div>
 
-        <div class="card p-6">
+        <div class="card p-6" x-data="{
+            step: 1,
+            ticketVerified: false,
+            verifiedTicketCode: '',
+            verifyingTicket: false,
+            verificationError: '',
+            verifyTicket() {
+                const ticketValue = this.$refs.ticketInput.value.trim();
+                if (!ticketValue) {
+                    this.verificationError = 'Please enter your email, phone number, or ticket code.';
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('ticket_verification', ticketValue);
+
+                this.verifyingTicket = true;
+                this.verificationError = '';
+
+                const csrftoken = getCookie('csrftoken');
+
+                fetch('{% url 'events:flyer_verify_ticket' org_slug=event.organization.slug event_slug=event.slug %}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': csrftoken
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        this.ticketVerified = true;
+                        this.verifiedTicketCode = data.ticket_code;
+                        this.step = 2;
+                        setTimeout(() => {
+                            if (window.lucide) lucide.createIcons();
+                        }, 100);
+                    } else {
+                        this.verificationError = data.error || 'Verification failed. Please try again.';
+                    }
+                })
+                .catch(error => {
+                    console.error('Verification error:', error);
+                    this.verificationError = 'Error verifying ticket. Please try again.';
+                })
+                .finally(() => {
+                    this.verifyingTicket = false;
+                });
+            }
+        }">
             <noscript>
                 <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded mb-4">
                     <p class="text-sm">{% trans "JavaScript is required to generate flyers. Please enable JavaScript in your browser." %}</p>
                 </div>
             </noscript>
-            <form id="flyer-form" method="post" enctype="multipart/form-data" class="space-y-6">
-                {% csrf_token %}
 
-                <div>
-                    <label class="block text-sm font-medium mb-2">{% trans "Your Photo" %}</label>
-                    <div class="border-2 border-dashed border-border rounded-lg p-6 text-center"
-                         x-data="{ preview: null, dragging: false }"
-                         @dragover.prevent="dragging = true"
-                         @dragleave.prevent="dragging = false"
-                         @drop.prevent="dragging = false; const file = $event.dataTransfer.files[0]; if (file) { $refs.photoInput.files = $event.dataTransfer.files; preview = URL.createObjectURL(file); }"
-                         :class="{ 'border-primary bg-primary/5': dragging }">
-                        <input type="file" name="photo" accept="image/*" required
-                               class="hidden" x-ref="photoInput"
-                               @change="preview = URL.createObjectURL($event.target.files[0])">
-                        <div x-show="!preview" class="space-y-2">
-                            <i data-lucide="upload" class="w-10 h-10 mx-auto text-muted-foreground"></i>
-                            <p class="text-sm text-muted-foreground">{% trans "Drag & drop or click to upload" %}</p>
-                            {% #button type="button" variant="outline" size="sm" attrs='@click="$refs.photoInput.click()"' %}
-                                {% trans "Choose Photo" %}
-                            {% /button %}
-                        </div>
-                        <div x-show="preview" class="space-y-2">
-                            <img :src="preview" class="w-32 h-32 mx-auto object-cover rounded-full">
-                            {% #button type="button" variant="outline" size="sm" attrs='@click="$refs.photoInput.click()"' %}
-                                {% trans "Change Photo" %}
-                            {% /button %}
+            <div x-show="step === 1" class="space-y-6">
+                <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+                    <h3 class="font-semibold mb-2 text-blue-900">{% trans "Ticket Verification Required" %}</h3>
+                    <p class="text-sm text-blue-700 mb-4">{% trans "Enter your email, phone number, or ticket code to verify you have a ticket:" %}</p>
+
+                    <div id="verification-form">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2 text-blue-900">{% trans "Email / Phone / Ticket Code" %} <span class="text-red-500">*</span></label>
+                                <input type="text" name="ticket_verification" x-ref="ticketInput" class="input w-full"
+                                       placeholder="your@email.com or +237XXXXXXXXX or TICKET-XXXX-XXXX"
+                                       @keydown.enter="verifyTicket()"
+                                       required>
+                            </div>
+
+                            <div x-show="verificationError" class="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700" x-text="verificationError"></div>
+
+                            <div>
+                                {% #button type="button" variant="default" class="w-full" attrs='@click="verifyTicket()" x-bind:disabled="verifyingTicket"' %}
+                                    <span x-show="!verifyingTicket" class="flex items-center justify-center">
+                                        <i data-lucide="shield-check" class="w-4 h-4 mr-2"></i>
+                                        {% trans "Verify Ticket" %}
+                                    </span>
+                                    <span x-show="verifyingTicket" class="flex items-center justify-center">
+                                        <i data-lucide="loader-2" class="w-4 h-4 mr-2 animate-spin"></i>
+                                        {% trans "Verifying..." %}
+                                    </span>
+                                {% /button %}
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                {% for field in text_fields %}
-                <div>
-                    <label class="block text-sm font-medium mb-2">
-                        {{ field.label }}
-                        {% if field.is_required %}<span class="text-red-500">*</span>{% endif %}
-                    </label>
-                    <input type="text" name="field_{{ field.id }}"
-                           placeholder="{{ field.placeholder }}"
-                           class="input w-full"
-                           {% if field.is_required %}required{% endif %}>
+            <div x-show="step === 2" class="space-y-6">
+                <div class="bg-green-50 border border-green-200 p-3 rounded-lg mb-4">
+                    <div class="flex items-center text-green-700">
+                        <i data-lucide="check-circle" class="w-5 h-5 mr-2"></i>
+                        <span class="text-sm font-medium">{% trans "Ticket verified successfully!" %}</span>
+                    </div>
                 </div>
-                {% endfor %}
 
-                <div class="pt-4">
-                    {% #button type="submit" variant="default" id="generate-btn" class="w-full" %}
-                        <i data-lucide="image" class="w-4 h-4 mr-2"></i>
-                        {% trans "Generate My Flyer" %}
-                    {% /button %}
-                </div>
-            </form>
+                <form id="flyer-form" method="post" enctype="multipart/form-data" class="space-y-6">
+                    {% csrf_token %}
+                    <input type="hidden" name="ticket_verification" x-model="$refs.ticketInput?.value">
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2">{% trans "Your Photo" %}</label>
+                        <div class="border-2 border-dashed border-border rounded-lg p-6 text-center"
+                             x-data="{ preview: null, dragging: false }"
+                             @dragover.prevent="dragging = true"
+                             @dragleave.prevent="dragging = false"
+                             @drop.prevent="dragging = false; const file = $event.dataTransfer.files[0]; if (file) { $refs.photoInput.files = $event.dataTransfer.files; preview = URL.createObjectURL(file); }"
+                             :class="{ 'border-primary bg-primary/5': dragging }">
+                            <input type="file" name="photo" accept="image/*" required
+                                   class="hidden" x-ref="photoInput"
+                                   @change="preview = URL.createObjectURL($event.target.files[0])">
+                            <div x-show="!preview" class="space-y-2">
+                                <i data-lucide="upload" class="w-10 h-10 mx-auto text-muted-foreground"></i>
+                                <p class="text-sm text-muted-foreground">{% trans "Drag & drop or click to upload" %}</p>
+                                {% #button type="button" variant="outline" size="sm" attrs='@click="$refs.photoInput.click()"' %}
+                                    {% trans "Choose Photo" %}
+                                {% /button %}
+                            </div>
+                            <div x-show="preview" class="space-y-2">
+                                <img :src="preview" class="w-32 h-32 mx-auto object-cover rounded-full">
+                                {% #button type="button" variant="outline" size="sm" attrs='@click="$refs.photoInput.click()"' %}
+                                    {% trans "Change Photo" %}
+                                {% /button %}
+                            </div>
+                        </div>
+                    </div>
+
+                    {% for field in text_fields %}
+                    <div>
+                        <label class="block text-sm font-medium mb-2">
+                            {{ field.label }}
+                            {% if field.is_required %}<span class="text-red-500">*</span>{% endif %}
+                        </label>
+                        <input type="text" name="field_{{ field.id }}"
+                               placeholder="{{ field.placeholder }}"
+                               class="input w-full"
+                               {% if field.is_required %}required{% endif %}>
+                    </div>
+                    {% endfor %}
+
+                    <div class="pt-4">
+                        {% #button type="submit" variant="default" id="generate-btn" class="w-full" %}
+                            <i data-lucide="image" class="w-4 h-4 mr-2"></i>
+                            {% trans "Generate My Flyer" %}
+                        {% /button %}
+                    </div>
+                </form>
+            </div>
 
             <div id="result" class="hidden mt-6">
                 <div class="border border-border rounded-lg overflow-hidden">
@@ -98,6 +193,21 @@
 </div>
 
 <script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('flyer-form');
     if (form) {
@@ -116,12 +226,15 @@ async function generateFlyer(formData) {
     btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 mr-2 animate-spin"></i>Generating...';
     if (window.lucide) lucide.createIcons();
 
+    const csrftoken = getCookie('csrftoken');
+
     try {
         const response = await fetch(window.location.href, {
             method: 'POST',
             body: formData,
             headers: {
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrftoken
             }
         });
 
@@ -130,7 +243,6 @@ async function generateFlyer(formData) {
             if (contentType && contentType.includes('image')) {
                 const blob = await response.blob();
 
-                // Verify blob is valid
                 if (blob.size === 0) {
                     throw new Error('Empty image received');
                 }
@@ -139,7 +251,6 @@ async function generateFlyer(formData) {
                 const imgElement = document.getElementById('flyer-result');
                 const downloadBtn = document.getElementById('download-btn');
 
-                // Set up the image with error handling
                 imgElement.onerror = function() {
                     URL.revokeObjectURL(url);
                     alert('Failed to load generated image. Please try again.');
@@ -150,12 +261,12 @@ async function generateFlyer(formData) {
                 document.getElementById('result').classList.remove('hidden');
                 document.querySelector('form').scrollIntoView({ behavior: 'smooth', block: 'start' });
             } else {
-                const text = await response.text();
-                alert(text || 'Error: Invalid response type. Expected an image.');
+                const data = await response.json();
+                alert(data.error || 'Error: Invalid response type. Expected an image.');
             }
         } else {
-            const text = await response.text();
-            alert(text || 'Error generating flyer. Please try again.');
+            const data = await response.json();
+            alert(data.error || 'Error generating flyer. Please try again.');
         }
     } catch (error) {
         console.error('Flyer generation error:', error);
@@ -175,22 +286,16 @@ async function shareFlyer() {
             const blob = await response.blob();
             const file = new File([blob], '{{ event.slug }}-flyer.jpg', { type: 'image/jpeg' });
             await navigator.share({
-                title: 'I Will Be There - {{ event.title }}',
-                text: "I'm attending {{ event.title }}!",
-                files: [file]
+                files: [file],
+                title: '{% trans "My Event Flyer" %}',
+                text: '{% blocktrans with title=event.title %}Check out my flyer for {{ title }}!{% endblocktrans %}'
             });
-        } catch (err) {
-            copyEventLink();
+        } catch (error) {
+            console.log('Sharing failed:', error);
         }
     } else {
-        copyEventLink();
+        alert('{% trans "Sharing is not supported on your device. Please use the download button." %}');
     }
-}
-
-function copyEventLink() {
-    const url = '{{ request.build_absolute_uri }}';
-    navigator.clipboard.writeText(url);
-    alert('Link copied to clipboard!');
 }
 </script>
 {% endblock %}

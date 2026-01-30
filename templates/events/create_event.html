@@ -396,7 +396,7 @@
                         </div>
                         <div>
                             <label for="id_contact_phone" class="block text-xs text-muted-foreground mb-1">{% trans "Phone" %}</label>
-                            <input type="tel" name="contact_phone" id="id_contact_phone" placeholder="+237 6XX XXX XXX"
+                            <input type="tel" name="contact_phone" id="id_contact_phone" placeholder="6XX XXX XXX"
                                    class="input" x-model="contactPhone" @input="clearError('contact')"
                                    :class="{ 'border-red-500': errors.contact }">
                         </div>

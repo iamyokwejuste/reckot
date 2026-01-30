@@ -10,6 +10,7 @@ from apps.payments.gateways import GatewayManager
 from apps.payments.gateways.base import PaymentStatus
 from apps.payments.invoice_service import create_invoice
 from apps.tickets.models import Booking
+from apps.events.models import FlyerBilling
 
 logger = logging.getLogger(__name__)
 gateway_manager = GatewayManager()
@@ -43,8 +44,14 @@ def calculate_organization_balance(organization):
 
     total_refunded = total_refunds["total"] or Decimal("0")
 
+    pending_flyer_bills = FlyerBilling.objects.filter(
+        event__organization=organization, is_paid=False
+    ).aggregate(total=Sum("total_amount"))
+
+    total_flyer_bills = pending_flyer_bills["total"] or Decimal("0")
+
     available_balance = (
-        total_revenue - total_service_fees - total_withdrawn - total_refunded
+        total_revenue - total_service_fees - total_withdrawn - total_refunded - total_flyer_bills
     )
 
     return {
@@ -52,6 +59,7 @@ def calculate_organization_balance(organization):
         "service_fees": total_service_fees,
         "total_withdrawn": total_withdrawn,
         "total_refunded": total_refunded,
+        "pending_flyer_bills": total_flyer_bills,
         "available_balance": available_balance,
     }
 

@@ -35,6 +35,7 @@ from apps.payments.services import (
 )
 from apps.tickets.models import Booking, GuestSession
 from apps.tickets.services import create_multi_ticket_booking
+from apps.tickets.tasks import send_ticket_confirmation_task
 
 
 class CheckoutView(View):
@@ -129,6 +130,11 @@ class CheckoutView(View):
             )
             request.session["guest_token"] = str(guest_session.token)
 
+        attendee_info = {}
+        for key in request.POST:
+            if key.startswith("attendee_name_") or key.startswith("attendee_email_"):
+                attendee_info[key] = request.POST.get(key, "").strip()
+
         booking, error = create_multi_ticket_booking(
             user=user,
             event=event,
@@ -139,6 +145,7 @@ class CheckoutView(View):
             guest_email=guest_email,
             guest_name=guest_name,
             guest_phone=guest_phone,
+            attendee_info=attendee_info,
         )
 
         if error:
@@ -153,6 +160,14 @@ class CheckoutView(View):
         if affiliate_code:
             request.session["affiliate_code"] = affiliate_code
             request.session["affiliate_booking"] = str(booking.reference)
+
+        if booking.total_amount == Decimal("0.00"):
+            send_ticket_confirmation_task.delay(booking.id)
+            messages.success(
+                request,
+                _("Your free tickets have been confirmed! Check your email for details."),
+            )
+            return redirect("tickets:my_tickets")
 
         return redirect("payments:select", booking_ref=booking.reference)
 

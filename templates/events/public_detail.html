@@ -157,19 +157,6 @@
                     </div>
                     {% endif %}
                 </div>
-
-                {% if event.flyer_config.is_enabled %}
-                <div class="card p-6 mt-6 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
-                    <h3 class="font-semibold mb-2">{% trans "I Will Be There!" %}</h3>
-                    <p class="text-sm text-muted-foreground mb-4">{% trans "Create your personalized flyer to share" %}</p>
-                    <a href="{% url 'events:flyer_generator' org_slug=event.organization.slug event_slug=event.slug %}">
-                        {% #button variant="default" size="sm" %}
-                            <i data-lucide="image" class="w-4 h-4 mr-2"></i>
-                            {% trans "Create My Flyer" %}
-                        {% /button %}
-                    </a>
-                </div>
-                {% endif %}
             </div>
 
             <div class="lg:col-span-1 self-start">
@@ -325,7 +312,8 @@
                         {% endif %}
 
                         {% for ticket_type in ticket_types %}
-                        <div class="border border-border rounded-lg p-4 {% if not ticket_type.is_available %}opacity-60{% endif %}">
+                        <div class="border border-border rounded-lg p-4 {% if not ticket_type.is_available %}opacity-60{% endif %}"
+                             x-data="{ quantity: 0, showAttendees: false }">
                             <div class="flex justify-between items-start mb-2">
                                 <div>
                                     <div class="font-medium">{{ ticket_type.name }}</div>
@@ -370,18 +358,51 @@
                             </div>
 
                             {% if ticket_type.is_available %}
-                            <div class="flex items-center gap-3">
-                                <label class="text-sm text-muted-foreground">{% trans "Qty:" %}</label>
-                                <select name="ticket_{{ ticket_type.id }}" class="input w-24 text-center">
-                                    {% for i in "0123456789"|make_list %}
-                                    {% if forloop.counter0 <= ticket_type.max_per_order %}
-                                    <option value="{{ forloop.counter0 }}">{{ forloop.counter0 }}</option>
+                            <div class="space-y-3">
+                                <div class="flex items-center gap-3">
+                                    <label class="text-sm font-medium">{% trans "Qty:" %}</label>
+                                    <input type="number"
+                                           name="ticket_{{ ticket_type.id }}"
+                                           x-model.number="quantity"
+                                           min="0"
+                                           max="{{ ticket_type.max_per_order }}"
+                                           value="0"
+                                           @input="if (quantity > {{ ticket_type.max_per_order }}) quantity = {{ ticket_type.max_per_order }}; if (quantity < 0) quantity = 0; showAttendees = quantity > 0"
+                                           @change="if (quantity > {{ ticket_type.max_per_order }}) quantity = {{ ticket_type.max_per_order }}; if (quantity < 0) quantity = 0"
+                                           class="h-10 w-20 rounded-md border border-input bg-background px-3 py-2 text-sm text-center ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                           placeholder="0">
+                                    <span class="text-xs text-muted-foreground" x-show="quantity > 0" x-cloak>
+                                        <span x-text="quantity"></span> <span x-text="quantity === 1 ? '{% trans "ticket" %}' : '{% trans "tickets" %}'"></span>
+                                    </span>
+                                    {% if ticket_type.available_quantity < 10 and ticket_type.available_quantity > 0 %}
+                                    <span class="text-sm text-destructive">{% blocktrans with qty=ticket_type.available_quantity %}Only {{ qty }} left!{% endblocktrans %}</span>
                                     {% endif %}
-                                    {% endfor %}
-                                </select>
-                                {% if ticket_type.available_quantity < 10 and ticket_type.available_quantity > 0 %}
-                                <span class="text-sm text-destructive">{% blocktrans with qty=ticket_type.available_quantity %}Only {{ qty }} left!{% endblocktrans %}</span>
-                                {% endif %}
+                                </div>
+
+                                <div x-show="showAttendees && quantity > 0" x-collapse x-cloak class="space-y-2 pt-3 border-t border-border">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2 text-xs font-medium">
+                                            <i data-lucide="users" class="w-3.5 h-3.5"></i>
+                                            <span>{% trans "Attendee Details" %}</span>
+                                        </div>
+                                        <span class="text-[10px] text-muted-foreground">{% trans "Optional - can use same email" %}</span>
+                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                        <template x-for="i in quantity" :key="i">
+                                            <div class="bg-muted/20 rounded-md p-2 space-y-1.5">
+                                                <div class="text-[10px] font-medium text-muted-foreground uppercase tracking-wide" x-text="'{% trans "Attendee" %} ' + i"></div>
+                                                <input type="text"
+                                                       :name="'attendee_name_{{ ticket_type.id }}_' + (i-1)"
+                                                       class="input w-full text-xs h-7"
+                                                       :placeholder="'{% trans "Name" %}'">
+                                                <input type="email"
+                                                       :name="'attendee_email_{{ ticket_type.id }}_' + (i-1)"
+                                                       class="input w-full text-xs h-7"
+                                                       :placeholder="'{% trans "Email" %}'">
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
                             </div>
                             {% endif %}
                         </div>

@@ -120,7 +120,7 @@
                     {% csrf_token %}
                     <div>
                         <label for="phone_number" class="block text-sm font-medium mb-2">{% trans "Phone Number" %}</label>
-                        <input type="tel" name="phone_number" id="phone_number" placeholder="+237 6XX XXX XXX" required class="input">
+                        <input type="tel" name="phone_number" id="phone_number" placeholder="6XX XXX XXX" required class="input">
                         <p class="text-xs text-muted-foreground mt-1">{% trans "We'll send you a verification code" %}</p>
                     </div>
                     <div id="phone-otp-result"></div>

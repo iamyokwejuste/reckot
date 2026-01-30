@@ -329,6 +329,11 @@ class FlyerGeneration(models.Model):
     event = models.ForeignKey(
         Event, on_delete=models.CASCADE, related_name="flyer_generations"
     )
+    ticket = models.ForeignKey(
+        "tickets.Ticket", on_delete=models.CASCADE, related_name="flyer_generations", null=True, blank=True
+    )
+    email = models.EmailField(max_length=255, blank=True)
+    phone = models.CharField(max_length=20, blank=True)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.CharField(max_length=500, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -336,11 +341,26 @@ class FlyerGeneration(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=["event", "created_at"]),
+            models.Index(fields=["event", "email"]),
+            models.Index(fields=["event", "phone"]),
         ]
         ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["event", "email"],
+                condition=models.Q(email__isnull=False) & ~models.Q(email=""),
+                name="unique_flyer_per_email"
+            ),
+            models.UniqueConstraint(
+                fields=["event", "phone"],
+                condition=models.Q(phone__isnull=False) & ~models.Q(phone=""),
+                name="unique_flyer_per_phone"
+            ),
+        ]
 
     def __str__(self):
-        return f"Flyer generated for {self.event.title} at {self.created_at}"
+        identifier = self.email or self.phone or str(self.ticket.code) if self.ticket else "Unknown"
+        return f"Flyer for {identifier} - {self.event.title}"
 
 
 class FlyerBilling(models.Model):

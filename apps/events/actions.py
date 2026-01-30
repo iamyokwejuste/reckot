@@ -26,11 +26,13 @@ from apps.events.models import (
     FlyerBilling,
 )
 from apps.events.flyer_service import generate_flyer
-from apps.orgs.models import Organization
+from apps.orgs.models import Organization, Membership, MemberRole
 from apps.tickets.forms import BookingForm
 from apps.tickets.services import create_booking
-from apps.tickets.models import Ticket, TicketType
+from apps.tickets.models import Ticket, TicketType, Booking
 from apps.payments.models import Payment
+from apps.payments.services import calculate_organization_balance
+from decimal import Decimal
 
 
 class PublicEventListView(View):
@@ -692,6 +694,115 @@ class ValidateCouponView(View):
 FLYER_PAY_PER_USE_PRICE = 25
 
 
+class FlyerTicketVerificationView(View):
+    def post(self, request, org_slug, event_slug):
+        event = get_object_or_404(
+            Event.objects.select_related("organization"),
+            organization__slug=org_slug,
+            slug=event_slug,
+            state=Event.State.PUBLISHED,
+        )
+
+        ticket_verification = request.POST.get("ticket_verification", "").strip()
+
+        if not ticket_verification:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": "Please provide your email, phone number, or ticket code.",
+                },
+                status=400,
+            )
+
+        is_email = "@" in ticket_verification
+        is_phone = ticket_verification.startswith("+") or ticket_verification.isdigit()
+
+        if is_email:
+            if FlyerGeneration.objects.filter(event=event, email__iexact=ticket_verification).exists():
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "error": "You have already generated a flyer with this email. Each person can only generate one flyer per event.",
+                    },
+                    status=403,
+                )
+
+            matching_tickets = Ticket.objects.filter(
+                Q(attendee_email__iexact=ticket_verification) |
+                Q(booking__user__email__iexact=ticket_verification, attendee_email="") |
+                Q(booking__guest_email__iexact=ticket_verification, attendee_email=""),
+                booking__event=event,
+                booking__status=Booking.Status.CONFIRMED
+            ).select_related("booking__user").first()
+
+        elif is_phone:
+            if FlyerGeneration.objects.filter(event=event, phone=ticket_verification).exists():
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "error": "You have already generated a flyer with this phone number. Each person can only generate one flyer per event.",
+                    },
+                    status=403,
+                )
+
+            matching_tickets = Ticket.objects.filter(
+                Q(booking__user__phone_number=ticket_verification) |
+                Q(booking__guest_phone=ticket_verification),
+                booking__event=event,
+                booking__status=Booking.Status.CONFIRMED
+            ).select_related("booking__user").first()
+
+        else:
+            try:
+                uuid.UUID(ticket_verification)
+                matching_tickets = Ticket.objects.filter(
+                    code=ticket_verification,
+                    booking__event=event,
+                    booking__status=Booking.Status.CONFIRMED
+                ).select_related("booking__user").first()
+
+                if matching_tickets:
+                    ticket_email = matching_tickets.attendee_email or matching_tickets.booking.buyer_email
+                    ticket_phone = matching_tickets.booking.user.phone_number if matching_tickets.booking.user else matching_tickets.booking.guest_phone
+
+                    if ticket_email and FlyerGeneration.objects.filter(event=event, email__iexact=ticket_email).exists():
+                        return JsonResponse(
+                            {
+                                "success": False,
+                                "error": "A flyer has already been generated for this ticket's attendee.",
+                            },
+                            status=403,
+                        )
+                    if ticket_phone and FlyerGeneration.objects.filter(event=event, phone=ticket_phone).exists():
+                        return JsonResponse(
+                            {
+                                "success": False,
+                                "error": "A flyer has already been generated for this ticket's attendee.",
+                            },
+                            status=403,
+                        )
+            except (ValueError, AttributeError):
+                matching_tickets = None
+
+        if not matching_tickets:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": "No valid ticket found. Please check your information and try again.",
+                },
+                status=403,
+            )
+
+        verified_ticket = matching_tickets
+
+        return JsonResponse(
+            {
+                "success": True,
+                "ticket_code": str(verified_ticket.code),
+            }
+        )
+
+
 class FlyerGeneratorView(View):
     def get(self, request, org_slug, event_slug):
         event = get_object_or_404(
@@ -747,6 +858,116 @@ class FlyerGeneratorView(View):
         except EventFlyerConfig.DoesNotExist:
             return HttpResponse(_("Flyer not configured"), status=404)
 
+        ticket_verification = request.POST.get("ticket_verification", "").strip()
+
+        if not ticket_verification:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": "Please provide your email, phone number, or ticket code to verify your ticket.",
+                },
+                status=400,
+            )
+
+        is_email = "@" in ticket_verification
+        is_phone = ticket_verification.startswith("+") or ticket_verification.isdigit()
+        attendee_email = ""
+        attendee_phone = ""
+
+        if is_email:
+            if FlyerGeneration.objects.filter(event=event, email__iexact=ticket_verification).exists():
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "error": "You have already generated a flyer with this email.",
+                    },
+                    status=403,
+                )
+            attendee_email = ticket_verification
+
+            verified_ticket = Ticket.objects.filter(
+                Q(attendee_email__iexact=ticket_verification) |
+                Q(booking__user__email__iexact=ticket_verification, attendee_email="") |
+                Q(booking__guest_email__iexact=ticket_verification, attendee_email=""),
+                booking__event=event,
+                booking__status=Booking.Status.CONFIRMED
+            ).select_related("booking__user").first()
+
+        elif is_phone:
+            if FlyerGeneration.objects.filter(event=event, phone=ticket_verification).exists():
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "error": "You have already generated a flyer with this phone number.",
+                    },
+                    status=403,
+                )
+            attendee_phone = ticket_verification
+
+            verified_ticket = Ticket.objects.filter(
+                Q(booking__user__phone_number=ticket_verification) |
+                Q(booking__guest_phone=ticket_verification),
+                booking__event=event,
+                booking__status=Booking.Status.CONFIRMED
+            ).select_related("booking__user").first()
+
+        else:
+            try:
+                uuid.UUID(ticket_verification)
+                verified_ticket = Ticket.objects.filter(
+                    code=ticket_verification,
+                    booking__event=event,
+                    booking__status=Booking.Status.CONFIRMED
+                ).select_related("booking__user").first()
+
+                if verified_ticket:
+                    ticket_email = verified_ticket.attendee_email or verified_ticket.booking.buyer_email
+                    ticket_phone = verified_ticket.booking.user.phone_number if verified_ticket.booking.user else verified_ticket.booking.guest_phone
+
+                    if ticket_email and FlyerGeneration.objects.filter(event=event, email__iexact=ticket_email).exists():
+                        return JsonResponse(
+                            {
+                                "success": False,
+                                "error": "A flyer has already been generated for this ticket's attendee.",
+                            },
+                            status=403,
+                        )
+                    if ticket_phone and FlyerGeneration.objects.filter(event=event, phone=ticket_phone).exists():
+                        return JsonResponse(
+                            {
+                                "success": False,
+                                "error": "A flyer has already been generated for this ticket's attendee.",
+                            },
+                            status=403,
+                        )
+
+                    attendee_email = ticket_email
+                    attendee_phone = ticket_phone or ""
+            except (ValueError, AttributeError):
+                verified_ticket = None
+
+        if not verified_ticket:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": "No valid ticket found. Please check your information and try again.",
+                },
+                status=403,
+            )
+
+        if not flyer_free and config.pay_per_use_accepted:
+            balance_data = calculate_organization_balance(event.organization.id)
+            available_balance = balance_data["available_balance"]
+
+            if available_balance < Decimal(str(FLYER_PAY_PER_USE_PRICE)):
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "error": f"Insufficient balance to generate flyer. Required: {FLYER_PAY_PER_USE_PRICE} FCFA, Available: {available_balance} FCFA. Please contact the event organizer.",
+                    },
+                    status=403,
+                )
+
         user_photo = request.FILES.get("photo")
         text_values = {}
         for key, value in request.POST.items():
@@ -760,6 +981,9 @@ class FlyerGeneratorView(View):
             if not flyer_free and config.pay_per_use_accepted:
                 FlyerGeneration.objects.create(
                     event=event,
+                    ticket=verified_ticket,
+                    email=attendee_email,
+                    phone=attendee_phone,
                     ip_address=request.META.get("REMOTE_ADDR"),
                     user_agent=request.META.get("HTTP_USER_AGENT", "")[:500],
                 )
@@ -767,6 +991,15 @@ class FlyerGeneratorView(View):
                     event=event, defaults={"rate_per_flyer": FLYER_PAY_PER_USE_PRICE}
                 )
                 billing.update_totals()
+            else:
+                FlyerGeneration.objects.create(
+                    event=event,
+                    ticket=verified_ticket,
+                    email=attendee_email,
+                    phone=attendee_phone,
+                    ip_address=request.META.get("REMOTE_ADDR"),
+                    user_agent=request.META.get("HTTP_USER_AGENT", "")[:500],
+                )
 
             response = FileResponse(flyer_image, content_type="image/jpeg")
             response["Content-Disposition"] = (
@@ -786,6 +1019,14 @@ class FlyerConfigView(LoginRequiredMixin, View):
             organization__members=request.user,
         )
 
+        membership = Membership.objects.filter(
+            organization=event.organization, user=request.user
+        ).first()
+
+        is_organizer = membership and membership.role in [
+            MemberRole.OWNER, MemberRole.ADMIN, MemberRole.MANAGER
+        ]
+
         has_feature = event.organization.has_feature("flyer_generator")
         has_paid_tickets = TicketType.objects.filter(event=event, price__gt=0).exists()
         flyer_free = has_feature or has_paid_tickets
@@ -804,6 +1045,7 @@ class FlyerConfigView(LoginRequiredMixin, View):
                 "has_feature": flyer_free,
                 "has_paid_tickets": has_paid_tickets,
                 "current_plan": event.organization.current_plan,
+                "is_organizer": is_organizer,
             },
         )
 
@@ -814,6 +1056,14 @@ class FlyerConfigView(LoginRequiredMixin, View):
             slug=event_slug,
             organization__members=request.user,
         )
+
+        membership = Membership.objects.filter(
+            organization=event.organization, user=request.user
+        ).first()
+
+        is_organizer = membership and membership.role in [
+            MemberRole.OWNER, MemberRole.ADMIN, MemberRole.MANAGER
+        ]
 
         try:
             config = event.flyer_config
@@ -841,6 +1091,9 @@ class FlyerConfigView(LoginRequiredMixin, View):
             request.POST.get("accept_pay_per_use") == "1"
             and not config.pay_per_use_accepted
         ):
+            if not is_organizer:
+                messages.error(request, "Only organizers can accept pay-per-use terms")
+                return redirect("events:flyer_config", org_slug=org_slug, event_slug=event_slug)
             config.pay_per_use_accepted = True
             config.pay_per_use_accepted_at = timezone.now()
 

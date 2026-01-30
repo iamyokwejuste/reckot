@@ -90,6 +90,11 @@ urlpatterns = [
         name="generate_preview",
     ),
     path(
+        "<slug:org_slug>/<slug:event_slug>/flyer/verify-ticket/",
+        actions.FlyerTicketVerificationView.as_view(),
+        name="flyer_verify_ticket",
+    ),
+    path(
         "<slug:org_slug>/<slug:event_slug>/flyer/",
         actions.FlyerGeneratorView.as_view(),
         name="flyer_generator",

@@ -8,7 +8,7 @@ class CustomSignupForm(SignupForm):
         required=False,
         widget=forms.TextInput(
             attrs={
-                "placeholder": "+237 6XX XXX XXX",
+                "placeholder": "6XX XXX XXX",
                 "class": "input",
                 "autocomplete": "tel",
             }

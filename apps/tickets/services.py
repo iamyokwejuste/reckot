@@ -35,6 +35,7 @@ def create_multi_ticket_booking(
     guest_email: str = None,
     guest_name: str = None,
     guest_phone: str = None,
+    attendee_info: dict = None,
 ):
     if not user and not guest_email:
         return None, "Either user or guest email is required."
@@ -95,8 +96,8 @@ def create_multi_ticket_booking(
                     f"Maximum {ticket_type.max_per_order} {ticket_type.name} tickets per order.",
                 )
 
-            for _ in range(quantity):
-                tickets_to_create.append(ticket_type)
+            for i in range(quantity):
+                tickets_to_create.append((ticket_type, ticket_type_id, i))
 
             total_amount += ticket_type.price * quantity
 
@@ -134,8 +135,24 @@ def create_multi_ticket_booking(
             booking.save(update_fields=["status"])
 
         created_tickets = []
-        for ticket_type in tickets_to_create:
-            ticket = Ticket.objects.create(booking=booking, ticket_type=ticket_type)
+        for ticket_data in tickets_to_create:
+            ticket_type, ticket_type_id, index = ticket_data
+
+            attendee_name = ""
+            attendee_email = ""
+
+            if attendee_info:
+                name_key = f"attendee_name_{ticket_type_id}_{index}"
+                email_key = f"attendee_email_{ticket_type_id}_{index}"
+                attendee_name = attendee_info.get(name_key, "")
+                attendee_email = attendee_info.get(email_key, "")
+
+            ticket = Ticket.objects.create(
+                booking=booking,
+                ticket_type=ticket_type,
+                attendee_name=attendee_name,
+                attendee_email=attendee_email,
+            )
             created_tickets.append(ticket)
 
         if question_answers:
