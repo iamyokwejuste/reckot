@@ -24,11 +24,11 @@
             <h1 class="text-2xl font-bold">{% trans "I Will Be There - Flyer Setup" %}</h1>
             <p class="text-muted-foreground">{% trans "Configure personalized flyers for attendees" %}</p>
         </div>
-        {% if config and config.is_enabled and has_feature or config and config.is_enabled and config.pay_per_use_accepted %}
+        {% if config and config.is_enabled and config.template_image %}
         <a href="{% url 'events:flyer_generator' org_slug=event.organization.slug event_slug=event.slug %}" target="_blank">
             {% #button variant="outline" size="sm" %}
                 <i data-lucide="external-link" class="w-4 h-4 mr-2"></i>
-                {% trans "Preview" %}
+                {% trans "Preview Generator" %}
             {% /button %}
         </a>
         {% endif %}
@@ -154,8 +154,7 @@
                          :class="{ 'border-primary bg-primary/5': dragging }">
                         <input type="file" name="template_image" accept="image/*" x-ref="templateInput"
                                class="hidden"
-                               @change="preview = URL.createObjectURL($event.target.files[0]); loadTemplatePreview($event)"
-                               {% if not config %}required{% endif %}>
+                               @change="preview = URL.createObjectURL($event.target.files[0]); loadTemplatePreview($event)">
                         <div x-show="!preview" class="space-y-3">
                             <div class="w-12 h-12 mx-auto rounded-full bg-muted flex items-center justify-center">
                                 <i data-lucide="image-plus" class="w-6 h-6 text-muted-foreground"></i>
@@ -554,7 +553,7 @@
         <input type="hidden" name="output_height" :value="output.height">
         <input type="hidden" name="fields_json" :value="JSON.stringify(fields)">
         {% if not has_feature and not config.pay_per_use_accepted and not config.template_image %}
-        <input type="hidden" name="accept_pay_per_use" :value="$root.enabled ? '1' : ''">
+        <input type="hidden" name="accept_pay_per_use" :value="enabled ? '1' : ''">
         {% endif %}
 
         <div class="flex justify-end gap-3">
@@ -596,7 +595,7 @@ function flyerEditor() {
             shape: '{{ config.photo_shape|default:"CIRCLE" }}',
             borderWidth: {{ config.photo_border_width|default:0 }},
             borderColor: '{{ config.photo_border_color|default:"#ffffff" }}',
-            bgColor: '{{ config.photo_bg_color|default:"transparent" }}'
+            bgColor: {% if config.photo_bg_color == "transparent" %}'rgba(0,0,0,0)'{% else %}'{{ config.photo_bg_color|default:"rgba(0,0,0,0)" }}'{% endif %}
         },
 
         photoPercent: { x: 0, y: 0, w: 0, h: 0 },
@@ -613,7 +612,7 @@ function flyerEditor() {
                 yPercent: {{ field.y }} / {{ config.output_height|default:1080 }} * 100,
                 font_size: {{ field.font_size }},
                 font_color: '{{ field.font_color }}',
-                bg_color: '{{ field.bg_color|default:"rgba(0,0,0,0.3)" }}',
+                bg_color: {% if field.bg_color == "transparent" %}'rgba(0,0,0,0)'{% else %}'{{ field.bg_color|default:"rgba(0,0,0,0.3)" }}'{% endif %},
                 max_width: {{ field.max_width }},
                 text_align: '{{ field.text_align }}',
                 required: {{ field.is_required|yesno:"true,false" }}

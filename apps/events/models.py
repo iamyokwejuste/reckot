@@ -273,7 +273,7 @@ class EventFlyerConfig(models.Model):
     pay_per_use_accepted = models.BooleanField(default=False)
     pay_per_use_accepted_at = models.DateTimeField(null=True, blank=True)
     template_change_count = models.PositiveSmallIntegerField(default=0)
-    template_image = models.ImageField(upload_to="flyer_templates/")
+    template_image = models.ImageField(upload_to="flyer_templates/", blank=True, null=True)
     photo_x = models.PositiveIntegerField(default=50)
     photo_y = models.PositiveIntegerField(default=50)
     photo_width = models.PositiveIntegerField(default=200)

@@ -1,4 +1,5 @@
 import uuid
+import json
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
@@ -824,16 +825,17 @@ class FlyerConfigView(LoginRequiredMixin, View):
         if "template_image" in request.FILES:
             config.template_image = request.FILES["template_image"]
 
-        config.photo_x = int(request.POST.get("photo_x", 50))
-        config.photo_y = int(request.POST.get("photo_y", 50))
-        config.photo_width = int(request.POST.get("photo_width", 200))
-        config.photo_height = int(request.POST.get("photo_height", 200))
-        config.photo_shape = request.POST.get("photo_shape", "CIRCLE")
-        config.photo_border_width = int(request.POST.get("photo_border_width", 0))
-        config.photo_border_color = request.POST.get("photo_border_color", "#ffffff")
-        config.photo_bg_color = request.POST.get("photo_bg_color", "rgba(0,0,0,0)")
-        config.output_width = int(request.POST.get("output_width", 1080))
-        config.output_height = int(request.POST.get("output_height", 1080))
+        config.photo_x = int(request.POST.get("photo_x") or 50)
+        config.photo_y = int(request.POST.get("photo_y") or 50)
+        config.photo_width = int(request.POST.get("photo_width") or 200)
+        config.photo_height = int(request.POST.get("photo_height") or 200)
+        config.photo_shape = request.POST.get("photo_shape") or "CIRCLE"
+        config.photo_border_width = int(request.POST.get("photo_border_width") or 0)
+        config.photo_border_color = request.POST.get("photo_border_color") or "#ffffff"
+        photo_bg = request.POST.get("photo_bg_color") or "rgba(0,0,0,0)"
+        config.photo_bg_color = "rgba(0,0,0,0)" if photo_bg == "transparent" else photo_bg
+        config.output_width = int(request.POST.get("output_width") or 1080)
+        config.output_height = int(request.POST.get("output_height") or 1080)
 
         if (
             request.POST.get("accept_pay_per_use") == "1"
@@ -851,10 +853,13 @@ class FlyerConfigView(LoginRequiredMixin, View):
                 billing.save(update_fields=["total_amount", "updated_at"])
             config.template_change_count += 1
 
-        config.save()
+        try:
+            config.save()
+        except Exception as e:
+            messages.error(request, f"Failed to save configuration: {str(e)}")
+            return redirect("events:flyer_config", org_slug=org_slug, event_slug=event_slug)
 
         config.text_fields.all().delete()
-        import json
 
         fields_json = request.POST.get("fields_json", "[]")
         try:
@@ -865,6 +870,9 @@ class FlyerConfigView(LoginRequiredMixin, View):
         for i, field in enumerate(fields):
             if not field.get("label", "").strip():
                 continue
+            field_bg = field.get("bg_color", "rgba(0,0,0,0.3)")
+            if field_bg == "transparent":
+                field_bg = "rgba(0,0,0,0)"
             FlyerTextField.objects.create(
                 flyer_config=config,
                 label=field.get("label", ""),
@@ -877,9 +885,10 @@ class FlyerConfigView(LoginRequiredMixin, View):
                 font_size=int(field.get("font_size", 32)),
                 font_color=field.get("font_color", "#ffffff"),
                 text_align=field.get("text_align", "CENTER"),
-                bg_color=field.get("bg_color", "rgba(0,0,0,0.3)"),
+                bg_color=field_bg,
             )
 
+        messages.success(request, "Flyer configuration saved successfully")
         return redirect("events:flyer_config", org_slug=org_slug, event_slug=event_slug)
 
 
