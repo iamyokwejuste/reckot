@@ -2578,8 +2578,6 @@ msgstr "Créez votre événement"
 #: templates/core/home.html:306
 msgid "Add details, set ticket types and prices. Takes about 2 minutes."
 msgstr "Ajoutez des détails, définissez les types de billets et les prix. Prend environ 2 minutes."
-"Ajoutez les détails, définissez les types de billets et les prix. Environ 2 "
-"minutes."
 
 #: templates/core/home.html:312
 msgid "Share your link"
@@ -2588,8 +2586,6 @@ msgstr "Partagez votre lien"
 #: templates/core/home.html:313
 msgid "Share on WhatsApp, social media, or email. Tickets sell themselves."
 msgstr "Partagez sur WhatsApp, les réseaux sociaux ou par e-mail. Les billets se vendent d'eux-mêmes."
-"Partagez sur WhatsApp, les réseaux sociaux ou par e-mail. Les billets se "
-"vendent tout seuls."
 
 #: templates/core/home.html:319 templates/reports/dashboard.html:318
 msgid "Check in attendees"
@@ -2598,8 +2594,7 @@ msgstr "Enregistrez les participants"
 #: templates/core/home.html:320
 msgid "Scan QR codes at the door. Works offline. Real-time stats."
 msgstr "Scannez les codes QR à l'entrée. Fonctionne hors ligne. Statistiques en temps réel."
-"Scannez les codes QR à l'entrée. Fonctionne hors ligne. Statistiques en "
-"temps réel."
+
 
 #: templates/core/home.html:377
 msgid "Simple, transparent pricing"
@@ -2620,8 +2615,7 @@ msgstr "Payez uniquement quand vous vendez."
 #: templates/core/home.html:409
 msgid "All plans include: Team collaboration, 24-hour payouts, QR check-in"
 msgstr "Tous les forfaits incluent : Collaboration d'équipe, paiements sous 24 heures, enregistrement QR"
-"Tous les forfaits incluent : Collaboration d'équipe, versements sous 24h, "
-"enregistrement QR"
+
 
 #: templates/core/home.html:417
 msgid "Ready to host your next event?"
