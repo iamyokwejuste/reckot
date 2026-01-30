@@ -886,8 +886,8 @@
 }
 
 .ai-btn {
-    background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-    color: white;
+    background: var(--color-primary);
+    color: var(--color-primary-foreground);
     border: none;
     font-size: 0.8125rem;
     padding: 0.5rem 0.875rem;
@@ -896,7 +896,8 @@
 }
 
 .ai-btn:hover {
-    background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+    background: var(--color-accent);
+    color: var(--color-accent-foreground);
     opacity: 1;
 }
 
@@ -919,11 +920,6 @@
     }
 }
 
-.ai-loading {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
 
 .ai-assistant .ai-messages::-webkit-scrollbar {
     width: 4px;

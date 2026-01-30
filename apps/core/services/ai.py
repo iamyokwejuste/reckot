@@ -357,19 +357,15 @@ Return ONLY the JSON array."""
             return None
 
         try:
-            response = self.client.models.generate_images(
-                model="imagen-3.0-generate-001",
-                prompt=prompt,
-                config={
-                    "number_of_images": 1,
-                    "aspect_ratio": aspect_ratio,
-                    "safety_filter_level": "block_some",
-                    "person_generation": "allow_adult",
-                },
+            response = self.client.models.generate_content(
+                model="gemini-2.5-flash-image",
+                contents=[prompt],
             )
 
-            if response.generated_images:
-                return response.generated_images[0].image.image_bytes
+            for part in response.parts:
+                if part.inline_data is not None:
+                    return part.inline_data.data
+
             return None
         except Exception as e:
             logger.error(f"Image generation error: {e}")

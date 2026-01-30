@@ -69,6 +69,71 @@ const ReckotAI = {
 
     async generateInsight(metrics) {
         return this._fetch('insight', { metrics });
+    },
+
+    async voiceToEvent(audioData) {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
+                          document.cookie.split(';').find(c => c.trim().startsWith('csrftoken='))?.split('=')[1];
+
+        const reader = new FileReader();
+        return new Promise((resolve, reject) => {
+            reader.onload = async () => {
+                try {
+                    const base64Audio = reader.result;
+
+                    const response = await fetch('/ai/voice-to-event/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify({
+                            audio: base64Audio
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.error || 'Voice conversion failed');
+                    }
+
+                    const result = await response.json();
+                    resolve(result);
+                } catch (error) {
+                    console.error('Voice AI Error:', error);
+                    reject(error);
+                }
+            };
+
+            reader.onerror = () => reject(new Error('Failed to read audio file'));
+            reader.readAsDataURL(audioData);
+        });
+    },
+
+    async generateCoverImage(eventData) {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
+                          document.cookie.split(';').find(c => c.trim().startsWith('csrftoken='))?.split('=')[1];
+
+        try {
+            const response = await fetch('/ai/generate-cover-image/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify(eventData)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Image generation failed');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Image AI Error:', error);
+            throw error;
+        }
     }
 };
 
@@ -89,12 +154,6 @@ const AIComponents = {
         btn.innerHTML = `
             <i data-lucide="${icon}" class="w-4 h-4"></i>
             <span>${text}</span>
-            <span class="ai-loading hidden">
-                <svg class="animate-spin w-4 h-4" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-                </svg>
-            </span>
         `;
 
         if (typeof lucide !== 'undefined') {
@@ -105,20 +164,12 @@ const AIComponents = {
     },
 
     setLoading(btn, loading) {
-        const text = btn.querySelector('span:not(.ai-loading)');
-        const loader = btn.querySelector('.ai-loading');
-        const icon = btn.querySelector('[data-lucide]');
-
         if (loading) {
             btn.disabled = true;
-            if (text) text.classList.add('hidden');
-            if (icon) icon.classList.add('hidden');
-            if (loader) loader.classList.remove('hidden');
+            btn.style.opacity = '0.6';
         } else {
             btn.disabled = false;
-            if (text) text.classList.remove('hidden');
-            if (icon) icon.classList.remove('hidden');
-            if (loader) loader.classList.add('hidden');
+            btn.style.opacity = '1';
         }
     },
 
@@ -582,6 +633,241 @@ ${result.reasoning || ''}
             element.value = content;
             element.dispatchEvent(new Event('input', { bubbles: true }));
         }
+    },
+
+    createVoiceEventCreator(options = {}) {
+        console.log('Creating Voice Event Creator...');
+        const wrapper = document.createElement('div');
+        wrapper.className = 'voice-event-creator card p-4 mb-4';
+
+        wrapper.innerHTML = `
+            <div class="flex items-center justify-between mb-3">
+                <div>
+                    <h4 class="font-medium flex items-center gap-2">
+                        <i data-lucide="mic" class="w-4 h-4"></i>
+                        Voice-to-Event Creator
+                    </h4>
+                    <p class="text-xs text-muted-foreground mt-1">Describe your event using your voice</p>
+                </div>
+            </div>
+            <div class="space-y-3">
+                <div class="voice-status hidden p-3 rounded-lg bg-muted border border-border">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+                        <span class="text-sm font-medium">Recording...</span>
+                        <span class="text-xs text-muted-foreground ml-auto" id="voice-timer">0:00</span>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" id="voice-start-btn" class="btn btn-default flex-1">
+                        <i data-lucide="mic" class="w-4 h-4"></i>
+                        Start Recording
+                    </button>
+                    <button type="button" id="voice-stop-btn" class="btn btn-outline hidden">
+                        <i data-lucide="square" class="w-4 h-4"></i>
+                        Stop
+                    </button>
+                </div>
+                <p class="text-xs text-muted-foreground">
+                    Powered by Google Gemini STT. Speak naturally about your event details.
+                </p>
+            </div>
+        `;
+
+        if (typeof lucide !== 'undefined') {
+            setTimeout(() => lucide.createIcons({ nodes: [wrapper] }), 0);
+        }
+
+        let mediaRecorder;
+        let audioChunks = [];
+        let startTime;
+        let timerInterval;
+
+        const startBtn = wrapper.querySelector('#voice-start-btn');
+        const stopBtn = wrapper.querySelector('#voice-stop-btn');
+        const voiceStatus = wrapper.querySelector('.voice-status');
+        const voiceTimer = wrapper.querySelector('#voice-timer');
+
+        startBtn.addEventListener('click', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    stream.getTracks().forEach(track => track.stop());
+
+                    this.showPageOverlay('Converting your voice to event details...');
+                    try {
+                        const result = await ReckotAI.voiceToEvent(audioBlob);
+
+                        if (result.title) {
+                            const titleField = document.querySelector('#id_title, [name="title"]');
+                            if (titleField) {
+                                titleField.value = result.title;
+                                titleField.dispatchEvent(new Event('input', { bubbles: true }));
+                            }
+                        }
+
+                        if (result.description) {
+                            const descField = document.querySelector('#id_description, [name="description"]');
+                            if (descField) {
+                                this.setEditorContent(descField, result.description);
+                            }
+                        }
+
+                        if (result.tagline) {
+                            const taglineField = document.querySelector('#id_short_description, [name="short_description"]');
+                            if (taglineField) {
+                                taglineField.value = result.tagline;
+                                taglineField.dispatchEvent(new Event('input', { bubbles: true }));
+                            }
+                        }
+
+                        if (result.location) {
+                            const locationField = document.querySelector('#id_location, [name="location"]');
+                            if (locationField) {
+                                locationField.value = result.location;
+                                locationField.dispatchEvent(new Event('input', { bubbles: true }));
+                            }
+                        }
+
+                        this.showToast('success', 'Event details created from your voice!');
+                    } catch (error) {
+                        this.showToast('error', error.message || 'Failed to convert voice to event');
+                    } finally {
+                        this.hidePageOverlay();
+                    }
+                };
+
+                mediaRecorder.start();
+                startTime = Date.now();
+
+                startBtn.classList.add('hidden');
+                stopBtn.classList.remove('hidden');
+                voiceStatus.classList.remove('hidden');
+
+                timerInterval = setInterval(() => {
+                    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                    const minutes = Math.floor(elapsed / 60);
+                    const seconds = elapsed % 60;
+                    voiceTimer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                }, 1000);
+
+            } catch (error) {
+                this.showToast('error', 'Microphone access denied');
+            }
+        });
+
+        stopBtn.addEventListener('click', () => {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                clearInterval(timerInterval);
+
+                startBtn.classList.remove('hidden');
+                stopBtn.classList.add('hidden');
+                voiceStatus.classList.add('hidden');
+                voiceTimer.textContent = '0:00';
+            }
+        });
+
+        console.log('Voice Event Creator created successfully');
+        return wrapper;
+    },
+
+    createCoverImageGenerator(options = {}) {
+        console.log('Creating Cover Image Generator...');
+        const coverInput = document.querySelector('[name="cover_image"]');
+        if (!coverInput) {
+            console.error('Cover input not found');
+            return;
+        }
+
+        const coverSection = coverInput.parentElement;
+        if (!coverSection) {
+            console.error('Cover section not found');
+            return;
+        }
+
+        console.log('Found cover section:', coverSection);
+        const wrapper = document.createElement('div');
+        wrapper.className = 'mt-3 p-3 rounded-lg bg-primary/5 border border-primary/20';
+
+        wrapper.innerHTML = `
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="sparkles" class="w-4 h-4 text-primary"></i>
+                    <span class="text-sm font-semibold">AI Cover Image</span>
+                </div>
+                <span class="text-xs text-muted-foreground">Powered by Imagen 3</span>
+            </div>
+            <p class="text-xs text-muted-foreground mb-3">Generate a stunning cover image based on your event details</p>
+            <button type="button" id="ai-cover-generate-btn" class="btn btn-default btn-sm w-full">
+                <i data-lucide="wand-2" class="w-4 h-4"></i>
+                Generate Cover Image
+            </button>
+        `;
+
+        if (typeof lucide !== 'undefined') {
+            setTimeout(() => lucide.createIcons({ nodes: [wrapper] }), 0);
+        }
+
+        const generateBtn = wrapper.querySelector('#ai-cover-generate-btn');
+
+        generateBtn.addEventListener('click', async () => {
+            const title = document.querySelector('#id_title, [name="title"]')?.value;
+            const description = this.getEditorContent(document.querySelector('#id_description, [name="description"]')) || '';
+            const eventType = document.querySelector('[name="event_type"]')?.value || 'general';
+
+            if (!title) {
+                this.showToast('error', 'Please enter an event title first');
+                return;
+            }
+
+            this.setLoading(generateBtn, true);
+            this.showPageOverlay('Generating your cover image with AI...');
+
+            try {
+                const result = await ReckotAI.generateCoverImage({
+                    title,
+                    description,
+                    event_type: eventType
+                });
+
+                if (result.image) {
+                    const response = await fetch(result.image);
+                    const blob = await response.blob();
+
+                    const file = new File([blob], 'ai-generated-cover.png', { type: 'image/png' });
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+
+                    const coverInput = document.querySelector('[name="cover_image"], [x-ref="coverInput"]');
+                    if (coverInput) {
+                        coverInput.files = dataTransfer.files;
+                        coverInput.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+
+                    this.showToast('success', 'Cover image generated successfully!');
+                } else if (result.error) {
+                    this.showToast('error', result.error);
+                }
+            } catch (error) {
+                this.showToast('error', error.message || 'Failed to generate cover image');
+            } finally {
+                this.setLoading(generateBtn, false);
+                this.hidePageOverlay();
+            }
+        });
+
+        coverSection.appendChild(wrapper);
+        console.log('Cover Image Generator created and appended successfully');
+        return wrapper;
     }
 };
 

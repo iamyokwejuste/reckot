@@ -522,6 +522,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 }
             }
+
+            const voiceCreator = AIComponents.createVoiceEventCreator();
+            if (voiceCreator) {
+                const progressBar = document.querySelector('.mb-8');
+                if (progressBar) {
+                    progressBar.parentNode.insertBefore(voiceCreator, progressBar.nextSibling);
+                }
+            }
+
+            setTimeout(() => {
+                AIComponents.createCoverImageGenerator();
+            }, 100);
         }, 500);
     }
 });
