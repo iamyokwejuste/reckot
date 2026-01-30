@@ -3,7 +3,6 @@ import logging
 from typing import Optional
 from google import genai
 from django.conf import settings
-from django.apps import apps
 from django.db.models import Count, Sum, Q, F
 from django.utils import timezone
 
@@ -78,7 +77,7 @@ def get_model_schema():
                 "capacity": "Maximum capacity",
                 "organization": "ForeignKey to Organization",
             },
-            "filtering": "ALWAYS filter is_public=True when counting public events"
+            "filtering": "ALWAYS filter is_public=True when counting public events",
         },
         "Ticket": {
             "description": "Individual tickets",
@@ -87,7 +86,7 @@ def get_model_schema():
                 "ticket_type": "ForeignKey to TicketType",
                 "status": "VALID, USED, CANCELLED, or REFUNDED",
                 "checked_in_at": "Check-in timestamp",
-            }
+            },
         },
         "Booking": {
             "description": "Ticket bookings",
@@ -97,7 +96,7 @@ def get_model_schema():
                 "status": "PENDING, CONFIRMED, CANCELLED, or REFUNDED",
                 "total_amount": "Total payment amount in XAF",
                 "created_at": "Booking creation time",
-            }
+            },
         },
         "Payment": {
             "description": "Payment transactions",
@@ -107,7 +106,7 @@ def get_model_schema():
                 "status": "PENDING, COMPLETED, FAILED, or REFUNDED",
                 "gateway": "Payment gateway used",
                 "created_at": "Payment timestamp",
-            }
+            },
         },
         "Organization": {
             "description": "Event organizations",
@@ -115,8 +114,8 @@ def get_model_schema():
                 "name": "Organization name",
                 "slug": "URL slug",
                 "members": "ManyToMany to User",
-            }
-        }
+            },
+        },
     }
     return schema
 
@@ -129,27 +128,29 @@ def execute_django_query(query_code: str):
         from apps.orgs.models import Organization
 
         safe_namespace = {
-            'Event': Event,
-            'Ticket': Ticket,
-            'Booking': Booking,
-            'Payment': Payment,
-            'Organization': Organization,
-            'TicketType': TicketType,
-            'Count': Count,
-            'Sum': Sum,
-            'Q': Q,
-            'F': F,
-            'timezone': timezone,
+            "Event": Event,
+            "Ticket": Ticket,
+            "Booking": Booking,
+            "Payment": Payment,
+            "Organization": Organization,
+            "TicketType": TicketType,
+            "Count": Count,
+            "Sum": Sum,
+            "Q": Q,
+            "F": F,
+            "timezone": timezone,
         }
 
         result = eval(query_code, {"__builtins__": {}}, safe_namespace)
 
-        if hasattr(result, '__iter__') and not isinstance(result, (str, dict)):
-            if hasattr(result, 'count'):
+        if hasattr(result, "__iter__") and not isinstance(result, (str, dict)):
+            if hasattr(result, "count"):
                 return list(result.values())[:100]
             return list(result)[:100]
-        elif hasattr(result, '__dict__'):
-            return {k: str(v) for k, v in result.__dict__.items() if not k.startswith('_')}
+        elif hasattr(result, "__dict__"):
+            return {
+                k: str(v) for k, v in result.__dict__.items() if not k.startswith("_")
+            }
         else:
             return result
 
@@ -221,10 +222,12 @@ Return as JSON:
 
 SUPPORT_SYSTEM_PROMPT = """You are Reckot's AI Assistant with DATABASE QUERY capabilities. Reckot is an event ticketing platform in Cameroon.
 
-When users ask questions about data (counts, statistics, events, tickets, etc.), you MUST:
+When users ask questions about data (counts, statistics, events, tickets, payments, organizations, etc.), you MUST:
 1. Generate a Django ORM query to fetch the actual data
-2. Return the query in this JSON format: {"action": "execute_query", "query": "Event.objects.filter(is_public=True).count()"}
-3. For events, ALWAYS use is_public=True to exclude private events unless specifically asked
+2. Return the query in this JSON format: {{"action": "execute_query", "query": "YourModel.objects.filter(...).count()"}}
+3. For events, ALWAYS use is_public=True to exclude private events
+4. For organizations, only show public data
+5. Never expose private user information without authentication
 
 Available Models and Fields:
 {schema}
@@ -241,10 +244,18 @@ Rules:
 - Keep queries simple and safe
 - Return single value or simple aggregate
 
-Authentication Requirements:
+Authentication & Access Control:
 - Check User Context for user_id/user_email
 - If missing, user is NOT logged in
-- Users need login for: create events, withdrawals, analytics, manage tickets
+- Public data only: Event counts, Organization counts (where is_public=True)
+- Private data requires authentication:
+  * Payments: MUST filter by user (booking__event__organization__members__id=user_id)
+  * Tickets: MUST scope to user's events/bookings
+  * Withdrawals: MUST filter by user's organization
+  * Analytics: MUST scope to user's events
+- NEVER query private data without authentication
+- NEVER expose other users' data
+- If user asks for private data while unauthenticated: "Please log in to view this information"
 
 For support tickets:
 {{"action": "create_ticket", "category": "PAYMENT|TICKET|EVENT|OTHER", "priority": "LOW|MEDIUM|HIGH|URGENT", "subject": "...", "description": "..."}}
@@ -292,7 +303,9 @@ If this is a data question, respond with execute_query action. Otherwise provide
             query_result = execute_django_query(query_code)
 
             if isinstance(query_result, dict) and "error" in query_result:
-                result["message"] = f"I encountered an error executing the query: {query_result['error']}"
+                result["message"] = (
+                    f"I encountered an error executing the query: {query_result['error']}"
+                )
             else:
                 result["message"] = f"Result: {query_result}"
                 result["action"] = "execute_query"

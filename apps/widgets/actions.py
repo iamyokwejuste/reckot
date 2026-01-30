@@ -8,6 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from apps.widgets.models import EmbedWidget
 from apps.events.models import Event
 
+
 @method_decorator(xframe_options_exempt, name="dispatch")
 class WidgetView(View):
     def get(self, request, widget_id):
@@ -36,6 +37,7 @@ class WidgetView(View):
             },
         )
 
+
 class WidgetJSView(View):
     def get(self, request, widget_id):
         get_object_or_404(EmbedWidget, widget_id=widget_id, is_active=True)
@@ -43,8 +45,22 @@ class WidgetJSView(View):
         base_url = request.build_absolute_uri("/").rstrip("/")
         iframe_url = f"{base_url}/widgets/{widget_id}/"
 
-        js_content = f
+        js_content = f"""
+(function() {{
+    var iframe = document.createElement('iframe');
+    iframe.src = '{iframe_url}';
+    iframe.style.border = 'none';
+    iframe.style.width = '100%';
+    iframe.style.height = '600px';
+
+    var container = document.getElementById('reckot-widget-{widget_id}');
+    if (container) {{
+        container.appendChild(iframe);
+    }}
+}})();
+"""
         return HttpResponse(js_content, content_type="application/javascript")
+
 
 class WidgetConfigView(View):
     def get(self, request, widget_id):
@@ -68,6 +84,7 @@ class WidgetConfigView(View):
                 },
             }
         )
+
 
 class WidgetManageView(LoginRequiredMixin, View):
     def get(self, request, org_slug, event_slug):

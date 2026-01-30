@@ -51,7 +51,11 @@ def calculate_organization_balance(organization):
     total_flyer_bills = pending_flyer_bills["total"] or Decimal("0")
 
     available_balance = (
-        total_revenue - total_service_fees - total_withdrawn - total_refunded - total_flyer_bills
+        total_revenue
+        - total_service_fees
+        - total_withdrawn
+        - total_refunded
+        - total_flyer_bills
     )
 
     return {

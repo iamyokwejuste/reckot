@@ -5,4 +5,4 @@ class PaymentsConfig(AppConfig):
     name = "apps.payments"
 
     def ready(self):
-        pass
+        import apps.payments.signals  # noqa: F401

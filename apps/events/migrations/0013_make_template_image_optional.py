@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('events', '0012_eventflyerconfig_photo_bg_color_and_more'),
+        ("events", "0012_eventflyerconfig_photo_bg_color_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='eventflyerconfig',
-            name='template_image',
-            field=models.ImageField(blank=True, null=True, upload_to='flyer_templates/'),
+            model_name="eventflyerconfig",
+            name="template_image",
+            field=models.ImageField(
+                blank=True, null=True, upload_to="flyer_templates/"
+            ),
         ),
     ]

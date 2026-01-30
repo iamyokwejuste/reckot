@@ -6,6 +6,7 @@ import uuid
 from datetime import timedelta
 from django.utils import timezone
 
+
 class Organization(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=120, unique=True, blank=True)
@@ -87,13 +88,14 @@ class Organization(models.Model):
         except OrganizationSubscription.DoesNotExist:
             return 2
 
-class MemberRole(models.TextChoices):
 
+class MemberRole(models.TextChoices):
     OWNER = "OWNER", _("Owner")
     ADMIN = "ADMIN", _("Admin")
     MANAGER = "MANAGER", _("Manager")
     MEMBER = "MEMBER", _("Member")
     VIEWER = "VIEWER", _("Viewer")
+
 
 # Permission definitions for each role
 ROLE_PERMISSIONS = {
@@ -157,8 +159,8 @@ ROLE_PERMISSIONS = {
     ],
 }
 
-class CustomRole(models.Model):
 
+class CustomRole(models.Model):
     name = models.CharField(max_length=100)
     organization = models.ForeignKey(
         Organization, on_delete=models.CASCADE, related_name="custom_roles"
@@ -168,6 +170,7 @@ class CustomRole(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.organization.name})"
+
 
 class Membership(models.Model):
     organization = models.ForeignKey(
@@ -210,19 +213,17 @@ class Membership(models.Model):
 
     @staticmethod
     def has_permission(role, permission):
-
         if not role:
             return False
         return permission in ROLE_PERMISSIONS.get(role, [])
 
     @property
     def permissions(self):
-
         return ROLE_PERMISSIONS.get(self.role, [])
 
     def can(self, permission):
-
         return self.has_permission(self.role, permission)
+
 
 class Invitation(models.Model):
     class Status(models.TextChoices):
@@ -279,7 +280,6 @@ class Invitation(models.Model):
         return self.status == self.Status.PENDING and not self.is_expired
 
     def accept(self, user):
-
         if not self.is_valid:
             return None
 
@@ -299,23 +299,23 @@ class Invitation(models.Model):
         return membership
 
     def decline(self):
-
         self.status = self.Status.DECLINED
         self.save()
 
     def cancel(self):
-
         self.status = self.Status.CANCELLED
         self.save()
 
     def __str__(self):
         return f"Invitation for {self.email} to {self.organization} as {self.get_role_display()}"
 
+
 class OrganizationPlan(models.TextChoices):
     FREE = "FREE", _("Free (2% fee)")
     STARTER = "STARTER", _("Starter (5% fee)")
     PRO = "PRO", _("Pro (3% fee)")
     ENTERPRISE = "ENTERPRISE", _("Enterprise (Custom)")
+
 
 PLAN_FEATURES = {
     OrganizationPlan.FREE: {
@@ -359,6 +359,7 @@ PLAN_FEATURES = {
         "export_formats": ["CSV", "EXCEL", "PDF", "JSON"],
     },
 }
+
 
 class OrganizationSubscription(models.Model):
     class Status(models.TextChoices):
@@ -406,6 +407,7 @@ class OrganizationSubscription(models.Model):
         if self.expires_at and timezone.now() > self.expires_at:
             return False
         return True
+
 
 # Backwards compatibility alias
 Role = CustomRole

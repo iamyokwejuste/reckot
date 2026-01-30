@@ -28,3 +28,8 @@ dependencies = [
     "google-genai>=1.0.0",
     "hiredis>=3.3.0",
 ]
+
+[dependency-groups]
+dev = [
+    "ty>=0.0.14",
+]

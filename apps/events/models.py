@@ -45,7 +45,11 @@ class Event(models.Model):
     is_public = models.BooleanField(default=False)
     is_free = models.BooleanField(default=False)
     preview_token = models.CharField(max_length=32, blank=True, db_index=True)
-    ticket_prefix = models.CharField(max_length=4, default="RECK", help_text="3-4 letter prefix for ticket codes (e.g., RECK, EVNT)")
+    ticket_prefix = models.CharField(
+        max_length=4,
+        default="RECK",
+        help_text="3-4 letter prefix for ticket codes (e.g., RECK, EVNT)",
+    )
 
     is_featured = models.BooleanField(default=False)
     feature_requested_at = models.DateTimeField(null=True, blank=True)
@@ -274,7 +278,9 @@ class EventFlyerConfig(models.Model):
     pay_per_use_accepted = models.BooleanField(default=False)
     pay_per_use_accepted_at = models.DateTimeField(null=True, blank=True)
     template_change_count = models.PositiveSmallIntegerField(default=0)
-    template_image = models.ImageField(upload_to="flyer_templates/", blank=True, null=True)
+    template_image = models.ImageField(
+        upload_to="flyer_templates/", blank=True, null=True
+    )
     photo_x = models.PositiveIntegerField(default=50)
     photo_y = models.PositiveIntegerField(default=50)
     photo_width = models.PositiveIntegerField(default=200)
@@ -331,7 +337,11 @@ class FlyerGeneration(models.Model):
         Event, on_delete=models.CASCADE, related_name="flyer_generations"
     )
     ticket = models.ForeignKey(
-        "tickets.Ticket", on_delete=models.CASCADE, related_name="flyer_generations", null=True, blank=True
+        "tickets.Ticket",
+        on_delete=models.CASCADE,
+        related_name="flyer_generations",
+        null=True,
+        blank=True,
     )
     email = models.EmailField(max_length=255, blank=True)
     phone = models.CharField(max_length=20, blank=True)
@@ -350,17 +360,21 @@ class FlyerGeneration(models.Model):
             models.UniqueConstraint(
                 fields=["event", "email"],
                 condition=models.Q(email__isnull=False) & ~models.Q(email=""),
-                name="unique_flyer_per_email"
+                name="unique_flyer_per_email",
             ),
             models.UniqueConstraint(
                 fields=["event", "phone"],
                 condition=models.Q(phone__isnull=False) & ~models.Q(phone=""),
-                name="unique_flyer_per_phone"
+                name="unique_flyer_per_phone",
             ),
         ]
 
     def __str__(self):
-        identifier = self.email or self.phone or str(self.ticket.code) if self.ticket else "Unknown"
+        identifier = (
+            self.email or self.phone or str(self.ticket.code)
+            if self.ticket
+            else "Unknown"
+        )
         return f"Flyer for {identifier} - {self.event.title}"
 
 

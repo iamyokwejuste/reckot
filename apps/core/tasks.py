@@ -136,8 +136,8 @@ def cleanup_expired_otps_task():
         used_cutoff = now - timedelta(hours=1)
 
         deleted, details = OTPVerification.objects.filter(
-            Q(expires_at__lt=expired_cutoff) |
-            Q(is_used=True, created_at__lt=used_cutoff)
+            Q(expires_at__lt=expired_cutoff)
+            | Q(is_used=True, created_at__lt=used_cutoff)
         ).delete()
 
         if deleted:

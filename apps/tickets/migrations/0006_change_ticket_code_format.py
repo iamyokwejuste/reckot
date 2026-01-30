@@ -6,30 +6,33 @@ import string
 
 
 def convert_ticket_codes(apps, schema_editor):
-    Ticket = apps.get_model('tickets', 'Ticket')
+    Ticket = apps.get_model("tickets", "Ticket")
     for ticket in Ticket.objects.all():
         prefix = "RECK"
         characters = string.ascii_uppercase + string.digits
         while True:
-            suffix = ''.join(random.choices(characters, k=6))
+            suffix = "".join(random.choices(characters, k=6))
             code = f"{prefix}{suffix}"
             if not Ticket.objects.filter(code=code).exists():
                 ticket.code = code
-                ticket.save(update_fields=['code'])
+                ticket.save(update_fields=["code"])
                 break
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('tickets', '0005_remove_booking_booking_status_event_idx_and_more'),
+        ("tickets", "0005_remove_booking_booking_status_event_idx_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='ticket',
-            name='code',
-            field=models.CharField(db_index=True, editable=False, max_length=20, unique=True),
+            model_name="ticket",
+            name="code",
+            field=models.CharField(
+                db_index=True, editable=False, max_length=20, unique=True
+            ),
         ),
-        migrations.RunPython(convert_ticket_codes, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(
+            convert_ticket_codes, reverse_code=migrations.RunPython.noop
+        ),
     ]

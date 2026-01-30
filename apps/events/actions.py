@@ -718,7 +718,9 @@ class FlyerTicketVerificationView(View):
         is_phone = ticket_verification.startswith("+") or ticket_verification.isdigit()
 
         if is_email:
-            if FlyerGeneration.objects.filter(event=event, email__iexact=ticket_verification).exists():
+            if FlyerGeneration.objects.filter(
+                event=event, email__iexact=ticket_verification
+            ).exists():
                 return JsonResponse(
                     {
                         "success": False,
@@ -727,16 +729,28 @@ class FlyerTicketVerificationView(View):
                     status=403,
                 )
 
-            matching_tickets = Ticket.objects.filter(
-                Q(attendee_email__iexact=ticket_verification) |
-                Q(booking__user__email__iexact=ticket_verification, attendee_email="") |
-                Q(booking__guest_email__iexact=ticket_verification, attendee_email=""),
-                booking__event=event,
-                booking__status=Booking.Status.CONFIRMED
-            ).select_related("booking__user").first()
+            matching_tickets = (
+                Ticket.objects.filter(
+                    Q(attendee_email__iexact=ticket_verification)
+                    | Q(
+                        booking__user__email__iexact=ticket_verification,
+                        attendee_email="",
+                    )
+                    | Q(
+                        booking__guest_email__iexact=ticket_verification,
+                        attendee_email="",
+                    ),
+                    booking__event=event,
+                    booking__status=Booking.Status.CONFIRMED,
+                )
+                .select_related("booking__user")
+                .first()
+            )
 
         elif is_phone:
-            if FlyerGeneration.objects.filter(event=event, phone=ticket_verification).exists():
+            if FlyerGeneration.objects.filter(
+                event=event, phone=ticket_verification
+            ).exists():
                 return JsonResponse(
                     {
                         "success": False,
@@ -745,25 +759,45 @@ class FlyerTicketVerificationView(View):
                     status=403,
                 )
 
-            matching_tickets = Ticket.objects.filter(
-                Q(booking__user__phone_number=ticket_verification) |
-                Q(booking__guest_phone=ticket_verification),
-                booking__event=event,
-                booking__status=Booking.Status.CONFIRMED
-            ).select_related("booking__user").first()
+            matching_tickets = (
+                Ticket.objects.filter(
+                    Q(booking__user__phone_number=ticket_verification)
+                    | Q(booking__guest_phone=ticket_verification),
+                    booking__event=event,
+                    booking__status=Booking.Status.CONFIRMED,
+                )
+                .select_related("booking__user")
+                .first()
+            )
 
         else:
-            matching_tickets = Ticket.objects.filter(
-                code__iexact=ticket_verification,
-                booking__event=event,
-                booking__status=Booking.Status.CONFIRMED
-            ).select_related("booking__user").first()
+            matching_tickets = (
+                Ticket.objects.filter(
+                    code__iexact=ticket_verification,
+                    booking__event=event,
+                    booking__status=Booking.Status.CONFIRMED,
+                )
+                .select_related("booking__user")
+                .first()
+            )
 
             if matching_tickets:
-                ticket_email = matching_tickets.attendee_email or matching_tickets.booking.buyer_email
-                ticket_phone = matching_tickets.booking.user.phone_number if matching_tickets.booking.user else matching_tickets.booking.guest_phone
+                ticket_email = (
+                    matching_tickets.attendee_email
+                    or matching_tickets.booking.buyer_email
+                )
+                ticket_phone = (
+                    matching_tickets.booking.user.phone_number
+                    if matching_tickets.booking.user
+                    else matching_tickets.booking.guest_phone
+                )
 
-                if ticket_email and FlyerGeneration.objects.filter(event=event, email__iexact=ticket_email).exists():
+                if (
+                    ticket_email
+                    and FlyerGeneration.objects.filter(
+                        event=event, email__iexact=ticket_email
+                    ).exists()
+                ):
                     return JsonResponse(
                         {
                             "success": False,
@@ -771,7 +805,12 @@ class FlyerTicketVerificationView(View):
                         },
                         status=403,
                     )
-                if ticket_phone and FlyerGeneration.objects.filter(event=event, phone=ticket_phone).exists():
+                if (
+                    ticket_phone
+                    and FlyerGeneration.objects.filter(
+                        event=event, phone=ticket_phone
+                    ).exists()
+                ):
                     return JsonResponse(
                         {
                             "success": False,
@@ -871,7 +910,9 @@ class FlyerGeneratorView(View):
         attendee_phone = ""
 
         if is_email:
-            if FlyerGeneration.objects.filter(event=event, email__iexact=ticket_verification).exists():
+            if FlyerGeneration.objects.filter(
+                event=event, email__iexact=ticket_verification
+            ).exists():
                 return JsonResponse(
                     {
                         "success": False,
@@ -881,16 +922,28 @@ class FlyerGeneratorView(View):
                 )
             attendee_email = ticket_verification
 
-            verified_ticket = Ticket.objects.filter(
-                Q(attendee_email__iexact=ticket_verification) |
-                Q(booking__user__email__iexact=ticket_verification, attendee_email="") |
-                Q(booking__guest_email__iexact=ticket_verification, attendee_email=""),
-                booking__event=event,
-                booking__status=Booking.Status.CONFIRMED
-            ).select_related("booking__user").first()
+            verified_ticket = (
+                Ticket.objects.filter(
+                    Q(attendee_email__iexact=ticket_verification)
+                    | Q(
+                        booking__user__email__iexact=ticket_verification,
+                        attendee_email="",
+                    )
+                    | Q(
+                        booking__guest_email__iexact=ticket_verification,
+                        attendee_email="",
+                    ),
+                    booking__event=event,
+                    booking__status=Booking.Status.CONFIRMED,
+                )
+                .select_related("booking__user")
+                .first()
+            )
 
         elif is_phone:
-            if FlyerGeneration.objects.filter(event=event, phone=ticket_verification).exists():
+            if FlyerGeneration.objects.filter(
+                event=event, phone=ticket_verification
+            ).exists():
                 return JsonResponse(
                     {
                         "success": False,
@@ -900,25 +953,45 @@ class FlyerGeneratorView(View):
                 )
             attendee_phone = ticket_verification
 
-            verified_ticket = Ticket.objects.filter(
-                Q(booking__user__phone_number=ticket_verification) |
-                Q(booking__guest_phone=ticket_verification),
-                booking__event=event,
-                booking__status=Booking.Status.CONFIRMED
-            ).select_related("booking__user").first()
+            verified_ticket = (
+                Ticket.objects.filter(
+                    Q(booking__user__phone_number=ticket_verification)
+                    | Q(booking__guest_phone=ticket_verification),
+                    booking__event=event,
+                    booking__status=Booking.Status.CONFIRMED,
+                )
+                .select_related("booking__user")
+                .first()
+            )
 
         else:
-            verified_ticket = Ticket.objects.filter(
-                code__iexact=ticket_verification,
-                booking__event=event,
-                booking__status=Booking.Status.CONFIRMED
-            ).select_related("booking__user").first()
+            verified_ticket = (
+                Ticket.objects.filter(
+                    code__iexact=ticket_verification,
+                    booking__event=event,
+                    booking__status=Booking.Status.CONFIRMED,
+                )
+                .select_related("booking__user")
+                .first()
+            )
 
             if verified_ticket:
-                ticket_email = verified_ticket.attendee_email or verified_ticket.booking.buyer_email
-                ticket_phone = verified_ticket.booking.user.phone_number if verified_ticket.booking.user else verified_ticket.booking.guest_phone
+                ticket_email = (
+                    verified_ticket.attendee_email
+                    or verified_ticket.booking.buyer_email
+                )
+                ticket_phone = (
+                    verified_ticket.booking.user.phone_number
+                    if verified_ticket.booking.user
+                    else verified_ticket.booking.guest_phone
+                )
 
-                if ticket_email and FlyerGeneration.objects.filter(event=event, email__iexact=ticket_email).exists():
+                if (
+                    ticket_email
+                    and FlyerGeneration.objects.filter(
+                        event=event, email__iexact=ticket_email
+                    ).exists()
+                ):
                     return JsonResponse(
                         {
                             "success": False,
@@ -926,7 +999,12 @@ class FlyerGeneratorView(View):
                         },
                         status=403,
                     )
-                if ticket_phone and FlyerGeneration.objects.filter(event=event, phone=ticket_phone).exists():
+                if (
+                    ticket_phone
+                    and FlyerGeneration.objects.filter(
+                        event=event, phone=ticket_phone
+                    ).exists()
+                ):
                     return JsonResponse(
                         {
                             "success": False,
@@ -1016,7 +1094,9 @@ class FlyerConfigView(LoginRequiredMixin, View):
         ).first()
 
         is_organizer = membership and membership.role in [
-            MemberRole.OWNER, MemberRole.ADMIN, MemberRole.MANAGER
+            MemberRole.OWNER,
+            MemberRole.ADMIN,
+            MemberRole.MANAGER,
         ]
 
         has_feature = event.organization.has_feature("flyer_generator")
@@ -1054,7 +1134,9 @@ class FlyerConfigView(LoginRequiredMixin, View):
         ).first()
 
         is_organizer = membership and membership.role in [
-            MemberRole.OWNER, MemberRole.ADMIN, MemberRole.MANAGER
+            MemberRole.OWNER,
+            MemberRole.ADMIN,
+            MemberRole.MANAGER,
         ]
 
         try:
@@ -1075,7 +1157,9 @@ class FlyerConfigView(LoginRequiredMixin, View):
         config.photo_border_width = int(request.POST.get("photo_border_width") or 0)
         config.photo_border_color = request.POST.get("photo_border_color") or "#ffffff"
         photo_bg = request.POST.get("photo_bg_color") or "rgba(0,0,0,0)"
-        config.photo_bg_color = "rgba(0,0,0,0)" if photo_bg == "transparent" else photo_bg
+        config.photo_bg_color = (
+            "rgba(0,0,0,0)" if photo_bg == "transparent" else photo_bg
+        )
         config.output_width = int(request.POST.get("output_width") or 1080)
         config.output_height = int(request.POST.get("output_height") or 1080)
 
@@ -1085,7 +1169,9 @@ class FlyerConfigView(LoginRequiredMixin, View):
         ):
             if not is_organizer:
                 messages.error(request, "Only organizers can accept pay-per-use terms")
-                return redirect("events:flyer_config", org_slug=org_slug, event_slug=event_slug)
+                return redirect(
+                    "events:flyer_config", org_slug=org_slug, event_slug=event_slug
+                )
             config.pay_per_use_accepted = True
             config.pay_per_use_accepted_at = timezone.now()
 
@@ -1102,7 +1188,9 @@ class FlyerConfigView(LoginRequiredMixin, View):
             config.save()
         except Exception as e:
             messages.error(request, f"Failed to save configuration: {str(e)}")
-            return redirect("events:flyer_config", org_slug=org_slug, event_slug=event_slug)
+            return redirect(
+                "events:flyer_config", org_slug=org_slug, event_slug=event_slug
+            )
 
         config.text_fields.all().delete()
 

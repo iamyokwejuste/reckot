@@ -122,7 +122,7 @@ class CheckInSearchView(LoginRequiredMixin, View):
 
 
 class CheckInTicketView(LoginRequiredMixin, View):
-    http_method_names = ['post']
+    http_method_names = ["post"]
 
     def post(self, request, code):
         result = verify_and_checkin(code, request.user)

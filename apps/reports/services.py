@@ -25,6 +25,7 @@ DATA_FETCHERS = {
     "SWAG": get_swag_data,
 }
 
+
 def get_financial_summary(event):
     payments = Payment.objects.filter(
         booking__event=event, status=Payment.Status.CONFIRMED
@@ -49,6 +50,7 @@ def get_financial_summary(event):
         "generated_at": datetime.now(),
     }
 
+
 def get_ticket_sales_data(event):
     tickets = Ticket.objects.filter(
         booking__event=event, booking__status=Booking.Status.CONFIRMED
@@ -64,6 +66,7 @@ def get_ticket_sales_data(event):
         "generated_at": datetime.now(),
     }
 
+
 def generate_csv_content(data: list) -> str:
     if not data:
         return ""
@@ -73,6 +76,7 @@ def generate_csv_content(data: list) -> str:
     writer.writerows(data)
     return output.getvalue()
 
+
 def generate_csv_export(event, report_type: str, user, mask_emails: bool = True):
     fetcher = DATA_FETCHERS.get(report_type)
     if not fetcher:
@@ -81,6 +85,7 @@ def generate_csv_export(event, report_type: str, user, mask_emails: bool = True)
     content = generate_csv_content(data)
     filename = f"{report_type.lower()}_{event.slug}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
     return content.encode("utf-8"), filename, "text/csv"
+
 
 def generate_excel_export(event, report_type: str, user, mask_emails: bool = True):
     fetcher = DATA_FETCHERS.get(report_type)
@@ -104,6 +109,7 @@ def generate_excel_export(event, report_type: str, user, mask_emails: bool = Tru
         filename,
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
+
 
 def generate_json_export(event, report_type: str, user, mask_emails: bool = True):
     if report_type == "FINANCIAL":
@@ -163,6 +169,7 @@ def generate_json_export(event, report_type: str, user, mask_emails: bool = True
     content = json.dumps(json_data, indent=2, default=str)
     filename = f"{report_type.lower()}_{event.slug}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
     return content.encode("utf-8"), filename, "application/json"
+
 
 def generate_pdf_export(event, report_type: str, user, mask_emails: bool = True):
     template_map = {

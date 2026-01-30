@@ -6,6 +6,7 @@ from datetime import timedelta
 import random
 import string
 
+
 class User(AbstractUser):
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     email_verified = models.BooleanField(default=False)
@@ -15,8 +16,8 @@ class User(AbstractUser):
     def __str__(self):
         return self.email or self.username
 
-class OTPVerification(models.Model):
 
+class OTPVerification(models.Model):
     class Type(models.TextChoices):
         EMAIL = "EMAIL", _("Email Verification")
         PHONE = "PHONE", _("Phone Verification")
@@ -48,7 +49,6 @@ class OTPVerification(models.Model):
 
     @staticmethod
     def generate_code(length: int = 6) -> str:
-
         return "".join(random.choices(string.digits, k=length))
 
     @property
@@ -60,7 +60,6 @@ class OTPVerification(models.Model):
         return not self.is_used and not self.is_expired and self.attempts < 5
 
     def verify(self, code: str) -> bool:
-
         self.attempts += 1
         self.save(update_fields=["attempts"])
 
@@ -76,7 +75,6 @@ class OTPVerification(models.Model):
 
     @classmethod
     def create_for_user(cls, user: User, otp_type: str, expiry_minutes: int = 10):
-
         cls.objects.filter(user=user, otp_type=otp_type, is_used=False).update(
             is_used=True
         )

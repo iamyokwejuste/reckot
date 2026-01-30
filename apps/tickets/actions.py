@@ -7,7 +7,7 @@ from django.views import View
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from django.template.loader import render_to_string
@@ -24,7 +24,9 @@ class TicketListView(LoginRequiredMixin, View):
 
         tickets = Ticket.objects.filter(
             booking__event__organization__members=request.user
-        ).select_related("booking__user", "booking__event", "ticket_type", "booking__guest_session")
+        ).select_related(
+            "booking__user", "booking__event", "ticket_type", "booking__guest_session"
+        )
 
         search = request.GET.get("search", "").strip()
         if search:
@@ -100,50 +102,74 @@ class TicketListView(LoginRequiredMixin, View):
         if format_type == "json":
             data = []
             for ticket in tickets:
-                data.append({
-                    "code": str(ticket.code),
-                    "ticket_type": ticket.ticket_type.name,
-                    "event": ticket.booking.event.title,
-                    "attendee_name": ticket.attendee_name or "",
-                    "attendee_email": ticket.attendee_email or "",
-                    "booking_email": ticket.booking.user.email if ticket.booking.user else ticket.booking.guest_email,
-                    "booking_name": ticket.booking.user.get_full_name() if ticket.booking.user else ticket.booking.guest_name,
-                    "status": ticket.booking.status,
-                    "checked_in": ticket.is_checked_in,
-                    "booking_date": ticket.booking.created_at.isoformat(),
-                })
+                data.append(
+                    {
+                        "code": str(ticket.code),
+                        "ticket_type": ticket.ticket_type.name,
+                        "event": ticket.booking.event.title,
+                        "attendee_name": ticket.attendee_name or "",
+                        "attendee_email": ticket.attendee_email or "",
+                        "booking_email": ticket.booking.user.email
+                        if ticket.booking.user
+                        else ticket.booking.guest_email,
+                        "booking_name": ticket.booking.user.get_full_name()
+                        if ticket.booking.user
+                        else ticket.booking.guest_name,
+                        "status": ticket.booking.status,
+                        "checked_in": ticket.is_checked_in,
+                        "booking_date": ticket.booking.created_at.isoformat(),
+                    }
+                )
 
             response = HttpResponse(
-                json.dumps(data, indent=2),
-                content_type="application/json"
+                json.dumps(data, indent=2), content_type="application/json"
             )
-            response["Content-Disposition"] = f'attachment; filename="rsvp-export-{datetime.now().strftime("%Y%m%d-%H%M%S")}.json"'
+            response["Content-Disposition"] = (
+                f'attachment; filename="rsvp-export-{datetime.now().strftime("%Y%m%d-%H%M%S")}.json"'
+            )
             return response
 
         elif format_type == "csv":
             response = HttpResponse(content_type="text/csv")
-            response["Content-Disposition"] = f'attachment; filename="rsvp-export-{datetime.now().strftime("%Y%m%d-%H%M%S")}.csv"'
+            response["Content-Disposition"] = (
+                f'attachment; filename="rsvp-export-{datetime.now().strftime("%Y%m%d-%H%M%S")}.csv"'
+            )
 
             writer = csv.writer(response)
-            writer.writerow([
-                "Ticket Code", "Ticket Type", "Event", "Attendee Name",
-                "Attendee Email", "Booking Email", "Booking Name",
-                "Status", "Checked In", "Booking Date"
-            ])
+            writer.writerow(
+                [
+                    "Ticket Code",
+                    "Ticket Type",
+                    "Event",
+                    "Attendee Name",
+                    "Attendee Email",
+                    "Booking Email",
+                    "Booking Name",
+                    "Status",
+                    "Checked In",
+                    "Booking Date",
+                ]
+            )
 
             for ticket in tickets:
-                writer.writerow([
-                    str(ticket.code),
-                    ticket.ticket_type.name,
-                    ticket.booking.event.title,
-                    ticket.attendee_name or "",
-                    ticket.attendee_email or "",
-                    ticket.booking.user.email if ticket.booking.user else ticket.booking.guest_email,
-                    ticket.booking.user.get_full_name() if ticket.booking.user else ticket.booking.guest_name,
-                    ticket.booking.status,
-                    "Yes" if ticket.is_checked_in else "No",
-                    ticket.booking.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-                ])
+                writer.writerow(
+                    [
+                        str(ticket.code),
+                        ticket.ticket_type.name,
+                        ticket.booking.event.title,
+                        ticket.attendee_name or "",
+                        ticket.attendee_email or "",
+                        ticket.booking.user.email
+                        if ticket.booking.user
+                        else ticket.booking.guest_email,
+                        ticket.booking.user.get_full_name()
+                        if ticket.booking.user
+                        else ticket.booking.guest_name,
+                        ticket.booking.status,
+                        "Yes" if ticket.is_checked_in else "No",
+                        ticket.booking.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                    ]
+                )
 
             return response
 
@@ -153,25 +179,38 @@ class TicketListView(LoginRequiredMixin, View):
             ws.title = "RSVP Export"
 
             headers = [
-                "Ticket Code", "Ticket Type", "Event", "Attendee Name",
-                "Attendee Email", "Booking Email", "Booking Name",
-                "Status", "Checked In", "Booking Date"
+                "Ticket Code",
+                "Ticket Type",
+                "Event",
+                "Attendee Name",
+                "Attendee Email",
+                "Booking Email",
+                "Booking Name",
+                "Status",
+                "Checked In",
+                "Booking Date",
             ]
             ws.append(headers)
 
             for ticket in tickets:
-                ws.append([
-                    str(ticket.code),
-                    ticket.ticket_type.name,
-                    ticket.booking.event.title,
-                    ticket.attendee_name or "",
-                    ticket.attendee_email or "",
-                    ticket.booking.user.email if ticket.booking.user else ticket.booking.guest_email,
-                    ticket.booking.user.get_full_name() if ticket.booking.user else ticket.booking.guest_name,
-                    ticket.booking.status,
-                    "Yes" if ticket.is_checked_in else "No",
-                    ticket.booking.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-                ])
+                ws.append(
+                    [
+                        str(ticket.code),
+                        ticket.ticket_type.name,
+                        ticket.booking.event.title,
+                        ticket.attendee_name or "",
+                        ticket.attendee_email or "",
+                        ticket.booking.user.email
+                        if ticket.booking.user
+                        else ticket.booking.guest_email,
+                        ticket.booking.user.get_full_name()
+                        if ticket.booking.user
+                        else ticket.booking.guest_name,
+                        ticket.booking.status,
+                        "Yes" if ticket.is_checked_in else "No",
+                        ticket.booking.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                    ]
+                )
 
             buffer = BytesIO()
             wb.save(buffer)
@@ -179,22 +218,29 @@ class TicketListView(LoginRequiredMixin, View):
 
             response = HttpResponse(
                 buffer.getvalue(),
-                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             )
-            response["Content-Disposition"] = f'attachment; filename="rsvp-export-{datetime.now().strftime("%Y%m%d-%H%M%S")}.xlsx"'
+            response["Content-Disposition"] = (
+                f'attachment; filename="rsvp-export-{datetime.now().strftime("%Y%m%d-%H%M%S")}.xlsx"'
+            )
             return response
 
         elif format_type == "pdf":
-            html_content = render_to_string("tickets/pdf/rsvp_export.html", {
-                "tickets": tickets,
-                "user": user,
-                "generated_at": datetime.now(),
-            })
+            html_content = render_to_string(
+                "tickets/pdf/rsvp_export.html",
+                {
+                    "tickets": tickets,
+                    "user": user,
+                    "generated_at": datetime.now(),
+                },
+            )
 
             pdf_content = HTML(string=html_content).write_pdf()
 
             response = HttpResponse(pdf_content, content_type="application/pdf")
-            response["Content-Disposition"] = f'attachment; filename="rsvp-export-{datetime.now().strftime("%Y%m%d-%H%M%S")}.pdf"'
+            response["Content-Disposition"] = (
+                f'attachment; filename="rsvp-export-{datetime.now().strftime("%Y%m%d-%H%M%S")}.pdf"'
+            )
             return response
 
         return HttpResponse("Invalid export format", status=400)
@@ -247,15 +293,22 @@ class MyTicketsView(View):
         else:
             guest_token = request.session.get("guest_token")
             if not guest_token:
-                messages.info(request, _("Please login or use ticket lookup to view your tickets."))
+                messages.info(
+                    request,
+                    _("Please login or use ticket lookup to view your tickets."),
+                )
                 return render(request, "tickets/my_tickets.html", {"tickets": []})
 
             tickets = (
                 Ticket.objects.filter(
                     booking__guest_session__token=guest_token,
-                    booking__status=Booking.Status.CONFIRMED
+                    booking__status=Booking.Status.CONFIRMED,
                 )
-                .select_related("booking__event__organization", "ticket_type", "booking__guest_session")
+                .select_related(
+                    "booking__event__organization",
+                    "ticket_type",
+                    "booking__guest_session",
+                )
                 .order_by("-booking__created_at")
             )
 

@@ -14,8 +14,8 @@ from apps.orgs.models import Organization, Membership, Invitation, MemberRole
 from apps.payments.models import Payment
 from apps.core.models import User
 
-class OrgPermissionMixin:
 
+class OrgPermissionMixin:
     required_permission = None
 
     def get_organization(self, slug):
@@ -39,6 +39,7 @@ class OrgPermissionMixin:
             self.organization = organization
         return super().dispatch(request, *args, **kwargs)
 
+
 class OrganizationListView(LoginRequiredMixin, View):
     def get(self, request):
         organizations = (
@@ -57,6 +58,7 @@ class OrganizationListView(LoginRequiredMixin, View):
                 "organizations": organizations,
             },
         )
+
 
 class OrganizationCreateView(LoginRequiredMixin, View):
     def get(self, request):
@@ -115,6 +117,7 @@ class OrganizationCreateView(LoginRequiredMixin, View):
                 },
             )
 
+
 class OrganizationDetailView(LoginRequiredMixin, OrgPermissionMixin, View):
     def get(self, request, slug):
         organization = self.organization
@@ -154,6 +157,7 @@ class OrganizationDetailView(LoginRequiredMixin, OrgPermissionMixin, View):
             },
         )
 
+
 class OrganizationMembersView(LoginRequiredMixin, OrgPermissionMixin, View):
     required_permission = "manage_members"
 
@@ -183,6 +187,7 @@ class OrganizationMembersView(LoginRequiredMixin, OrgPermissionMixin, View):
                 "roles": MemberRole.choices,
             },
         )
+
 
 class InviteMemberView(LoginRequiredMixin, OrgPermissionMixin, View):
     required_permission = "invite_members"
@@ -267,6 +272,7 @@ class InviteMemberView(LoginRequiredMixin, OrgPermissionMixin, View):
         messages.success(request, _("Invitation sent to %(email)s.") % {"email": email})
         return redirect("orgs:members", slug=slug)
 
+
 class UpdateMemberRoleView(LoginRequiredMixin, OrgPermissionMixin, View):
     required_permission = "manage_members"
 
@@ -304,6 +310,7 @@ class UpdateMemberRoleView(LoginRequiredMixin, OrgPermissionMixin, View):
         )
         return redirect("orgs:members", slug=slug)
 
+
 class RemoveMemberView(LoginRequiredMixin, OrgPermissionMixin, View):
     required_permission = "remove_members"
 
@@ -334,6 +341,7 @@ class RemoveMemberView(LoginRequiredMixin, OrgPermissionMixin, View):
         )
         return redirect("orgs:members", slug=slug)
 
+
 class LeaveOrganizationView(LoginRequiredMixin, View):
     def post(self, request, slug):
         organization = get_object_or_404(Organization, slug=slug)
@@ -359,6 +367,7 @@ class LeaveOrganizationView(LoginRequiredMixin, View):
 
         return redirect("orgs:list")
 
+
 class CancelInvitationView(LoginRequiredMixin, OrgPermissionMixin, View):
     required_permission = "invite_members"
 
@@ -378,6 +387,7 @@ class CancelInvitationView(LoginRequiredMixin, OrgPermissionMixin, View):
             _("Cancelled invitation to %(email)s.") % {"email": invitation.email},
         )
         return redirect("orgs:members", slug=slug)
+
 
 class ResendInvitationView(LoginRequiredMixin, OrgPermissionMixin, View):
     required_permission = "invite_members"
@@ -420,6 +430,7 @@ class ResendInvitationView(LoginRequiredMixin, OrgPermissionMixin, View):
             messages.error(request, _("Failed to resend invitation."))
 
         return redirect("orgs:members", slug=slug)
+
 
 class AcceptInvitationView(LoginRequiredMixin, View):
     def get(self, request, token):
@@ -474,6 +485,7 @@ class AcceptInvitationView(LoginRequiredMixin, View):
                 {"message": _("Failed to accept invitation.")},
             )
 
+
 class TransferOwnershipView(LoginRequiredMixin, View):
     def post(self, request, slug):
         organization = get_object_or_404(Organization, slug=slug, owner=request.user)
@@ -505,6 +517,7 @@ class TransferOwnershipView(LoginRequiredMixin, View):
             % {"email": new_owner_membership.user.email},
         )
         return redirect("orgs:detail", slug=slug)
+
 
 class OrganizationEditView(LoginRequiredMixin, OrgPermissionMixin, View):
     required_permission = "manage_organization"
@@ -549,6 +562,7 @@ class OrganizationEditView(LoginRequiredMixin, OrgPermissionMixin, View):
 
         messages.success(request, _("Organization updated successfully!"))
         return redirect("orgs:detail", slug=organization.slug)
+
 
 class BulkInviteView(LoginRequiredMixin, OrgPermissionMixin, View):
     required_permission = "invite_members"
@@ -667,6 +681,7 @@ class BulkInviteView(LoginRequiredMixin, OrgPermissionMixin, View):
             )
 
         return redirect("orgs:members", slug=slug)
+
 
 class DownloadInviteTemplateView(LoginRequiredMixin, View):
     def get(self, request):

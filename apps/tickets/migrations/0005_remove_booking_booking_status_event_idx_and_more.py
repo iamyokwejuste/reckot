@@ -4,18 +4,17 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('tickets', '0004_add_performance_indexes'),
+        ("tickets", "0004_add_performance_indexes"),
     ]
 
     operations = [
         migrations.RemoveIndex(
-            model_name='booking',
-            name='booking_status_event_idx',
+            model_name="booking",
+            name="booking_status_event_idx",
         ),
         migrations.RemoveIndex(
-            model_name='ticket',
-            name='ticket_checkin_booking_idx',
+            model_name="ticket",
+            name="ticket_checkin_booking_idx",
         ),
     ]

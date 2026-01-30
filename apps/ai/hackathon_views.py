@@ -5,6 +5,7 @@ from django.views import View
 from django.views.decorators.csrf import csrf_protect
 from django.utils.decorators import method_decorator
 from django.contrib.auth.mixins import LoginRequiredMixin
+from decimal import Decimal
 
 from apps.ai.verification import verify_event_authenticity, get_fraud_prevention_tips
 from apps.ai.voice_creator import create_event_from_voice, enhance_voice_created_event
@@ -13,12 +14,20 @@ from apps.ai.predictive_analytics import (
     optimize_ticket_pricing,
     generate_marketing_strategy,
 )
+from apps.ai.decorators import ai_feature_required, ai_rate_limit, log_ai_usage
 from apps.events.models import Event
 from apps.core.services.ai import gemini_ai
-from decimal import Decimal
 
 
-@method_decorator(csrf_protect, name="dispatch")
+@method_decorator(
+    [
+        csrf_protect,
+        ai_feature_required,
+        ai_rate_limit(30),
+        log_ai_usage("VERIFY_EVENT"),
+    ],
+    name="dispatch",
+)
 class VerifyEventView(LoginRequiredMixin, View):
     def post(self, request):
         try:
@@ -87,7 +96,15 @@ class FraudPreventionTipsView(View):
         )
 
 
-@method_decorator(csrf_protect, name="dispatch")
+@method_decorator(
+    [
+        csrf_protect,
+        ai_feature_required,
+        ai_rate_limit(30),
+        log_ai_usage("VOICE_TO_EVENT"),
+    ],
+    name="dispatch",
+)
 class VoiceToEventView(LoginRequiredMixin, View):
     def post(self, request):
         try:
@@ -124,7 +141,15 @@ class VoiceToEventView(LoginRequiredMixin, View):
             )
 
 
-@method_decorator(csrf_protect, name="dispatch")
+@method_decorator(
+    [
+        csrf_protect,
+        ai_feature_required,
+        ai_rate_limit(30),
+        log_ai_usage("PREDICT_SALES"),
+    ],
+    name="dispatch",
+)
 class PredictSalesView(LoginRequiredMixin, View):
     def post(self, request):
         try:
@@ -196,7 +221,15 @@ class PredictSalesView(LoginRequiredMixin, View):
             )
 
 
-@method_decorator(csrf_protect, name="dispatch")
+@method_decorator(
+    [
+        csrf_protect,
+        ai_feature_required,
+        ai_rate_limit(30),
+        log_ai_usage("OPTIMIZE_PRICING"),
+    ],
+    name="dispatch",
+)
 class OptimizePricingView(LoginRequiredMixin, View):
     def post(self, request):
         try:
@@ -246,7 +279,15 @@ class OptimizePricingView(LoginRequiredMixin, View):
             return JsonResponse({"error": str(e)}, status=500)
 
 
-@method_decorator(csrf_protect, name="dispatch")
+@method_decorator(
+    [
+        csrf_protect,
+        ai_feature_required,
+        ai_rate_limit(30),
+        log_ai_usage("MARKETING_STRATEGY"),
+    ],
+    name="dispatch",
+)
 class MarketingStrategyView(LoginRequiredMixin, View):
     def post(self, request):
         try:
@@ -274,7 +315,15 @@ class MarketingStrategyView(LoginRequiredMixin, View):
             return JsonResponse({"error": str(e)}, status=500)
 
 
-@method_decorator(csrf_protect, name="dispatch")
+@method_decorator(
+    [
+        csrf_protect,
+        ai_feature_required,
+        ai_rate_limit(30),
+        log_ai_usage("GENERATE_IMAGE"),
+    ],
+    name="dispatch",
+)
 class GenerateCoverImageView(LoginRequiredMixin, View):
     def post(self, request):
         try:
@@ -295,7 +344,7 @@ class GenerateCoverImageView(LoginRequiredMixin, View):
                 "food": "dining setup, food presentation, restaurant or catering atmosphere",
                 "business": "corporate environment, office setting, professional meeting space",
                 "cultural": "cultural venue, traditional and modern elements, community gathering",
-                "general": "modern event venue, professional setup, welcoming atmosphere"
+                "general": "modern event venue, professional setup, welcoming atmosphere",
             }
 
             visual_guide = event_visuals.get(event_type, event_visuals["general"])
@@ -304,7 +353,7 @@ class GenerateCoverImageView(LoginRequiredMixin, View):
                 "16:9": "1920x1080 pixels (landscape, 16:9 ratio)",
                 "1:1": "1080x1080 pixels (square, 1:1 ratio)",
                 "4:3": "1600x1200 pixels (landscape, 4:3 ratio)",
-                "3:2": "1800x1200 pixels (landscape, 3:2 ratio)"
+                "3:2": "1800x1200 pixels (landscape, 3:2 ratio)",
             }
             dimension_spec = aspect_ratios.get(aspect_ratio, aspect_ratios["16:9"])
 
@@ -345,7 +394,11 @@ Visual Requirements:
                 )
             else:
                 return JsonResponse(
-                    {"success": False, "error": "AI did not generate any image. Please try again."}, status=500
+                    {
+                        "success": False,
+                        "error": "AI did not generate any image. Please try again.",
+                    },
+                    status=500,
                 )
 
         except Exception as e:

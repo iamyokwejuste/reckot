@@ -2,6 +2,7 @@ from typing import Dict, Optional
 from decimal import Decimal
 from apps.core.services.ai import gemini_ai
 
+
 def verify_event_authenticity(
     title: str,
     description: str,
@@ -19,7 +20,9 @@ def verify_event_authenticity(
         - Successful events: {organizer_history.get("successful_events", 0)}
         - Average rating: {organizer_history.get("avg_rating", 0)}/5
         - Refund rate: {organizer_history.get("refund_rate", 0)}%
-You are an event fraud detection expert for African markets. Analyze this event for authenticity and potential scam indicators.
+        """
+
+    prompt = f"""You are an event fraud detection expert for African markets. Analyze this event for authenticity and potential scam indicators.
 
 Event Details:
 Title: {title}
@@ -83,6 +86,7 @@ Focus on African market context - events here often use mobile money, smaller ve
             "error": "Analysis parsing failed",
         }
 
+
 def _analyze_event_image(image_data: bytes, title: str, description: str) -> Dict:
     prompt = f"""Analyze this event poster/cover image for authenticity.
 
@@ -116,6 +120,7 @@ Return JSON:
             "concerns": [],
             "analysis": "Image analysis unavailable",
         }
+
 
 def get_fraud_prevention_tips() -> list[str]:
     return [

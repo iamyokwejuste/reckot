@@ -119,3 +119,63 @@ class AIMessage(models.Model):
 
     class Meta:
         ordering = ["created_at"]
+
+
+class AIUsageLog(models.Model):
+    class Operation(models.TextChoices):
+        CHAT = "CHAT", "Chat Message"
+        GENERATE_DESCRIPTION = "GENERATE_DESCRIPTION", "Generate Description"
+        GENERATE_IMAGE = "GENERATE_IMAGE", "Generate Image"
+        IMPROVE_TEXT = "IMPROVE_TEXT", "Improve Text"
+        TRANSLATE = "TRANSLATE", "Translate"
+        SUMMARIZE = "SUMMARIZE", "Summarize"
+        INSIGHT = "INSIGHT", "Generate Insight"
+        QUERY = "QUERY", "Database Query"
+        VOICE_TO_EVENT = "VOICE_TO_EVENT", "Voice to Event"
+        VERIFY_EVENT = "VERIFY_EVENT", "Verify Event"
+        PREDICT_SALES = "PREDICT_SALES", "Predict Sales"
+        OPTIMIZE_PRICING = "OPTIMIZE_PRICING", "Optimize Pricing"
+        MARKETING_STRATEGY = "MARKETING_STRATEGY", "Marketing Strategy"
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="ai_usage_logs",
+        null=True,
+        blank=True,
+    )
+    session_id = models.UUIDField(null=True, blank=True)
+    operation = models.CharField(max_length=50, choices=Operation.choices)
+    prompt = models.TextField()
+    response = models.TextField(blank=True)
+    tokens_used = models.IntegerField(default=0)
+    cost = models.DecimalField(max_digits=10, decimal_places=6, default=0)
+    execution_time = models.FloatField(help_text="Execution time in seconds")
+    models_accessed = models.JSONField(default=list, blank=True)
+    error = models.TextField(blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["user", "-created_at"]),
+            models.Index(fields=["operation", "-created_at"]),
+        ]
+
+
+class AIRateLimit(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="ai_rate_limits",
+    )
+    date = models.DateField(auto_now_add=True)
+    request_count = models.IntegerField(default=0)
+    daily_limit = models.IntegerField(default=30)
+
+    class Meta:
+        unique_together = ["user", "date"]
+        indexes = [
+            models.Index(fields=["user", "date"]),
+        ]

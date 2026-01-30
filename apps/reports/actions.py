@@ -17,7 +17,7 @@ from django.views import View
 
 from apps.events.models import CheckoutQuestion, Event
 from apps.orgs.models import Organization
-from apps.payments.models import Payment, Withdrawal, Refund
+from apps.payments.models import Payment
 from apps.payments.services import calculate_organization_balance
 from apps.reports.queries import (
     get_event_summary,
@@ -44,17 +44,15 @@ class AnalyticsView(LoginRequiredMixin, View):
 
         payment_stats = Payment.objects.filter(
             booking__event__organization__members=user, status=Payment.Status.CONFIRMED
-        ).aggregate(total_revenue=Sum("amount"), total_service_fees=Sum("service_fee"))
+        ).aggregate(total_revenue=Sum("amount"))
 
         total_revenue = payment_stats["total_revenue"] or 0
-        service_fees = payment_stats["total_service_fees"] or 0
 
         ticket_stats = Ticket.objects.filter(
             booking__event__organization__members=user,
             booking__status=Booking.Status.CONFIRMED,
         ).aggregate(
-            total=Count("id"),
-            checked_in=Count("id", filter=Q(is_checked_in=True))
+            total=Count("id"), checked_in=Count("id", filter=Q(is_checked_in=True))
         )
 
         tickets_sold = ticket_stats["total"]
@@ -63,7 +61,7 @@ class AnalyticsView(LoginRequiredMixin, View):
 
         event_counts = user_events.aggregate(
             active=Count("id", filter=Q(state=Event.State.PUBLISHED, end_at__gte=now)),
-            total=Count("id")
+            total=Count("id"),
         )
         active_events = event_counts["active"]
 
@@ -507,7 +505,9 @@ class AttendeeListView(LoginRequiredMixin, View):
                 | Q(code__icontains=search_query)
             )
 
-        tickets_qs = tickets_qs.order_by("booking__user__last_name", "booking__user__first_name")
+        tickets_qs = tickets_qs.order_by(
+            "booking__user__last_name", "booking__user__first_name"
+        )
 
         total_count = tickets_qs.count()
         checked_in_count = tickets_qs.filter(is_checked_in=True).count()

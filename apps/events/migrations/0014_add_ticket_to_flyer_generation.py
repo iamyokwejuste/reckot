@@ -5,20 +5,27 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('events', '0013_make_template_image_optional'),
-        ('tickets', '0005_remove_booking_booking_status_event_idx_and_more'),
+        ("events", "0013_make_template_image_optional"),
+        ("tickets", "0005_remove_booking_booking_status_event_idx_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='flyergeneration',
-            name='ticket',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='flyer_generations', to='tickets.ticket'),
+            model_name="flyergeneration",
+            name="ticket",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="flyer_generations",
+                to="tickets.ticket",
+            ),
         ),
         migrations.AddIndex(
-            model_name='flyergeneration',
-            index=models.Index(fields=['ticket'], name='events_flye_ticket__18df4c_idx'),
+            model_name="flyergeneration",
+            index=models.Index(
+                fields=["ticket"], name="events_flye_ticket__18df4c_idx"
+            ),
         ),
     ]

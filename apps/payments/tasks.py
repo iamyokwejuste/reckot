@@ -11,12 +11,13 @@ logger = logging.getLogger(__name__)
 @shared_task
 def send_refund_notification_task(refund_id: int):
     try:
-        refund = Refund.objects.select_related(
-            "payment__booking__user",
-            "payment__booking__event"
-        ).prefetch_related(
-            "payment__booking__tickets__ticket_type__event"
-        ).get(id=refund_id)
+        refund = (
+            Refund.objects.select_related(
+                "payment__booking__user", "payment__booking__event"
+            )
+            .prefetch_related("payment__booking__tickets__ticket_type__event")
+            .get(id=refund_id)
+        )
 
         payment = refund.payment
         booking = payment.booking
@@ -75,18 +76,21 @@ def process_expired_payments_task():
 @shared_task
 def send_payment_reminder_task(payment_id: int):
     try:
-        payment = Payment.objects.select_related(
-            "booking__user",
-            "booking__event"
-        ).prefetch_related(
-            "booking__tickets__ticket_type"
-        ).get(id=payment_id)
+        payment = (
+            Payment.objects.select_related("booking__user", "booking__event")
+            .prefetch_related("booking__tickets__ticket_type")
+            .get(id=payment_id)
+        )
 
         if payment.status != Payment.Status.PENDING:
             return
 
         user = payment.booking.user
-        ticket = list(payment.booking.tickets.all())[0] if payment.booking.tickets.exists() else None
+        ticket = (
+            list(payment.booking.tickets.all())[0]
+            if payment.booking.tickets.exists()
+            else None
+        )
         if not ticket:
             return
 

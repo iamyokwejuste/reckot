@@ -12,16 +12,22 @@ from django.db.models import Sum
 
 from apps.ai.models import SupportTicket, AIConversation, AIMessage
 from apps.ai import services
+from apps.ai.decorators import (
+    ai_feature_required,
+    ai_rate_limit,
+    log_ai_usage,
+    validate_query,
+)
 from apps.events.models import Event
 
 logger = logging.getLogger(__name__)
 
 
+@method_decorator(ai_feature_required, name="dispatch")
 class AIAssistantView(View):
     template_name = "ai/assistant.html"
 
-    def get(self, request):
-        session_id = request.session.get("ai_session_id")
+    def get(self, request, session_id=None):
         conversation = None
         messages_list = []
 
@@ -42,6 +48,7 @@ class AIAssistantView(View):
                 "conversation": conversation,
                 "messages": messages_list,
                 "context": context,
+                "session_id": session_id,
             },
         )
 
@@ -53,7 +60,16 @@ class AIAssistantView(View):
         return context
 
 
-@method_decorator(csrf_exempt, name="dispatch")
+@method_decorator(
+    [
+        csrf_exempt,
+        ai_feature_required,
+        ai_rate_limit(30),
+        log_ai_usage("CHAT"),
+        validate_query,
+    ],
+    name="dispatch",
+)
 class AIAssistantChatView(View):
     def post(self, request):
         try:
@@ -63,10 +79,19 @@ class AIAssistantChatView(View):
             return JsonResponse({"error": "Invalid JSON"}, status=400)
 
         user_message = data.get("message", "").strip()
+        session_id = data.get("session_id")
+
         if not user_message:
             return JsonResponse({"error": "Message is required"}, status=400)
 
-        conversation = self._get_or_create_conversation(request)
+        word_count = len(user_message.split())
+        if word_count > 50:
+            return JsonResponse(
+                {"error": "Message too long. Please limit to 50 words or less."},
+                status=400,
+            )
+
+        conversation = self._get_or_create_conversation(request, session_id)
         history = self._get_conversation_history(conversation)
         context = self._build_context(request)
 
@@ -98,17 +123,20 @@ class AIAssistantChatView(View):
                     "action": result.get("action"),
                     "ticket_reference": result.get("ticket_reference"),
                     "query_result": result.get("query_result"),
+                    "session_id": str(conversation.session_id),
                 }
             )
         except Exception as e:
             logger.error(f"Error in AI chat: {str(e)}", exc_info=True)
             return JsonResponse(
-                {"error": "An error occurred processing your request", "message": "Sorry, I encountered an error. Please try again."},
-                status=500
+                {
+                    "error": "An error occurred processing your request",
+                    "message": "Sorry, I encountered an error. Please try again.",
+                },
+                status=500,
             )
 
-    def _get_or_create_conversation(self, request):
-        session_id = request.session.get("ai_session_id")
+    def _get_or_create_conversation(self, request, session_id=None):
         if session_id:
             conversation = AIConversation.objects.filter(session_id=session_id).first()
             if conversation:
@@ -117,7 +145,6 @@ class AIAssistantChatView(View):
         conversation = AIConversation.objects.create(
             user=request.user if request.user.is_authenticated else None
         )
-        request.session["ai_session_id"] = str(conversation.session_id)
         return conversation
 
     def _get_conversation_history(self, conversation):
@@ -144,6 +171,10 @@ class AIAssistantChatView(View):
         )
 
 
+@method_decorator(
+    [ai_feature_required, ai_rate_limit(30), log_ai_usage("GENERATE_DESCRIPTION")],
+    name="dispatch",
+)
 class AIGenerateContentView(LoginRequiredMixin, View):
     def post(self, request):
         try:
@@ -189,6 +220,9 @@ class AIGenerateContentView(LoginRequiredMixin, View):
         )
 
 
+@method_decorator(
+    [ai_feature_required, ai_rate_limit(30), log_ai_usage("INSIGHT")], name="dispatch"
+)
 class AIAnalyzeIssueView(View):
     def post(self, request):
         try:
@@ -202,6 +236,9 @@ class AIAnalyzeIssueView(View):
         return JsonResponse(result)
 
 
+@method_decorator(
+    [ai_feature_required, ai_rate_limit(30), log_ai_usage("INSIGHT")], name="dispatch"
+)
 class AIEventInsightsView(LoginRequiredMixin, View):
     def get(self, request, event_id):
         event = get_object_or_404(Event, id=event_id)

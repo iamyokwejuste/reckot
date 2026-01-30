@@ -203,7 +203,7 @@ def generate_ticket_qr_code(ticket):
         booking.user.email if booking.user else booking.guest_email
     )
     attendee_phone = ""
-    if booking.user and hasattr(booking.user, 'phone_number'):
+    if booking.user and hasattr(booking.user, "phone_number"):
         attendee_phone = booking.user.phone_number or ""
     else:
         attendee_phone = booking.guest_phone or ""
@@ -235,8 +235,8 @@ def generate_ticket_qr_code(ticket):
 
 
 def generate_ticket_pdf(ticket):
-    logging.getLogger('fontTools').setLevel(logging.WARNING)
-    logging.getLogger('weasyprint').setLevel(logging.WARNING)
+    logging.getLogger("fontTools").setLevel(logging.WARNING)
+    logging.getLogger("weasyprint").setLevel(logging.WARNING)
 
     qr_code_data = generate_ticket_qr_code(ticket)
     event = ticket.ticket_type.event
@@ -246,12 +246,10 @@ def generate_ticket_pdf(ticket):
     try:
         customization = event.customization
         primary_color = customization.primary_color or "#1a1a1a"
-        secondary_color = customization.secondary_color or "#2d2d2d"
         text_color = customization.text_color or "#ffffff"
     except Exception:
         customization = None
         primary_color = "#1a1a1a"
-        secondary_color = "#2d2d2d"
         text_color = "#ffffff"
 
     context = {
@@ -358,8 +356,8 @@ def generate_ticket_pdf(ticket):
 
 
 def generate_booking_tickets_pdf(booking):
-    logging.getLogger('fontTools').setLevel(logging.WARNING)
-    logging.getLogger('weasyprint').setLevel(logging.WARNING)
+    logging.getLogger("fontTools").setLevel(logging.WARNING)
+    logging.getLogger("weasyprint").setLevel(logging.WARNING)
 
     tickets = booking.tickets.select_related(
         "ticket_type", "ticket_type__event", "ticket_type__event__organization"

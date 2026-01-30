@@ -4,25 +4,24 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('reports', '0005_merge_20260130_1116'),
+        ("reports", "0005_merge_20260130_1116"),
     ]
 
     operations = [
         migrations.RemoveIndex(
-            model_name='reportexport',
-            name='reports_rep_event_i_ef3310_idx',
+            model_name="reportexport",
+            name="reports_rep_event_i_ef3310_idx",
         ),
         migrations.RemoveIndex(
-            model_name='reportexport',
-            name='export_user_created_idx',
+            model_name="reportexport",
+            name="export_user_created_idx",
         ),
         migrations.RemoveIndex(
-            model_name='reportexport',
-            name='export_event_type_idx',
+            model_name="reportexport",
+            name="export_event_type_idx",
         ),
         migrations.DeleteModel(
-            name='ReportExport',
+            name="ReportExport",
         ),
     ]

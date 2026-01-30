@@ -6,6 +6,7 @@ from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from apps.events.models import Event, CheckoutQuestion
 
+
 class TicketType(models.Model):
     event = models.ForeignKey(
         Event, on_delete=models.CASCADE, related_name="ticket_types"
@@ -32,8 +33,8 @@ class TicketType(models.Model):
         sold = self.tickets.count()
         return max(0, self.quantity - sold)
 
-class GuestSession(models.Model):
 
+class GuestSession(models.Model):
     token = models.UUIDField(
         default=uuid.uuid4, editable=False, unique=True, db_index=True
     )
@@ -57,6 +58,7 @@ class GuestSession(models.Model):
         from django.utils import timezone
 
         return timezone.now() > self.expires_at
+
 
 class Booking(models.Model):
     class Status(models.TextChoices):
@@ -123,6 +125,7 @@ class Booking(models.Model):
             return self.user.get_full_name() or self.user.email
         return self.guest_name
 
+
 class Ticket(models.Model):
     booking = models.ForeignKey(
         Booking, on_delete=models.CASCADE, related_name="tickets"
@@ -158,7 +161,7 @@ class Ticket(models.Model):
         prefix = (event.ticket_prefix or "RECK").upper()[:4]
         characters = string.ascii_uppercase + string.digits
         while True:
-            suffix = ''.join(random.choices(characters, k=6))
+            suffix = "".join(random.choices(characters, k=6))
             code = f"{prefix}{suffix}"
             if not Ticket.objects.filter(code=code).exists():
                 return code
@@ -168,6 +171,7 @@ class Ticket(models.Model):
             event = self.ticket_type.event
             self.code = self.generate_code(event)
         super().save(*args, **kwargs)
+
 
 class TicketQuestionAnswer(models.Model):
     ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name="answers")

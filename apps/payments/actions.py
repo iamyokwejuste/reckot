@@ -11,7 +11,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
-from django.db.models import Count, Q, Sum
+from django.db.models import Q, Sum
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -166,7 +166,9 @@ class CheckoutView(View):
             send_ticket_confirmation_task.delay(booking.id)
             messages.success(
                 request,
-                _("Your free tickets have been confirmed! Check your email for details."),
+                _(
+                    "Your free tickets have been confirmed! Check your email for details."
+                ),
             )
             return redirect("tickets:my_tickets")
 
@@ -239,7 +241,6 @@ def get_booking_for_request(request, booking_ref):
 
 class PaymentSelectMethodView(View):
     def _calculate_withdrawal_fee(self, amount):
-
         if amount <= 1000:
             return Decimal("50")
         return (Decimal(str(amount)) * Decimal("0.04")).quantize(Decimal("1"))
@@ -585,7 +586,9 @@ class RefundRequestView(LoginRequiredMixin, View):
         if payment_age > timedelta(days=self.REFUND_WINDOW_DAYS):
             messages.error(
                 request,
-                _(f"Refund requests must be made within {self.REFUND_WINDOW_DAYS} days of payment."),
+                _(
+                    f"Refund requests must be made within {self.REFUND_WINDOW_DAYS} days of payment."
+                ),
             )
             return redirect("payments:success", payment_ref=payment_ref)
 
@@ -601,7 +604,9 @@ class RefundRequestView(LoginRequiredMixin, View):
 
         refund_type = request.POST.get("refund_type", "FULL")
         amount = (
-            payment.amount if refund_type == "FULL" else Decimal(request.POST.get("amount", "0"))
+            payment.amount
+            if refund_type == "FULL"
+            else Decimal(request.POST.get("amount", "0"))
         )
         reason = request.POST.get("reason", "").strip()
 
@@ -684,9 +689,7 @@ class WithdrawalBalanceView(LoginRequiredMixin, View):
         user_org = Organization.objects.filter(members=request.user).first()
 
         if not user_org:
-            return JsonResponse(
-                {"error": "No organization found"}, status=404
-            )
+            return JsonResponse({"error": "No organization found"}, status=404)
 
         balance_data = calculate_organization_balance(user_org)
 
@@ -743,7 +746,9 @@ class WithdrawalRequestView(LoginRequiredMixin, View):
                     status=400,
                 )
 
-            today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            today_start = timezone.now().replace(
+                hour=0, minute=0, second=0, microsecond=0
+            )
             todays_withdrawals = Withdrawal.objects.filter(
                 organization=user_orgs, created_at__gte=today_start
             ).count()
@@ -843,7 +848,6 @@ class WithdrawalRequestView(LoginRequiredMixin, View):
 
 class WithdrawalListView(LoginRequiredMixin, View):
     def get(self, request):
-
         user_orgs = Organization.objects.filter(members=request.user)
 
         withdrawals = Withdrawal.objects.filter(
@@ -880,54 +884,61 @@ class TransactionHistoryView(LoginRequiredMixin, View):
         user_org = Organization.objects.filter(members=request.user).first()
 
         if not user_org:
-            return render(request, "payments/transactions/history.html", {"transactions": []})
+            return render(
+                request, "payments/transactions/history.html", {"transactions": []}
+            )
 
         transactions = []
 
         payments = Payment.objects.filter(
-            booking__event__organization=user_org,
-            status=Payment.Status.CONFIRMED
+            booking__event__organization=user_org, status=Payment.Status.CONFIRMED
         ).select_related("booking__event", "booking__user")
 
         for payment in payments:
-            transactions.append({
-                "date": payment.confirmed_at or payment.created_at,
-                "type": "credit",
-                "description": f"Payment for {payment.booking.event.title}",
-                "amount": payment.amount,
-                "balance_change": f"+{payment.amount - payment.service_fee}",
-                "reference": str(payment.reference),
-            })
+            transactions.append(
+                {
+                    "date": payment.confirmed_at or payment.created_at,
+                    "type": "credit",
+                    "description": f"Payment for {payment.booking.event.title}",
+                    "amount": payment.amount,
+                    "balance_change": f"+{payment.amount - payment.service_fee}",
+                    "reference": str(payment.reference),
+                }
+            )
 
         withdrawals = Withdrawal.objects.filter(
             organization=user_org,
-            status__in=[Withdrawal.Status.COMPLETED, Withdrawal.Status.PROCESSING]
+            status__in=[Withdrawal.Status.COMPLETED, Withdrawal.Status.PROCESSING],
         ).select_related("organization")
 
         for withdrawal in withdrawals:
-            transactions.append({
-                "date": withdrawal.created_at,
-                "type": "debit",
-                "description": f"Withdrawal to {withdrawal.phone_number}",
-                "amount": withdrawal.amount,
-                "balance_change": f"-{withdrawal.amount}",
-                "reference": str(withdrawal.reference),
-            })
+            transactions.append(
+                {
+                    "date": withdrawal.created_at,
+                    "type": "debit",
+                    "description": f"Withdrawal to {withdrawal.phone_number}",
+                    "amount": withdrawal.amount,
+                    "balance_change": f"-{withdrawal.amount}",
+                    "reference": str(withdrawal.reference),
+                }
+            )
 
         refunds = Refund.objects.filter(
             payment__booking__event__organization=user_org,
-            status=Refund.Status.PROCESSED
+            status=Refund.Status.PROCESSED,
         ).select_related("payment__booking__event")
 
         for refund in refunds:
-            transactions.append({
-                "date": refund.processed_at or refund.created_at,
-                "type": "debit",
-                "description": f"Refund for {refund.payment.booking.event.title}",
-                "amount": refund.amount,
-                "balance_change": f"-{refund.amount}",
-                "reference": str(refund.reference),
-            })
+            transactions.append(
+                {
+                    "date": refund.processed_at or refund.created_at,
+                    "type": "debit",
+                    "description": f"Refund for {refund.payment.booking.event.title}",
+                    "amount": refund.amount,
+                    "balance_change": f"-{refund.amount}",
+                    "reference": str(refund.reference),
+                }
+            )
 
         transactions.sort(key=lambda x: x["date"], reverse=True)
 

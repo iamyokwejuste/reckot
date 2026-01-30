@@ -4,11 +4,9 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('reports', '0004_add_performance_indexes'),
-        ('reports', '0004_alter_reportexport_format'),
+        ("reports", "0004_add_performance_indexes"),
+        ("reports", "0004_alter_reportexport_format"),
     ]
 
-    operations = [
-    ]
+    operations = []

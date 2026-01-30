@@ -1,4 +1,4 @@
-from django.db.models import Case, Count, Sum, When
+from django.db.models import Sum
 from apps.events.models import Event, CheckoutQuestion
 from apps.tickets.models import Ticket, Booking, TicketQuestionAnswer
 from apps.checkin.models import CheckIn, SwagCollection
@@ -216,14 +216,19 @@ def get_custom_responses_data(event_id: int, mask_emails: bool = True):
 
 
 def get_questions_summary(event_id: int):
-    questions = CheckoutQuestion.objects.filter(event_id=event_id).order_by("order").prefetch_related(
-        "answers"
+    questions = (
+        CheckoutQuestion.objects.filter(event_id=event_id)
+        .order_by("order")
+        .prefetch_related("answers")
     )
 
-    confirmed_answers = TicketQuestionAnswer.objects.filter(
-        question__event_id=event_id,
-        booking__status=Booking.Status.CONFIRMED
-    ).select_related("question").values("question_id", "answer")
+    confirmed_answers = (
+        TicketQuestionAnswer.objects.filter(
+            question__event_id=event_id, booking__status=Booking.Status.CONFIRMED
+        )
+        .select_related("question")
+        .values("question_id", "answer")
+    )
 
     answer_counts = {}
     answer_breakdowns = {}
@@ -235,7 +240,9 @@ def get_questions_summary(event_id: int):
         if q_id not in answer_breakdowns:
             answer_breakdowns[q_id] = {}
         answer_text = ans["answer"]
-        answer_breakdowns[q_id][answer_text] = answer_breakdowns[q_id].get(answer_text, 0) + 1
+        answer_breakdowns[q_id][answer_text] = (
+            answer_breakdowns[q_id].get(answer_text, 0) + 1
+        )
 
     result = []
     for q in questions:

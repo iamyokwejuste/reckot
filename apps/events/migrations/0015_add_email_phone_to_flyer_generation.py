@@ -4,41 +4,56 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('events', '0014_add_ticket_to_flyer_generation'),
-        ('tickets', '0005_remove_booking_booking_status_event_idx_and_more'),
+        ("events", "0014_add_ticket_to_flyer_generation"),
+        ("tickets", "0005_remove_booking_booking_status_event_idx_and_more"),
     ]
 
     operations = [
         migrations.RemoveIndex(
-            model_name='flyergeneration',
-            name='events_flye_ticket__18df4c_idx',
+            model_name="flyergeneration",
+            name="events_flye_ticket__18df4c_idx",
         ),
         migrations.AddField(
-            model_name='flyergeneration',
-            name='email',
+            model_name="flyergeneration",
+            name="email",
             field=models.EmailField(blank=True, max_length=255),
         ),
         migrations.AddField(
-            model_name='flyergeneration',
-            name='phone',
+            model_name="flyergeneration",
+            name="phone",
             field=models.CharField(blank=True, max_length=20),
         ),
         migrations.AddIndex(
-            model_name='flyergeneration',
-            index=models.Index(fields=['event', 'email'], name='events_flye_event_i_f73861_idx'),
+            model_name="flyergeneration",
+            index=models.Index(
+                fields=["event", "email"], name="events_flye_event_i_f73861_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='flyergeneration',
-            index=models.Index(fields=['event', 'phone'], name='events_flye_event_i_a721c7_idx'),
+            model_name="flyergeneration",
+            index=models.Index(
+                fields=["event", "phone"], name="events_flye_event_i_a721c7_idx"
+            ),
         ),
         migrations.AddConstraint(
-            model_name='flyergeneration',
-            constraint=models.UniqueConstraint(condition=models.Q(('email__isnull', False), models.Q(('email', ''), _negated=True)), fields=('event', 'email'), name='unique_flyer_per_email'),
+            model_name="flyergeneration",
+            constraint=models.UniqueConstraint(
+                condition=models.Q(
+                    ("email__isnull", False), models.Q(("email", ""), _negated=True)
+                ),
+                fields=("event", "email"),
+                name="unique_flyer_per_email",
+            ),
         ),
         migrations.AddConstraint(
-            model_name='flyergeneration',
-            constraint=models.UniqueConstraint(condition=models.Q(('phone__isnull', False), models.Q(('phone', ''), _negated=True)), fields=('event', 'phone'), name='unique_flyer_per_phone'),
+            model_name="flyergeneration",
+            constraint=models.UniqueConstraint(
+                condition=models.Q(
+                    ("phone__isnull", False), models.Q(("phone", ""), _negated=True)
+                ),
+                fields=("event", "phone"),
+                name="unique_flyer_per_phone",
+            ),
         ),
     ]

@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('events', '0015_add_email_phone_to_flyer_generation'),
+        ("events", "0015_add_email_phone_to_flyer_generation"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='event',
-            name='ticket_prefix',
-            field=models.CharField(default='RECK', help_text='3-4 letter prefix for ticket codes (e.g., RECK, EVNT)', max_length=4),
+            model_name="event",
+            name="ticket_prefix",
+            field=models.CharField(
+                default="RECK",
+                help_text="3-4 letter prefix for ticket codes (e.g., RECK, EVNT)",
+                max_length=4,
+            ),
         ),
     ]

@@ -39,12 +39,20 @@ class GeminiAI:
             error_str = str(e)
             logger.error(f"Gemini API error: {error_str}")
 
-            if "429" in error_str or "RESOURCE_EXHAUSTED" in error_str or "quota" in error_str.lower():
+            if (
+                "429" in error_str
+                or "RESOURCE_EXHAUSTED" in error_str
+                or "quota" in error_str.lower()
+            ):
                 raise Exception("AI service quota exceeded. Please try again later.")
             elif "503" in error_str or "SERVICE_UNAVAILABLE" in error_str:
-                raise Exception("AI service is temporarily unavailable. Please try again in a few moments.")
+                raise Exception(
+                    "AI service is temporarily unavailable. Please try again in a few moments."
+                )
             elif "401" in error_str or "UNAUTHENTICATED" in error_str:
-                raise Exception("AI service authentication failed. Please contact support.")
+                raise Exception(
+                    "AI service authentication failed. Please contact support."
+                )
             else:
                 raise Exception(f"AI processing failed: {error_str}")
 
@@ -380,12 +388,22 @@ Return ONLY the JSON array."""
             error_str = str(e)
             logger.error(f"Image generation error: {error_str}")
 
-            if "429" in error_str or "RESOURCE_EXHAUSTED" in error_str or "quota" in error_str.lower():
-                raise Exception("AI image generation quota exceeded. Please try again later.")
+            if (
+                "429" in error_str
+                or "RESOURCE_EXHAUSTED" in error_str
+                or "quota" in error_str.lower()
+            ):
+                raise Exception(
+                    "AI image generation quota exceeded. Please try again later."
+                )
             elif "503" in error_str or "SERVICE_UNAVAILABLE" in error_str:
-                raise Exception("AI service is temporarily unavailable. Please try again in a few moments.")
+                raise Exception(
+                    "AI service is temporarily unavailable. Please try again in a few moments."
+                )
             elif "401" in error_str or "UNAUTHENTICATED" in error_str:
-                raise Exception("AI service authentication failed. Please contact support.")
+                raise Exception(
+                    "AI service authentication failed. Please contact support."
+                )
             else:
                 raise Exception(f"Failed to generate image: {error_str}")
 

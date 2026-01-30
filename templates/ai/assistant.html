@@ -74,17 +74,24 @@
                 </template>
             </div>
 
-            <form @submit.prevent="sendMessage()" class="flex gap-2">
-                <input
-                    type="text"
-                    x-model="inputMessage"
-                    placeholder="{% trans 'Type your message...' %}"
-                    class="input flex-1"
-                    :disabled="isLoading"
-                >
-                {% #button type="submit" variant="default" x-bind:disabled="isLoading || !inputMessage.trim()" %}
-                    <i data-lucide="send" class="h-4 w-4"></i>
-                {% /button %}
+            <form @submit.prevent="sendMessage()" class="space-y-2">
+                <div class="flex gap-2">
+                    <input
+                        type="text"
+                        x-model="inputMessage"
+                        placeholder="{% trans 'Type your message...' %}"
+                        class="input flex-1"
+                        :disabled="isLoading"
+                        maxlength="500"
+                    >
+                    {% #button type="submit" variant="default" x-bind:disabled="isLoading || !inputMessage.trim()" %}
+                        <i data-lucide="send" class="h-4 w-4"></i>
+                    {% /button %}
+                </div>
+                <p class="text-xs text-muted-foreground" x-show="inputMessage.trim().split(/\s+/).length > 50" x-cloak>
+                    <span class="text-destructive font-medium">{% trans "Message too long!" %}</span>
+                    <span x-text="inputMessage.trim().split(/\s+/).length"></span>/50 {% trans "words max" %}
+                </p>
             </form>
 
             <div class="mt-4 pt-4 border-t flex items-center justify-between text-xs text-muted-foreground">
@@ -103,6 +110,7 @@ function aiAssistant() {
         messages: {{ messages|safe|default:"[]" }},
         inputMessage: '',
         isLoading: false,
+        sessionId: '{{ session_id|default:"" }}',
 
         async sendMessage(preset = null) {
             const message = preset || this.inputMessage.trim();
@@ -117,10 +125,27 @@ function aiAssistant() {
                 const response = await fetch('{% url "ai:chat" %}', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: message })
+                    body: JSON.stringify({
+                        message: message,
+                        session_id: this.sessionId || null
+                    })
                 });
                 const data = await response.json();
-                this.messages.push({ role: 'ASSISTANT', content: data.message });
+
+                if (!response.ok) {
+                    let errorMessage = data.error || '{% trans "Sorry, something went wrong. Please try again." %}';
+                    if (data.disabled) {
+                        errorMessage += '\n\n{% trans "You can enable AI features in your account settings." %}';
+                    }
+                    this.messages.push({ role: 'ASSISTANT', content: errorMessage });
+                } else {
+                    this.messages.push({ role: 'ASSISTANT', content: data.message });
+
+                    if (data.session_id && !this.sessionId) {
+                        this.sessionId = data.session_id;
+                        window.history.pushState({}, '', `/ai/assistant/${data.session_id}/`);
+                    }
+                }
             } catch (error) {
                 this.messages.push({ role: 'ASSISTANT', content: '{% trans "Sorry, something went wrong. Please try again." %}' });
             }

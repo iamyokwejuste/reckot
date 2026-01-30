@@ -4,22 +4,21 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payments', '0007_merge_0003_add_performance_indexes_0006_withdrawal'),
+        ("payments", "0007_merge_0003_add_performance_indexes_0006_withdrawal"),
     ]
 
     operations = [
         migrations.RemoveIndex(
-            model_name='payment',
-            name='payment_status_expires_idx',
+            model_name="payment",
+            name="payment_status_expires_idx",
         ),
         migrations.RemoveIndex(
-            model_name='refund',
-            name='refund_status_created_idx',
+            model_name="refund",
+            name="refund_status_created_idx",
         ),
         migrations.RemoveIndex(
-            model_name='withdrawal',
-            name='withdrawal_org_status_idx',
+            model_name="withdrawal",
+            name="withdrawal_org_status_idx",
         ),
     ]

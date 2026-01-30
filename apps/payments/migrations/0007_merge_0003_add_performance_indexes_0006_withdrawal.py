@@ -4,11 +4,9 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payments', '0003_add_performance_indexes'),
-        ('payments', '0006_withdrawal'),
+        ("payments", "0003_add_performance_indexes"),
+        ("payments", "0006_withdrawal"),
     ]
 
-    operations = [
-    ]
+    operations = []
