@@ -641,9 +641,9 @@ class WithdrawalRequestView(LoginRequiredMixin, View):
             phone_number = request.POST.get("phone_number", "").strip()
             description = request.POST.get("description", "Withdrawal from Reckot")
 
-            if amount <= 0:
+            if amount < 200:
                 return JsonResponse(
-                    {"success": False, "error": "Invalid amount"}, status=400
+                    {"success": False, "error": "Minimum withdrawal amount is 200 XAF"}, status=400
                 )
 
             if not phone_number:
@@ -686,6 +686,15 @@ class WithdrawalRequestView(LoginRequiredMixin, View):
                 total_revenue - total_service_fees - total_withdrawn - total_refunded
             )
 
+            if available_balance < 200:
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "error": f"Minimum balance required for withdrawal is 200 XAF. Your balance: {available_balance} XAF",
+                    },
+                    status=400,
+                )
+
             if amount > available_balance:
                 return JsonResponse(
                     {
@@ -705,14 +714,14 @@ class WithdrawalRequestView(LoginRequiredMixin, View):
             }
 
             gateway = CampayGateway(gateway_credentials)
-            gateway_fee = gateway.calculate_withdrawal_fee(amount)
+            gateway_fee = Decimal("0")
 
             platform_commission_percent = Decimal("7")
             platform_commission = (
                 amount * platform_commission_percent / Decimal("100")
             ).quantize(Decimal("1"))
 
-            net_amount = amount - gateway_fee - platform_commission
+            net_amount = amount - platform_commission
 
             withdrawal = Withdrawal.objects.create(
                 organization=user_orgs,
@@ -728,7 +737,7 @@ class WithdrawalRequestView(LoginRequiredMixin, View):
             withdrawal.mark_processing()
 
             result = gateway.disburse(
-                amount=amount,
+                amount=net_amount,
                 currency="XAF",
                 phone_number=phone_number,
                 description=description,
@@ -746,7 +755,6 @@ class WithdrawalRequestView(LoginRequiredMixin, View):
                         "message": "Withdrawal request submitted successfully",
                         "reference": str(withdrawal.reference),
                         "net_amount": float(net_amount),
-                        "gateway_fee": float(gateway_fee),
                         "platform_commission": float(platform_commission),
                     }
                 )

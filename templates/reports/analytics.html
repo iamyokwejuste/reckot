@@ -70,8 +70,8 @@
         error: '',
         success: false,
         platformCommission: 7,
-        gatewayFee: 0,
-        netAmount: 0
+        netAmount: 0,
+        availableBalance: {{ available_balance }}
      }"
      @open-export-modal.window="showExportModal = true"
      @open-withdraw-modal.window="showWithdrawModal = true">
@@ -113,26 +113,47 @@
                     <p class="text-xs text-muted-foreground">{% trans "This is your available balance from confirmed payments, minus service fees and previous withdrawals" %}</p>
                 </div>
 
-                <div>
+                <div x-show="availableBalance < 200" class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg text-sm">
+                    <p class="font-medium">{% trans "Minimum withdrawal amount is 200 XAF" %}</p>
+                    <p class="text-xs mt-1">{% trans "You need at least 200 XAF in your balance to make a withdrawal" %}</p>
+                </div>
+
+                <div x-show="availableBalance >= 200">
                     <label class="block text-sm font-medium mb-2">{% trans "Withdrawal Amount (XAF)" %}</label>
                     <input
                         type="number"
                         x-model="withdrawAmount"
                         @input="
-                            const amount = parseFloat(withdrawAmount) || 0;
-                            gatewayFee = amount <= 1000 ? 50 : Math.floor(amount * 0.04);
+                            let amount = parseFloat(withdrawAmount) || 0;
+                            if (amount > availableBalance) {
+                                withdrawAmount = availableBalance;
+                                amount = availableBalance;
+                            }
+                            if (amount < 0) {
+                                withdrawAmount = 0;
+                                amount = 0;
+                            }
                             const commission = Math.floor(amount * platformCommission / 100);
-                            netAmount = amount - gatewayFee - commission;
+                            netAmount = amount - commission;
+                        "
+                        @keydown="
+                            const currentValue = parseFloat(withdrawAmount) || 0;
+                            const key = $event.key;
+                            if (key === 'ArrowUp' && currentValue >= availableBalance) {
+                                $event.preventDefault();
+                            }
                         "
                         class="input w-full"
-                        placeholder="{% trans "Enter amount" %}"
-                        min="1"
+                        placeholder="{% trans "Enter amount (min: 200 XAF)" %}"
+                        min="200"
                         max="{{ available_balance }}"
+                        step="1"
                         required
                     >
+                    <p class="text-xs text-muted-foreground mt-1">{% trans "We take care of all withdrawal fees" %}</p>
                 </div>
 
-                <div>
+                <div x-show="availableBalance >= 200">
                     <label class="block text-sm font-medium mb-2">{% trans "Phone Number (with country code)" %}</label>
                     <input
                         type="text"
@@ -144,14 +165,10 @@
                     <p class="text-xs text-muted-foreground mt-1">{% trans "Include country code (e.g., 237 for Cameroon)" %}</p>
                 </div>
 
-                <div class="bg-muted/50 p-4 rounded-lg space-y-2" x-show="withdrawAmount > 0">
+                <div class="bg-muted/50 p-4 rounded-lg space-y-2" x-show="withdrawAmount > 0 && availableBalance >= 200">
                     <div class="flex justify-between text-sm">
                         <span class="text-muted-foreground">{% trans "Withdrawal Amount" %}</span>
                         <span class="font-medium" x-text="withdrawAmount + ' XAF'"></span>
-                    </div>
-                    <div class="flex justify-between text-sm">
-                        <span class="text-muted-foreground">{% trans "Gateway Fee" %}</span>
-                        <span class="font-medium text-red-500" x-text="'- ' + gatewayFee + ' XAF'"></span>
                     </div>
                     <div class="flex justify-between text-sm">
                         <span class="text-muted-foreground">{% trans "Platform Commission" %} (<span x-text="platformCommission"></span>%)</span>
@@ -178,9 +195,10 @@
                     </button>
                     <button
                         type="button"
+                        x-show="availableBalance >= 200"
                         @click="
-                            if (!withdrawAmount || parseFloat(withdrawAmount) <= 0) {
-                                error = '{% trans "Please enter a valid amount" %}';
+                            if (!withdrawAmount || parseFloat(withdrawAmount) < 200) {
+                                error = '{% trans "Minimum withdrawal amount is 200 XAF" %}';
                                 return;
                             }
                             if (parseFloat(withdrawAmount) > {{ available_balance }}) {

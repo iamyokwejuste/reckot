@@ -13,7 +13,12 @@
         </div>
 
         <div class="card p-6">
-            <form id="flyer-form" method="post" enctype="multipart/form-data" class="space-y-6" target="_blank">
+            <noscript>
+                <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded mb-4">
+                    <p class="text-sm">{% trans "JavaScript is required to generate flyers. Please enable JavaScript in your browser." %}</p>
+                </div>
+            </noscript>
+            <form id="flyer-form" method="post" enctype="multipart/form-data" class="space-y-6">
                 {% csrf_token %}
 
                 <div>
@@ -101,7 +106,6 @@ document.addEventListener('DOMContentLoaded', function() {
             e.stopPropagation();
             await generateFlyer(new FormData(this));
         });
-        form.removeAttribute('target');
     }
 });
 
@@ -115,28 +119,47 @@ async function generateFlyer(formData) {
     try {
         const response = await fetch(window.location.href, {
             method: 'POST',
-            body: formData
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
         });
 
         if (response.ok) {
             const contentType = response.headers.get('content-type');
             if (contentType && contentType.includes('image')) {
                 const blob = await response.blob();
+
+                // Verify blob is valid
+                if (blob.size === 0) {
+                    throw new Error('Empty image received');
+                }
+
                 const url = URL.createObjectURL(blob);
-                document.getElementById('flyer-result').src = url;
-                document.getElementById('download-btn').href = url;
+                const imgElement = document.getElementById('flyer-result');
+                const downloadBtn = document.getElementById('download-btn');
+
+                // Set up the image with error handling
+                imgElement.onerror = function() {
+                    URL.revokeObjectURL(url);
+                    alert('Failed to load generated image. Please try again.');
+                };
+
+                imgElement.src = url;
+                downloadBtn.href = url;
                 document.getElementById('result').classList.remove('hidden');
                 document.querySelector('form').scrollIntoView({ behavior: 'smooth', block: 'start' });
             } else {
                 const text = await response.text();
-                alert(text || 'Error: Invalid response type');
+                alert(text || 'Error: Invalid response type. Expected an image.');
             }
         } else {
             const text = await response.text();
             alert(text || 'Error generating flyer. Please try again.');
         }
     } catch (error) {
-        alert('Error generating flyer. Please try again.');
+        console.error('Flyer generation error:', error);
+        alert('Error generating flyer: ' + (error.message || 'Please try again.'));
     }
 
     btn.disabled = false;
