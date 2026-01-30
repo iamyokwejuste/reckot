@@ -155,6 +155,8 @@
                     </div>
                     {% endfor %}
 
+                    <div id="generation-error" class="hidden p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700"></div>
+
                     <div class="pt-4">
                         {% #button type="submit" variant="default" id="generate-btn" class="w-full" %}
                             <i data-lucide="image" class="w-4 h-4 mr-2"></i>
@@ -219,12 +221,26 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+function showGenerationError(message) {
+    const errorDiv = document.getElementById('generation-error');
+    errorDiv.textContent = message;
+    errorDiv.classList.remove('hidden');
+    errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function hideGenerationError() {
+    const errorDiv = document.getElementById('generation-error');
+    errorDiv.classList.add('hidden');
+}
+
 async function generateFlyer(formData) {
     const btn = document.getElementById('generate-btn');
     const btnText = btn.innerHTML;
     btn.disabled = true;
     btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 mr-2 animate-spin"></i>Generating...';
     if (window.lucide) lucide.createIcons();
+
+    hideGenerationError();
 
     const csrftoken = getCookie('csrftoken');
     const cleanUrl = window.location.origin + window.location.pathname;
@@ -254,7 +270,7 @@ async function generateFlyer(formData) {
 
                 imgElement.onerror = function() {
                     URL.revokeObjectURL(url);
-                    alert('Failed to load generated image. Please try again.');
+                    showGenerationError('Failed to load generated image. Please try again.');
                 };
 
                 imgElement.src = url;
@@ -263,15 +279,15 @@ async function generateFlyer(formData) {
                 document.querySelector('form').scrollIntoView({ behavior: 'smooth', block: 'start' });
             } else {
                 const data = await response.json();
-                alert(data.error || 'Error: Invalid response type. Expected an image.');
+                showGenerationError(data.error || 'Error: Invalid response type. Expected an image.');
             }
         } else {
             const data = await response.json();
-            alert(data.error || 'Error generating flyer. Please try again.');
+            showGenerationError(data.error || 'Error generating flyer. Please try again.');
         }
     } catch (error) {
         console.error('Flyer generation error:', error);
-        alert('Error generating flyer: ' + (error.message || 'Please try again.'));
+        showGenerationError('Error generating flyer: ' + (error.message || 'Please try again.'));
     }
 
     btn.disabled = false;
