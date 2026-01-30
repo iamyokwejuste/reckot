@@ -3,10 +3,10 @@ from decimal import Decimal
 from typing import Optional, List
 from django.conf import settings
 
-from .base import PaymentGateway, PaymentResult, PaymentStatus
-from .campay import CampayGateway
-from .pawapay import PawapayGateway
-from .flutterwave import FlutterwaveGateway
+from apps.payments.gateways.base import PaymentGateway, PaymentResult, PaymentStatus
+from apps.payments.gateways.campay import CampayGateway
+from apps.payments.gateways.pawapay import PawapayGateway
+from apps.payments.gateways.flutterwave import FlutterwaveGateway
 
 logger = logging.getLogger(__name__)
 

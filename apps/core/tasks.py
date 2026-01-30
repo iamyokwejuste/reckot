@@ -1,6 +1,12 @@
 import logging
+from datetime import timedelta
 from django.contrib.auth import get_user_model
+from django.db.models import Q
+from django.utils import timezone
 from celery import shared_task
+
+from apps.core.models import OTPVerification
+from apps.core.services.notifications import NotificationService
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -15,8 +21,6 @@ def send_email_task(
     attachments: list = None,
     inline_images: dict = None,
 ):
-    from .services.notifications import NotificationService
-
     try:
         NotificationService.send_email(
             to_email=to_email,
@@ -33,8 +37,6 @@ def send_email_task(
 
 @shared_task
 def send_sms_task(phone_number: str, template_name: str, context: dict):
-    from .services.notifications import NotificationService
-
     try:
         NotificationService.send_sms(
             phone_number=phone_number,
@@ -50,8 +52,6 @@ def send_sms_task(phone_number: str, template_name: str, context: dict):
 def send_otp_sms_task(
     phone_number: str, otp_code: str = None, expiry_minutes: int = 10
 ):
-    from .services.notifications import NotificationService
-
     try:
         NotificationService.send_otp_sms(
             phone_number=phone_number,
@@ -65,9 +65,6 @@ def send_otp_sms_task(
 
 @shared_task
 def send_otp_verification_task(user_id: int, otp_id: int):
-    from .models import OTPVerification
-    from .services.notifications import NotificationService
-
     try:
         user = User.objects.get(id=user_id)
         otp = OTPVerification.objects.get(id=otp_id)
@@ -75,8 +72,6 @@ def send_otp_verification_task(user_id: int, otp_id: int):
         if otp.is_expired or otp.is_used:
             logger.warning(f"OTP {otp_id} is expired or already used")
             return
-
-        from django.utils import timezone
 
         expiry_minutes = max(
             1, int((otp.expires_at - timezone.now()).total_seconds() / 60)
@@ -106,8 +101,6 @@ def send_otp_verification_task(user_id: int, otp_id: int):
 
 @shared_task
 def send_welcome_email_task(user_id: int):
-    from .services.notifications import NotificationService
-
     try:
         user = User.objects.get(id=user_id)
         if user.email:
@@ -122,8 +115,6 @@ def send_welcome_email_task(user_id: int):
 
 @shared_task
 def resend_otp_task(user_id: int, otp_type: str = "EMAIL"):
-    from .models import OTPVerification
-
     try:
         user = User.objects.get(id=user_id)
         otp = OTPVerification.create_for_user(
@@ -139,11 +130,6 @@ def resend_otp_task(user_id: int, otp_type: str = "EMAIL"):
 
 @shared_task
 def cleanup_expired_otps_task():
-    from django.utils import timezone
-    from datetime import timedelta
-    from .models import OTPVerification
-    from django.db.models import Q
-
     try:
         now = timezone.now()
         expired_cutoff = now - timedelta(hours=24)

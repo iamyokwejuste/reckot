@@ -3,7 +3,7 @@ import logging
 import time
 from decimal import Decimal
 from django.conf import settings
-from .base import PaymentGateway, PaymentResult, PaymentStatus
+from apps.payments.gateways.base import PaymentGateway, PaymentResult, PaymentStatus
 
 logger = logging.getLogger(__name__)
 

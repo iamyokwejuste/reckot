@@ -1,14 +1,15 @@
 import logging
+from django.utils import timezone
 from celery import shared_task
+
+from apps.core.services.notifications import NotificationService
+from apps.payments.models import Payment, Refund
 
 logger = logging.getLogger(__name__)
 
 
 @shared_task
 def send_refund_notification_task(refund_id: int):
-    from .models import Refund
-    from apps.core.services.notifications import NotificationService
-
     try:
         refund = Refund.objects.select_related(
             "payment__booking__user",
@@ -59,9 +60,6 @@ def send_refund_notification_task(refund_id: int):
 
 @shared_task
 def process_expired_payments_task():
-    from django.utils import timezone
-    from .models import Payment
-
     try:
         expired_count = Payment.objects.filter(
             status=Payment.Status.PENDING, expires_at__lt=timezone.now()
@@ -76,10 +74,6 @@ def process_expired_payments_task():
 
 @shared_task
 def send_payment_reminder_task(payment_id: int):
-    from django.utils import timezone
-    from .models import Payment
-    from apps.core.services.notifications import NotificationService
-
     try:
         payment = Payment.objects.select_related(
             "booking__user",

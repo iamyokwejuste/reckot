@@ -2,7 +2,7 @@ import requests
 import logging
 import uuid
 from decimal import Decimal
-from .base import PaymentGateway, PaymentResult, PaymentStatus
+from apps.payments.gateways.base import PaymentGateway, PaymentResult, PaymentStatus
 
 logger = logging.getLogger(__name__)
 

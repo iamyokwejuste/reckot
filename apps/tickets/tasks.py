@@ -1,15 +1,15 @@
 import logging
 from celery import shared_task
 
+from apps.core.services.notifications import NotificationService
+from apps.core.services.qrcode import QRCodeService
+from apps.tickets.models import Booking, Ticket
+
 logger = logging.getLogger(__name__)
 
 
 @shared_task
 def send_ticket_confirmation_task(booking_id: int):
-    from .models import Booking
-    from apps.core.services.notifications import NotificationService
-    from apps.core.services.qrcode import QRCodeService
-
     try:
         booking = (
             Booking.objects.select_related("user", "payment")
@@ -57,9 +57,6 @@ def send_ticket_confirmation_task(booking_id: int):
 
 @shared_task
 def generate_ticket_qr_task(ticket_id: int) -> str | None:
-    from .models import Ticket
-    from apps.core.services.qrcode import QRCodeService
-
     try:
         ticket = Ticket.objects.get(id=ticket_id)
         qr_base64 = QRCodeService.generate_ticket_qr_base64(str(ticket.code))
