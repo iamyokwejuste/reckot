@@ -33,7 +33,9 @@ def create_circular_mask(size):
     return mask
 
 
-def create_rounded_mask(size, radius=20):
+def create_rounded_mask(size, radius=None):
+    if radius is None:
+        radius = min(size[0], size[1]) // 8
     mask = Image.new("L", size, 0)
     draw = ImageDraw.Draw(mask)
     draw.rounded_rectangle((0, 0, size[0], size[1]), radius=radius, fill=255)
@@ -72,24 +74,25 @@ def generate_flyer(config, user_photo, text_values: dict) -> BytesIO:
             mask = create_circular_mask((config.photo_width, config.photo_height))
             photo.putalpha(mask)
         elif config.photo_shape == "ROUNDED":
-            mask = create_rounded_mask(
-                (config.photo_width, config.photo_height), radius=20
-            )
+            mask = create_rounded_mask((config.photo_width, config.photo_height))
             photo.putalpha(mask)
 
         if hasattr(config, "photo_bg_color") and config.photo_bg_color:
             bg_color = parse_color(config.photo_bg_color)
             if bg_color[3] > 0:
                 bg_size = (config.photo_width, config.photo_height)
-                bg_layer = Image.new("RGBA", bg_size, bg_color)
+                bg_layer = Image.new("RGBA", bg_size, (0, 0, 0, 0))
                 bg_draw = ImageDraw.Draw(bg_layer)
 
                 if config.photo_shape == "CIRCLE":
                     bg_draw.ellipse((0, 0, bg_size[0], bg_size[1]), fill=bg_color)
                 elif config.photo_shape == "ROUNDED":
+                    radius = min(config.photo_width, config.photo_height) // 8
                     bg_draw.rounded_rectangle(
-                        (0, 0, bg_size[0], bg_size[1]), radius=20, fill=bg_color
+                        (0, 0, bg_size[0], bg_size[1]), radius=radius, fill=bg_color
                     )
+                else:
+                    bg_draw.rectangle((0, 0, bg_size[0], bg_size[1]), fill=bg_color)
 
                 template.paste(bg_layer, (config.photo_x, config.photo_y), bg_layer)
 
@@ -107,9 +110,10 @@ def generate_flyer(config, user_photo, text_values: dict) -> BytesIO:
                     (0, 0, border_size[0], border_size[1]), fill=border_color + (255,)
                 )
             elif config.photo_shape == "ROUNDED":
+                radius = min(border_size[0], border_size[1]) // 8
                 border_draw.rounded_rectangle(
                     (0, 0, border_size[0], border_size[1]),
-                    radius=20,
+                    radius=radius,
                     fill=border_color + (255,),
                 )
             else:

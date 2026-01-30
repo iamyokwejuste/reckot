@@ -13,7 +13,7 @@
         </div>
 
         <div class="card p-6">
-            <form id="flyer-form" method="post" enctype="multipart/form-data" class="space-y-6">
+            <form id="flyer-form" method="post" enctype="multipart/form-data" class="space-y-6" target="_blank">
                 {% csrf_token %}
 
                 <div>
@@ -93,15 +93,24 @@
 </div>
 
 <script>
-document.getElementById('flyer-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    await generateFlyer(new FormData(this));
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('flyer-form');
+    if (form) {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            await generateFlyer(new FormData(this));
+        });
+        form.removeAttribute('target');
+    }
 });
 
 async function generateFlyer(formData) {
     const btn = document.getElementById('generate-btn');
+    const btnText = btn.innerHTML;
     btn.disabled = true;
     btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 mr-2 animate-spin"></i>Generating...';
+    if (window.lucide) lucide.createIcons();
 
     try {
         const response = await fetch(window.location.href, {
@@ -110,11 +119,18 @@ async function generateFlyer(formData) {
         });
 
         if (response.ok) {
-            const blob = await response.blob();
-            const url = URL.createObjectURL(blob);
-            document.getElementById('flyer-result').src = url;
-            document.getElementById('download-btn').href = url;
-            document.getElementById('result').classList.remove('hidden');
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('image')) {
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                document.getElementById('flyer-result').src = url;
+                document.getElementById('download-btn').href = url;
+                document.getElementById('result').classList.remove('hidden');
+                document.querySelector('form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                const text = await response.text();
+                alert(text || 'Error: Invalid response type');
+            }
         } else {
             const text = await response.text();
             alert(text || 'Error generating flyer. Please try again.');
@@ -124,7 +140,7 @@ async function generateFlyer(formData) {
     }
 
     btn.disabled = false;
-    btn.innerHTML = '<i data-lucide="image" class="w-4 h-4 mr-2"></i>Generate My Flyer';
+    btn.innerHTML = btnText;
     if (window.lucide) lucide.createIcons();
 }
 
