@@ -101,12 +101,12 @@ def get_payment_data(event_id: int, mask_emails: bool = True):
             phone = phone[:4] + '****' + phone[-2:] if len(phone) > 6 else phone
         result.append({
             'reference': str(row['reference']),
-            'email': email,
+            'customer': email,
+            'provider': row['provider'],
+            'date': str(row['created_at']),
             'amount': str(row['amount']),
-            'method': row['provider'],
             'status': row['status'],
             'phone': phone,
-            'created_at': str(row['created_at']),
             'confirmed_at': str(row['confirmed_at'] or ''),
         })
     return result

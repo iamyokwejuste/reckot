@@ -283,11 +283,14 @@ def generate_pdf_export(event, report_type: str, user, mask_emails: bool = True)
             width: 100%;
             border-collapse: collapse;
             margin: 16px 0;
+            table-layout: fixed;
         }
         th, td {
             padding: 8px 12px;
             text-align: left;
             border-bottom: 1px solid #e5e5e5;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
         th {
             background: #f5f5f5;
