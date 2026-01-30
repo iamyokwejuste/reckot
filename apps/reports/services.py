@@ -2,13 +2,11 @@ import csv
 import json
 from io import StringIO, BytesIO
 from datetime import datetime
-from django.core.files.base import ContentFile
 from django.template.loader import render_to_string
 from django.db.models import Sum, Count
 from openpyxl import Workbook
 from weasyprint import HTML, CSS
 from weasyprint.text.fonts import FontConfiguration
-from apps.reports.models import ReportExport
 from apps.reports.queries import get_rsvp_data, get_payment_data, get_checkin_data, get_swag_data
 from apps.payments.models import Payment
 from apps.tickets.models import Ticket, Booking
@@ -78,25 +76,17 @@ def generate_csv_content(data: list) -> str:
     return output.getvalue()
 
 
-def generate_csv_export(event, report_type: str, user, mask_emails: bool = True) -> ReportExport:
+def generate_csv_export(event, report_type: str, user, mask_emails: bool = True):
     fetcher = DATA_FETCHERS.get(report_type)
     if not fetcher:
         raise ValueError(f'Unknown report type: {report_type}')
     data = fetcher(event.id, mask_emails)
     content = generate_csv_content(data)
-    export = ReportExport.objects.create(
-        event=event,
-        report_type=report_type,
-        format='CSV',
-        created_by=user,
-        mask_emails=mask_emails
-    )
-    filename = f'{report_type.lower()}_{event.id}_{export.id}.csv'
-    export.file.save(filename, ContentFile(content.encode('utf-8')))
-    return export
+    filename = f'{report_type.lower()}_{event.slug}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
+    return content.encode('utf-8'), filename, 'text/csv'
 
 
-def generate_excel_export(event, report_type: str, user, mask_emails: bool = True) -> ReportExport:
+def generate_excel_export(event, report_type: str, user, mask_emails: bool = True):
     fetcher = DATA_FETCHERS.get(report_type)
     if not fetcher:
         raise ValueError(f'Unknown report type: {report_type}')
@@ -112,22 +102,9 @@ def generate_excel_export(event, report_type: str, user, mask_emails: bool = Tru
     output = BytesIO()
     wb.save(output)
     output.seek(0)
-    export = ReportExport.objects.create(
-        event=event,
-        report_type=report_type,
-        format='EXCEL',
-        created_by=user,
-        mask_emails=mask_emails
-    )
-    filename = f'{report_type.lower()}_{event.id}_{export.id}.xlsx'
-    export.file.save(filename, ContentFile(output.getvalue()))
-    return export
+    filename = f'{report_type.lower()}_{event.slug}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
+    return output.getvalue(), filename, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
-
-def get_recent_exports(event_id: int, limit: int = 10):
-    return ReportExport.objects.filter(
-        event_id=event_id
-    ).order_by('-created_at')[:limit]
 
 
 def generate_json_export(event, report_type: str, user, mask_emails: bool = True) -> ReportExport:
@@ -185,20 +162,11 @@ def generate_json_export(event, report_type: str, user, mask_emails: bool = True
             json_data = {'error': 'Unknown report type'}
 
     content = json.dumps(json_data, indent=2, default=str)
-
-    export = ReportExport.objects.create(
-        event=event,
-        report_type=report_type,
-        format='JSON',
-        created_by=user,
-        mask_emails=mask_emails
-    )
-    filename = f'{report_type.lower()}_{event.slug}_{export.reference.hex[:8]}.json'
-    export.file.save(filename, ContentFile(content.encode('utf-8')))
-    return export
+    filename = f'{report_type.lower()}_{event.slug}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json'
+    return content.encode('utf-8'), filename, 'application/json'
 
 
-def generate_pdf_export(event, report_type: str, user, mask_emails: bool = True) -> ReportExport:
+def generate_pdf_export(event, report_type: str, user, mask_emails: bool = True):
     template_map = {
         'RSVP': 'reports/pdf/attendees.html',
         'PAYMENTS': 'reports/pdf/payments.html',
@@ -327,13 +295,5 @@ def generate_pdf_export(event, report_type: str, user, mask_emails: bool = True)
     html = HTML(string=html_content)
     pdf_content = html.write_pdf(stylesheets=[css], font_config=font_config)
 
-    export = ReportExport.objects.create(
-        event=event,
-        report_type=report_type,
-        format='PDF',
-        created_by=user,
-        mask_emails=mask_emails
-    )
-    filename = f'{report_type.lower()}_{event.slug}_{export.reference.hex[:8]}.pdf'
-    export.file.save(filename, ContentFile(pdf_content))
-    return export
+    filename = f'{report_type.lower()}_{event.slug}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
+    return pdf_content, filename, 'application/pdf'

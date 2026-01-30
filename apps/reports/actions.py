@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, Q, Sum
 from django.db.models.functions import TruncDate
-from django.http import FileResponse, Http404
+from django.http import FileResponse, Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.timesince import timesince
@@ -14,7 +14,6 @@ from django.views import View
 
 from apps.events.models import Event
 from apps.payments.models import Payment
-from apps.reports.models import ReportExport
 from apps.reports.queries import (
     get_event_summary,
     get_questions_summary,
@@ -24,7 +23,6 @@ from apps.reports.services import (
     generate_excel_export,
     generate_json_export,
     generate_pdf_export,
-    get_recent_exports,
 )
 from apps.tickets.models import Booking, Ticket
 
@@ -129,7 +127,6 @@ class ReportsDashboardView(LoginRequiredMixin, View):
     def get(self, request, org_slug, event_slug):
         event = get_object_or_404(Event, organization__slug=org_slug, slug=event_slug)
         summary = get_event_summary(event.id)
-        recent_exports = get_recent_exports(event.id)
 
         pending_count = Payment.objects.filter(
             booking__event=event, status=Payment.Status.PENDING
@@ -216,8 +213,6 @@ class ReportsDashboardView(LoginRequiredMixin, View):
             {
                 "event": event,
                 "summary": summary,
-                "recent_exports": recent_exports,
-                "report_types": ReportExport.Type.choices,
                 "sales_timeline": sales_timeline_filled,
                 "max_daily_sales": max_daily_sales,
                 "recent_activity": recent_activity,
@@ -408,19 +403,6 @@ class SalesTimelineView(LoginRequiredMixin, View):
         )
 
 
-class DownloadReportView(LoginRequiredMixin, View):
-    def get(self, request, export_ref):
-        export = get_object_or_404(ReportExport, reference=export_ref)
-        if not export.file:
-            raise Http404("File not found")
-        response = FileResponse(
-            export.file.open("rb"),
-            as_attachment=True,
-            filename=export.file.name.split("/")[-1],
-        )
-        return response
-
-
 class ReportsSummaryView(LoginRequiredMixin, View):
     def get(self, request, org_slug, event_slug):
         event = get_object_or_404(Event, organization__slug=org_slug, slug=event_slug)
@@ -512,14 +494,11 @@ class AttendeeListView(LoginRequiredMixin, View):
 class ExportCenterView(LoginRequiredMixin, View):
     def get(self, request, org_slug, event_slug):
         event = get_object_or_404(Event, organization__slug=org_slug, slug=event_slug)
-        recent_exports = get_recent_exports(event.id)
         return render(
             request,
             "reports/export_center.html",
             {
                 "event": event,
-                "recent_exports": recent_exports,
-                "report_types": ReportExport.Type.choices,
             },
         )
 
@@ -531,7 +510,8 @@ class ExportGenerateView(LoginRequiredMixin, View):
         format_type = request.POST.get("format", "PDF")
         mask_emails = request.POST.get("mask_emails", "on") == "on"
 
-        if report_type not in dict(ReportExport.Type.choices):
+        valid_types = ['RSVP', 'PAYMENTS', 'CHECKINS', 'SWAG', 'FINANCIAL', 'TICKET_SALES']
+        if report_type not in valid_types:
             messages.error(request, _("Invalid report type"))
             return redirect(
                 "reports:export_center", org_slug=org_slug, event_slug=event_slug
@@ -539,23 +519,25 @@ class ExportGenerateView(LoginRequiredMixin, View):
 
         try:
             if format_type == "PDF":
-                export = generate_pdf_export(
+                content, filename, content_type = generate_pdf_export(
                     event, report_type, request.user, mask_emails
                 )
             elif format_type == "EXCEL":
-                export = generate_excel_export(
+                content, filename, content_type = generate_excel_export(
                     event, report_type, request.user, mask_emails
                 )
             elif format_type == "JSON":
-                export = generate_json_export(
+                content, filename, content_type = generate_json_export(
                     event, report_type, request.user, mask_emails
                 )
             else:
-                export = generate_csv_export(
+                content, filename, content_type = generate_csv_export(
                     event, report_type, request.user, mask_emails
                 )
 
-            return redirect("reports:download", export_ref=export.reference)
+            response = HttpResponse(content, content_type=content_type)
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            return response
         except Exception as e:
             messages.error(request, _("Export failed: %(error)s") % {"error": str(e)})
             return redirect(

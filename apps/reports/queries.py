@@ -68,7 +68,7 @@ def get_rsvp_data(event_id: int, mask_emails: bool = True):
             'ticket_type': ticket.ticket_type.name,
             'checked_in': 'Yes' if ticket.is_checked_in else 'No',
             'checked_in_at': str(ticket.checked_in_at or ''),
-            'booked_at': str(booking.created_at),
+            'registered_at': str(booking.created_at),
         }
 
         answers_dict = {a.question_id: a.answer for a in ticket.answers.all()}
