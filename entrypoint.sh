@@ -26,5 +26,8 @@ if [ "$RUN_MIGRATIONS" = "true" ]; then
     uv run python manage.py migrate --noinput
 fi
 
+echo "==> Collecting static files..."
+uv run python manage.py collectstatic --noinput --clear
+
 echo "==> Starting application..."
 exec "$@"
