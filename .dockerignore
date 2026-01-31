@@ -37,6 +37,8 @@ test_*.py
 staticfiles/
 node_modules/
 tailwindcss
+tailwind.config.js
+static/css/input.css
 .DS_Store
 Thumbs.db
 *.log
