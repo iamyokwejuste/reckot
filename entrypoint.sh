@@ -21,13 +21,16 @@ while ! pg_isready -h "${DB_HOST:-db}" -p "${DB_PORT:-5432}" -U "${DB_USER:-reck
 done
 echo "==> Database is ready!"
 
+echo "==> Fixing permissions..."
+chown -R appuser:appuser /app/media /app/staticfiles
+
 if [ "$RUN_MIGRATIONS" = "true" ]; then
     echo "==> Running database migrations..."
-    uv run python manage.py migrate --noinput
+    su -s /bin/bash appuser -c "uv run python manage.py migrate --noinput"
 fi
 
 echo "==> Collecting static files..."
-uv run python manage.py collectstatic --noinput --clear
+su -s /bin/bash appuser -c "uv run python manage.py collectstatic --noinput --clear"
 
-echo "==> Starting application..."
-exec "$@"
+echo "==> Starting application as appuser..."
+exec su -s /bin/bash appuser -c "exec $*"

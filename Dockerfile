@@ -59,8 +59,6 @@ RUN mkdir -p /app/media/org_logos /app/media/event_covers /app/media/event_heroe
 
 RUN chown -R appuser:appuser /app/media /app/staticfiles
 
-USER appuser
-
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
