@@ -20,12 +20,12 @@
 
 {% block header_actions %}
 <div class="flex items-center gap-1 sm:gap-2">
-    <div class="custom-select-wrapper w-24 sm:w-32 md:w-fit" x-data="{ open: false, value: '30d', label: '{% trans "Last 30 days" %}' }">
+    <div class="custom-select-wrapper max-w-[120px] md:max-w-none md:w-fit" x-data="{ open: false, value: '30d', label: '{% trans "Last 30 days" %}' }">
         <input type="hidden" name="date_range" :value="value">
         <button type="button" @click="open = !open" @click.outside="open = false"
-                class="custom-select-trigger" :class="{ 'custom-select-trigger-active': open }">
-            <span class="custom-select-value" x-text="label"></span>
-            <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4" :class="{ 'rotate-180': open }"></i>
+                class="custom-select-trigger w-full" :class="{ 'custom-select-trigger-active': open }">
+            <span class="custom-select-value truncate md:whitespace-nowrap" x-text="label"></span>
+            <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4 flex-shrink-0" :class="{ 'rotate-180': open }"></i>
         </button>
         <div x-show="open" x-transition @click.outside="open = false" class="custom-select-dropdown" x-cloak>
             <div class="custom-select-options">

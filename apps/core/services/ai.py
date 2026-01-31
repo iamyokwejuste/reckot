@@ -299,15 +299,16 @@ Keep response under 150 words."""
         return self._generate(prompt, max_tokens=300)
 
     def generate_analytics_insight(self, metrics: dict) -> Optional[str]:
-        prompt = f"""You are an expert event analytics consultant. Analyze these metrics and provide valuable insights.
+        prompt = f"""You are an expert event analytics consultant. Analyze these metrics and provide valuable, comprehensive insights.
 
 METRICS:
 {json.dumps(metrics, indent=2)}
 
-Write a helpful analysis (3-4 sentences) that:
-1. Highlights the most important metric and what it means
+Write a detailed analysis that:
+1. Highlights the most important metrics and what they mean
 2. Identifies any opportunities or areas needing attention
-3. Provides a specific, actionable recommendation
+3. Provides specific, actionable recommendations
+4. Includes insights about trends and patterns in the data
 
 RULES:
 - Be specific with actual numbers from the data
@@ -315,10 +316,11 @@ RULES:
 - Focus on insights that help improve event performance
 - If metrics show zero activity, suggest ways to boost engagement
 - NO emojis
+- Provide comprehensive analysis without arbitrary length limits
 
 Return ONLY the insight text, no headers or labels."""
 
-        return self._generate(prompt, max_tokens=500)
+        return self._generate(prompt, max_tokens=2048)
 
     def suggest_event_tags(self, title: str, description: str) -> Optional[list]:
         prompt = f"""Suggest relevant tags/categories for this event:

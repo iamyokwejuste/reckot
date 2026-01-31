@@ -79,14 +79,7 @@ const ReckotOffline = {
     },
 
     async registerServiceWorker() {
-        if ('serviceWorker' in navigator) {
-            try {
-                const registration = await navigator.serviceWorker.register('/sw.js');
-                return registration;
-            } catch (error) {
-
-            }
-        }
+        return null;
     },
 
     async ensureDb() {
