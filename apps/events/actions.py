@@ -1073,7 +1073,7 @@ class FlyerGeneratorView(View):
 
             response = FileResponse(flyer_image, content_type="image/jpeg")
             response["Content-Disposition"] = (
-                f'inline; filename="{event.slug}-flyer.jpg"'
+                f'attachment; filename="{event.slug}-flyer.jpg"'
             )
             return response
         except Exception as e:

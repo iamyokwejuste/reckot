@@ -4,6 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
+    stop_grace_period: 240s
     expose:
       - "8000"
     environment:
@@ -88,6 +89,7 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
+    stop_grace_period: 300s
     command: uv run celery -A reckot worker --loglevel=info --concurrency=4 -Q default,emails,payments,exports
     environment:
       SECRET_KEY: ${SECRET_KEY:-change-me-in-production-use-a-long-random-string}
@@ -139,6 +141,7 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
+    stop_grace_period: 60s
     command: uv run celery -A reckot beat --loglevel=info --schedule=/tmp/celerybeat-schedule
     environment:
       SECRET_KEY: ${SECRET_KEY:-change-me-in-production-use-a-long-random-string}
