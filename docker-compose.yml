@@ -60,9 +60,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    # volumes:
-    #   - media_data:/app/media
-    #   - static_data:/app/staticfiles
+    volumes:
+      - media_data:/app/media
+      - static_data:/app/staticfiles
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
       interval: 10s
@@ -207,5 +207,5 @@ volumes:
   redis_data:
   media_data:
   backup_data:
-  # static_data:
+  static_data:
   celery_beat_data:
