@@ -6,8 +6,7 @@
     <div class="container">
         <nav class="flex h-16 items-center justify-between" aria-label="Main navigation">
             <a href="/" class="flex items-center gap-2" aria-label="Reckot Home">
-                <img x-show="!isDark" src="{% static 'images/logo/logo_light_mode.png' %}" alt="Reckot" width="120" height="36" class="h-9 w-auto">
-                <img x-show="isDark" x-cloak src="{% static 'images/logo/logo_dark_mode.png' %}" alt="Reckot" width="120" height="36" class="h-9 w-auto">
+                {% include "partials/logo_full.html" with class="h-9 w-auto" attrs='width="120" height="36"' %}
             </a>
 
             <div class="hidden md:flex items-center gap-1">
@@ -79,8 +78,7 @@
 <div id="mobile-menu" class="fixed inset-0 bg-background text-foreground flex-col" style="z-index: 60; display: none;">
     <div class="flex items-center justify-between h-16 px-4 border-b border-border">
         <a href="/" hx-boost="false" onclick="closeMobileMenu()" aria-label="Reckot Home" class="touch-manipulation">
-            <img x-show="!isDark" x-cloak src="{% static 'images/logo/logo_light_mode.png' %}" alt="Reckot" width="120" height="36" class="h-9 w-auto">
-            <img x-show="isDark" x-cloak src="{% static 'images/logo/logo_dark_mode.png' %}" alt="Reckot" width="120" height="36" class="h-9 w-auto">
+            {% include "partials/logo_full.html" with class="h-9 w-auto" attrs='width="120" height="36"' %}
         </a>
         <button onclick="closeMobileMenu()" class="p-2 rounded-lg hover:bg-muted transition-colors touch-manipulation active:scale-95" aria-label="Close menu">
             <i data-lucide="x" class="h-6 w-6" aria-hidden="true"></i>

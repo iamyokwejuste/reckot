@@ -119,8 +119,7 @@
             <div class="grid grid-cols-2 gap-6 sm:gap-8 md:grid-cols-4">
                 <div class="col-span-2 md:col-span-1 mb-2 md:mb-0">
                     <a href="/" class="inline-block" aria-label="Reckot Home">
-                        <img x-show="!isDark" src="{% static 'images/logo/logo_light_mode.png' %}" alt="Reckot" width="120" height="32" class="h-7 sm:h-8 w-auto" loading="lazy">
-                        <img x-show="isDark" x-cloak src="{% static 'images/logo/logo_dark_mode.png' %}" alt="Reckot" width="120" height="32" class="h-7 sm:h-8 w-auto" loading="lazy">
+                        {% include "partials/logo_full.html" with class="h-7 sm:h-8 w-auto" attrs='width="120" height="32" loading="lazy"' %}
                     </a>
                     <p class="mt-3 text-xs sm:text-sm text-muted-foreground">{% trans "Modern event management for Africa." %}</p>
                 </div>
@@ -221,27 +220,6 @@
 
     {% block extra_scripts %}{% endblock %}
 
-    {% if request.resolver_match.url_name != 'assistant' %}
-    <a href="{% url 'ai:assistant' %}"
-       class="fixed bottom-6 right-6 z-[99999] flex h-16 w-16 items-center justify-center rounded-full bg-foreground text-background shadow-2xl hover:scale-110 hover:shadow-[0_20px_60px_-12px_rgba(0,0,0,0.5)] transition-all duration-300 group"
-       title="{% trans 'AI Assistant' %}"
-       id="ai-assistant-fab">
-        <i data-lucide="bot" class="h-7 w-7"></i>
-        <span class="absolute right-full mr-4 whitespace-nowrap rounded-xl bg-popover px-4 py-2 text-sm font-medium text-popover-foreground shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-200 border border-border hidden lg:block">
-            {% trans "AI Assistant" %}
-        </span>
-        <span class="absolute -top-1 -right-1 flex h-5 w-5">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-5 w-5 bg-emerald-500 border-2 border-background"></span>
-        </span>
-    </a>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            }
-        });
-    </script>
-    {% endif %}
+    {% include "partials/ai_assistant_button.html" %}
 </body>
 </html>

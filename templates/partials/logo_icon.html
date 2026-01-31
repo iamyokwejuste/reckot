@@ -1,0 +1,3 @@
+{% load static %}
+<img x-show="isDark" x-cloak src="{% static 'images/logo/reckto_logo_dark_mode.png' %}" alt="Reckot" class="{{ class|default:'h-7 w-7' }}" {{ attrs|safe }}>
+<img x-show="!isDark" src="{% static 'images/logo/reckto_logo_light_mode.png' %}" alt="Reckot" class="{{ class|default:'h-7 w-7' }}" {{ attrs|safe }}>
