@@ -212,7 +212,7 @@ STORAGES = {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": "reckot.storage.NonStrictCompressedManifestStaticFilesStorage",
     },
 }
 WHITENOISE_AUTOREFRESH = DEBUG
