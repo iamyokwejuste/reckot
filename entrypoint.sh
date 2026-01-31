@@ -22,7 +22,7 @@ done
 echo "==> Database is ready!"
 
 echo "==> Fixing permissions..."
-chown -R appuser:appuser /app/media /app/staticfiles
+chown -R appuser:appuser /opt/venv /app/media /app/staticfiles
 
 if [ "$RUN_MIGRATIONS" = "true" ]; then
     echo "==> Running database migrations..."
@@ -33,4 +33,4 @@ echo "==> Collecting static files..."
 su -s /bin/bash appuser -c "uv run python manage.py collectstatic --noinput --clear"
 
 echo "==> Starting application as appuser..."
-exec su -s /bin/bash appuser -c "exec $*"
+exec su -s /bin/bash appuser -c 'exec "$@"' -- appuser "$@"
