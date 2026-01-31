@@ -910,16 +910,6 @@ class FlyerGeneratorView(View):
         attendee_phone = ""
 
         if is_email:
-            if FlyerGeneration.objects.filter(
-                event=event, email__iexact=ticket_verification
-            ).exists():
-                return JsonResponse(
-                    {
-                        "success": False,
-                        "error": "You have already generated a flyer with this email.",
-                    },
-                    status=403,
-                )
             attendee_email = ticket_verification
 
             verified_ticket = (
@@ -941,16 +931,6 @@ class FlyerGeneratorView(View):
             )
 
         elif is_phone:
-            if FlyerGeneration.objects.filter(
-                event=event, phone=ticket_verification
-            ).exists():
-                return JsonResponse(
-                    {
-                        "success": False,
-                        "error": "You have already generated a flyer with this phone number.",
-                    },
-                    status=403,
-                )
             attendee_phone = ticket_verification
 
             verified_ticket = (

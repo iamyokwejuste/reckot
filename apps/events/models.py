@@ -355,18 +355,6 @@ class FlyerGeneration(models.Model):
             models.Index(fields=["event", "phone"]),
         ]
         ordering = ["-created_at"]
-        constraints = [
-            models.UniqueConstraint(
-                fields=["event", "email"],
-                condition=models.Q(email__isnull=False) & ~models.Q(email=""),
-                name="unique_flyer_per_email",
-            ),
-            models.UniqueConstraint(
-                fields=["event", "phone"],
-                condition=models.Q(phone__isnull=False) & ~models.Q(phone=""),
-                name="unique_flyer_per_phone",
-            ),
-        ]
 
     def __str__(self):
         identifier = (
