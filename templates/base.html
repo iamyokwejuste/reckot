@@ -149,6 +149,7 @@
     <script defer src="https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js"></script>
     <script defer src="https://unpkg.com/@alpinejs/collapse@3.14.8/dist/cdn.min.js"></script>
     <script defer src="https://unpkg.com/@alpinejs/intersect@3.14.8/dist/cdn.min.js"></script>
+    <script src="{% static 'js/chatbot.js' %}"></script>
     <script defer src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js"></script>
     <script defer src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js" onload="lucide.createIcons()"></script>
 
@@ -215,6 +216,6 @@
 
     {% block extra_scripts %}{% endblock %}
 
-    {% include "partials/ai_assistant_button.html" %}
+    {% include "partials/floating_chatbot.html" %}
 </body>
 </html>

@@ -25,23 +25,68 @@ def send_ticket_confirmation_task(booking_id: int):
         user = booking.user
         event = tickets[0].ticket_type.event
 
-        qr_bytes = None
-        if tickets:
-            qr_buffer = QRCodeService.generate_ticket_qr(str(tickets[0].code))
-            qr_bytes = qr_buffer.getvalue()
+        # Determine buyer email and phone
+        buyer_email = booking.buyer_email
+        buyer_phone = (
+            user.phone_number
+            if user and hasattr(user, "phone_number")
+            else booking.guest_phone
+        )
 
-        if user.email:
-            NotificationService.send_ticket_confirmation(
-                to_email=user.email,
-                booking=booking,
-                tickets=tickets,
-                event=event,
-                qr_code_bytes=qr_bytes,
-            )
+        # Check delivery method
+        if booking.delivery_method == "EMAIL_INDIVIDUALLY":
+            # Send individual emails to each attendee
+            for ticket in tickets:
+                attendee_email = ticket.attendee_email
+                if attendee_email:
+                    qr_buffer = QRCodeService.generate_ticket_qr(str(ticket.code))
+                    qr_bytes = qr_buffer.getvalue()
 
-        if user.phone_number:
+                    NotificationService.send_ticket_confirmation(
+                        to_email=attendee_email,
+                        booking=booking,
+                        tickets=[ticket],  # Send only this ticket
+                        event=event,
+                        qr_code_bytes=qr_bytes,
+                    )
+                    logger.info(
+                        f"Individual ticket {ticket.code} sent to {attendee_email}"
+                    )
+                else:
+                    # If no attendee email, fallback to buyer email
+                    logger.warning(
+                        f"Ticket {ticket.code} has no attendee email, falling back to buyer email"
+                    )
+                    qr_buffer = QRCodeService.generate_ticket_qr(str(ticket.code))
+                    qr_bytes = qr_buffer.getvalue()
+
+                    NotificationService.send_ticket_confirmation(
+                        to_email=buyer_email,
+                        booking=booking,
+                        tickets=[ticket],
+                        event=event,
+                        qr_code_bytes=qr_bytes,
+                    )
+        else:
+            # EMAIL_ALL: Send all tickets to buyer email
+            qr_bytes = None
+            if tickets:
+                qr_buffer = QRCodeService.generate_ticket_qr(str(tickets[0].code))
+                qr_bytes = qr_buffer.getvalue()
+
+            if buyer_email:
+                NotificationService.send_ticket_confirmation(
+                    to_email=buyer_email,
+                    booking=booking,
+                    tickets=tickets,
+                    event=event,
+                    qr_code_bytes=qr_bytes,
+                )
+
+        # Send SMS notification to buyer phone if available
+        if buyer_phone:
             NotificationService.send_ticket_sms(
-                phone_number=user.phone_number,
+                phone_number=buyer_phone,
                 booking=booking,
                 tickets=tickets,
                 event=event,

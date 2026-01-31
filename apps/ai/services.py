@@ -238,7 +238,23 @@ Return as JSON:
 
 SUPPORT_SYSTEM_PROMPT = """You are Reckot's AI Assistant with DATABASE QUERY capabilities. Reckot is an event ticketing platform in Cameroon.
 
-When users ask questions about data (counts, statistics, events, tickets, payments, organizations, etc.), you MUST:
+IMPORTANT SCOPE: You ONLY answer questions about Reckot and its features (events, tickets, payments, organizations, check-in, etc.).
+REFUSE to answer general knowledge questions, trivia, or topics unrelated to Reckot. If asked about unrelated topics, politely respond: "I can only help with questions about Reckot, our event ticketing platform. How can I assist you with events, tickets, payments, or check-in?"
+
+Event Search Questions:
+When users ask about finding specific types of events (e.g., "any cake events?", "food events near me?", "music concerts?"), EXECUTE a query to search for matching events.
+- Search in BOTH title and description fields using Q objects
+- ALWAYS filter is_public=True and state='PUBLISHED'
+- Limit results to 5 events using [:5]
+- Use .values() to get required fields including organization__slug
+- Example for single keyword: {{"action": "execute_query", "query": "list(Event.objects.filter(Q(title__icontains='cake') | Q(description__icontains='cake'), is_public=True, state='PUBLISHED').values('title', 'slug', 'organization__slug', 'start_at', 'location')[:5])"}}
+- For multiple keywords (e.g. "food or cake"), search for the primary keyword only
+- You will receive a list of event dictionaries
+- Format each event as: **[Event Title](/events/org-slug/event-slug/)** - Location, Date
+- Build URL using: /events/{{organization__slug}}/{{slug}}/
+- If no events found, suggest they [browse all events](/events/discover/)
+
+When users ask questions about data (counts, statistics, totals, etc.), you MUST:
 1. Generate a Django ORM query to fetch the actual data
 2. Return the query in this JSON format: {{"action": "execute_query", "query": "YourModel.objects.filter(...).count()"}}
 3. For events, ALWAYS use is_public=True to exclude private events
@@ -271,7 +287,23 @@ Authentication & Access Control:
   * Analytics: MUST scope to user's events
 - NEVER query private data without authentication
 - NEVER expose other users' data
-- If user asks for private data while unauthenticated: "Please log in to view this information"
+- If user asks for private data while unauthenticated: "Please [log in to your account](/accounts/login/) to view this information"
+
+Response Formatting:
+- Use markdown for links: [text](url)
+- Common page links to use in responses:
+  * Login: [log in to your account](/accounts/login/)
+  * Browse/discover events: [browse events](/events/discover/) or [discover events](/events/discover/)
+  * Create event: [create a new event](/events/create/)
+  * Dashboard/Reports: [your dashboard](/reports/) or [analytics dashboard](/reports/)
+  * Events list: [your events](/events/)
+  * My tickets: [view your tickets](/tickets/my/)
+  * Bookings/tickets list: [view your bookings](/tickets/)
+  * Organizations: [manage your organization](/orgs/)
+  * Settings: [account settings](/app/settings/)
+- When user asks about specific event types (food, music, tech, etc.), suggest they [search for events on the discover page](/events/discover/)
+- Format responses with **bold** and *italic* where appropriate
+- Use code blocks with backticks for technical details
 
 For support tickets:
 {{"action": "create_ticket", "category": "PAYMENT|TICKET|EVENT|OTHER", "priority": "LOW|MEDIUM|HIGH|URGENT", "subject": "...", "description": "..."}}
@@ -323,7 +355,43 @@ If this is a data question, respond with execute_query action. Otherwise provide
                     f"I encountered an error executing the query: {query_result['error']}"
                 )
             else:
-                result["message"] = f"Result: {query_result}"
+                if isinstance(query_result, list) and len(query_result) > 0:
+                    if all(isinstance(item, dict) and 'slug' in item and 'organization__slug' in item for item in query_result):
+                        formatted_events = []
+                        for event in query_result:
+                            title = event.get('title', 'Untitled Event')
+                            org_slug = event.get('organization__slug', '')
+                            event_slug = event.get('slug', '')
+                            location = event.get('location', '')
+                            start_at = event.get('start_at', '')
+
+                            event_url = f"/events/{org_slug}/{event_slug}/"
+                            event_line = f"**[{title}]({event_url})**"
+                            if location or start_at:
+                                details = []
+                                if location:
+                                    details.append(location)
+                                if start_at:
+                                    from datetime import datetime
+                                    try:
+                                        if isinstance(start_at, str):
+                                            date_obj = datetime.fromisoformat(start_at.replace('Z', '+00:00'))
+                                        else:
+                                            date_obj = start_at
+                                        details.append(date_obj.strftime('%b %d, %Y'))
+                                    except (ValueError, AttributeError, TypeError):
+                                        pass
+                                event_line += f" - {', '.join(details)}"
+                            formatted_events.append(event_line)
+
+                        result["message"] = f"I found {len(formatted_events)} event{'s' if len(formatted_events) != 1 else ''}:\n\n" + "\n".join(formatted_events)
+                    else:
+                        result["message"] = f"Result: {query_result}"
+                else:
+                    if isinstance(query_result, list) and len(query_result) == 0:
+                        result["message"] = "I couldn't find any events matching your search. You can [browse all events](/discover/) to see what's available!"
+                    else:
+                        result["message"] = f"Result: {query_result}"
                 result["action"] = "execute_query"
                 result["query_result"] = query_result
 

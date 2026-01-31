@@ -38,6 +38,7 @@ def create_multi_ticket_booking(
     guest_name: str | None = None,
     guest_phone: str | None = None,
     attendee_info: dict | None = None,
+    delivery_method: str = "EMAIL_ALL",
 ):
     if not user and not guest_email:
         return None, "Either user or guest email is required."
@@ -128,6 +129,7 @@ def create_multi_ticket_booking(
             guest_email=guest_email or "",
             guest_name=guest_name or "",
             guest_phone=guest_phone or "",
+            delivery_method=delivery_method,
         )
 
         if coupon and discount_amount > 0:

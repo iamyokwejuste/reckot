@@ -73,7 +73,9 @@
 </script>
 {% endblock %}
 
-{% block extra_head %}{% endblock %}
+{% block extra_head %}
+<script defer src="{% static 'js/event_checkout.js' %}"></script>
+{% endblock %}
 
 {% block content %}
 <div class="container mx-auto px-4 py-8 pb-24">
@@ -239,48 +241,8 @@
 
                     {% if ticket_types %}
                     <form method="post" action="{% url 'payments:checkout' %}" class="space-y-4" hx-boost="false"
-                          x-data="{
-                              couponCode: '',
-                              couponValid: null,
-                              couponError: '',
-                              couponDiscount: null,
-                              discountType: '',
-                              discountValue: 0,
-                              async validateCoupon() {
-                                  if (!this.couponCode.trim()) {
-                                      this.couponValid = null;
-                                      this.couponError = '';
-                                      this.couponDiscount = null;
-                                      return;
-                                  }
-                                  try {
-                                      const response = await fetch('{% url 'events:validate_coupon' %}', {
-                                          method: 'POST',
-                                          headers: {
-                                              'Content-Type': 'application/x-www-form-urlencoded',
-                                              'X-CSRFToken': '{{ csrf_token }}'
-                                          },
-                                          body: `code=${encodeURIComponent(this.couponCode)}&event_id={{ event.id }}`
-                                      });
-                                      const data = await response.json();
-                                      this.couponValid = data.valid;
-                                      if (data.valid) {
-                                          this.couponError = '';
-                                          this.discountType = data.discount_type;
-                                          this.discountValue = data.discount_value;
-                                          this.couponDiscount = data.discount_type === 'PERCENTAGE'
-                                              ? `${data.discount_value}% off`
-                                              : `${data.discount_value} XAF off`;
-                                      } else {
-                                          this.couponError = data.error;
-                                          this.couponDiscount = null;
-                                      }
-                                  } catch (e) {
-                                      this.couponError = 'Failed to validate coupon';
-                                      this.couponValid = false;
-                                  }
-                              }
-                          }">
+                          @submit="if (!validateDeliveryEmails($event)) return false;"
+                          x-data="eventCheckout('{{ csrf_token }}', {{ event.id }}, '{% url 'events:validate_coupon' %}')">
                         {% csrf_token %}
                         <input type="hidden" name="event_id" value="{{ event.id }}">
                         {% if affiliate_code %}
@@ -410,7 +372,62 @@
                         </div>
                         {% endfor %}
 
-                        <div class="border-t border-border pt-4">
+                        <div class="border-t border-border pt-4 mt-4">
+                            <label class="block text-sm font-medium mb-3">{% trans "How would you like to receive the tickets?" %}</label>
+                            <p class="text-xs text-muted-foreground mb-3">{% trans "Choose your preferred delivery method for this group purchase" %}</p>
+
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-3 p-3 rounded-lg border border-border cursor-pointer hover:bg-muted/50 transition-colors"
+                                       :class="deliveryMethod === 'EMAIL_ALL' ? 'bg-primary/5 border-primary' : ''">
+                                    <input type="radio" name="delivery_method" value="EMAIL_ALL"
+                                           x-model="deliveryMethod"
+                                           @change="deliveryError = ''"
+                                           class="w-4 h-4 text-primary border-border focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-2">
+                                            <i data-lucide="mail" class="w-4 h-4"></i>
+                                            <span class="font-medium text-sm">{% trans "Email me all tickets" %}</span>
+                                        </div>
+                                        <p class="text-xs text-muted-foreground mt-1">{% trans "All tickets will be sent to your email address" %}</p>
+                                    </div>
+                                </label>
+
+                                <label class="flex items-center gap-3 p-3 rounded-lg border border-border cursor-pointer hover:bg-muted/50 transition-colors"
+                                       :class="deliveryMethod === 'EMAIL_INDIVIDUALLY' ? 'bg-primary/5 border-primary' : ''">
+                                    <input type="radio" name="delivery_method" value="EMAIL_INDIVIDUALLY"
+                                           x-model="deliveryMethod"
+                                           @change="deliveryError = ''"
+                                           class="w-4 h-4 text-primary border-border focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-2">
+                                            <i data-lucide="mail-plus" class="w-4 h-4"></i>
+                                            <span class="font-medium text-sm">{% trans "Email tickets individually" %}</span>
+                                        </div>
+                                        <p class="text-xs text-muted-foreground mt-1">{% trans "Each ticket will be sent to the respective attendee's email" %}</p>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div x-show="deliveryMethod === 'EMAIL_INDIVIDUALLY'" x-collapse x-cloak
+                                 class="mt-3 p-3 rounded-lg bg-muted/30 border border-border">
+                                <div class="flex items-start gap-2">
+                                    <i data-lucide="info" class="w-4 h-4 text-primary flex-shrink-0 mt-0.5"></i>
+                                    <p class="text-xs text-muted-foreground">
+                                        {% trans "Each group member must have a unique email address. Please ensure all attendee emails are filled in above." %}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div x-show="deliveryError" x-collapse x-cloak
+                                 class="mt-3 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                                <div class="flex items-start gap-2">
+                                    <i data-lucide="alert-circle" class="w-4 h-4 text-destructive flex-shrink-0 mt-0.5"></i>
+                                    <p class="text-xs text-destructive" x-text="deliveryError"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-border pt-4 mt-4">
                             <label class="block text-sm font-medium mb-2">{% trans "Have a coupon code?" %}</label>
                             <div class="flex gap-2 items-center">
                                 <input type="text" name="coupon_code" x-model="couponCode"

@@ -6,6 +6,7 @@ from django.views import View
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
+from django.db import models
 from django.db.models import Q, Count, Sum
 from django.http import JsonResponse, HttpResponse, FileResponse
 from django.urls import reverse
@@ -17,6 +18,7 @@ from apps.events.services import create_event
 from apps.events.queries import get_user_events
 from apps.events.models import (
     Event,
+    EventCategory,
     Coupon,
     EventFlyerConfig,
     FlyerTextField,
@@ -39,33 +41,52 @@ class PublicEventListView(View):
     def get(self, request):
         events = (
             Event.objects.filter(is_public=True, state=Event.State.PUBLISHED)
-            .select_related("organization")
+            .select_related("organization", "category")
+            .prefetch_related("ticket_types")
             .order_by("-start_at")
         )
 
-        search = request.GET.get("q", "")
-        if search:
-            events = events.filter(
-                Q(title__icontains=search)
-                | Q(description__icontains=search)
-                | Q(location__icontains=search)
-            )
+        events_data = []
+        for event in events:
+            ticket_types = event.ticket_types.filter(is_active=True)
+            min_price = ticket_types.aggregate(min_price=models.Min("price"))["min_price"] or 0
 
-        location = request.GET.get("location", "")
-        if location:
-            events = events.filter(location__icontains=location)
+            events_data.append({
+                "id": event.id,
+                "title": event.title,
+                "description": event.description or "",
+                "short_description": event.short_description or event.description[:150] if event.description else "",
+                "location": event.location or "",
+                "city": event.city or "",
+                "location_short": (event.location or event.city or "Online")[:20],
+                "start_at": event.start_at.isoformat(),
+                "date_formatted": event.start_at.strftime("%b %d, %Y"),
+                "category_name": event.category.name if event.category else "",
+                "category_slug": event.category.slug if event.category else "",
+                "cover_image": event.cover_image.url if event.cover_image else "",
+                "is_free": event.is_free,
+                "min_price": float(min_price),
+                "url": reverse("events:public_detail", kwargs={"org_slug": event.organization.slug, "event_slug": event.slug}),
+            })
 
-        paginator = Paginator(events, 12)
-        page = request.GET.get("page", 1)
-        events = paginator.get_page(page)
+        categories = EventCategory.objects.filter(is_active=True).order_by("display_order", "name")
+        categories_data = [
+            {
+                "id": cat.id,
+                "name": cat.name,
+                "slug": cat.slug,
+                "icon": cat.icon or "tag",
+                "color": cat.color,
+            }
+            for cat in categories
+        ]
 
         return render(
             request,
             "events/discover.html",
             {
-                "events": events,
-                "search": search,
-                "location": location,
+                "events_json": json.dumps(events_data),
+                "categories_json": json.dumps(categories_data),
             },
         )
 

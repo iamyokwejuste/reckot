@@ -355,8 +355,8 @@ const AIComponents = {
         overlay.innerHTML = `
             <div class="flex flex-col items-center gap-4 p-8 rounded-xl bg-card border border-border shadow-2xl">
                 <div class="relative">
-                    <div class="w-12 h-12 rounded-full border-4 border-purple-500/30 border-t-purple-500 animate-spin"></div>
-                    <i data-lucide="sparkles" class="w-5 h-5 text-purple-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></i>
+                    <div class="w-12 h-12 rounded-full border-4 border-primary/30 border-t-primary animate-spin"></div>
+                    <i data-lucide="sparkles" class="w-5 h-5 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></i>
                 </div>
                 <p class="text-sm font-medium text-foreground">${message}</p>
                 <p class="text-xs text-muted-foreground">Please wait...</p>

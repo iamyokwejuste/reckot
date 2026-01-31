@@ -10,82 +10,112 @@
 {% block twitter_title %}Discover Events Near You | Reckot{% endblock %}
 {% block twitter_description %}Find and book tickets for amazing events happening in Africa. Browse upcoming events on Reckot.{% endblock %}
 
+{% load static %}
+
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold mb-2">{% trans "Discover Events" %}</h1>
-        <p class="text-muted-foreground">{% trans "Find amazing events happening near you" %}</p>
+<script defer src="{% static 'js/discover.js' %}"></script>
+<script id="events-data" type="application/json">{{ events_json|safe }}</script>
+<script id="categories-data" type="application/json">{{ categories_json|safe }}</script>
+
+<div class="container mx-auto px-4 py-8" x-data="discover()" @input.debounce.300ms="filterEvents()">
+    <div class="text-center mb-6 sm:mb-8">
+        <h1 class="text-2xl sm:text-3xl font-bold mb-2">{% trans "Discover Events" %}</h1>
+        <p class="text-sm sm:text-base text-muted-foreground">{% trans "Find amazing events happening near you" %}</p>
     </div>
 
-    <form method="get" class="mb-8">
-        <div class="flex flex-col md:flex-row gap-4 max-w-2xl mx-auto">
-            <div class="flex-1">
-                <input type="text" name="q" value="{{ search }}" placeholder="{% trans "Search events..." %}" class="input w-full">
+    <div class="mb-6 sm:mb-8 space-y-3 sm:space-y-4" x-data="{ filtersOpen: false }">
+        <div class="max-w-4xl mx-auto">
+            <div class="flex gap-2">
+                <div class="flex-1">
+                    {% #input type="text" placeholder="Search events..." attrs='x-model="searchQuery"' %}{% /input %}
+                </div>
+                <button @click="filtersOpen = !filtersOpen"
+                        class="btn btn-ghost sm:hidden shrink-0 px-3"
+                        :class="filtersOpen ? 'bg-muted' : ''">
+                    <i data-lucide="filter" class="w-4 h-4"></i>
+                </button>
             </div>
-            <div class="flex-1">
-                <input type="text" name="location" value="{{ location }}" placeholder="{% trans "Location..." %}" class="input w-full">
-            </div>
-            {% #button type="submit" variant="default" %}
-                <i data-lucide="search" class="w-4 h-4 mr-2"></i>
-                {% trans "Search" %}
-            {% /button %}
-        </div>
-    </form>
 
-    {% if events %}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {% for event in events %}
-        <a href="{% url 'events:public_detail' org_slug=event.organization.slug event_slug=event.slug %}" class="card hover:shadow-lg transition-shadow">
-            <div class="p-6">
-                <div class="flex items-start justify-between mb-4">
-                    <div class="flex-shrink-0 w-12 h-12 rounded-lg bg-foreground/5 flex items-center justify-center">
-                        <i data-lucide="calendar" class="w-6 h-6 text-foreground"></i>
+            <div :class="filtersOpen ? 'block' : 'hidden sm:block'" class="mt-3 sm:mt-0 space-y-3">
+                <div class="flex flex-col sm:flex-row gap-3 sm:mt-3">
+                    <div class="flex-1">
+                        {% #input type="text" placeholder="Location..." attrs='x-model="locationQuery"' %}{% /input %}
                     </div>
-                    {% if event.ticket_types.exists %}
-                    <span class="text-sm font-semibold">From {{ event.ticket_types.first.price }} XAF</span>
-                    {% endif %}
+                    <div class="flex-1">
+                        <select x-model="selectedDate" @change="filterEvents()" class="input w-full">
+                            <option value="all">{% trans "All Dates" %}</option>
+                            <option value="today">{% trans "Today" %}</option>
+                            <option value="week">{% trans "This Week" %}</option>
+                            <option value="month">{% trans "This Month" %}</option>
+                        </select>
+                    </div>
                 </div>
-                <h3 class="font-semibold text-lg mb-2">{{ event.title }}</h3>
-                <div class="text-sm text-muted-foreground mb-4 line-clamp-2 prose prose-sm dark:prose-invert max-w-none">{{ event.description|safe }}</div>
-                <div class="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span class="flex items-center gap-1">
-                        <i data-lucide="clock" class="w-4 h-4"></i>
-                        {{ event.start_at|date:"M j, Y" }}
-                    </span>
-                    <span class="flex items-center gap-1">
-                        <i data-lucide="map-pin" class="w-4 h-4"></i>
-                        {{ event.location|truncatewords:3 }}
-                    </span>
+
+                <div class="flex flex-wrap gap-2" x-show="categories.length > 0">
+                    <button type="button" @click="selectedCategory = ''; filterEvents()" :class="selectedCategory === '' ? 'bg-foreground text-background' : ''" class="btn btn-ghost btn-sm text-xs sm:text-sm">
+                        {% trans "All" %}
+                    </button>
+                    <template x-for="category in categories" :key="category.slug">
+                        <button type="button" @click="selectedCategory = category.slug; filterEvents()" :class="selectedCategory === category.slug ? 'bg-foreground text-background' : ''" class="btn btn-ghost btn-sm flex items-center gap-1.5 text-xs sm:text-sm">
+                            <i :data-lucide="category.icon || 'tag'" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+                            <span x-text="category.name"></span>
+                        </button>
+                    </template>
                 </div>
             </div>
-        </a>
-        {% endfor %}
+        </div>
+
+        <div class="text-center text-xs sm:text-sm text-muted-foreground">
+            <span x-text="filteredEvents.length"></span> {% trans "events found" %}
+        </div>
     </div>
 
-    {% if events.has_other_pages %}
-    <div class="flex justify-center mt-8 gap-2">
-        {% if events.has_previous %}
-        <a href="?page={{ events.previous_page_number }}{% if search %}&q={{ search }}{% endif %}{% if location %}&location={{ location }}{% endif %}">
-            {% #button variant="outline" size="sm" %}{% trans "Previous" %}{% /button %}
-        </a>
-        {% endif %}
-        {% #button variant="ghost" size="sm" %}{% blocktrans with num=events.number total=events.paginator.num_pages %}Page {{ num }} of {{ total }}{% endblocktrans %}{% /button %}
-        {% if events.has_next %}
-        <a href="?page={{ events.next_page_number }}{% if search %}&q={{ search }}{% endif %}{% if location %}&location={{ location }}{% endif %}">
-            {% #button variant="outline" size="sm" %}{% trans "Next" %}{% /button %}
-        </a>
-        {% endif %}
+    <div x-show="filteredEvents.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <template x-for="event in filteredEvents" :key="event.id">
+            <a :href="event.url" class="card hover:shadow-lg transition-shadow no-underline">
+                <div x-show="event.cover_image" class="w-full h-48 overflow-hidden rounded-t-xl">
+                    <img :src="event.cover_image" :alt="event.title" class="w-full h-full object-cover">
+                </div>
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex gap-2 flex-wrap">
+                            <div x-show="event.category_name" class="badge badge-default">
+                                <span x-text="event.category_name"></span>
+                            </div>
+                            <div :class="getEventStatus(event).class">
+                                <span x-text="getEventStatus(event).label"></span>
+                            </div>
+                        </div>
+                        <span x-show="event.min_price > 0" class="text-sm font-semibold text-foreground">
+                            <span x-text="event.min_price"></span> XAF
+                        </span>
+                        <span x-show="event.is_free" class="text-sm font-semibold text-success">
+                            {% trans "Free" %}
+                        </span>
+                    </div>
+                    <h3 class="font-semibold text-lg mb-2 text-foreground" x-text="event.title"></h3>
+                    <div class="text-sm text-muted-foreground mb-4 line-clamp-2" x-text="event.short_description"></div>
+                    <div class="flex items-center gap-4 text-sm text-muted-foreground">
+                        <span class="flex items-center gap-1">
+                            <i data-lucide="clock" class="w-4 h-4"></i>
+                            <span x-text="event.date_formatted"></span>
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <i data-lucide="map-pin" class="w-4 h-4"></i>
+                            <span x-text="event.location_short"></span>
+                        </span>
+                    </div>
+                </div>
+            </a>
+        </template>
     </div>
-    {% endif %}
 
-    {% else %}
-    <div class="text-center py-16">
+    <div x-show="filteredEvents.length === 0" class="text-center py-16">
         <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-foreground/5 mb-4">
             <i data-lucide="calendar-x" class="w-8 h-8 text-muted-foreground"></i>
         </div>
         <h3 class="font-semibold text-lg mb-2">{% trans "No events found" %}</h3>
         <p class="text-muted-foreground">{% trans "Try adjusting your search criteria" %}</p>
     </div>
-    {% endif %}
 </div>
 {% endblock %}

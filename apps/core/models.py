@@ -84,3 +84,41 @@ class OTPVerification(models.Model):
             otp_type=otp_type,
             expires_at=timezone.now() + timedelta(minutes=expiry_minutes),
         )
+
+
+class Notification(models.Model):
+    class Type(models.TextChoices):
+        TICKET_PURCHASE = "TICKET_PURCHASE", _("Ticket Purchase")
+        PAYMENT_CONFIRMED = "PAYMENT_CONFIRMED", _("Payment Confirmed")
+        REFUND_APPROVED = "REFUND_APPROVED", _("Refund Approved")
+        REFUND_PROCESSED = "REFUND_PROCESSED", _("Refund Processed")
+        EVENT_UPDATE = "EVENT_UPDATE", _("Event Update")
+        EVENT_CANCELLED = "EVENT_CANCELLED", _("Event Cancelled")
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
+    notification_type = models.CharField(max_length=20, choices=Type.choices)
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+    link = models.CharField(max_length=500, blank=True)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["user", "is_read", "-created_at"]),
+            models.Index(fields=["expires_at"]),
+        ]
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.user.email} - {self.title}"
+
+    def save(self, *args, **kwargs):
+        if not self.expires_at:
+            self.expires_at = timezone.now() + timedelta(days=30)
+        super().save(*args, **kwargs)
+
+    @property
+    def is_expired(self):
+        return timezone.now() > self.expires_at

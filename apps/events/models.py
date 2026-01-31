@@ -6,6 +6,43 @@ from django.utils.translation import gettext_lazy as _
 from apps.orgs.models import Organization
 
 
+class EventCategory(models.Model):
+    """Categories for organizing and filtering events"""
+
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=110, unique=True, blank=True)
+    description = models.TextField(blank=True)
+    icon = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Lucide icon name (e.g., music, briefcase, graduation-cap)",
+    )
+    color = models.CharField(
+        max_length=7,
+        default="#09090b",
+        help_text="Hex color code for category badge",
+    )
+    is_active = models.BooleanField(default=True)
+    display_order = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name_plural = "Event Categories"
+        ordering = ["display_order", "name"]
+        indexes = [
+            models.Index(fields=["is_active", "display_order"]),
+        ]
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+
 class Event(models.Model):
     class State(models.TextChoices):
         DRAFT = "DRAFT", _("Draft")
@@ -20,6 +57,13 @@ class Event(models.Model):
 
     organization = models.ForeignKey(
         Organization, on_delete=models.CASCADE, related_name="events"
+    )
+    category = models.ForeignKey(
+        EventCategory,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="events",
     )
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=220, blank=True)
@@ -68,6 +112,7 @@ class Event(models.Model):
             models.Index(fields=["slug"]),
             models.Index(fields=["is_public", "state"]),
             models.Index(fields=["is_featured", "feature_order"]),
+            models.Index(fields=["category", "is_public", "state"]),
         ]
 
     def __str__(self):

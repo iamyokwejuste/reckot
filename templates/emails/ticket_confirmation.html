@@ -4,7 +4,7 @@
 
 {% block content %}
 <h1 class="heading">You're going to {{ event.title }}!</h1>
-<p class="subheading email-muted">Your tickets are confirmed and ready</p>
+<p class="subheading email-muted">Your {% if tickets|length == 1 %}ticket is{% else %}tickets are{% endif %} confirmed and ready</p>
 
 <!-- Event Details -->
 <div class="ticket-info email-badge">
@@ -31,7 +31,7 @@
 <!-- Tickets -->
 <div class="divider email-border" style="border-top: 1px solid;"></div>
 
-<h2 style="font-size: 18px; font-weight: 600; margin: 0 0 16px 0;">Your Tickets ({{ tickets|length }})</h2>
+<h2 style="font-size: 18px; font-weight: 600; margin: 0 0 16px 0;">Your {% if tickets|length == 1 %}Ticket{% else %}Tickets ({{ tickets|length }}){% endif %}</h2>
 
 {% for ticket in tickets %}
 <div class="ticket-info email-card" style="margin-bottom: 16px; border: 1px solid;">

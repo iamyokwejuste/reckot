@@ -1,37 +1,51 @@
-import logging
+from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.contrib.auth import get_user_model
-from allauth.account.signals import user_signed_up
-from allauth.socialaccount.signals import social_account_added
-
-from apps.core.models import OTPVerification
-from apps.core.tasks import send_otp_verification_task, send_welcome_email_task
-
-logger = logging.getLogger(__name__)
-User = get_user_model()
+from django.urls import reverse
+from apps.tickets.models import Booking
+from apps.payments.models import Payment, Refund
+from apps.core.models import Notification
 
 
-@receiver(user_signed_up)
-def handle_user_signup(sender, request, user, **kwargs):
-    sociallogin = kwargs.get("sociallogin")
+@receiver(post_save, sender=Booking)
+def create_ticket_purchase_notification(sender, instance, created, **kwargs):
+    if created and instance.user and instance.status == Booking.Status.CONFIRMED:
+        Notification.objects.create(
+            user=instance.user,
+            notification_type=Notification.Type.TICKET_PURCHASE,
+            title=f"Ticket confirmed for {instance.event.title}",
+            message=f"Your ticket for {instance.event.title} has been confirmed. Check your email for details.",
+            link=f"/tickets/my/",
+        )
 
-    try:
-        if sociallogin:
-            user.email_verified = True
-            user.save(update_fields=["email_verified"])
-            send_welcome_email_task.enqueue(user.id)
-        else:
-            otp = OTPVerification.create_for_user(
-                user=user, otp_type=OTPVerification.Type.EMAIL, expiry_minutes=10
+
+@receiver(post_save, sender=Payment)
+def create_payment_notification(sender, instance, created, **kwargs):
+    if not created and instance.status == Payment.Status.CONFIRMED and instance.booking.user:
+        Notification.objects.create(
+            user=instance.booking.user,
+            notification_type=Notification.Type.PAYMENT_CONFIRMED,
+            title=f"Payment confirmed",
+            message=f"Your payment of {instance.amount} XAF for {instance.booking.event.title} has been confirmed.",
+            link=f"/tickets/my/",
+        )
+
+
+@receiver(post_save, sender=Refund)
+def create_refund_notification(sender, instance, created, **kwargs):
+    if instance.payment.booking.user:
+        if created and instance.status == Refund.Status.APPROVED:
+            Notification.objects.create(
+                user=instance.payment.booking.user,
+                notification_type=Notification.Type.REFUND_APPROVED,
+                title="Refund approved",
+                message=f"Your refund request for {instance.payment.booking.event.title} has been approved.",
+                link=f"/tickets/my/",
             )
-            send_otp_verification_task.enqueue(user.id, otp.id)
-    except Exception as e:
-        logger.error(f"Failed to enqueue signup tasks for user {user.id}: {e}")
-
-
-@receiver(social_account_added)
-def handle_social_account_added(sender, request, sociallogin, **kwargs):
-    user = sociallogin.user
-    if not user.email_verified and sociallogin.account.provider == "google":
-        user.email_verified = True
-        user.save(update_fields=["email_verified"])
+        elif not created and instance.status == Refund.Status.PROCESSED:
+            Notification.objects.create(
+                user=instance.payment.booking.user,
+                notification_type=Notification.Type.REFUND_PROCESSED,
+                title="Refund processed",
+                message=f"Your refund of {instance.amount} XAF has been processed and will arrive soon.",
+                link=f"/tickets/my/",
+            )

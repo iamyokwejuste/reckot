@@ -136,6 +136,8 @@ class CheckoutView(View):
             if key.startswith("attendee_name_") or key.startswith("attendee_email_"):
                 attendee_info[key] = request.POST.get(key, "").strip()
 
+        delivery_method = request.POST.get("delivery_method", "EMAIL_ALL")
+
         booking, error = create_multi_ticket_booking(
             user=user,
             event=event,
@@ -147,6 +149,7 @@ class CheckoutView(View):
             guest_name=guest_name,
             guest_phone=guest_phone,
             attendee_info=attendee_info,
+            delivery_method=delivery_method,
         )
 
         if error:

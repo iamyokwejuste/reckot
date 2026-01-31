@@ -1,10 +1,13 @@
 from django.urls import path
-from apps.core import actions
+from apps.core import actions, notification_views
 from apps.core.api import ai
 
 app_name = "core"
 
 urlpatterns = [
+    path("api/notifications/", notification_views.NotificationListView.as_view(), name="notifications_list"),
+    path("api/notifications/<int:notification_id>/read/", notification_views.NotificationMarkReadView.as_view(), name="notification_mark_read"),
+    path("api/notifications/read-all/", notification_views.NotificationMarkAllReadView.as_view(), name="notifications_mark_all_read"),
     path("settings/", actions.SettingsView.as_view(), name="settings"),
     path(
         "settings/toggle-ai/",

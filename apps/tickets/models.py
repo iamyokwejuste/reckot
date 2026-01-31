@@ -66,6 +66,10 @@ class Booking(models.Model):
         CANCELLED = "CANCELLED", _("Cancelled")
         REFUNDED = "REFUNDED", _("Refunded")
 
+    class DeliveryMethod(models.TextChoices):
+        EMAIL_ALL = "EMAIL_ALL", _("Email me all tickets")
+        EMAIL_INDIVIDUALLY = "EMAIL_INDIVIDUALLY", _("Email tickets individually")
+
     reference = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     event = models.ForeignKey(
         Event, on_delete=models.CASCADE, related_name="bookings", null=True
@@ -89,6 +93,12 @@ class Booking(models.Model):
     guest_phone = models.CharField(max_length=20, blank=True)
     status = models.CharField(
         max_length=20, choices=Status.choices, default=Status.PENDING
+    )
+    delivery_method = models.CharField(
+        max_length=20,
+        choices=DeliveryMethod.choices,
+        default=DeliveryMethod.EMAIL_ALL,
+        help_text="How tickets should be delivered to recipients",
     )
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
