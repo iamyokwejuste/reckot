@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
+from django.templatetags.static import static
 
 from apps.core.models import OTPVerification, User
 from apps.core.tasks import resend_otp_task, send_otp_sms_task
@@ -40,6 +41,31 @@ def service_worker(request):
         return HttpResponse(content, content_type="application/javascript")
     except FileNotFoundError:
         return HttpResponse("", content_type="application/javascript", status=404)
+
+
+def manifest_view(request):
+    manifest = {
+        "name": "Reckot - Event Ticketing Platform",
+        "short_name": "Reckot",
+        "description": "Modern event ticketing and management platform",
+        "icons": [
+            {
+                "src": request.build_absolute_uri(static("images/favicon/android-chrome-192x192.png")),
+                "sizes": "192x192",
+                "type": "image/png"
+            },
+            {
+                "src": request.build_absolute_uri(static("images/favicon/android-chrome-512x512.png")),
+                "sizes": "512x512",
+                "type": "image/png"
+            }
+        ],
+        "theme_color": "#000000",
+        "background_color": "#ffffff",
+        "display": "standalone",
+        "start_url": "/"
+    }
+    return JsonResponse(manifest, content_type="application/manifest+json")
 
 
 class HomeView(View):

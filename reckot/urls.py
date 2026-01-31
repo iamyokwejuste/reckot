@@ -15,6 +15,7 @@ from apps.core.actions import (
     ResendOTPView,
     robots_txt,
     service_worker,
+    manifest_view,
     PhoneLoginRequestView,
     PhoneLoginVerifyView,
     PhoneSignupRequestView,
@@ -41,6 +42,7 @@ urlpatterns = [
     ),
     path("robots.txt", robots_txt, name="robots_txt"),
     path("sw.js", service_worker, name="service_worker"),
+    path("site.webmanifest", manifest_view, name="manifest"),
     path(
         "sitemap.xml",
         sitemap,
