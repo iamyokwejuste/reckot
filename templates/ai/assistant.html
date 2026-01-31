@@ -6,26 +6,54 @@
 
 {% block extra_head %}
 <script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 function aiAssistant() {
     return {
         messages: [],
         inputMessage: '',
         isLoading: false,
         sessionId: '',
+        messageCounter: 0,
+        autoScroll: true,
 
         async sendMessage(preset = null) {
             const message = preset || this.inputMessage.trim();
             if (!message) return;
 
-            this.messages.push({ role: 'USER', content: message });
+            this.messages.push({
+                id: ++this.messageCounter,
+                role: 'USER',
+                content: message,
+                timestamp: Date.now()
+            });
             this.inputMessage = '';
             this.isLoading = true;
-            this.scrollToBottom();
+
+            setTimeout(() => this.scrollToBottom(), 50);
 
             try {
-                const response = await fetch('/ai/chat/', {
+                const csrftoken = getCookie('csrftoken');
+                const response = await fetch('/ai/assistant/chat/', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': csrftoken
+                    },
                     body: JSON.stringify({
                         message: message,
                         session_id: this.sessionId || null
@@ -38,9 +66,19 @@ function aiAssistant() {
                     if (data.disabled) {
                         errorMessage += '\n\nYou can enable AI features in your account settings.';
                     }
-                    this.messages.push({ role: 'ASSISTANT', content: errorMessage });
+                    this.messages.push({
+                        id: ++this.messageCounter,
+                        role: 'ASSISTANT',
+                        content: errorMessage,
+                        timestamp: Date.now()
+                    });
                 } else {
-                    this.messages.push({ role: 'ASSISTANT', content: data.message });
+                    this.messages.push({
+                        id: ++this.messageCounter,
+                        role: 'ASSISTANT',
+                        content: data.message,
+                        timestamp: Date.now()
+                    });
 
                     if (data.session_id && !this.sessionId) {
                         this.sessionId = data.session_id;
@@ -48,30 +86,74 @@ function aiAssistant() {
                     }
                 }
             } catch (error) {
-                this.messages.push({ role: 'ASSISTANT', content: 'Sorry, something went wrong. Please try again.' });
+                this.messages.push({
+                    id: ++this.messageCounter,
+                    role: 'ASSISTANT',
+                    content: 'Sorry, something went wrong. Please try again.',
+                    timestamp: Date.now()
+                });
             }
 
             this.isLoading = false;
-            this.scrollToBottom();
+            setTimeout(() => this.scrollToBottom(), 50);
         },
 
         async clearConversation() {
             if (!confirm('Clear conversation history?')) return;
-            await fetch('/ai/clear/', { method: 'POST' });
+            const csrftoken = getCookie('csrftoken');
+            await fetch('/ai/assistant/clear/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    session_id: this.sessionId || null
+                })
+            });
             this.messages = [];
+            this.messageCounter = 0;
+            this.sessionId = '';
+            window.history.pushState({}, '', '/ai/assistant/');
         },
 
         scrollToBottom() {
-            this.$nextTick(() => {
-                const container = document.getElementById('chat-container');
+            if (!this.autoScroll) return;
+
+            const container = document.getElementById('chat-container');
+            if (container) {
                 container.scrollTop = container.scrollHeight;
-            });
+            }
+        },
+
+        handleScroll(event) {
+            const container = event.target;
+            const isAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 50;
+            this.autoScroll = isAtBottom;
         },
 
         init() {
-            const messagesData = {{ messages|safe|default:"[]" }};
-            this.messages = messagesData;
-            this.sessionId = '{{ session_id|default:"" }}';
+            try {
+                const messagesData = JSON.parse('{{ chat_messages|escapejs }}' || '[]');
+
+                if (Array.isArray(messagesData)) {
+                    this.messages = messagesData.map((msg, idx) => ({
+                        ...msg,
+                        id: ++this.messageCounter,
+                        timestamp: Date.now() - (messagesData.length - idx) * 1000
+                    }));
+                } else {
+                    this.messages = [];
+                }
+
+                this.sessionId = '{{ session_id|default:"" }}';
+                setTimeout(() => this.scrollToBottom(), 100);
+            } catch (error) {
+                this.messages = [];
+                this.sessionId = '';
+                this.messageCounter = 0;
+            }
         }
     }
 }
@@ -79,7 +161,7 @@ function aiAssistant() {
 {% endblock %}
 
 {% block content %}
-<div class="container py-8" x-data="aiAssistant()" x-init="init()">
+<div class="container py-8" x-data="aiAssistant()" x-init="init()" x-cloak>
     {% #breadcrumb %}
         {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
         {% #breadcrumb_separator %}{% /breadcrumb_separator %}
@@ -95,7 +177,7 @@ function aiAssistant() {
                     </div>
                     <div>
                         <h1 class="text-xl font-bold">{% trans "Reckot AI Assistant" %}</h1>
-                        <p class="text-sm text-muted-foreground">{% trans "Powered by Google Gemini" %}</p>
+                        <p class="text-sm text-muted-foreground">{% trans "Powered by Google Gemini" %} <span class="text-xs" x-text="'(' + messages.length + ' messages)'"></span></p>
                     </div>
                 </div>
                 <button @click="clearConversation()" class="text-sm text-muted-foreground hover:text-foreground transition-colors">
@@ -103,37 +185,38 @@ function aiAssistant() {
                 </button>
             </div>
 
-            <div id="chat-container" class="h-[400px] overflow-y-auto space-y-4 mb-4 p-4 rounded-xl bg-muted/50">
-                <template x-if="messages.length === 0">
-                    <div class="text-center py-12">
-                        <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
-                            <i data-lucide="message-circle" class="h-8 w-8 text-primary"></i>
-                        </div>
-                        <h3 class="font-medium mb-2">{% trans "How can I help you today?" %}</h3>
-                        <p class="text-sm text-muted-foreground mb-4">{% trans "Ask me about events, tickets, payments, or any issues you're experiencing." %}</p>
-                        <div class="flex flex-wrap justify-center gap-2">
-                            <button @click="sendMessage('How do I create an event?')" class="text-xs px-3 py-1.5 rounded-full bg-background border hover:bg-accent transition-colors">
-                                {% trans "How to create an event?" %}
-                            </button>
-                            <button @click="sendMessage('I have a payment issue')" class="text-xs px-3 py-1.5 rounded-full bg-background border hover:bg-accent transition-colors">
-                                {% trans "Payment issue" %}
-                            </button>
-                            <button @click="sendMessage('How do I check in attendees?')" class="text-xs px-3 py-1.5 rounded-full bg-background border hover:bg-accent transition-colors">
-                                {% trans "Check-in help" %}
-                            </button>
-                        </div>
+            <div id="chat-container" @scroll="handleScroll" class="h-[400px] overflow-y-auto space-y-4 mb-4 p-4 rounded-xl bg-muted/50">
+                <div x-show="messages.length === 0" class="text-center py-12">
+                    <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
+                        <i data-lucide="message-circle" class="h-8 w-8 text-primary"></i>
                     </div>
-                </template>
+                    <h3 class="font-medium mb-2">{% trans "How can I help you today?" %}</h3>
+                    <p class="text-sm text-muted-foreground mb-4">{% trans "Ask me about events, tickets, payments, or any issues you're experiencing." %}</p>
+                    <div class="flex flex-wrap justify-center gap-2">
+                        <button @click="sendMessage('How do I create an event?')" class="text-xs px-3 py-1.5 rounded-full bg-background border hover:bg-accent transition-colors">
+                            {% trans "How to create an event?" %}
+                        </button>
+                        <button @click="sendMessage('I have a payment issue')" class="text-xs px-3 py-1.5 rounded-full bg-background border hover:bg-accent transition-colors">
+                            {% trans "Payment issue" %}
+                        </button>
+                        <button @click="sendMessage('How do I check in attendees?')" class="text-xs px-3 py-1.5 rounded-full bg-background border hover:bg-accent transition-colors">
+                            {% trans "Check-in help" %}
+                        </button>
+                    </div>
+                </div>
 
-                <template x-for="(msg, index) in messages" :key="index">
-                    <div :class="msg.role === 'USER' ? 'flex justify-end' : 'flex justify-start'">
-                        <div :class="msg.role === 'USER'
-                            ? 'bg-primary text-primary-foreground rounded-2xl rounded-br-md px-4 py-2 max-w-[80%]'
-                            : 'bg-background border rounded-2xl rounded-bl-md px-4 py-2 max-w-[80%]'">
-                            <p class="text-sm whitespace-pre-wrap" x-text="msg.content"></p>
+                <!-- Messages list -->
+                <div class="space-y-4">
+                    <template x-for="msg in messages" :key="msg.id">
+                        <div :class="msg.role === 'USER' ? 'flex justify-end' : 'flex justify-start'">
+                            <div :class="msg.role === 'USER'
+                                ? 'bg-primary text-primary-foreground rounded-2xl rounded-br-md px-4 py-2 max-w-[80%]'
+                                : 'bg-background border rounded-2xl rounded-bl-md px-4 py-2 max-w-[80%]'">
+                                <p class="text-sm whitespace-pre-wrap" x-text="msg.content"></p>
+                            </div>
                         </div>
-                    </div>
-                </template>
+                    </template>
+                </div>
 
                 <template x-if="isLoading">
                     <div class="flex justify-start">

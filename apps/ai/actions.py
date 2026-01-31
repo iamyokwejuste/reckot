@@ -46,7 +46,7 @@ class AIAssistantView(View):
             self.template_name,
             {
                 "conversation": conversation,
-                "messages": messages_list,
+                "chat_messages": json.dumps(messages_list),
                 "context": context,
                 "session_id": session_id,
             },
@@ -303,10 +303,25 @@ class SupportTicketCreateView(View):
         return redirect("ai:ticket_detail", reference=ticket.reference)
 
 
+@method_decorator(csrf_exempt, name="dispatch")
 class ClearConversationView(View):
     def post(self, request):
-        session_id = request.session.get("ai_session_id")
+        try:
+            data = json.loads(request.body)
+            session_id = data.get("session_id")
+        except json.JSONDecodeError:
+            session_id = None
+
         if session_id:
-            AIConversation.objects.filter(session_id=session_id).delete()
-            del request.session["ai_session_id"]
-        return JsonResponse({"status": "ok"})
+            # Delete the conversation by session_id
+            deleted_count, _ = AIConversation.objects.filter(session_id=session_id).delete()
+            logger.info(f"Deleted conversation with session_id {session_id}: {deleted_count} records")
+            return JsonResponse({"status": "ok", "deleted": deleted_count})
+        else:
+            # If no session_id, delete all conversations for the authenticated user
+            if request.user.is_authenticated:
+                deleted_count, _ = AIConversation.objects.filter(user=request.user).delete()
+                logger.info(f"Deleted all conversations for user {request.user.id}: {deleted_count} records")
+                return JsonResponse({"status": "ok", "deleted": deleted_count})
+
+        return JsonResponse({"status": "ok", "deleted": 0})

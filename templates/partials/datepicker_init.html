@@ -12,9 +12,7 @@
             if (el._flatpickr) {
                 try {
                     el._flatpickr.destroy();
-                } catch(e) {
-                    console.warn('Error destroying flatpickr instance:', e);
-                }
+                } catch(e) {}
             }
 
             const enableTime = el.dataset.enableTime === 'true';
@@ -56,8 +54,6 @@
             try {
                 flatpickr(el, config);
             } catch(e) {
-                console.error('Error initializing flatpickr:', e);
-                // Reset flags on error so it can be retried
                 el._flatpickrInitialized = false;
                 el.removeAttribute('data-datepicker-initialized');
             }

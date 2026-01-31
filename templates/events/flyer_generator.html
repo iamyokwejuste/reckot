@@ -55,7 +55,6 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Verification error:', error);
                     this.verificationError = 'Error verifying ticket. Please try again.';
                 })
                 .finally(() => {
@@ -286,7 +285,6 @@ async function generateFlyer(formData) {
             showGenerationError(data.error || 'Error generating flyer. Please try again.');
         }
     } catch (error) {
-        console.error('Flyer generation error:', error);
         showGenerationError('Error generating flyer: ' + (error.message || 'Please try again.'));
     }
 
@@ -307,9 +305,7 @@ async function shareFlyer() {
                 title: '{% trans "My Event Flyer" %}',
                 text: '{% blocktrans with title=event.title %}Check out my flyer for {{ title }}!{% endblocktrans %}'
             });
-        } catch (error) {
-            console.log('Sharing failed:', error);
-        }
+        } catch (error) {}
     } else {
         alert('{% trans "Sharing is not supported on your device. Please use the download button." %}');
     }

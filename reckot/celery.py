@@ -23,4 +23,8 @@ app.conf.beat_schedule = {
         "task": "apps.messaging.tasks.process_scheduled_campaigns",
         "schedule": 60.0,
     },
+    "cleanup-old-ai-conversations-daily": {
+        "task": "apps.ai.tasks.cleanup_old_ai_conversations",
+        "schedule": crontab(hour=2, minute=0),
+    },
 }

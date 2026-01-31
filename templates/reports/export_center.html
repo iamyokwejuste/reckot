@@ -92,9 +92,7 @@
             a.click();
             window.URL.revokeObjectURL(downloadUrl);
             document.body.removeChild(a);
-        } catch (error) {
-            console.error('Download failed:', error);
-        }
+        } catch (error) {}
     }
 }">
     <div class="card p-6">

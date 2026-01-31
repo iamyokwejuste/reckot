@@ -5,6 +5,30 @@
 
 {% block title %}{% trans "Log Out" %} - Reckot{% endblock %}
 
+{% block extra_head %}
+<script>
+function handleLogout(event) {
+    event.preventDefault();
+    const form = event.target;
+
+    fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        credentials: 'same-origin'
+    }).then(() => {
+        document.cookie.split(";").forEach(function(c) {
+            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+        });
+
+        window.location.href = form.querySelector('input[name="next"]')?.value || '/';
+        window.location.reload(true);
+    });
+
+    return false;
+}
+</script>
+{% endblock %}
+
 {% block content %}
 <div class="min-h-[calc(100vh-4rem)] flex items-center justify-center py-12 px-4">
     <div class="w-full max-w-md">
@@ -20,7 +44,7 @@
                 </p>
             </div>
 
-            <form method="post" hx-boost="false" action="{% url 'account_logout' %}">
+            <form method="post" hx-boost="false" action="{% url 'account_logout' %}" onsubmit="return handleLogout(event)">
                 {% csrf_token %}
                 {% if request.GET.next %}
                 <input type="hidden" name="next" value="{{ request.GET.next }}">

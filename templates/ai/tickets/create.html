@@ -6,10 +6,11 @@
 
 {% block content %}
 <div class="container py-8">
+    {% url 'ai:tickets' as tickets_url %}
     {% #breadcrumb %}
         {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
         {% #breadcrumb_separator %}{% /breadcrumb_separator %}
-        {% #breadcrumb_item href="{% url 'ai:tickets' %}" %}{% trans "Support Tickets" %}{% /breadcrumb_item %}
+        {% #breadcrumb_item href=tickets_url %}{% trans "Support Tickets" %}{% /breadcrumb_item %}
         {% #breadcrumb_separator %}{% /breadcrumb_separator %}
         {% #breadcrumb_item %}{% trans "Create" %}{% /breadcrumb_item %}
     {% /breadcrumb %}

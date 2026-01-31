@@ -15,33 +15,25 @@ window.initDatePickers = function() {
     if (startPicker && startPicker.destroy) {
         try {
             startPicker.destroy();
-        } catch(e) {
-            console.warn('Error destroying start picker:', e);
-        }
+        } catch(e) {}
         startPicker = null;
     }
     if (endPicker && endPicker.destroy) {
         try {
             endPicker.destroy();
-        } catch(e) {
-            console.warn('Error destroying end picker:', e);
-        }
+        } catch(e) {}
         endPicker = null;
     }
 
     if (startEl._flatpickr) {
         try {
             startEl._flatpickr.destroy();
-        } catch(e) {
-            console.warn('Error destroying flatpickr on start element:', e);
-        }
+        } catch(e) {}
     }
     if (endEl._flatpickr) {
         try {
             endEl._flatpickr.destroy();
-        } catch(e) {
-            console.warn('Error destroying flatpickr on end element:', e);
-        }
+        } catch(e) {}
     }
 
     const commonConfig = {
@@ -109,7 +101,6 @@ window.initDatePickers = function() {
 
         return true;
     } catch(e) {
-        console.error('Error initializing event form datepickers:', e);
         startEl._eventFormPickerInitialized = false;
         endEl._eventFormPickerInitialized = false;
         return false;

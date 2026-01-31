@@ -64,9 +64,7 @@
     var metrics = {};
     try {
         metrics = JSON.parse(metricsStr);
-    } catch (e) {
-        console.error('Failed to parse metrics:', e);
-    }
+    } catch (e) {}
 
     var btn = document.getElementById('ai-insights-btn');
     var btnText = document.getElementById('ai-insights-btn-text');

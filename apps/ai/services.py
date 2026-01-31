@@ -6,10 +6,14 @@ from django.conf import settings
 from django.db.models import Count, Sum, Q, F
 from django.utils import timezone
 
+from django.contrib.auth import get_user_model
+
 from apps.events.models import Event
 from apps.tickets.models import Ticket, Booking, TicketType
 from apps.payments.models import Payment
 from apps.orgs.models import Organization
+
+User = get_user_model()
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +73,17 @@ gemini = GeminiService()
 
 def get_model_schema():
     schema = {
+        "User": {
+            "description": "User accounts (DO NOT expose sensitive data)",
+            "fields": {
+                "username": "Username",
+                "email": "Email address (PRIVATE)",
+                "first_name": "First name",
+                "last_name": "Last name",
+                "is_active": "Is account active",
+            },
+            "security": "NEVER expose emails or personal data publicly. Only count users.",
+        },
         "Event": {
             "description": "Events in the system",
             "fields": {
@@ -128,6 +143,7 @@ def get_model_schema():
 def execute_django_query(query_code: str):
     try:
         safe_namespace = {
+            "User": User,
             "Event": Event,
             "Ticket": Ticket,
             "Booking": Booking,

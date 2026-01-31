@@ -22,7 +22,6 @@ const ReckotAI = {
 
             return await response.json();
         } catch (error) {
-            console.error('AI Error:', error);
             throw error;
         }
     },
@@ -100,7 +99,6 @@ const ReckotAI = {
                     const result = await response.json();
                     resolve(result);
                 } catch (error) {
-                    console.error('Voice AI Error:', error);
                     reject(error);
                 }
             };
@@ -131,7 +129,6 @@ const ReckotAI = {
 
             return await response.json();
         } catch (error) {
-            console.error('Image AI Error:', error);
             throw error;
         }
     }
@@ -898,13 +895,11 @@ ${result.reasoning || ''}
     createCoverImageGenerator(options = {}) {
         const coverInput = document.querySelector('[name="cover_image"]');
         if (!coverInput) {
-            console.error('Cover input not found');
             return;
         }
 
         const coverSection = coverInput.parentElement;
         if (!coverSection) {
-            console.error('Cover section not found');
             return;
         }
 
