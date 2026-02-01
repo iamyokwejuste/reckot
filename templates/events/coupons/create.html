@@ -46,6 +46,11 @@
                 return this.eventDates[this.selectedEvent];
             }
             return null;
+        },
+        updateValidUntilMax() {
+            if (window.updateValidUntilMax) {
+                window.updateValidUntilMax();
+            }
         }
     }">
         {% csrf_token %}
@@ -93,13 +98,13 @@
                     </button>
                     <div x-show="open" x-transition @click.outside="open = false" class="custom-select-dropdown" x-cloak>
                         <div class="custom-select-options">
-                            <button type="button" @click="selectedEvent = ''; selectedEventLabel = ''; open = false; updateValidUntilMax()"
+                            <button type="button" @click="selectedEvent = ''; selectedEventLabel = ''; open = false; $nextTick(() => updateValidUntilMax())"
                                     class="custom-select-option" :class="{ 'custom-select-option-selected': selectedEvent === '' }">
                                 <span>{% trans "All events in organization" %}</span>
                                 <i x-show="selectedEvent === ''" data-lucide="check" class="custom-select-check w-4 h-4"></i>
                             </button>
                             {% for event in events %}
-                            <button type="button" @click="selectedEvent = '{{ event.id }}'; selectedEventLabel = '{{ event.title|escapejs }} ({{ event.organization.name|escapejs }})'; open = false; updateValidUntilMax()"
+                            <button type="button" @click="selectedEvent = '{{ event.id }}'; selectedEventLabel = '{{ event.title|escapejs }} ({{ event.organization.name|escapejs }})'; open = false; $nextTick(() => updateValidUntilMax())"
                                     class="custom-select-option" :class="{ 'custom-select-option-selected': selectedEvent === '{{ event.id }}' }">
                                 <span>{{ event.title }} ({{ event.organization.name }})</span>
                                 <i x-show="selectedEvent === '{{ event.id }}'" data-lucide="check" class="custom-select-check w-4 h-4"></i>

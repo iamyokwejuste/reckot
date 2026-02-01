@@ -413,7 +413,7 @@ If this is a data question, respond with execute_query action. Otherwise provide
                         result["message"] = f"Result: {query_result}"
                 else:
                     if isinstance(query_result, list) and len(query_result) == 0:
-                        result["message"] = "I couldn't find any events matching your search. You can [browse all events](/discover/) to see what's available!"
+                        result["message"] = "I couldn't find any events matching your search. You can [browse all events](/events/discover/) to see what's available!"
                     else:
                         result["message"] = f"Result: {query_result}"
                 result["action"] = "execute_query"
