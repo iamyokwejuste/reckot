@@ -41,7 +41,26 @@ document.addEventListener('alpine:init', () => {
                 this.recognition.onerror = (event) => {
                     console.error('Speech recognition error:', event.error);
                     this.isListening = false;
+
+                    const errorMessages = {
+                        'network': 'No internet connection. Please check your network and try again.',
+                        'not-allowed': 'Microphone access denied. Please allow microphone access in your browser settings.',
+                        'no-speech': 'No speech detected. Please try again.',
+                        'audio-capture': 'Microphone not found. Please check your microphone is connected.',
+                        'aborted': 'Speech recognition stopped.'
+                    };
+
+                    const message = errorMessages[event.error] || 'Speech recognition failed. Please try again.';
+
+                    this.messages.push({
+                        id: ++this.messageCounter,
+                        role: 'ASSISTANT',
+                        content: '⚠️ ' + message,
+                        timestamp: Date.now()
+                    });
+
                     this.$nextTick(() => {
+                        this.scrollToBottom();
                         if (typeof lucide !== 'undefined') {
                             lucide.createIcons();
                         }
