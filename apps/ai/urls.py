@@ -6,6 +6,7 @@ app_name = "ai"
 urlpatterns = [
     path("assistant/chat/", actions.AIAssistantChatView.as_view(), name="chat"),
     path("assistant/clear/", actions.ClearConversationView.as_view(), name="clear"),
+    path("assistant/transcribe/", actions.AudioTranscribeView.as_view(), name="transcribe"),
     path("generate/", actions.AIGenerateContentView.as_view(), name="generate"),
     path("analyze/", actions.AIAnalyzeIssueView.as_view(), name="analyze"),
     path(

@@ -1,3 +1,4 @@
+import json
 from typing import Dict, List
 from datetime import datetime
 from decimal import Decimal
@@ -94,7 +95,6 @@ Base predictions on African market realities:
     result = gemini_ai.chat(prompt)
 
     try:
-        import json
 
         prediction = json.loads(result)
         prediction["generated_at"] = datetime.now().isoformat()
@@ -179,7 +179,6 @@ Return JSON:
     result = gemini_ai.chat(prompt)
 
     try:
-        import json
 
         return json.loads(result)
     except json.JSONDecodeError:
@@ -233,7 +232,6 @@ Return actionable strategy in JSON:
     result = gemini_ai.chat(prompt)
 
     try:
-        import json
 
         return json.loads(result)
     except json.JSONDecodeError:

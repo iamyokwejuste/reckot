@@ -7,11 +7,11 @@ document.addEventListener('alpine:init', () => {
         isListening: false,
         sessionId: '',
         messageCounter: 0,
-        recognition: null,
+        mediaRecorder: null,
+        audioChunks: [],
 
         init() {
             this.loadFromStorage();
-            this.initSpeechRecognition();
             this.$nextTick(() => {
                 if (typeof lucide !== 'undefined') {
                     lucide.createIcons();
@@ -19,77 +19,52 @@ document.addEventListener('alpine:init', () => {
             });
         },
 
-        initSpeechRecognition() {
-            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                this.recognition = new SpeechRecognition();
-                this.recognition.continuous = false;
-                this.recognition.interimResults = false;
-                this.recognition.lang = 'en-US';
+        async toggleVoiceInput() {
+            if (this.isListening) {
+                // Stop recording
+                if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+                    this.mediaRecorder.stop();
+                }
+            } else {
+                // Start recording
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    this.mediaRecorder = new MediaRecorder(stream);
+                    this.audioChunks = [];
 
-                this.recognition.onresult = (event) => {
-                    const transcript = event.results[0][0].transcript;
-                    this.inputMessage = transcript;
-                    this.isListening = false;
-                    this.$nextTick(() => {
-                        if (typeof lucide !== 'undefined') {
-                            lucide.createIcons();
+                    this.mediaRecorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) {
+                            this.audioChunks.push(event.data);
                         }
-                    });
-                };
-
-                this.recognition.onerror = (event) => {
-                    console.error('Speech recognition error:', event.error);
-                    this.isListening = false;
-
-                    const errorMessages = {
-                        'network': 'No internet connection. Please check your network and try again.',
-                        'not-allowed': 'Microphone access denied. Please allow microphone access in your browser settings.',
-                        'no-speech': 'No speech detected. Please try again.',
-                        'audio-capture': 'Microphone not found. Please check your microphone is connected.',
-                        'aborted': 'Speech recognition stopped.'
                     };
 
-                    const message = errorMessages[event.error] || 'Speech recognition failed. Please try again.';
+                    this.mediaRecorder.onstop = async () => {
+                        stream.getTracks().forEach(track => track.stop());
 
+                        const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+
+                        const reader = new FileReader();
+                        reader.readAsDataURL(audioBlob);
+                        reader.onloadend = async () => {
+                            const base64Audio = reader.result.split(',')[1];
+
+                            await this.transcribeAudio(base64Audio, 'audio/webm');
+                        };
+                    };
+
+                    this.mediaRecorder.start();
+                    this.isListening = true;
+
+                } catch (error) {
+                    console.error('Microphone permission error:', error);
                     this.messages.push({
                         id: ++this.messageCounter,
                         role: 'ASSISTANT',
-                        content: '⚠️ ' + message,
+                        content: '⚠️ Microphone access denied. Please allow microphone access and try again.',
                         timestamp: Date.now()
                     });
-
-                    this.$nextTick(() => {
-                        this.scrollToBottom();
-                        if (typeof lucide !== 'undefined') {
-                            lucide.createIcons();
-                        }
-                    });
-                };
-
-                this.recognition.onend = () => {
-                    this.isListening = false;
-                    this.$nextTick(() => {
-                        if (typeof lucide !== 'undefined') {
-                            lucide.createIcons();
-                        }
-                    });
-                };
-            }
-        },
-
-        toggleVoiceInput() {
-            if (!this.recognition) {
-                alert('Speech recognition is not supported in your browser. Please try Chrome, Edge, or Safari.');
-                return;
-            }
-
-            if (this.isListening) {
-                this.recognition.stop();
-                this.isListening = false;
-            } else {
-                this.recognition.start();
-                this.isListening = true;
+                    this.$nextTick(() => this.scrollToBottom());
+                }
             }
 
             this.$nextTick(() => {
@@ -97,6 +72,67 @@ document.addEventListener('alpine:init', () => {
                     lucide.createIcons();
                 }
             });
+        },
+
+        async transcribeAudio(base64Audio, mimeType) {
+            this.isListening = false;
+            this.isLoading = true;
+
+            this.$nextTick(() => {
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            });
+
+            try {
+                const csrfToken = document.cookie
+                    .split(';')
+                    .find(c => c.trim().startsWith('csrftoken='))
+                    ?.split('=')[1] || '';
+
+                const response = await fetch('/ai/assistant/transcribe/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({
+                        audio: base64Audio,
+                        mimeType: mimeType
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.transcription) {
+                    this.inputMessage = data.transcription;
+                    await this.sendMessage();
+                } else {
+                    this.messages.push({
+                        id: ++this.messageCounter,
+                        role: 'ASSISTANT',
+                        content: '⚠️ Could not transcribe audio. Please try again.',
+                        timestamp: Date.now()
+                    });
+                    this.$nextTick(() => this.scrollToBottom());
+                }
+            } catch (error) {
+                console.error('Transcription error:', error);
+                this.messages.push({
+                    id: ++this.messageCounter,
+                    role: 'ASSISTANT',
+                    content: '⚠️ Transcription failed. Please try again.',
+                    timestamp: Date.now()
+                });
+                this.$nextTick(() => this.scrollToBottom());
+            } finally {
+                this.isLoading = false;
+                this.$nextTick(() => {
+                    if (typeof lucide !== 'undefined') {
+                        lucide.createIcons();
+                    }
+                });
+            }
         },
 
         formatMessage(content) {

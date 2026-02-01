@@ -109,7 +109,6 @@ Return JSON:
 
     try:
         result = gemini_ai.chat_with_image(prompt, image_data)
-        import json
 
         return json.loads(result)
     except Exception:

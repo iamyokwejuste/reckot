@@ -1,5 +1,6 @@
 import json
 import logging
+import base64
 from django.views import View
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -19,6 +20,7 @@ from apps.ai.decorators import (
     validate_query,
 )
 from apps.events.models import Event
+from apps.core.services.ai import gemini_ai
 
 logger = logging.getLogger(__name__)
 
@@ -325,3 +327,29 @@ class ClearConversationView(View):
                 return JsonResponse({"status": "ok", "deleted": deleted_count})
 
         return JsonResponse({"status": "ok", "deleted": 0})
+
+
+@method_decorator([csrf_exempt, ai_feature_required], name="dispatch")
+class AudioTranscribeView(View):
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+            audio_base64 = data.get("audio")
+            mime_type = data.get("mimeType", "audio/webm")
+
+            if not audio_base64:
+                return JsonResponse({"error": "No audio data provided"}, status=400)
+
+            audio_data = base64.b64decode(audio_base64)
+
+            prompt = "Transcribe this audio clearly and accurately. Only output the transcribed text, nothing else."
+            transcription = gemini_ai.chat_with_audio(prompt, audio_data, mime_type)
+
+            if not transcription:
+                return JsonResponse({"error": "Transcription failed"}, status=500)
+
+            return JsonResponse({"transcription": transcription.strip()})
+
+        except Exception as e:
+            logger.error(f"Error transcribing audio: {str(e)}", exc_info=True)
+            return JsonResponse({"error": f"Transcription failed: {str(e)}"}, status=500)

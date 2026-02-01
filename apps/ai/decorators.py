@@ -1,5 +1,6 @@
 import time
 import json
+import re
 from functools import wraps
 from datetime import date
 from typing import Callable, Any
@@ -101,14 +102,30 @@ def log_ai_usage(operation: str) -> Callable[[Callable[..., HttpResponse]], Call
 
 
 def validate_query(view_func: Callable[..., HttpResponse]) -> Callable[..., HttpResponse]:
-    ALLOWED_MODELS = ["Event", "Ticket", "Payment", "Organization", "Booking"]
-    FORBIDDEN_METHODS = [
-        "delete",
-        "update",
-        "create",
-        "save",
-        "bulk_create",
-        "bulk_update",
+    ALLOWED_MODELS = ["Event", "Ticket", "Payment", "Organization", "Booking", "TicketType"]
+    FORBIDDEN_PATTERNS = [
+        r"\.delete\(",
+        r"\.update\(",
+        r"\.create\(",
+        r"\.save\(",
+        r"\.bulk_create\(",
+        r"\.bulk_update\(",
+        r"\.raw\(",
+        r"\.execute\(",
+        r"__import__",
+        r"eval\(",
+        r"exec\(",
+        r"compile\(",
+        r"globals\(",
+        r"locals\(",
+        r"vars\(",
+        r"__",
+    ]
+    ALLOWED_SAFE_METHODS = [
+        "filter", "exclude", "get", "all", "first", "last",
+        "count", "exists", "values", "values_list",
+        "order_by", "distinct", "annotate", "aggregate",
+        "select_related", "prefetch_related", "only", "defer"
     ]
 
     @wraps(view_func)
@@ -120,30 +137,40 @@ def validate_query(view_func: Callable[..., HttpResponse]) -> Callable[..., Http
                 data = json.loads(response.content)
 
                 if data.get("action") == "execute_query":
-                    query = data.get("query", "")
+                    if "query_result" in data:
+                        return response
 
-                    for method in FORBIDDEN_METHODS:
-                        if f".{method}(" in query:
+                    query = data.get("query", "").strip()
+
+                    if not query:
+                        return JsonResponse(
+                            {"error": "Query blocked: empty query", "query_blocked": True},
+                            status=403,
+                        )
+
+                    for pattern in FORBIDDEN_PATTERNS:
+                        if re.search(pattern, query, re.IGNORECASE):
                             return JsonResponse(
                                 {
-                                    "error": "Query blocked: forbidden operations",
+                                    "error": "Query blocked: forbidden operations detected",
                                     "query_blocked": True,
                                 },
                                 status=403,
                             )
 
-                    model_found = False
-                    for model in ALLOWED_MODELS:
-                        if query.startswith(f"{model}.objects"):
-                            model_found = True
-                            break
-
-                    if not model_found:
+                    model_pattern = r"\b(" + "|".join(ALLOWED_MODELS) + r")\.objects\b"
+                    if not re.search(model_pattern, query):
                         return JsonResponse(
                             {
-                                "error": "Query blocked: unauthorized model",
+                                "error": "Query blocked: no authorized model found",
                                 "query_blocked": True,
                             },
+                            status=403,
+                        )
+
+                    if len(query) > 2000:
+                        return JsonResponse(
+                            {"error": "Query blocked: query too long", "query_blocked": True},
                             status=403,
                         )
 

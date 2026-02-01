@@ -60,6 +60,7 @@ class PublicEventListView(View):
                 "city": event.city or "",
                 "location_short": (event.location or event.city or "Online")[:20],
                 "start_at": event.start_at.isoformat(),
+                "end_at": event.end_at.isoformat() if event.end_at else event.start_at.isoformat(),
                 "date_formatted": event.start_at.strftime("%b %d, %Y"),
                 "category_name": event.category.name if event.category else "",
                 "category_slug": event.category.slug if event.category else "",
@@ -1272,8 +1273,6 @@ class CheckoutQuestionsView(LoginRequiredMixin, View):
             question_id = request.POST.get("question_id")
             CheckoutQuestion.objects.filter(id=question_id, event=event).delete()
         elif action == "reorder":
-            import json
-
             order_data = json.loads(request.POST.get("order", "[]"))
             for i, qid in enumerate(order_data):
                 CheckoutQuestion.objects.filter(id=qid, event=event).update(order=i)

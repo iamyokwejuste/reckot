@@ -1,3 +1,4 @@
+import json
 from typing import Dict, Optional
 from datetime import datetime
 from apps.core.services.ai import gemini_ai
@@ -55,7 +56,6 @@ Context for pricing (Cameroon/Africa):
 
     try:
         result = gemini_ai.chat_with_audio(prompt, audio_data)
-        import json
 
         event_data = json.loads(result)
 
@@ -114,7 +114,6 @@ Return JSON:
     result = gemini_ai.chat(prompt)
 
     try:
-        import json
 
         enhancements = json.loads(result)
 
@@ -149,7 +148,6 @@ Return the complete updated event JSON with changes marked."""
     result = gemini_ai.chat_with_audio(prompt, user_voice_feedback)
 
     try:
-        import json
 
         updated_event = json.loads(result)
         updated_event["revision_count"] = event_data.get("revision_count", 0) + 1
