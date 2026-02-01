@@ -108,6 +108,14 @@
                        @keydown.enter="sendMessage()"
                        @keydown.escape="close()">
                 <button type="button"
+                        @click="toggleVoiceInput()"
+                        class="btn btn-default shrink-0 rounded-lg min-w-[36px] h-[36px] flex items-center justify-center p-0"
+                        :class="{'bg-red-500 text-white': isListening}"
+                        :disabled="isLoading"
+                        title="{% trans 'Voice input' %}">
+                    <i :data-lucide="isListening ? 'mic-off' : 'mic'" class="h-4 w-4"></i>
+                </button>
+                <button type="button"
                         @click="sendMessage()"
                         class="btn btn-default shrink-0 rounded-lg min-w-[36px] h-[36px] flex items-center justify-center p-0"
                         :disabled="isLoading || !inputMessage.trim()">

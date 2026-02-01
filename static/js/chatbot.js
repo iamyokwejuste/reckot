@@ -4,11 +4,75 @@ document.addEventListener('alpine:init', () => {
         messages: [],
         inputMessage: '',
         isLoading: false,
+        isListening: false,
         sessionId: '',
         messageCounter: 0,
+        recognition: null,
 
         init() {
             this.loadFromStorage();
+            this.initSpeechRecognition();
+            this.$nextTick(() => {
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            });
+        },
+
+        initSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                this.recognition = new SpeechRecognition();
+                this.recognition.continuous = false;
+                this.recognition.interimResults = false;
+                this.recognition.lang = 'en-US';
+
+                this.recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    this.inputMessage = transcript;
+                    this.isListening = false;
+                    this.$nextTick(() => {
+                        if (typeof lucide !== 'undefined') {
+                            lucide.createIcons();
+                        }
+                    });
+                };
+
+                this.recognition.onerror = (event) => {
+                    console.error('Speech recognition error:', event.error);
+                    this.isListening = false;
+                    this.$nextTick(() => {
+                        if (typeof lucide !== 'undefined') {
+                            lucide.createIcons();
+                        }
+                    });
+                };
+
+                this.recognition.onend = () => {
+                    this.isListening = false;
+                    this.$nextTick(() => {
+                        if (typeof lucide !== 'undefined') {
+                            lucide.createIcons();
+                        }
+                    });
+                };
+            }
+        },
+
+        toggleVoiceInput() {
+            if (!this.recognition) {
+                alert('Speech recognition is not supported in your browser. Please try Chrome, Edge, or Safari.');
+                return;
+            }
+
+            if (this.isListening) {
+                this.recognition.stop();
+                this.isListening = false;
+            } else {
+                this.recognition.start();
+                this.isListening = true;
+            }
+
             this.$nextTick(() => {
                 if (typeof lucide !== 'undefined') {
                     lucide.createIcons();
