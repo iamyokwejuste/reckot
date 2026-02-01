@@ -20,7 +20,7 @@
 {% endblock %}
 
 {% block header_actions %}
-<a href="{% url 'events:coupon_create' %}">
+<a href="{% url 'events:coupon_create' %}" hx-boost="false">
     {% #button variant="default" size="sm" %}
         <i data-lucide="plus" class="w-4 h-4"></i>
         {% trans "Create Coupon" %}
@@ -124,7 +124,7 @@
             </div>
             <h3 class="text-lg font-semibold mb-2">{% trans "No coupons yet" %}</h3>
             <p class="text-muted-foreground mb-6">{% trans "Create discount codes to offer special pricing for your events." %}</p>
-            <a href="{% url 'events:coupon_create' %}">
+            <a href="{% url 'events:coupon_create' %}" hx-boost="false">
                 {% #button variant="default" %}
                     <i data-lucide="plus" class="w-4 h-4"></i>
                     {% trans "Create Coupon" %}

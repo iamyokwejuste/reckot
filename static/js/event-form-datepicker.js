@@ -1,7 +1,8 @@
-let startPicker = null;
-let endPicker = null;
+if (typeof window.initDatePickers === 'undefined') {
+    let startPicker = null;
+    let endPicker = null;
 
-window.initDatePickers = function() {
+    window.initDatePickers = function() {
     const startEl = document.getElementById('id_start_at');
     const endEl = document.getElementById('id_end_at');
 
@@ -105,4 +106,5 @@ window.initDatePickers = function() {
         endEl._eventFormPickerInitialized = false;
         return false;
     }
-};
+    };
+}

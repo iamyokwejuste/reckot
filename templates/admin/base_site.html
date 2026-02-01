@@ -10,6 +10,66 @@
 <script src="{% static 'js/chatbot.js' %}"></script>
 <script defer src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js"></script>
 <script defer src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js" onload="lucide.createIcons()"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const logoLightUrl = '{% static "images/logo/logo_light_mode.png" %}';
+    const logoDarkUrl = '{% static "images/logo/logo_dark_mode.png" %}';
+
+    const isDark = document.documentElement.classList.contains('dark') ||
+                   window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const logoUrl = isDark ? logoDarkUrl : logoLightUrl;
+
+    const loader = document.createElement('div');
+    loader.id = 'page-loader';
+    loader.className = 'fixed inset-0 z-[9999] flex items-center justify-center bg-background transition-opacity duration-300';
+    loader.setAttribute('hx-preserve', 'true');
+    loader.innerHTML = `
+        <div class="flex flex-col items-center gap-6">
+            <div class="relative flex items-center justify-center">
+                <div class="absolute inset-0 h-24 w-24 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+                <div class="h-16 w-16 flex items-center justify-center z-10">
+                    <img src="${logoUrl}" alt="Reckot" class="h-12 w-auto" loading="eager">
+                </div>
+            </div>
+            <p class="text-sm text-muted-foreground animate-pulse">Loading...</p>
+        </div>
+    `;
+    document.body.insertBefore(loader, document.body.firstChild);
+
+    function hideLoader() {
+        loader.style.opacity = '0';
+        setTimeout(() => loader.style.display = 'none', 300);
+    }
+
+    if (document.readyState === 'complete') {
+        hideLoader();
+    } else {
+        const images = document.images;
+        const totalImages = images.length;
+        let loadedImages = 0;
+
+        if (totalImages === 0) {
+            window.addEventListener('load', hideLoader);
+        } else {
+            function imageLoaded() {
+                loadedImages++;
+                if (loadedImages === totalImages) hideLoader();
+            }
+
+            Array.from(images).forEach(img => {
+                if (img.complete) {
+                    imageLoaded();
+                } else {
+                    img.addEventListener('load', imageLoaded);
+                    img.addEventListener('error', imageLoaded);
+                }
+            });
+
+            window.addEventListener('load', () => setTimeout(hideLoader, 500));
+        }
+    }
+});
+</script>
 {% endblock %}
 
 {% block branding %}

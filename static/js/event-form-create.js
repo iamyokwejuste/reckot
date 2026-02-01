@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const form = document.querySelector('form');
     if (form && window.FormPersistence) {
         const formId = 'event_create';
@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const persistence = FormPersistence.autoSave(formId, form);
 
-        form.addEventListener('submit', function() {
+        form.addEventListener('submit', function () {
             FormPersistence.clear(formId);
             persistence.stop();
         });

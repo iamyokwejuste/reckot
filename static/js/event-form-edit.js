@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const aiEnabled = document.body.dataset.aiEnabled === 'true';
 
     if (window.AIComponents && aiEnabled) {

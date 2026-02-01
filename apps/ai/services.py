@@ -335,6 +335,78 @@ For support tickets:
 Be concise and accurate."""
 
 
+def _format_query_result(result):
+    """Format query results for user-friendly display."""
+    from decimal import Decimal
+
+    # Handle None/empty results
+    if result is None:
+        return "No data found."
+
+    # Handle simple types
+    if isinstance(result, (int, float)):
+        return f"**{result:,}**"
+
+    if isinstance(result, str):
+        return result
+
+    if isinstance(result, Decimal):
+        return f"**{float(result):,.2f} XAF**"
+
+    # Handle dictionaries
+    if isinstance(result, dict):
+        # Check if it's an aggregation result
+        if len(result) == 1:
+            key, value = next(iter(result.items()))
+            if isinstance(value, Decimal):
+                return f"**{float(value):,.2f} XAF**"
+            elif isinstance(value, (int, float)):
+                return f"**{value:,}**"
+
+        # Format as key-value pairs
+        lines = []
+        for key, value in result.items():
+            if key.startswith('_'):
+                continue
+            formatted_key = key.replace('_', ' ').title()
+            if isinstance(value, Decimal):
+                formatted_value = f"{float(value):,.2f} XAF"
+            elif isinstance(value, (int, float)):
+                formatted_value = f"{value:,}"
+            else:
+                formatted_value = str(value)
+            lines.append(f"**{formatted_key}:** {formatted_value}")
+        return "\n".join(lines) if lines else str(result)
+
+    # Handle lists
+    if isinstance(result, list):
+        if not result:
+            return "No results found."
+
+        # Check if it's a list of dictionaries (common for .values() queries)
+        if all(isinstance(item, dict) for item in result):
+            formatted_items = []
+            for item in result:
+                parts = []
+                for key, value in item.items():
+                    if key.startswith('_'):
+                        continue
+                    if isinstance(value, Decimal):
+                        parts.append(f"**{key.replace('_', ' ').title()}:** {float(value):,.2f} XAF")
+                    elif isinstance(value, (int, float)):
+                        parts.append(f"**{key.replace('_', ' ').title()}:** {value:,}")
+                    else:
+                        parts.append(f"**{key.replace('_', ' ').title()}:** {value}")
+                formatted_items.append(" | ".join(parts))
+            return "\n".join(formatted_items)
+
+        # Simple list of values
+        return "\n".join([f"• {_format_query_result(item)}" for item in result[:10]])
+
+    # Fallback for other types
+    return str(result)
+
+
 def chat_with_assistant(
     user_message: str, conversation_history: list, context: Optional[dict] = None
 ) -> dict:
@@ -410,12 +482,12 @@ If this is a data question, respond with execute_query action. Otherwise provide
 
                         result["message"] = f"I found {len(formatted_events)} event{'s' if len(formatted_events) != 1 else ''}:\n\n" + "\n".join(formatted_events)
                     else:
-                        result["message"] = f"Result: {query_result}"
+                        result["message"] = _format_query_result(query_result)
                 else:
                     if isinstance(query_result, list) and len(query_result) == 0:
                         result["message"] = "I couldn't find any events matching your search. You can [browse all events](/events/discover/) to see what's available!"
                     else:
-                        result["message"] = f"Result: {query_result}"
+                        result["message"] = _format_query_result(query_result)
                 result["action"] = "execute_query"
                 result["query_result"] = query_result
 

@@ -133,6 +133,7 @@
     {% block extra_head %}{% endblock %}
 </head>
 <body class="min-h-screen bg-background text-foreground antialiased" hx-boost="true" data-ai-enabled="{% if user.is_authenticated and user.ai_features_enabled %}true{% else %}false{% endif %}">
+    {% include "partials/page_loader.html" %}
     {% include "partials/messages.html" %}
     <div x-data="{ sidebarOpen: false, collapsed: localStorage.getItem('sidebarCollapsed') === 'true' }"
          x-init="$watch('collapsed', val => localStorage.setItem('sidebarCollapsed', val))"

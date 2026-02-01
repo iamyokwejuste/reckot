@@ -181,7 +181,7 @@ document.addEventListener('alpine:init', () => {
                     sessionId: this.sessionId,
                     messageCounter: this.messageCounter
                 }));
-            } catch (e) {}
+            } catch (e) { }
         },
 
         toggle() {

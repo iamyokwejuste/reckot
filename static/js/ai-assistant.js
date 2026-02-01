@@ -1,358 +1,359 @@
-const ReckotAI = {
-    baseUrl: '/app/api/ai',
+if (typeof ReckotAI === 'undefined') {
+    window.ReckotAI = {
+        baseUrl: '/app/api/ai',
 
-    async _fetch(endpoint, data) {
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
-                          document.cookie.split(';').find(c => c.trim().startsWith('csrftoken='))?.split('=')[1];
+        async _fetch(endpoint, data) {
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
+                document.cookie.split(';').find(c => c.trim().startsWith('csrftoken='))?.split('=')[1];
 
-        try {
-            const response = await fetch(`${this.baseUrl}/${endpoint}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify(data)
-            });
+            try {
+                const response = await fetch(`${this.baseUrl}/${endpoint}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify(data)
+                });
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'AI request failed');
-            }
-
-            return await response.json();
-        } catch (error) {
-            throw error;
-        }
-    },
-
-    async generateDescription(context) {
-        return this._fetch('generate-description', context);
-    },
-
-    async improveDescription(description) {
-        return this._fetch('improve-description', { description });
-    },
-
-    async generateSEO(title, description) {
-        return this._fetch('generate-seo', { title, description });
-    },
-
-    async generateCaption(title, description, platform = 'general') {
-        return this._fetch('generate-caption', { title, description, platform });
-    },
-
-    async translate(text, language = 'French') {
-        return this._fetch('translate', { text, language });
-    },
-
-    async summarize(text, maxWords = 30) {
-        return this._fetch('summarize', { text, max_words: maxWords });
-    },
-
-    async suggestPricing(eventType, location, description) {
-        return this._fetch('suggest-pricing', {
-            event_type: eventType,
-            location,
-            description
-        });
-    },
-
-    async suggestTags(title, description) {
-        return this._fetch('suggest-tags', { title, description });
-    },
-
-    async askAssistant(eventInfo, question) {
-        return this._fetch('assistant', { event_info: eventInfo, question });
-    },
-
-    async generateInsight(metrics) {
-        return this._fetch('insight', { metrics });
-    },
-
-    async voiceToEvent(audioData) {
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
-                          document.cookie.split(';').find(c => c.trim().startsWith('csrftoken='))?.split('=')[1];
-
-        const reader = new FileReader();
-        return new Promise((resolve, reject) => {
-            reader.onload = async () => {
-                try {
-                    const base64Audio = reader.result;
-
-                    const response = await fetch('/ai/voice-to-event/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': csrfToken
-                        },
-                        body: JSON.stringify({
-                            audio: base64Audio
-                        })
-                    });
-
-                    if (!response.ok) {
-                        const error = await response.json();
-                        throw new Error(error.error || 'Voice conversion failed');
-                    }
-
-                    const result = await response.json();
-                    resolve(result);
-                } catch (error) {
-                    reject(error);
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'AI request failed');
                 }
-            };
 
-            reader.onerror = () => reject(new Error('Failed to read audio file'));
-            reader.readAsDataURL(audioData);
-        });
-    },
-
-    async generateCoverImage(eventData) {
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
-                          document.cookie.split(';').find(c => c.trim().startsWith('csrftoken='))?.split('=')[1];
-
-        try {
-            const response = await fetch('/ai/generate-cover-image/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify(eventData)
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'Image generation failed');
+                return await response.json();
+            } catch (error) {
+                throw error;
             }
+        },
 
-            return await response.json();
-        } catch (error) {
-            throw error;
+        async generateDescription(context) {
+            return this._fetch('generate-description', context);
+        },
+
+        async improveDescription(description) {
+            return this._fetch('improve-description', { description });
+        },
+
+        async generateSEO(title, description) {
+            return this._fetch('generate-seo', { title, description });
+        },
+
+        async generateCaption(title, description, platform = 'general') {
+            return this._fetch('generate-caption', { title, description, platform });
+        },
+
+        async translate(text, language = 'French') {
+            return this._fetch('translate', { text, language });
+        },
+
+        async summarize(text, maxWords = 30) {
+            return this._fetch('summarize', { text, max_words: maxWords });
+        },
+
+        async suggestPricing(eventType, location, description) {
+            return this._fetch('suggest-pricing', {
+                event_type: eventType,
+                location,
+                description
+            });
+        },
+
+        async suggestTags(title, description) {
+            return this._fetch('suggest-tags', { title, description });
+        },
+
+        async askAssistant(eventInfo, question) {
+            return this._fetch('assistant', { event_info: eventInfo, question });
+        },
+
+        async generateInsight(metrics) {
+            return this._fetch('insight', { metrics });
+        },
+
+        async voiceToEvent(audioData) {
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
+                document.cookie.split(';').find(c => c.trim().startsWith('csrftoken='))?.split('=')[1];
+
+            const reader = new FileReader();
+            return new Promise((resolve, reject) => {
+                reader.onload = async () => {
+                    try {
+                        const base64Audio = reader.result;
+
+                        const response = await fetch('/ai/voice-to-event/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrfToken
+                            },
+                            body: JSON.stringify({
+                                audio: base64Audio
+                            })
+                        });
+
+                        if (!response.ok) {
+                            const error = await response.json();
+                            throw new Error(error.error || 'Voice conversion failed');
+                        }
+
+                        const result = await response.json();
+                        resolve(result);
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+
+                reader.onerror = () => reject(new Error('Failed to read audio file'));
+                reader.readAsDataURL(audioData);
+            });
+        },
+
+        async generateCoverImage(eventData) {
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
+                document.cookie.split(';').find(c => c.trim().startsWith('csrftoken='))?.split('=')[1];
+
+            try {
+                const response = await fetch('/ai/generate-cover-image/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify(eventData)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Image generation failed');
+                }
+
+                return await response.json();
+            } catch (error) {
+                throw error;
+            }
         }
-    }
-};
+    };
 
 
-const AIComponents = {
-    createButton(options = {}) {
-        const {
-            text = 'AI Generate',
-            icon = 'sparkles',
-            size = 'sm',
-            variant = 'default',
-            className = ''
-        } = options;
+    if (typeof AIComponents === 'undefined') {
+        window.AIComponents = {
+            createButton(options = {}) {
+                const {
+                    text = 'AI Generate',
+                    icon = 'sparkles',
+                    size = 'sm',
+                    variant = 'default',
+                    className = ''
+                } = options;
 
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = `btn btn-${variant} btn-${size} ai-btn ${className}`.trim();
-        btn.innerHTML = `
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `btn btn-${variant} btn-${size} ai-btn ${className}`.trim();
+                btn.innerHTML = `
             <i data-lucide="${icon}" class="w-4 h-4"></i>
             <span>${text}</span>
         `;
 
-        if (typeof lucide !== 'undefined') {
-            setTimeout(() => lucide.createIcons({ nodes: [btn] }), 0);
-        }
+                if (typeof lucide !== 'undefined') {
+                    setTimeout(() => lucide.createIcons({ nodes: [btn] }), 0);
+                }
 
-        return btn;
-    },
+                return btn;
+            },
 
-    setLoading(btn, loading) {
-        if (loading) {
-            btn.disabled = true;
-            btn.style.opacity = '0.6';
-        } else {
-            btn.disabled = false;
-            btn.style.opacity = '1';
-        }
-    },
+            setLoading(btn, loading) {
+                if (loading) {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.6';
+                } else {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                }
+            },
 
-    createDescriptionGenerator(targetSelector, options = {}) {
-        const target = document.querySelector(targetSelector);
-        if (!target) return;
+            createDescriptionGenerator(targetSelector, options = {}) {
+                const target = document.querySelector(targetSelector);
+                if (!target) return;
 
-        const wrapper = document.createElement('div');
-        wrapper.className = 'ai-tools-wrapper mt-4 p-3 rounded-lg bg-muted/50 border border-border';
+                const wrapper = document.createElement('div');
+                wrapper.className = 'ai-tools-wrapper mt-4 p-3 rounded-lg bg-muted/50 border border-border';
 
-        const header = document.createElement('div');
-        header.className = 'flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3';
+                const header = document.createElement('div');
+                header.className = 'flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3';
 
-        const labelGroup = document.createElement('div');
-        labelGroup.className = 'flex flex-col';
+                const labelGroup = document.createElement('div');
+                labelGroup.className = 'flex flex-col';
 
-        const label = document.createElement('span');
-        label.className = 'text-xs font-semibold text-foreground uppercase tracking-wide';
-        label.textContent = 'AI Tools';
+                const label = document.createElement('span');
+                label.className = 'text-xs font-semibold text-foreground uppercase tracking-wide';
+                label.textContent = 'AI Tools';
 
-        const tagline = document.createElement('span');
-        tagline.className = 'text-xs text-muted-foreground';
-        tagline.textContent = 'Boost your reach with AI-powered content';
+                const tagline = document.createElement('span');
+                tagline.className = 'text-xs text-muted-foreground';
+                tagline.textContent = 'Boost your reach with AI-powered content';
 
-        labelGroup.appendChild(label);
-        labelGroup.appendChild(tagline);
-        header.appendChild(labelGroup);
+                labelGroup.appendChild(label);
+                labelGroup.appendChild(tagline);
+                header.appendChild(labelGroup);
 
-        const container = document.createElement('div');
-        container.className = 'flex flex-wrap items-center gap-2';
+                const container = document.createElement('div');
+                container.className = 'flex flex-wrap items-center gap-2';
 
-        const generateBtn = this.createButton({
-            text: 'Generate',
-            icon: 'sparkles',
-            ...options
-        });
+                const generateBtn = this.createButton({
+                    text: 'Generate',
+                    icon: 'sparkles',
+                    ...options
+                });
 
-        const improveBtn = this.createButton({
-            text: 'Improve',
-            icon: 'wand-2',
-            ...options
-        });
+                const improveBtn = this.createButton({
+                    text: 'Improve',
+                    icon: 'wand-2',
+                    ...options
+                });
 
-        container.appendChild(generateBtn);
-        container.appendChild(improveBtn);
-        wrapper.appendChild(header);
-        wrapper.appendChild(container);
+                container.appendChild(generateBtn);
+                container.appendChild(improveBtn);
+                wrapper.appendChild(header);
+                wrapper.appendChild(container);
 
-        const richtextWrapper = target.closest('.richtext-wrapper') || target.parentNode;
-        richtextWrapper.parentNode.insertBefore(wrapper, richtextWrapper.nextSibling);
+                const richtextWrapper = target.closest('.richtext-wrapper') || target.parentNode;
+                richtextWrapper.parentNode.insertBefore(wrapper, richtextWrapper.nextSibling);
 
-        generateBtn.addEventListener('click', async () => {
-            const title = document.querySelector(options.titleSelector || '[name="title"]')?.value;
-            if (!title) {
-                this.showToast('error', 'Please enter an event title first');
-                return;
-            }
-
-            this.setLoading(generateBtn, true);
-            this.showPageOverlay('Generating tagline & description...');
-            try {
-                const context = await this.collectEventContext(options);
-                const result = await ReckotAI.generateDescription(context);
-
-                let generated = [];
-
-                if (result.tagline) {
-                    const taglineField = document.querySelector('#id_short_description, [name="short_description"]');
-                    if (taglineField) {
-                        taglineField.value = result.tagline;
-                        taglineField.dispatchEvent(new Event('input', { bubbles: true }));
-                        generated.push('tagline');
+                generateBtn.addEventListener('click', async () => {
+                    const title = document.querySelector(options.titleSelector || '[name="title"]')?.value;
+                    if (!title) {
+                        this.showToast('error', 'Please enter an event title first');
+                        return;
                     }
-                }
 
-                if (result.description) {
-                    const desc = typeof result.description === 'object'
-                        ? result.description.description || JSON.stringify(result.description)
-                        : result.description;
-                    this.setEditorContent(target, desc);
-                    generated.push('description');
-                }
+                    this.setLoading(generateBtn, true);
+                    this.showPageOverlay('Generating tagline & description...');
+                    try {
+                        const context = await this.collectEventContext(options);
+                        const result = await ReckotAI.generateDescription(context);
 
-                if (generated.length > 0) {
-                    this.showToast('success', `Generated ${generated.join(' & ')}!`);
-                }
-            } catch (error) {
-                this.showToast('error', error.message || 'Failed to generate');
-            } finally {
-                this.setLoading(generateBtn, false);
-                this.hidePageOverlay();
-            }
-        });
+                        let generated = [];
 
-        improveBtn.addEventListener('click', async () => {
-            const content = this.getEditorContent(target);
-            if (!content || content.length < 20) {
-                this.showToast('error', 'Please write some content first');
-                return;
-            }
+                        if (result.tagline) {
+                            const taglineField = document.querySelector('#id_short_description, [name="short_description"]');
+                            if (taglineField) {
+                                taglineField.value = result.tagline;
+                                taglineField.dispatchEvent(new Event('input', { bubbles: true }));
+                                generated.push('tagline');
+                            }
+                        }
 
-            this.setLoading(improveBtn, true);
-            this.showPageOverlay('Improving description...');
-            try {
-                const result = await ReckotAI.improveDescription(content);
-                if (result.description) {
-                    this.setEditorContent(target, result.description);
-                    this.showToast('success', 'Description improved!');
-                }
-            } catch (error) {
-                this.showToast('error', error.message || 'Failed to improve');
-            } finally {
-                this.setLoading(improveBtn, false);
-                this.hidePageOverlay();
-            }
-        });
+                        if (result.description) {
+                            const desc = typeof result.description === 'object'
+                                ? result.description.description || JSON.stringify(result.description)
+                                : result.description;
+                            this.setEditorContent(target, desc);
+                            generated.push('description');
+                        }
 
-        return wrapper;
-    },
+                        if (generated.length > 0) {
+                            this.showToast('success', `Generated ${generated.join(' & ')}!`);
+                        }
+                    } catch (error) {
+                        this.showToast('error', error.message || 'Failed to generate');
+                    } finally {
+                        this.setLoading(generateBtn, false);
+                        this.hidePageOverlay();
+                    }
+                });
 
-    collectEventContext(options = {}) {
-        const context = {
-            title: document.querySelector(options.titleSelector || '[name="title"]')?.value || '',
-            short_description: document.querySelector('[name="short_description"]')?.value || '',
-            event_type: document.querySelector('[name="event_type"]')?.value || 'general',
-            location: document.querySelector('[name="location"]')?.value || ''
-        };
+                improveBtn.addEventListener('click', async () => {
+                    const content = this.getEditorContent(target);
+                    if (!content || content.length < 20) {
+                        this.showToast('error', 'Please write some content first');
+                        return;
+                    }
 
-        const coverInput = document.querySelector('[name="cover_image"]');
-        if (coverInput?.files?.[0]) {
-            return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    context.cover_image = e.target.result;
-                    context.cover_image_mime = coverInput.files[0].type || 'image/jpeg';
-                    resolve(context);
+                    this.setLoading(improveBtn, true);
+                    this.showPageOverlay('Improving description...');
+                    try {
+                        const result = await ReckotAI.improveDescription(content);
+                        if (result.description) {
+                            this.setEditorContent(target, result.description);
+                            this.showToast('success', 'Description improved!');
+                        }
+                    } catch (error) {
+                        this.showToast('error', error.message || 'Failed to improve');
+                    } finally {
+                        this.setLoading(improveBtn, false);
+                        this.hidePageOverlay();
+                    }
+                });
+
+                return wrapper;
+            },
+
+            collectEventContext(options = {}) {
+                const context = {
+                    title: document.querySelector(options.titleSelector || '[name="title"]')?.value || '',
+                    short_description: document.querySelector('[name="short_description"]')?.value || '',
+                    event_type: document.querySelector('[name="event_type"]')?.value || 'general',
+                    location: document.querySelector('[name="location"]')?.value || ''
                 };
-                reader.readAsDataURL(coverInput.files[0]);
-            });
-        }
 
-        const coverPreview = document.querySelector('[x-ref="coverInput"]');
-        if (coverPreview?.files?.[0]) {
-            return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    context.cover_image = e.target.result;
-                    context.cover_image_mime = coverPreview.files[0].type || 'image/jpeg';
-                    resolve(context);
-                };
-                reader.readAsDataURL(coverPreview.files[0]);
-            });
-        }
+                const coverInput = document.querySelector('[name="cover_image"]');
+                if (coverInput?.files?.[0]) {
+                    return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            context.cover_image = e.target.result;
+                            context.cover_image_mime = coverInput.files[0].type || 'image/jpeg';
+                            resolve(context);
+                        };
+                        reader.readAsDataURL(coverInput.files[0]);
+                    });
+                }
 
-        return Promise.resolve(context);
-    },
+                const coverPreview = document.querySelector('[x-ref="coverInput"]');
+                if (coverPreview?.files?.[0]) {
+                    return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            context.cover_image = e.target.result;
+                            context.cover_image_mime = coverPreview.files[0].type || 'image/jpeg';
+                            resolve(context);
+                        };
+                        reader.readAsDataURL(coverPreview.files[0]);
+                    });
+                }
 
-    showToast(type, message) {
-        if (window.showToast) {
-            window.showToast(type, message);
-            return;
-        }
+                return Promise.resolve(context);
+            },
 
-        const existingToast = document.querySelector('.ai-toast');
-        if (existingToast) existingToast.remove();
+            showToast(type, message) {
+                if (window.showToast) {
+                    window.showToast(type, message);
+                    return;
+                }
 
-        const toast = document.createElement('div');
-        toast.className = `ai-toast fixed bottom-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-sm font-medium animate-in ${
-            type === 'error'
-                ? 'bg-red-500/10 border border-red-500/20 text-red-500'
-                : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-500'
-        }`;
-        toast.textContent = message;
-        document.body.appendChild(toast);
+                const existingToast = document.querySelector('.ai-toast');
+                if (existingToast) existingToast.remove();
 
-        setTimeout(() => toast.remove(), 3000);
-    },
+                const toast = document.createElement('div');
+                toast.className = `ai-toast fixed bottom-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-sm font-medium animate-in ${type === 'error'
+                        ? 'bg-red-500/10 border border-red-500/20 text-red-500'
+                        : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-500'
+                    }`;
+                toast.textContent = message;
+                document.body.appendChild(toast);
 
-    showPageOverlay(message = 'Generating with AI...') {
-        const existing = document.getElementById('ai-page-overlay');
-        if (existing) return;
+                setTimeout(() => toast.remove(), 3000);
+            },
 
-        const overlay = document.createElement('div');
-        overlay.id = 'ai-page-overlay';
-        overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center bg-background/80 backdrop-blur-sm';
-        overlay.innerHTML = `
+            showPageOverlay(message = 'Generating with AI...') {
+                const existing = document.getElementById('ai-page-overlay');
+                if (existing) return;
+
+                const overlay = document.createElement('div');
+                overlay.id = 'ai-page-overlay';
+                overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center bg-background/80 backdrop-blur-sm';
+                overlay.innerHTML = `
             <div class="flex flex-col items-center gap-4 p-8 rounded-xl bg-card border border-border shadow-2xl">
                 <div class="relative">
                     <div class="w-12 h-12 rounded-full border-4 border-primary/30 border-t-primary animate-spin"></div>
@@ -362,81 +363,81 @@ const AIComponents = {
                 <p class="text-xs text-muted-foreground">Please wait...</p>
             </div>
         `;
-        document.body.appendChild(overlay);
-        document.body.style.overflow = 'hidden';
+                document.body.appendChild(overlay);
+                document.body.style.overflow = 'hidden';
 
-        if (typeof lucide !== 'undefined') {
-            lucide.createIcons({ nodes: [overlay] });
-        }
-    },
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons({ nodes: [overlay] });
+                }
+            },
 
-    hidePageOverlay() {
-        const overlay = document.getElementById('ai-page-overlay');
-        if (overlay) {
-            overlay.remove();
-            document.body.style.overflow = '';
-        }
-    },
+            hidePageOverlay() {
+                const overlay = document.getElementById('ai-page-overlay');
+                if (overlay) {
+                    overlay.remove();
+                    document.body.style.overflow = '';
+                }
+            },
 
-    createTranslateButton(targetSelector, options = {}) {
-        const target = document.querySelector(targetSelector);
-        if (!target) return;
+            createTranslateButton(targetSelector, options = {}) {
+                const target = document.querySelector(targetSelector);
+                if (!target) return;
 
-        const richtextWrapper = target.closest('.richtext-wrapper') || target.parentNode;
-        const existingWrapper = richtextWrapper.parentNode.querySelector('.ai-tools-wrapper');
-        const container = existingWrapper?.querySelector('.flex.flex-wrap') || null;
+                const richtextWrapper = target.closest('.richtext-wrapper') || target.parentNode;
+                const existingWrapper = richtextWrapper.parentNode.querySelector('.ai-tools-wrapper');
+                const container = existingWrapper?.querySelector('.flex.flex-wrap') || null;
 
-        if (container) {
-            const separator = document.createElement('div');
-            separator.className = 'hidden sm:block w-px h-6 bg-border mx-1';
-            container.appendChild(separator);
-        }
-
-        const languages = options.languages || ['French', 'English'];
-
-        languages.forEach(lang => {
-            const btn = this.createButton({
-                text: lang,
-                icon: 'languages',
-                size: 'sm',
-                variant: 'ghost'
-            });
-
-            btn.addEventListener('click', async () => {
-                const content = this.getEditorContent(target);
-                if (!content) {
-                    this.showToast('error', 'No content to translate');
-                    return;
+                if (container) {
+                    const separator = document.createElement('div');
+                    separator.className = 'hidden sm:block w-px h-6 bg-border mx-1';
+                    container.appendChild(separator);
                 }
 
-                this.setLoading(btn, true);
-                this.showPageOverlay(`Translating to ${lang}...`);
-                try {
-                    const result = await ReckotAI.translate(content, lang);
-                    if (result.translation) {
-                        this.setEditorContent(target, result.translation);
-                        this.showToast('success', `Translated to ${lang}!`);
+                const languages = options.languages || ['French', 'English'];
+
+                languages.forEach(lang => {
+                    const btn = this.createButton({
+                        text: lang,
+                        icon: 'languages',
+                        size: 'sm',
+                        variant: 'ghost'
+                    });
+
+                    btn.addEventListener('click', async () => {
+                        const content = this.getEditorContent(target);
+                        if (!content) {
+                            this.showToast('error', 'No content to translate');
+                            return;
+                        }
+
+                        this.setLoading(btn, true);
+                        this.showPageOverlay(`Translating to ${lang}...`);
+                        try {
+                            const result = await ReckotAI.translate(content, lang);
+                            if (result.translation) {
+                                this.setEditorContent(target, result.translation);
+                                this.showToast('success', `Translated to ${lang}!`);
+                            }
+                        } catch (error) {
+                            this.showToast('error', error.message || 'Failed to translate');
+                        } finally {
+                            this.setLoading(btn, false);
+                            this.hidePageOverlay();
+                        }
+                    });
+
+                    if (container) {
+                        container.appendChild(btn);
                     }
-                } catch (error) {
-                    this.showToast('error', error.message || 'Failed to translate');
-                } finally {
-                    this.setLoading(btn, false);
-                    this.hidePageOverlay();
-                }
-            });
+                });
 
-            if (container) {
-                container.appendChild(btn);
-            }
-        });
+                return existingWrapper;
+            },
 
-        return existingWrapper;
-    },
-
-    createSocialCaptionGenerator(options = {}) {
-        const container = document.createElement('div');
-        container.className = 'ai-social-generator card p-4';
-        container.innerHTML = `
+            createSocialCaptionGenerator(options = {}) {
+                const container = document.createElement('div');
+                container.className = 'ai-social-generator card p-4';
+                container.innerHTML = `
             <h4 class="font-medium mb-3 flex items-center gap-2">
                 <i data-lucide="share-2" class="w-4 h-4"></i>
                 Generate Social Captions
@@ -463,69 +464,69 @@ const AIComponents = {
             </div>
         `;
 
-        if (typeof lucide !== 'undefined') {
-            setTimeout(() => lucide.createIcons({ nodes: [container] }), 0);
-        }
-
-        const output = container.querySelector('.ai-caption-output');
-        const textarea = container.querySelector('textarea');
-        const copyBtn = container.querySelector('.copy-btn');
-
-        container.querySelectorAll('[data-platform]').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const platform = btn.dataset.platform;
-                const title = document.querySelector(options.titleSelector || '[name="title"]')?.value;
-                const description = options.getDescription?.() || document.querySelector('[name="description"]')?.value;
-
-                if (!title) {
-                    AIComponents.showToast('error', 'Please enter an event title');
-                    return;
+                if (typeof lucide !== 'undefined') {
+                    setTimeout(() => lucide.createIcons({ nodes: [container] }), 0);
                 }
 
-                btn.disabled = true;
-                btn.innerHTML = '<svg class="animate-spin w-4 h-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>';
+                const output = container.querySelector('.ai-caption-output');
+                const textarea = container.querySelector('textarea');
+                const copyBtn = container.querySelector('.copy-btn');
 
-                try {
-                    const result = await ReckotAI.generateCaption(title, description, platform);
-                    if (result.caption) {
-                        textarea.value = result.caption;
-                        output.classList.remove('hidden');
-                    }
-                } catch (error) {
-                    AIComponents.showToast('error', error.message || 'Failed to generate caption');
-                } finally {
-                    btn.disabled = false;
-                    btn.innerHTML = `<i data-lucide="${platform}" class="w-4 h-4"></i> ${platform.charAt(0).toUpperCase() + platform.slice(1)}`;
-                    if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [btn] });
-                }
-            });
-        });
+                container.querySelectorAll('[data-platform]').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const platform = btn.dataset.platform;
+                        const title = document.querySelector(options.titleSelector || '[name="title"]')?.value;
+                        const description = options.getDescription?.() || document.querySelector('[name="description"]')?.value;
 
-        copyBtn.addEventListener('click', () => {
-            navigator.clipboard.writeText(textarea.value);
-            AIComponents.showToast('success', 'Copied to clipboard!');
-        });
+                        if (!title) {
+                            AIComponents.showToast('error', 'Please enter an event title');
+                            return;
+                        }
 
-        return container;
-    },
+                        btn.disabled = true;
+                        btn.innerHTML = '<svg class="animate-spin w-4 h-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>';
 
-    createPricingSuggester(options = {}) {
-        const btn = this.createButton({
-            text: 'Suggest Pricing',
-            icon: 'sparkles',
-            ...options
-        });
+                        try {
+                            const result = await ReckotAI.generateCaption(title, description, platform);
+                            if (result.caption) {
+                                textarea.value = result.caption;
+                                output.classList.remove('hidden');
+                            }
+                        } catch (error) {
+                            AIComponents.showToast('error', error.message || 'Failed to generate caption');
+                        } finally {
+                            btn.disabled = false;
+                            btn.innerHTML = `<i data-lucide="${platform}" class="w-4 h-4"></i> ${platform.charAt(0).toUpperCase() + platform.slice(1)}`;
+                            if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [btn] });
+                        }
+                    });
+                });
 
-        btn.addEventListener('click', async () => {
-            const eventType = document.querySelector(options.eventTypeSelector || '[name="event_type"]')?.value || 'general';
-            const location = document.querySelector(options.locationSelector || '[name="location"]')?.value || 'Cameroon';
-            const description = options.getDescription?.() || document.querySelector('[name="description"]')?.value || '';
+                copyBtn.addEventListener('click', () => {
+                    navigator.clipboard.writeText(textarea.value);
+                    AIComponents.showToast('success', 'Copied to clipboard!');
+                });
 
-            this.setLoading(btn, true);
-            try {
-                const result = await ReckotAI.suggestPricing(eventType, location, description);
-                if (result.early_bird !== undefined) {
-                    const message = `
+                return container;
+            },
+
+            createPricingSuggester(options = {}) {
+                const btn = this.createButton({
+                    text: 'Suggest Pricing',
+                    icon: 'sparkles',
+                    ...options
+                });
+
+                btn.addEventListener('click', async () => {
+                    const eventType = document.querySelector(options.eventTypeSelector || '[name="event_type"]')?.value || 'general';
+                    const location = document.querySelector(options.locationSelector || '[name="location"]')?.value || 'Cameroon';
+                    const description = options.getDescription?.() || document.querySelector('[name="description"]')?.value || '';
+
+                    this.setLoading(btn, true);
+                    try {
+                        const result = await ReckotAI.suggestPricing(eventType, location, description);
+                        if (result.early_bird !== undefined) {
+                            const message = `
 Suggested Pricing (XAF):
 • Early Bird: ${result.early_bird?.toLocaleString() || 'N/A'}
 • Regular: ${result.regular?.toLocaleString() || 'N/A'}
@@ -533,23 +534,23 @@ Suggested Pricing (XAF):
 
 ${result.reasoning || ''}
                     `.trim();
-                    alert(message);
-                }
-            } catch (error) {
-                AIComponents.showToast('error', error.message || 'Failed to suggest pricing');
-            } finally {
-                this.setLoading(btn, false);
-            }
-        });
+                            alert(message);
+                        }
+                    } catch (error) {
+                        AIComponents.showToast('error', error.message || 'Failed to suggest pricing');
+                    } finally {
+                        this.setLoading(btn, false);
+                    }
+                });
 
-        return btn;
-    },
+                return btn;
+            },
 
-    createEventAssistant(eventInfo, containerSelector) {
-        const container = document.querySelector(containerSelector);
-        if (!container) return;
+            createEventAssistant(eventInfo, containerSelector) {
+                const container = document.querySelector(containerSelector);
+                if (!container) return;
 
-        container.innerHTML = `
+                container.innerHTML = `
             <div class="ai-assistant card p-4">
                 <h4 class="font-medium mb-3 flex items-center gap-2">
                     <i data-lucide="bot" class="w-5 h-5"></i>
@@ -565,78 +566,78 @@ ${result.reasoning || ''}
             </div>
         `;
 
-        if (typeof lucide !== 'undefined') {
-            setTimeout(() => lucide.createIcons({ nodes: [container] }), 0);
-        }
-
-        const messages = container.querySelector('.ai-messages');
-        const form = container.querySelector('form');
-        const input = container.querySelector('input');
-        const submitBtn = container.querySelector('button[type="submit"]');
-
-        const addMessage = (text, isUser = false) => {
-            const msg = document.createElement('div');
-            msg.className = `p-3 rounded-lg text-sm ${isUser ? 'bg-primary/10 ml-8' : 'bg-muted mr-8'}`;
-            msg.textContent = text;
-            messages.appendChild(msg);
-            messages.scrollTop = messages.scrollHeight;
-        };
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const question = input.value.trim();
-            if (!question) return;
-
-            addMessage(question, true);
-            input.value = '';
-            submitBtn.disabled = true;
-
-            try {
-                const result = await ReckotAI.askAssistant(eventInfo, question);
-                if (result.answer) {
-                    addMessage(result.answer);
+                if (typeof lucide !== 'undefined') {
+                    setTimeout(() => lucide.createIcons({ nodes: [container] }), 0);
                 }
-            } catch (error) {
-                addMessage('Sorry, I could not process that question.');
-            } finally {
-                submitBtn.disabled = false;
-            }
-        });
 
-        return container;
-    },
+                const messages = container.querySelector('.ai-messages');
+                const form = container.querySelector('form');
+                const input = container.querySelector('input');
+                const submitBtn = container.querySelector('button[type="submit"]');
 
-    getEditorContent(element) {
-        const wrapper = element.closest('.richtext-wrapper') || element.parentElement;
-        const editor = wrapper?.querySelector('.richtext-editor');
-        if (editor) {
-            return editor.innerText || editor.textContent;
-        }
-        return element.value;
-    },
+                const addMessage = (text, isUser = false) => {
+                    const msg = document.createElement('div');
+                    msg.className = `p-3 rounded-lg text-sm ${isUser ? 'bg-primary/10 ml-8' : 'bg-muted mr-8'}`;
+                    msg.textContent = text;
+                    messages.appendChild(msg);
+                    messages.scrollTop = messages.scrollHeight;
+                };
 
-    setEditorContent(element, content) {
-        const wrapper = element.closest('.richtext-wrapper') || element.parentElement;
-        const editor = wrapper?.querySelector('.richtext-editor');
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const question = input.value.trim();
+                    if (!question) return;
 
-        const htmlContent = content.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
-        const formatted = `<p>${htmlContent}</p>`;
+                    addMessage(question, true);
+                    input.value = '';
+                    submitBtn.disabled = true;
 
-        if (editor) {
-            editor.innerHTML = formatted;
-            element.value = formatted;
-            element.dispatchEvent(new Event('input', { bubbles: true }));
-        } else {
-            element.value = content;
-            element.dispatchEvent(new Event('input', { bubbles: true }));
-        }
-    },
+                    try {
+                        const result = await ReckotAI.askAssistant(eventInfo, question);
+                        if (result.answer) {
+                            addMessage(result.answer);
+                        }
+                    } catch (error) {
+                        addMessage('Sorry, I could not process that question.');
+                    } finally {
+                        submitBtn.disabled = false;
+                    }
+                });
 
-    createVoiceEventCreator(options = {}) {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'voice-event-creator card p-4 mb-4';
+                return container;
+            },
 
-        wrapper.innerHTML = `
+            getEditorContent(element) {
+                const wrapper = element.closest('.richtext-wrapper') || element.parentElement;
+                const editor = wrapper?.querySelector('.richtext-editor');
+                if (editor) {
+                    return editor.innerText || editor.textContent;
+                }
+                return element.value;
+            },
+
+            setEditorContent(element, content) {
+                const wrapper = element.closest('.richtext-wrapper') || element.parentElement;
+                const editor = wrapper?.querySelector('.richtext-editor');
+
+                const htmlContent = content.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
+                const formatted = `<p>${htmlContent}</p>`;
+
+                if (editor) {
+                    editor.innerHTML = formatted;
+                    element.value = formatted;
+                    element.dispatchEvent(new Event('input', { bubbles: true }));
+                } else {
+                    element.value = content;
+                    element.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            },
+
+            createVoiceEventCreator(options = {}) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'voice-event-creator card p-4 mb-4';
+
+                wrapper.innerHTML = `
             <div class="flex items-center justify-between mb-3">
                 <div>
                     <h4 class="font-medium flex items-center gap-2">
@@ -683,230 +684,230 @@ ${result.reasoning || ''}
             </div>
         `;
 
-        if (typeof lucide !== 'undefined') {
-            setTimeout(() => lucide.createIcons({ nodes: [wrapper] }), 0);
-        }
+                if (typeof lucide !== 'undefined') {
+                    setTimeout(() => lucide.createIcons({ nodes: [wrapper] }), 0);
+                }
 
-        let mediaRecorder;
-        let audioChunks = [];
-        let startTime;
-        let timerInterval;
+                let mediaRecorder;
+                let audioChunks = [];
+                let startTime;
+                let timerInterval;
 
-        const startBtn = wrapper.querySelector('#voice-start-btn');
-        const stopBtn = wrapper.querySelector('#voice-stop-btn');
-        const voiceStatus = wrapper.querySelector('.voice-status');
-        const voiceTimer = wrapper.querySelector('#voice-timer');
+                const startBtn = wrapper.querySelector('#voice-start-btn');
+                const stopBtn = wrapper.querySelector('#voice-stop-btn');
+                const voiceStatus = wrapper.querySelector('.voice-status');
+                const voiceTimer = wrapper.querySelector('#voice-timer');
 
-        startBtn.addEventListener('click', async () => {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                audioChunks = [];
-
-                mediaRecorder.ondataavailable = (event) => {
-                    audioChunks.push(event.data);
-                };
-
-                mediaRecorder.onstop = async () => {
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                    stream.getTracks().forEach(track => track.stop());
-
-                    this.showPageOverlay('Converting your voice to event details...');
+                startBtn.addEventListener('click', async () => {
                     try {
-                        const result = await ReckotAI.voiceToEvent(audioBlob);
+                        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        mediaRecorder = new MediaRecorder(stream);
+                        audioChunks = [];
 
-                        if (result.error) {
-                            this.showToast('error', result.error || 'Failed to understand audio');
-                            return;
-                        }
+                        mediaRecorder.ondataavailable = (event) => {
+                            audioChunks.push(event.data);
+                        };
 
-                        let updated = [];
+                        mediaRecorder.onstop = async () => {
+                            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                            stream.getTracks().forEach(track => track.stop());
 
-                        if (result.title) {
-                            const titleField = document.querySelector('#id_title, [name="title"]');
-                            if (titleField) {
-                                titleField.value = result.title;
-                                titleField.dispatchEvent(new Event('input', { bubbles: true }));
-                                updated.push('title');
-                            }
-                        }
-
-                        if (result.tagline) {
-                            const taglineField = document.querySelector('#id_short_description, [name="short_description"]');
-                            if (taglineField) {
-                                taglineField.value = result.tagline;
-                                taglineField.dispatchEvent(new Event('input', { bubbles: true }));
-                                updated.push('tagline');
-                            }
-                        }
-
-                        if (result.description) {
-                            const descField = document.querySelector('#id_description, [name="description"]');
-                            if (descField) {
-                                this.setEditorContent(descField, result.description);
-                                updated.push('description');
-                            }
-                        }
-
-                        if (result.location) {
-                            const locationField = document.querySelector('#id_location, [name="location"]');
-                            if (locationField) {
-                                locationField.value = result.location;
-                                locationField.dispatchEvent(new Event('input', { bubbles: true }));
-                                updated.push('location');
-                            }
-                        }
-
-                        if (result.event_type) {
-                            const typeField = document.querySelector('[name="event_type"]');
-                            if (typeField) {
-                                typeField.value = result.event_type;
-                                typeField.dispatchEvent(new Event('change', { bubbles: true }));
-                                updated.push('type');
-                            }
-                        }
-
-                        if (result.date) {
-                            const dateField = document.querySelector('[name="start_date"]');
-                            if (dateField) {
-                                dateField.value = result.date;
-                                dateField.dispatchEvent(new Event('input', { bubbles: true }));
-                                updated.push('date');
-                            }
-                        }
-
-                        if (result.time) {
-                            const timeField = document.querySelector('[name="start_time"]');
-                            if (timeField) {
-                                timeField.value = result.time;
-                                timeField.dispatchEvent(new Event('input', { bubbles: true }));
-                                updated.push('time');
-                            }
-                        }
-
-                        const enhanceDesc = wrapper.querySelector('#voice-enhance-description')?.checked;
-                        const generateCover = wrapper.querySelector('#voice-generate-cover')?.checked;
-
-                        if (enhanceDesc && result.title) {
-                            this.showPageOverlay('Enhancing description with AI...');
+                            this.showPageOverlay('Converting your voice to event details...');
                             try {
-                                const context = await this.collectEventContext(options);
-                                const enhanced = await ReckotAI.generateDescription(context);
+                                const result = await ReckotAI.voiceToEvent(audioBlob);
 
-                                if (enhanced.description) {
-                                    const descField = document.querySelector('#id_description, [name="description"]');
-                                    if (descField) {
-                                        this.setEditorContent(descField, enhanced.description);
-                                        updated.push('enhanced description');
+                                if (result.error) {
+                                    this.showToast('error', result.error || 'Failed to understand audio');
+                                    return;
+                                }
+
+                                let updated = [];
+
+                                if (result.title) {
+                                    const titleField = document.querySelector('#id_title, [name="title"]');
+                                    if (titleField) {
+                                        titleField.value = result.title;
+                                        titleField.dispatchEvent(new Event('input', { bubbles: true }));
+                                        updated.push('title');
                                     }
                                 }
 
-                                if (enhanced.tagline) {
+                                if (result.tagline) {
                                     const taglineField = document.querySelector('#id_short_description, [name="short_description"]');
                                     if (taglineField) {
-                                        taglineField.value = enhanced.tagline;
+                                        taglineField.value = result.tagline;
                                         taglineField.dispatchEvent(new Event('input', { bubbles: true }));
-                                        if (!updated.includes('tagline')) updated.push('enhanced tagline');
+                                        updated.push('tagline');
                                     }
                                 }
-                            } catch (error) {
-                                this.showToast('warning', 'Description enhancement failed');
-                            }
-                        }
 
-                        if (generateCover && result.title) {
-                            this.showPageOverlay('Generating cover image with AI...');
-                            try {
-                                const title = document.querySelector('#id_title, [name="title"]')?.value;
-                                const description = this.getEditorContent(document.querySelector('#id_description, [name="description"]')) || '';
-                                const eventType = document.querySelector('[name="event_type"]')?.value || result.event_type || 'general';
-
-                                const coverResult = await ReckotAI.generateCoverImage({
-                                    title,
-                                    description,
-                                    event_type: eventType
-                                });
-
-                                if (coverResult.image) {
-                                    const response = await fetch(coverResult.image);
-                                    const blob = await response.blob();
-                                    const file = new File([blob], 'ai-generated-cover.png', { type: 'image/png' });
-                                    const dataTransfer = new DataTransfer();
-                                    dataTransfer.items.add(file);
-
-                                    const coverInput = document.querySelector('[name="cover_image"], [x-ref="coverInput"]');
-                                    if (coverInput) {
-                                        coverInput.files = dataTransfer.files;
-                                        coverInput.dispatchEvent(new Event('change', { bubbles: true }));
-                                        updated.push('cover image');
+                                if (result.description) {
+                                    const descField = document.querySelector('#id_description, [name="description"]');
+                                    if (descField) {
+                                        this.setEditorContent(descField, result.description);
+                                        updated.push('description');
                                     }
                                 }
-                            } catch (error) {
-                                this.showToast('warning', 'Cover image generation failed: ' + (error.message || 'Unknown error'));
-                            }
-                        }
 
-                        if (updated.length > 0) {
-                            this.showToast('success', `Updated: ${updated.join(', ')}`);
-                        } else {
-                            this.showToast('warning', 'No event details extracted from audio');
-                        }
+                                if (result.location) {
+                                    const locationField = document.querySelector('#id_location, [name="location"]');
+                                    if (locationField) {
+                                        locationField.value = result.location;
+                                        locationField.dispatchEvent(new Event('input', { bubbles: true }));
+                                        updated.push('location');
+                                    }
+                                }
+
+                                if (result.event_type) {
+                                    const typeField = document.querySelector('[name="event_type"]');
+                                    if (typeField) {
+                                        typeField.value = result.event_type;
+                                        typeField.dispatchEvent(new Event('change', { bubbles: true }));
+                                        updated.push('type');
+                                    }
+                                }
+
+                                if (result.date) {
+                                    const dateField = document.querySelector('[name="start_date"]');
+                                    if (dateField) {
+                                        dateField.value = result.date;
+                                        dateField.dispatchEvent(new Event('input', { bubbles: true }));
+                                        updated.push('date');
+                                    }
+                                }
+
+                                if (result.time) {
+                                    const timeField = document.querySelector('[name="start_time"]');
+                                    if (timeField) {
+                                        timeField.value = result.time;
+                                        timeField.dispatchEvent(new Event('input', { bubbles: true }));
+                                        updated.push('time');
+                                    }
+                                }
+
+                                const enhanceDesc = wrapper.querySelector('#voice-enhance-description')?.checked;
+                                const generateCover = wrapper.querySelector('#voice-generate-cover')?.checked;
+
+                                if (enhanceDesc && result.title) {
+                                    this.showPageOverlay('Enhancing description with AI...');
+                                    try {
+                                        const context = await this.collectEventContext(options);
+                                        const enhanced = await ReckotAI.generateDescription(context);
+
+                                        if (enhanced.description) {
+                                            const descField = document.querySelector('#id_description, [name="description"]');
+                                            if (descField) {
+                                                this.setEditorContent(descField, enhanced.description);
+                                                updated.push('enhanced description');
+                                            }
+                                        }
+
+                                        if (enhanced.tagline) {
+                                            const taglineField = document.querySelector('#id_short_description, [name="short_description"]');
+                                            if (taglineField) {
+                                                taglineField.value = enhanced.tagline;
+                                                taglineField.dispatchEvent(new Event('input', { bubbles: true }));
+                                                if (!updated.includes('tagline')) updated.push('enhanced tagline');
+                                            }
+                                        }
+                                    } catch (error) {
+                                        this.showToast('warning', 'Description enhancement failed');
+                                    }
+                                }
+
+                                if (generateCover && result.title) {
+                                    this.showPageOverlay('Generating cover image with AI...');
+                                    try {
+                                        const title = document.querySelector('#id_title, [name="title"]')?.value;
+                                        const description = this.getEditorContent(document.querySelector('#id_description, [name="description"]')) || '';
+                                        const eventType = document.querySelector('[name="event_type"]')?.value || result.event_type || 'general';
+
+                                        const coverResult = await ReckotAI.generateCoverImage({
+                                            title,
+                                            description,
+                                            event_type: eventType
+                                        });
+
+                                        if (coverResult.image) {
+                                            const response = await fetch(coverResult.image);
+                                            const blob = await response.blob();
+                                            const file = new File([blob], 'ai-generated-cover.png', { type: 'image/png' });
+                                            const dataTransfer = new DataTransfer();
+                                            dataTransfer.items.add(file);
+
+                                            const coverInput = document.querySelector('[name="cover_image"], [x-ref="coverInput"]');
+                                            if (coverInput) {
+                                                coverInput.files = dataTransfer.files;
+                                                coverInput.dispatchEvent(new Event('change', { bubbles: true }));
+                                                updated.push('cover image');
+                                            }
+                                        }
+                                    } catch (error) {
+                                        this.showToast('warning', 'Cover image generation failed: ' + (error.message || 'Unknown error'));
+                                    }
+                                }
+
+                                if (updated.length > 0) {
+                                    this.showToast('success', `Updated: ${updated.join(', ')}`);
+                                } else {
+                                    this.showToast('warning', 'No event details extracted from audio');
+                                }
+                            } catch (error) {
+                                this.showToast('error', error.message || 'Failed to convert voice to event');
+                            } finally {
+                                this.hidePageOverlay();
+                            }
+                        };
+
+                        mediaRecorder.start();
+                        startTime = Date.now();
+
+                        startBtn.classList.add('hidden');
+                        stopBtn.classList.remove('hidden');
+                        voiceStatus.classList.remove('hidden');
+
+                        timerInterval = setInterval(() => {
+                            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                            const minutes = Math.floor(elapsed / 60);
+                            const seconds = elapsed % 60;
+                            voiceTimer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                        }, 1000);
+
                     } catch (error) {
-                        this.showToast('error', error.message || 'Failed to convert voice to event');
-                    } finally {
-                        this.hidePageOverlay();
+                        this.showToast('error', 'Microphone access denied');
                     }
-                };
+                });
 
-                mediaRecorder.start();
-                startTime = Date.now();
+                stopBtn.addEventListener('click', () => {
+                    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                        mediaRecorder.stop();
+                        clearInterval(timerInterval);
 
-                startBtn.classList.add('hidden');
-                stopBtn.classList.remove('hidden');
-                voiceStatus.classList.remove('hidden');
+                        startBtn.classList.remove('hidden');
+                        stopBtn.classList.add('hidden');
+                        voiceStatus.classList.add('hidden');
+                        voiceTimer.textContent = '0:00';
+                    }
+                });
 
-                timerInterval = setInterval(() => {
-                    const elapsed = Math.floor((Date.now() - startTime) / 1000);
-                    const minutes = Math.floor(elapsed / 60);
-                    const seconds = elapsed % 60;
-                    voiceTimer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                }, 1000);
+                return wrapper;
+            },
 
-            } catch (error) {
-                this.showToast('error', 'Microphone access denied');
-            }
-        });
+            createCoverImageGenerator(options = {}) {
+                const coverInput = document.querySelector('[name="cover_image"]');
+                if (!coverInput) {
+                    return;
+                }
 
-        stopBtn.addEventListener('click', () => {
-            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                mediaRecorder.stop();
-                clearInterval(timerInterval);
+                const coverSection = coverInput.parentElement;
+                if (!coverSection) {
+                    return;
+                }
 
-                startBtn.classList.remove('hidden');
-                stopBtn.classList.add('hidden');
-                voiceStatus.classList.add('hidden');
-                voiceTimer.textContent = '0:00';
-            }
-        });
+                const wrapper = document.createElement('div');
+                wrapper.className = 'mt-3 p-3 rounded-lg bg-primary/5 border border-primary/20';
 
-        return wrapper;
-    },
-
-    createCoverImageGenerator(options = {}) {
-        const coverInput = document.querySelector('[name="cover_image"]');
-        if (!coverInput) {
-            return;
-        }
-
-        const coverSection = coverInput.parentElement;
-        if (!coverSection) {
-            return;
-        }
-
-        const wrapper = document.createElement('div');
-        wrapper.className = 'mt-3 p-3 rounded-lg bg-primary/5 border border-primary/20';
-
-        wrapper.innerHTML = `
+                wrapper.innerHTML = `
             <div class="flex items-center justify-between mb-2">
                 <div class="flex items-center gap-2">
                     <i data-lucide="sparkles" class="w-4 h-4 text-primary"></i>
@@ -921,62 +922,61 @@ ${result.reasoning || ''}
             </button>
         `;
 
-        if (typeof lucide !== 'undefined') {
-            setTimeout(() => lucide.createIcons({ nodes: [wrapper] }), 0);
-        }
+                if (typeof lucide !== 'undefined') {
+                    setTimeout(() => lucide.createIcons({ nodes: [wrapper] }), 0);
+                }
 
-        const generateBtn = wrapper.querySelector('#ai-cover-generate-btn');
+                const generateBtn = wrapper.querySelector('#ai-cover-generate-btn');
 
-        generateBtn.addEventListener('click', async () => {
-            const title = document.querySelector('#id_title, [name="title"]')?.value;
-            const description = this.getEditorContent(document.querySelector('#id_description, [name="description"]')) || '';
-            const eventType = document.querySelector('[name="event_type"]')?.value || 'general';
+                generateBtn.addEventListener('click', async () => {
+                    const title = document.querySelector('#id_title, [name="title"]')?.value;
+                    const description = this.getEditorContent(document.querySelector('#id_description, [name="description"]')) || '';
+                    const eventType = document.querySelector('[name="event_type"]')?.value || 'general';
 
-            if (!title) {
-                this.showToast('error', 'Please enter an event title first');
-                return;
-            }
-
-            this.setLoading(generateBtn, true);
-            this.showPageOverlay('Generating your cover image with AI...');
-
-            try {
-                const result = await ReckotAI.generateCoverImage({
-                    title,
-                    description,
-                    event_type: eventType
-                });
-
-                if (result.image) {
-                    const response = await fetch(result.image);
-                    const blob = await response.blob();
-
-                    const file = new File([blob], 'ai-generated-cover.png', { type: 'image/png' });
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(file);
-
-                    const coverInput = document.querySelector('[name="cover_image"], [x-ref="coverInput"]');
-                    if (coverInput) {
-                        coverInput.files = dataTransfer.files;
-                        coverInput.dispatchEvent(new Event('change', { bubbles: true }));
+                    if (!title) {
+                        this.showToast('error', 'Please enter an event title first');
+                        return;
                     }
 
-                    this.showToast('success', 'Cover image generated successfully!');
-                } else if (result.error) {
-                    this.showToast('error', result.error);
-                }
-            } catch (error) {
-                this.showToast('error', error.message || 'Failed to generate cover image');
-            } finally {
-                this.setLoading(generateBtn, false);
-                this.hidePageOverlay();
+                    this.setLoading(generateBtn, true);
+                    this.showPageOverlay('Generating your cover image with AI...');
+
+                    try {
+                        const result = await ReckotAI.generateCoverImage({
+                            title,
+                            description,
+                            event_type: eventType
+                        });
+
+                        if (result.image) {
+                            const response = await fetch(result.image);
+                            const blob = await response.blob();
+
+                            const file = new File([blob], 'ai-generated-cover.png', { type: 'image/png' });
+                            const dataTransfer = new DataTransfer();
+                            dataTransfer.items.add(file);
+
+                            const coverInput = document.querySelector('[name="cover_image"], [x-ref="coverInput"]');
+                            if (coverInput) {
+                                coverInput.files = dataTransfer.files;
+                                coverInput.dispatchEvent(new Event('change', { bubbles: true }));
+                            }
+
+                            this.showToast('success', 'Cover image generated successfully!');
+                        } else if (result.error) {
+                            this.showToast('error', result.error);
+                        }
+                    } catch (error) {
+                        this.showToast('error', error.message || 'Failed to generate cover image');
+                    } finally {
+                        this.setLoading(generateBtn, false);
+                        this.hidePageOverlay();
+                    }
+                });
+
+                coverSection.appendChild(wrapper);
+                return wrapper;
             }
-        });
-
-        coverSection.appendChild(wrapper);
-        return wrapper;
+        };
     }
-};
-
-window.ReckotAI = ReckotAI;
-window.AIComponents = AIComponents;
+}

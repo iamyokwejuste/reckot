@@ -7,16 +7,13 @@
 
 {% block extra_head %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<link href="{% static 'css/richtext.css' %}" rel="stylesheet">
 <script>
 (function() {
     function registerEditEvent() {
         if (typeof Alpine === 'undefined') {
-            console.log('Alpine not loaded yet, waiting...');
             return;
         }
 
-        console.log('Registering editEvent component');
         Alpine.data('editEvent', (eventData) => ({
             step: 1,
             totalSteps: 4,
@@ -352,7 +349,7 @@
                             this.value = val;
                             this.label = lbl;
                             this.open = false;
-                            eventType = val;
+                            $root.eventType = val;
                         }
                     }">
                         <input type="hidden" name="event_type" x-model="value">
