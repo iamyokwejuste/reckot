@@ -30,7 +30,7 @@ if [ "$RUN_MIGRATIONS" = "true" ]; then
 fi
 
 echo "==> Collecting static files..."
-su -s /bin/bash appuser -c "uv run python manage.py collectstatic --noinput --clear"
+su -s /bin/bash appuser -c "uv run python manage.py collectstatic --noinput"
 
 echo "==> Starting application as appuser..."
 exec su -s /bin/bash appuser -c 'exec "$@"' -- appuser "$@"

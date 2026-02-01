@@ -67,9 +67,9 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
       interval: 10s
-      timeout: 10s
-      retries: 30
-      start_period: 120s
+      timeout: 5s
+      retries: 60
+      start_period: 60s
 
   redis:
     image: redis:7-alpine
@@ -129,7 +129,7 @@ services:
       FLUTTERWAVE_ENCRYPTION_KEY: ${FLUTTERWAVE_ENCRYPTION_KEY:-}
       RUN_MIGRATIONS: "false"
     depends_on:
-      web:
+      db:
         condition: service_healthy
       redis:
         condition: service_healthy
