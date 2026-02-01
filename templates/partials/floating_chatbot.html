@@ -14,11 +14,14 @@
     </button>
 
     <div x-show="isOpen"
-         class="fixed inset-0 z-[70] bg-card flex flex-col
+         class="fixed top-[60px] left-0 right-0 bottom-0 z-[70] bg-card flex flex-col
                 sm:inset-auto sm:bottom-6 sm:right-6 sm:w-[33vw] sm:rounded-2xl sm:border sm:border-border sm:shadow-2xl"
-         style="overflow: hidden !important; height: 100% !important;">
+         style="overflow: hidden !important;">
 
          <style>
+            #floating-chatbot > div[x-show] {
+                height: calc(100vh - 60px) !important;
+            }
             @media (min-width: 640px) {
                 #floating-chatbot > div[x-show] {
                     height: 60vh !important;
@@ -27,35 +30,34 @@
             }
          </style>
 
-        <div class="flex items-center justify-between p-4 border-b border-border bg-gradient-to-br from-primary to-primary/90 rounded-t-2xl flex-shrink-0">
-            <div class="flex items-center gap-3">
-                <div class="h-10 w-10 rounded-full backdrop-blur flex items-center justify-center bg-primary/20">
-                    <i data-lucide="bot" class="h-5 w-5 text-white"></i>
+        <div class="flex items-center justify-between py-2.5 px-3 sm:px-4 border-b border-border bg-primary sm:rounded-t-2xl flex-shrink-0">
+            <div class="flex items-center gap-2 sm:gap-3">
+                <div class="h-9 w-9 sm:h-10 sm:w-10 rounded-full backdrop-blur flex items-center justify-center bg-primary-foreground/20 flex-shrink-0">
+                    <i data-lucide="bot" class="h-5 w-5 text-primary-foreground"></i>
                 </div>
-                <div>
-                    <h3 class="font-semibold text-white">{% trans "Reckot Assistant" %}</h3>
-                    <p class="text-xs text-white/80">{% trans "Powered by Gemini" %}</p>
+                <div class="flex flex-col -space-y-0.5">
+                    <h3 class="font-semibold text-primary-foreground text-sm sm:text-base">{% trans "Reckot Assistant" %}</h3>
+                    <p class="text-[10px] sm:text-xs text-primary-foreground/80">{% trans "Powered by Gemini" %}</p>
                 </div>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5 sm:gap-2">
                 <button @click="clearChat()"
-                        class="h-8 w-8 rounded-lg hover:bg-white/20 transition-colors flex items-center justify-center"
+                        class="h-9 w-9 sm:h-8 sm:w-8 rounded-lg hover:bg-primary-foreground/20 active:bg-primary-foreground/30 transition-colors flex items-center justify-center"
                         title="{% trans 'Clear chat' %}">
-                    <i data-lucide="trash-2" class="h-4 w-4 text-white"></i>
+                    <i data-lucide="trash-2" class="h-4 w-4 sm:h-4 sm:w-4 text-primary-foreground"></i>
                 </button>
                 <button @click="close()"
-                        class="h-8 w-8 rounded-lg hover:bg-white/20 transition-colors flex items-center justify-center"
+                        class="h-9 w-9 sm:h-8 sm:w-8 rounded-lg hover:bg-primary-foreground/20 active:bg-primary-foreground/30 transition-colors flex items-center justify-center"
                         aria-label="{% trans 'Close' %}">
-                    <i data-lucide="x" class="h-5 w-5 text-white"></i>
+                    <i data-lucide="x" class="h-5 w-5 text-primary-foreground"></i>
                 </button>
             </div>
         </div>
-
         <div x-ref="messages" class="flex-1 min-h-0 p-4 space-y-3 bg-muted/20" style="overflow-y: auto !important; max-height: 100% !important;">
             <template x-for="msg in messages" :key="msg.id">
                 <div :class="msg.role === 'USER' ? 'flex justify-end' : 'flex justify-start'">
                     <div :class="msg.role === 'USER'
-                        ? 'bg-gradient-to-br from-primary to-primary/90 text-white rounded-2xl rounded-br-md px-4 py-2.5 max-w-[85%] shadow-md'
+                        ? 'bg-primary text-primary-foreground rounded-2xl rounded-br-md px-4 py-2.5 max-w-[85%] shadow-md'
                         : 'bg-card border border-border rounded-2xl rounded-bl-md px-4 py-2.5 max-w-[85%] shadow-sm'">
                         <div class="text-sm break-words" x-html="formatMessage(msg.content)"></div>
                     </div>
@@ -107,9 +109,9 @@
                        @keydown.escape="close()">
                 <button type="button"
                         @click="sendMessage()"
-                        class="btn btn-default px-2.5 py-2 shrink-0 rounded-lg"
+                        class="btn btn-default shrink-0 rounded-lg min-w-[36px] h-[36px] flex items-center justify-center p-0"
                         :disabled="isLoading || !inputMessage.trim()">
-                    <i data-lucide="send" class="h-3.5 w-3.5"></i>
+                    <i data-lucide="send" class="h-4 w-4"></i>
                 </button>
             </div>
             <p class="text-[10px] text-muted-foreground mt-2 text-center">

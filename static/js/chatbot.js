@@ -175,7 +175,29 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-        clearChat() {
+        async clearChat() {
+            if (this.sessionId) {
+                try {
+                    const csrfToken = document.cookie
+                        .split(';')
+                        .find(c => c.trim().startsWith('csrftoken='))
+                        ?.split('=')[1] || '';
+
+                    await fetch('/ai/assistant/clear/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify({
+                            session_id: this.sessionId
+                        })
+                    });
+                } catch (error) {
+                    console.error('Error clearing conversation:', error);
+                }
+            }
+
             this.messages = [];
             this.sessionId = '';
             this.messageCounter = 0;
