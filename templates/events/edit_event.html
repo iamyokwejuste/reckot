@@ -343,12 +343,40 @@
                 <h2 class="text-lg font-semibold">{% trans "Location" %}</h2>
 
                 <div>
-                    <label for="id_event_type" class="block text-sm font-medium mb-2">{% trans "Event Type" %}</label>
-                    <select name="event_type" id="id_event_type" required class="input" x-model="eventType">
-                        <option value="IN_PERSON" {% if event.event_type == 'IN_PERSON' %}selected{% endif %}>{% trans "In Person" %}</option>
-                        <option value="ONLINE" {% if event.event_type == 'ONLINE' %}selected{% endif %}>{% trans "Online" %}</option>
-                        <option value="HYBRID" {% if event.event_type == 'HYBRID' %}selected{% endif %}>{% trans "Hybrid" %}</option>
-                    </select>
+                    <label class="block text-sm font-medium mb-2">{% trans "Event Type" %}</label>
+                    <div x-data="{
+                        open: false,
+                        value: '{{ event.event_type }}',
+                        label: '{{ event.get_event_type_display }}',
+                        selectOption(val, lbl) {
+                            this.value = val;
+                            this.label = lbl;
+                            this.open = false;
+                            eventType = val;
+                        }
+                    }">
+                        <input type="hidden" name="event_type" x-model="value">
+                        <button type="button" @click="open = !open" @click.outside="open = false" class="custom-select-trigger" :class="{ 'custom-select-trigger-active': open }">
+                            <span class="custom-select-value" x-text="label"></span>
+                            <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4" :class="{ 'rotate-180': open }"></i>
+                        </button>
+                        <div x-show="open" x-transition @click.outside="open = false" class="custom-select-dropdown" x-cloak>
+                            <div class="custom-select-options">
+                                <button type="button" @click="selectOption('IN_PERSON', '{% trans "In Person" %}')" class="custom-select-option" :class="{ 'custom-select-option-selected': value === 'IN_PERSON' }">
+                                    <span>{% trans "In Person" %}</span>
+                                    <i x-show="value === 'IN_PERSON'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                                </button>
+                                <button type="button" @click="selectOption('ONLINE', '{% trans "Online" %}')" class="custom-select-option" :class="{ 'custom-select-option-selected': value === 'ONLINE' }">
+                                    <span>{% trans "Online" %}</span>
+                                    <i x-show="value === 'ONLINE'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                                </button>
+                                <button type="button" @click="selectOption('HYBRID', '{% trans "Hybrid" %}')" class="custom-select-option" :class="{ 'custom-select-option-selected': value === 'HYBRID' }">
+                                    <span>{% trans "Hybrid" %}</span>
+                                    <i x-show="value === 'HYBRID'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div x-show="eventType !== 'ONLINE'" class="space-y-4">
