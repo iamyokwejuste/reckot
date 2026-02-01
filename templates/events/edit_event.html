@@ -202,7 +202,7 @@
 
                 <div>
                     <label class="block text-sm font-medium mb-2">{% trans "Organization" %}</label>
-                    <div class="input bg-muted text-muted-foreground cursor-not-allowed">
+                    <div class="input bg-muted text-muted-foreground cursor-not-allowed flex items-center">
                         {{ event.organization.name }}
                     </div>
                     <p class="text-xs text-muted-foreground mt-1">{% trans "Organization cannot be changed" %}</p>
@@ -405,10 +405,14 @@
                     <p class="text-xs text-muted-foreground mt-1">{% trans "0 for unlimited" %}</p>
                 </div>
 
-                <div class="flex items-center gap-3">
-                    <input type="checkbox" name="is_free" id="id_is_free" class="h-4 w-4 rounded border-border"
-                           {% if event.is_free %}checked{% endif %}>
-                    <label for="id_is_free" class="text-sm font-medium">{% trans "This is a free event" %}</label>
+                <div class="flex items-center gap-3 p-3 rounded-lg bg-muted/50 border border-border/50">
+                    <input type="checkbox" id="id_is_free_display" class="h-4 w-4 rounded border-border opacity-50 cursor-not-allowed"
+                           {% if event.is_free %}checked{% endif %} disabled>
+                    <input type="hidden" name="is_free" value="{% if event.is_free %}on{% endif %}">
+                    <label for="id_is_free_display" class="text-sm font-medium opacity-70 cursor-not-allowed">
+                        {% trans "This is a free event" %}
+                        <span class="text-xs text-muted-foreground ml-2">({% trans "Cannot be changed after creation" %})</span>
+                    </label>
                 </div>
 
                 <div>
@@ -444,8 +448,8 @@
         <div class="flex items-center justify-between mt-6">
             <template x-if="step > 1">
                 {% #button type="button" variant="outline" attrs='@click="prevStep()"' %}
-                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                    {% trans "Back" %}
+                    <i data-lucide="chevron-left" class="w-4 h-4 mr-1"></i>
+                    <span>{% trans "Back" %}</span>
                 {% /button %}
             </template>
             <div x-show="step === 1">

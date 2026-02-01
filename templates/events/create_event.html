@@ -445,8 +445,8 @@
         <div class="flex items-center justify-between mt-6">
             <template x-if="step > 1">
                 {% #button type="button" variant="outline" attrs='@click="prevStep()"' %}
-                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                    {% trans "Back" %}
+                    <i data-lucide="chevron-left" class="w-4 h-4 mr-1"></i>
+                    <span>{% trans "Back" %}</span>
                 {% /button %}
             </template>
             <div x-show="step === 1"></div>
