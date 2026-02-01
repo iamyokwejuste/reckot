@@ -1,11 +1,13 @@
 import json
 import base64
+import io
 from django.http import JsonResponse
 from django.views import View
 from django.views.decorators.csrf import csrf_protect
 from django.utils.decorators import method_decorator
 from django.contrib.auth.mixins import LoginRequiredMixin
 from decimal import Decimal
+from PIL import Image
 
 from apps.ai.verification import verify_event_authenticity, get_fraud_prevention_tips
 from apps.ai.voice_creator import create_event_from_voice, enhance_voice_created_event
@@ -17,6 +19,29 @@ from apps.ai.predictive_analytics import (
 from apps.ai.decorators import ai_feature_required, ai_rate_limit, log_ai_usage
 from apps.events.models import Event
 from apps.core.services.ai import gemini_ai
+
+
+def crop_to_aspect_ratio(image_bytes: bytes, aspect_width: int, aspect_height: int) -> bytes:
+    img = Image.open(io.BytesIO(image_bytes))
+    current_width, current_height = img.size
+    target_aspect = aspect_width / aspect_height
+    current_aspect = current_width / current_height
+
+    if abs(current_aspect - target_aspect) < 0.01:
+        return image_bytes
+
+    if current_aspect > target_aspect:
+        new_width = int(current_height * target_aspect)
+        left = (current_width - new_width) // 2
+        img = img.crop((left, 0, left + new_width, current_height))
+    else:
+        new_height = int(current_width / target_aspect)
+        top = (current_height - new_height) // 2
+        img = img.crop((0, top, current_width, top + new_height))
+
+    output = io.BytesIO()
+    img.save(output, format='PNG', quality=95)
+    return output.getvalue()
 
 
 @method_decorator(
@@ -354,8 +379,13 @@ class GenerateCoverImageView(LoginRequiredMixin, View):
                 "1:1": "1080x1080 pixels (square, 1:1 ratio)",
                 "4:3": "1600x1200 pixels (landscape, 4:3 ratio)",
                 "3:2": "1800x1200 pixels (landscape, 3:2 ratio)",
+                "40x65cm": "2400x3900 pixels (landscape, 8:13 ratio, print size: 40cm height x 65cm width at 300 DPI)",
             }
-            dimension_spec = aspect_ratios.get(aspect_ratio, aspect_ratios["16:9"])
+            dimension_spec = aspect_ratios.get(aspect_ratio, aspect_ratios["40x65cm"])
+
+            physical_size = ""
+            if aspect_ratio == "40x65cm":
+                physical_size = "\n- Physical print size: 40cm (height) x 65cm (width)"
 
             image_prompt = f"""Create a realistic, professional event cover image.
 
@@ -364,8 +394,9 @@ Type: {event_type}
 Context: {description[:200]}
 
 Image Specifications:
-- Dimensions: {dimension_spec}
-- Orientation: Landscape, suitable for event covers and social media banners
+- Dimensions: {dimension_spec}{physical_size}
+- Orientation: Landscape, suitable for event covers, posters, and banners
+- Print-ready quality at 300 DPI
 
 Visual Requirements:
 - Photorealistic style (NOT illustrated, NOT abstract, NOT surreal, NOT fantasy)
@@ -373,17 +404,21 @@ Visual Requirements:
 - African context: Black people attending/participating in the event, African venue/setting
 - Modern, clean, professional composition
 - Natural lighting and realistic colors
-- High resolution, print-quality
+- High resolution, print-quality with sharp details
 - People should be Black/African, representing African event attendees
 - No text, no typography, no logos, no graphic overlays
 - No fantasy elements, no abstract art, no surrealism, no artistic interpretation
 - Professional photography style, as if taken by a professional event photographer
 - Focus on real, tangible elements that clearly represent the event type
-- Realistic perspective and proportions"""
+- Realistic perspective and proportions
+- Suitable for large-format printing and professional event marketing"""
 
             image_bytes = gemini_ai.generate_image(image_prompt)
 
             if image_bytes:
+                if aspect_ratio == "40x65cm":
+                    image_bytes = crop_to_aspect_ratio(image_bytes, 40, 65)
+
                 image_base64 = base64.b64encode(image_bytes).decode("utf-8")
                 return JsonResponse(
                     {
