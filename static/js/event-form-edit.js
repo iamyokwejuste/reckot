@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
-    if (window.AIComponents) {
+    const aiEnabled = document.body.dataset.aiEnabled === 'true';
+
+    if (window.AIComponents && aiEnabled) {
         setTimeout(() => {
             const descriptionField = document.querySelector('#id_description');
             if (descriptionField) {

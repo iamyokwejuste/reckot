@@ -12,7 +12,16 @@ from apps.ai.models import AIRateLimit, AIUsageLog
 def ai_feature_required(view_func: Callable[..., HttpResponse]) -> Callable[..., HttpResponse]:
     @wraps(view_func)
     def wrapped_view(request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        if request.user.is_authenticated and not request.user.ai_features_enabled:
+        if not request.user.is_authenticated:
+            return JsonResponse(
+                {
+                    "error": "Please log in to use AI features.",
+                    "disabled": True,
+                },
+                status=403,
+            )
+
+        if not request.user.ai_features_enabled:
             return JsonResponse(
                 {
                     "error": "AI features disabled. Enable in settings.",

@@ -1,4 +1,5 @@
-document.addEventListener('alpine:init', () => {
+function registerCreateEvent() {
+    if (typeof Alpine !== 'undefined') {
     Alpine.data('createEvent', () => ({
         step: 1,
         totalSteps: 4,
@@ -95,4 +96,11 @@ document.addEventListener('alpine:init', () => {
             });
         }
     }));
-});
+    }
+}
+
+if (typeof Alpine !== 'undefined') {
+    registerCreateEvent();
+} else {
+    document.addEventListener('alpine:init', registerCreateEvent);
+}
