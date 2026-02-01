@@ -6,7 +6,6 @@
 {% block title %}{% trans "Edit" %} {{ event.title }} - Reckot{% endblock %}
 
 {% block extra_head %}
-<script src="{% static 'js/edit_event.js' %}"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <link href="{% static 'css/richtext.css' %}" rel="stylesheet">
 {% endblock %}
@@ -425,5 +424,6 @@
 <script src="{% static 'js/image-compress.js' %}"></script>
 <script src="{% static 'js/ai-assistant.js' %}"></script>
 <script src="{% static 'js/event-form-datepicker.js' %}"></script>
+<script src="{% static 'js/edit_event.js' %}"></script>
 <script src="{% static 'js/event-form-edit.js' %}"></script>
 {% endblock %}
