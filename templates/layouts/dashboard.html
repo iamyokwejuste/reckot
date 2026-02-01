@@ -51,7 +51,27 @@
             }
         }
         document.addEventListener("DOMContentLoaded", () => lucide.createIcons());
-        document.addEventListener("htmx:afterSwap", () => lucide.createIcons());
+        document.addEventListener("htmx:afterSwap", (evt) => {
+            lucide.createIcons();
+
+            const scripts = evt.detail.target.querySelectorAll('script');
+            scripts.forEach(script => {
+                if (script.innerHTML) {
+                    const newScript = document.createElement('script');
+                    newScript.innerHTML = script.innerHTML;
+                    script.parentNode.replaceChild(newScript, script);
+                }
+            });
+
+            if (typeof Alpine !== 'undefined') {
+                const alpineElements = evt.detail.target.querySelectorAll('[x-data]');
+                alpineElements.forEach(el => {
+                    if (!el.__x) {
+                        Alpine.initTree(el);
+                    }
+                });
+            }
+        });
 
         document.addEventListener("showToast", (e) => {
             const { type, message } = e.detail;
