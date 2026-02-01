@@ -1,22 +1,45 @@
 {% load static %}
 <div id="page-loader" class="fixed inset-0 z-[9999] flex items-center justify-center bg-background transition-opacity duration-300" hx-preserve="true">
-    <div class="flex flex-col items-center gap-6">
-        <div class="relative flex items-center justify-center">
-            <div class="absolute inset-0 h-24 w-24 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-            <div class="h-16 w-16 flex items-center justify-center z-10">
-                <img src="{% static 'images/logo/logo_light_mode.png' %}"
-                     alt="Reckot"
-                     class="h-12 w-auto dark:hidden"
-                     loading="eager">
-                <img src="{% static 'images/logo/logo_dark_mode.png' %}"
-                     alt="Reckot"
-                     class="h-12 w-auto hidden dark:block"
-                     loading="eager">
-            </div>
+    <div class="relative w-40 h-40">
+        <div id="spinner" class="absolute inset-0 animate-spin rounded-full" style="border: 4px solid rgba(0,0,0,0.1); border-top-color: currentColor;"></div>
+        <div class="absolute inset-0 flex items-center justify-center">
+            <img id="logo-light" src="{% static 'images/logo/reckto_logo_light_mode.png' %}"
+                 alt="Reckot"
+                 class="h-24 w-24 object-contain"
+                 loading="eager"
+                 style="display: none;">
+            <img id="logo-dark" src="{% static 'images/logo/reckto_logo_dark_mode.png' %}"
+                 alt="Reckot"
+                 class="h-24 w-24 object-contain"
+                 loading="eager"
+                 style="display: none;">
         </div>
-        <p class="text-sm text-muted-foreground animate-pulse">Loading...</p>
     </div>
 </div>
+<script>
+(function() {
+    const mode = localStorage.getItem('theme') || 'system';
+    const isDark = mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const loader = document.getElementById('page-loader');
+    const logoLight = document.getElementById('logo-light');
+    const logoDark = document.getElementById('logo-dark');
+    const spinner = document.getElementById('spinner');
+
+    if (isDark) {
+        document.documentElement.classList.add('dark');
+        logoDark.style.display = 'block';
+        loader.style.backgroundColor = '#09090b';
+    } else {
+        document.documentElement.classList.remove('dark');
+        logoLight.style.display = 'block';
+        loader.style.backgroundColor = '#fafafa';
+    }
+
+    const spinnerColor = isDark ? '#fafafa' : '#09090b';
+    spinner.style.color = spinnerColor;
+})();
+</script>
+
 
 <script>
 (function() {
@@ -31,10 +54,10 @@
     }
 
     if (document.readyState === 'complete') {
-        hideLoader();
+        setTimeout(hideLoader, 800);
     } else {
         window.addEventListener('load', () => {
-            setTimeout(hideLoader, 300);
+            setTimeout(hideLoader, 800);
         });
     }
 })();
