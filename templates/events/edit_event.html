@@ -523,9 +523,17 @@
                 });
             }
         }));
+
+        if (window.Alpine && Alpine.version) {
+            setTimeout(() => {
+                const el = document.querySelector('[x-data*="editEvent"]');
+                if (el && !el.__x) {
+                    Alpine.initTree(el);
+                }
+            }, 50);
+        }
     }
 
-    // Register immediately if Alpine is already loaded, otherwise wait for init
     if (typeof Alpine !== 'undefined') {
         registerEditEvent();
     } else {
