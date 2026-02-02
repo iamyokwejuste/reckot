@@ -239,7 +239,7 @@
                         <div class="text-sm font-medium text-primary">{% trans "Event has started!" %}</div>
                     </div>
 
-                    {% if ticket_types %}
+                    {% if ticket_types and has_available_tickets %}
                     <form method="post" action="{% url 'payments:checkout' %}" class="space-y-4" hx-boost="false"
                           @submit="if (!validateDeliveryEmails($event)) return false;"
                           x-data="eventCheckout('{{ csrf_token }}', {{ event.id }}, '{% url 'events:validate_coupon' %}')">
