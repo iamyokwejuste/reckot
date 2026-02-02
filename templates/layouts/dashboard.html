@@ -291,9 +291,13 @@
 
                     <div x-data="{ open: false }" class="relative">
                         <button @click="open = !open" class="flex items-center gap-2 rounded-full p-1 hover:bg-muted transition-colors shrink-0">
+                            {% if user.get_profile_image_url %}
+                            <img src="{{ user.get_profile_image_url }}" alt="{{ user.get_full_name|default:user.email }}" class="h-8 w-8 rounded-full object-cover">
+                            {% else %}
                             <div class="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
                                 <span class="text-sm font-medium">{{ user.email|slice:":1"|upper }}</span>
                             </div>
+                            {% endif %}
                         </button>
 
                         <div x-show="open"
