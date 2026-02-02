@@ -59,6 +59,13 @@ RUN mkdir -p /app/media/org_logos /app/media/event_covers /app/media/event_heroe
 
 RUN chown -R appuser:appuser /app/media /app/staticfiles
 
+ENV DJANGO_SETTINGS_MODULE=reckot.settings \
+    SECRET_KEY=build-time-only-not-for-production \
+    DEBUG=False \
+    ALLOWED_HOSTS=*
+
+RUN su appuser -c "uv run python manage.py collectstatic --noinput --clear"
+
 EXPOSE 8000
 
 ENTRYPOINT ["/app/entrypoint.sh"]

@@ -1,36 +1,27 @@
 #!/bin/bash
 set -e
 
-echo "==> Environment check..."
-echo "DB_HOST: ${DB_HOST:-db}"
-echo "DB_PORT: ${DB_PORT:-5432}"
-echo "DB_NAME: ${DB_NAME:-reckot}"
-echo "DB_USER: ${DB_USER:-reckot}"
-
-echo "==> Waiting for database at ${DB_HOST:-db}:${DB_PORT:-5432}..."
-max_attempts=60
+echo "==> Waiting for database..."
+max_attempts=30
 attempt=0
 while ! pg_isready -h "${DB_HOST:-db}" -p "${DB_PORT:-5432}" -U "${DB_USER:-reckot}" -q 2>/dev/null; do
     attempt=$((attempt + 1))
     if [ $attempt -ge $max_attempts ]; then
-        echo "Database not available after $max_attempts attempts, starting anyway..."
+        echo "Database not ready after $max_attempts attempts"
         break
     fi
-    echo "Database unavailable (attempt $attempt/$max_attempts), waiting..."
-    sleep 2
+    sleep 1
 done
-echo "==> Database is ready!"
-
-echo "==> Fixing permissions..."
-chown -R appuser:appuser /opt/venv /app/media /app/staticfiles
 
 if [ "$RUN_MIGRATIONS" = "true" ]; then
-    echo "==> Running database migrations..."
+    echo "==> Running migrations..."
     su -s /bin/bash appuser -c "uv run python manage.py migrate --noinput"
 fi
 
-echo "==> Collecting static files..."
-su -s /bin/bash appuser -c "uv run python manage.py collectstatic --noinput"
+if [ "$COLLECT_STATIC" = "true" ]; then
+    echo "==> Collecting static files..."
+    su -s /bin/bash appuser -c "uv run python manage.py collectstatic --noinput"
+fi
 
-echo "==> Starting application as appuser..."
+echo "==> Starting application..."
 exec su -s /bin/bash appuser -c 'exec "$@"' -- appuser "$@"
