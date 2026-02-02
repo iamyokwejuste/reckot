@@ -67,7 +67,4 @@ def handle_refund_status_change(sender, instance, created, **kwargs):
             notes=notes,
         )
 
-        if instance.status == Refund.Status.PROCESSED:
-            process_refund_payment(instance)
-
         send_refund_notification_task.delay(instance.id)

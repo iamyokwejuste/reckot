@@ -32,6 +32,7 @@ from apps.payments.services import (
     confirm_payment,
     fail_payment,
     initiate_payment,
+    process_refund_payment,
     verify_and_confirm_payment,
 )
 from apps.tickets.models import Booking, GuestSession
@@ -745,8 +746,16 @@ class RefundProcessView(LoginRequiredMixin, View):
             refund.approve(processed_by=request.user)
             messages.success(request, _("Refund approved."))
         elif action == "process":
-            refund.process(processed_by=request.user)
-            messages.success(request, _("Refund marked as processed."))
+            success = process_refund_payment(refund)
+
+            if success:
+                refund.process(processed_by=request.user)
+                messages.success(request, _("Refund processed successfully and marked as completed."))
+            else:
+                messages.error(
+                    request,
+                    _("Failed to process refund with payment provider. Please check the logs and try again.")
+                )
         elif action == "reject":
             reason = request.POST.get("rejection_reason", "")
             refund.reject(reason, processed_by=request.user)
