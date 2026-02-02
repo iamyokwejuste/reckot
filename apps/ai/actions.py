@@ -10,6 +10,7 @@ from django.utils.decorators import method_decorator
 from django.utils import timezone
 from django.contrib import messages
 from django.db.models import Sum
+from django.conf import settings
 
 from apps.ai.models import SupportTicket, AIConversation, AIMessage
 from apps.ai import services
@@ -92,6 +93,23 @@ class AIAssistantChatView(View):
                 {"error": "Message too long. Please limit to 50 words or less."},
                 status=400,
             )
+
+        if request.user.is_authenticated:
+            today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            user_messages_today = AIMessage.objects.filter(
+                conversation__user=request.user,
+                role=AIMessage.Role.USER,
+                created_at__gte=today_start
+            ).count()
+
+            daily_limit = getattr(settings, 'RECKOT_AI_CHAT_DAILY_LIMIT', 50)
+            if user_messages_today >= daily_limit:
+                return JsonResponse(
+                    {
+                        "error": f"Daily chat limit reached. You can send up to {daily_limit} messages per day. Please try again tomorrow."
+                    },
+                    status=429
+                )
 
         conversation = self._get_or_create_conversation(request, session_id)
         history = self._get_conversation_history(conversation)

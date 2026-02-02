@@ -62,7 +62,7 @@
             "@type": "Offer",
             "name": "{{ tt.name|escapejs }}",
             "price": "{{ tt.price }}",
-            "priceCurrency": "XAF",
+            "priceCurrency": "{{ event.organization.currency|default:'XAF' }}",
             "availability": "https://schema.org/{% if tt.is_available %}InStock{% else %}SoldOut{% endif %}",
             "url": "{{ request.build_absolute_uri }}",
             "validFrom": "{% if tt.sales_start %}{{ tt.sales_start|date:'c' }}{% else %}{{ event.created_at|date:'c' }}{% endif %}"
@@ -303,7 +303,7 @@
                                     {% if ticket_type.price == 0 %}
                                     <span class="text-success">{% trans "Free" %}</span>
                                     {% else %}
-                                    {{ ticket_type.price }} XAF
+                                    {{ ticket_type.price }} {{ currency }}
                                     {% endif %}
                                 </div>
                             </div>
@@ -482,6 +482,14 @@
                             <i data-lucide="arrow-right" class="w-4 h-4"></i>
                         {% /button %}
                     </form>
+
+                    {% if not has_available_tickets %}
+                    <div class="p-4 rounded-lg bg-muted border border-border text-center mt-4">
+                        <p class="text-sm text-muted-foreground">
+                            {% trans "Ticket sales are not available at this time." %}
+                        </p>
+                    </div>
+                    {% endif %}
                     {% else %}
                     <p class="text-muted-foreground text-sm">{% trans "No tickets available at this time." %}</p>
                     {% endif %}

@@ -10,7 +10,7 @@ from io import BytesIO
 from weasyprint import HTML, CSS
 from weasyprint.text.fonts import FontConfiguration
 from apps.tickets.models import TicketType, Booking, Ticket, TicketQuestionAnswer
-from apps.events.models import CouponUsage, CheckoutQuestion
+from apps.events.models import CouponUsage, CheckoutQuestion, Event
 
 
 def create_booking(user, ticket_type: TicketType, quantity: int):
@@ -59,6 +59,12 @@ def create_multi_ticket_booking(
         tickets_to_create = []
         now = timezone.localtime(timezone.now())
         now_naive = now.replace(tzinfo=None)
+
+        if event.state == Event.State.CLOSED:
+            return None, "This event is closed and ticket sales are no longer available."
+
+        if event.end_at and now > event.end_at:
+            return None, "This event has ended and ticket sales are no longer available."
 
         for ticket_type_id, quantity in ticket_selections.items():
             if quantity <= 0:

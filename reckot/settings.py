@@ -80,6 +80,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "apps.core.context_processors.platform_settings",
                 "apps.core.context_processors.unread_notifications",
+                "apps.core.context_processors.user_currency",
             ],
             "builtins": [
                 "slippers.templatetags.slippers",
@@ -293,8 +294,11 @@ RECKOT_PLATFORM_FEE_PERCENTAGE = Decimal(
     os.getenv("RECKOT_PLATFORM_FEE_PERCENTAGE", "7")
 )
 
-# campay docs: https://documenter.getpostman.com/view/2391374/T1LV8PVA
+RECKOT_AI_CHAT_DAILY_LIMIT = int(
+    os.getenv("RECKOT_AI_CHAT_DAILY_LIMIT", "50")
+)
 
+# campay docs: https://documenter.getpostman.com/view/2391374/T1LV8PVA
 PAYMENT_GATEWAYS = {
     "PRIMARY": os.getenv("PAYMENT_PRIMARY_GATEWAY", "CAMPAY"),
     "FALLBACKS": os.getenv("PAYMENT_FALLBACK_GATEWAYS", "PAWAPAY,FLUTTERWAVE").split(

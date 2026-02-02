@@ -14,7 +14,7 @@
         {% #breadcrumb_item %}{% trans "Payment" %}{% /breadcrumb_item %}
     {% /breadcrumb %}
 
-    <div class="mx-auto mt-8 max-w-lg" data-animate="scale-in">
+    <div class="mx-auto mt-8 max-w-6xl" data-animate="scale-in">
         {% #card class="shadow-xl" %}
             <div class="text-center mb-6">
                 <div class="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-animated mb-4">
@@ -31,10 +31,12 @@
                     hx-post="{% url 'payments:start' booking_ref=booking.reference %}"
                     hx-target="#payment-panel"
                     hx-swap="innerHTML"
-                    class="space-y-6"
+                    class="grid grid-cols-1 lg:grid-cols-2 gap-6"
+                    x-data="{ selectedMethod: 'CAMPAY' }"
                 >
                     {% csrf_token %}
 
+                    <div class="space-y-6">
                     <div class="space-y-3">
                         <p class="text-sm font-medium">{% trans "Payment Method" %}</p>
                         <div class="grid gap-3">
@@ -47,6 +49,7 @@
                                     class="h-4 w-4 border-2 border-input text-primary focus:ring-primary"
                                     required
                                     checked
+                                    x-model="selectedMethod"
                                 />
                                 <div class="flex items-center gap-3 flex-1">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10">
@@ -66,6 +69,7 @@
                                     value="FLUTTERWAVE"
                                     data-payment-method="mobile_money"
                                     class="h-4 w-4 border-2 border-input text-primary focus:ring-primary"
+                                    x-model="selectedMethod"
                                 />
                                 <div class="flex items-center gap-3 flex-1">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
@@ -73,7 +77,7 @@
                                     </div>
                                     <div>
                                         <span class="font-medium block">{% trans "Mobile Money (Flutterwave)" %}</span>
-                                        <span class="text-xs text-muted-foreground">{% trans "Ghana, Uganda, Cameroon" %}</span>
+                                        <span class="text-xs text-muted-foreground">{% trans "Ghana, Uganda" %}</span>
                                     </div>
                                 </div>
                             </label>
@@ -84,6 +88,7 @@
                                     value="FLUTTERWAVE"
                                     data-payment-method="card"
                                     class="h-4 w-4 border-2 border-input text-primary focus:ring-primary"
+                                    x-model="selectedMethod"
                                 />
                                 <div class="flex items-center gap-3 flex-1">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10">
@@ -102,6 +107,7 @@
                                     value="OFFLINE"
                                     data-payment-method=""
                                     class="h-4 w-4 border-2 border-input text-primary focus:ring-primary"
+                                    x-model="selectedMethod"
                                 />
                                 <div class="flex items-center gap-3">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
@@ -134,41 +140,44 @@
                         <p class="text-xs text-muted-foreground">{% trans "Enter without country code (e.g., 6XX XXX XXX)" %}</p>
                         <p x-show="phone && carrier === 'UNKNOWN'" class="text-xs text-destructive">{% trans "Invalid Cameroon phone number" %}</p>
                     </div>
+                    </div>
 
-                    <div class="rounded-xl bg-muted p-4 space-y-3">
-                        <div class="text-xs text-info-foreground mb-2">
+                    <div class="space-y-6">
+                    <div class="rounded-xl bg-muted p-4 space-y-3 lg:sticky lg:top-24">
+                        <div class="text-xs text-info-foreground mb-2" x-show="selectedMethod === 'CAMPAY'" x-cloak>
                             {% trans "Note: The agent name that will appear for withdrawal is" %} <strong>TAKWID GROUP</strong>.
                         </div>
                         <div class="text-sm text-muted-foreground mb-2">{% trans "Order Summary" %}</div>
                         {% for ticket in booking.tickets.all %}
                         <div class="flex items-center justify-between text-sm">
                             <span>{{ ticket.ticket_type.name }}</span>
-                            <span>{{ ticket.ticket_type.price }} XAF</span>
+                            <span>{{ ticket.ticket_type.price }} {{ currency }}</span>
                         </div>
                         {% endfor %}
                         <div class="border-t border-border pt-3 space-y-2">
                             <div class="flex items-center justify-between text-sm">
                                 <span>{% trans "Subtotal" %}</span>
-                                <span>{{ subtotal }} XAF</span>
+                                <span>{{ subtotal }} {{ currency }}</span>
                             </div>
                             <div class="flex items-center justify-between text-sm text-muted-foreground">
                                 <span class="flex items-center gap-1">
                                     {% trans "Transaction Fee" %}
                                     <i data-lucide="info" class="h-3 w-3" title="{% trans 'Mobile money withdrawal fee' %}"></i>
                                 </span>
-                                <span>{{ withdrawal_fee }} XAF</span>
+                                <span>{{ withdrawal_fee }} {{ currency }}</span>
                             </div>
                             <div class="border-t border-border pt-2 flex items-center justify-between">
                                 <span class="font-medium">{% trans "Total to Pay" %}</span>
-                                <span class="text-xl font-bold">{{ total_with_fee }} XAF</span>
+                                <span class="text-xl font-bold">{{ total_with_fee }} {{ currency }}</span>
                             </div>
                         </div>
-                    </div>
 
-                    {% #button type="submit" variant="default" class="w-full" %}
+                    {% #button type="submit" variant="default" class="w-full mt-4" %}
                         <i data-lucide="credit-card" class="mr-2 h-4 w-4"></i>
                         {% trans "Pay Now" %}
                     {% /button %}
+                    </div>
+                    </div>
                 </form>
             </div>
         {% /card %}

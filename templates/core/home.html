@@ -410,6 +410,135 @@
     </div>
 </section>
 
+<section id="faq" class="py-20 md:py-28 bg-muted/30">
+    <div class="container">
+        <div class="text-center max-w-2xl mx-auto mb-16" x-data x-intersect.once="$el.classList.add('animate-in')">
+            <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">{% trans "Frequently asked questions" %}</h2>
+            <p class="text-muted-foreground mt-4 text-lg">{% trans "Everything you need to know about Reckot" %}</p>
+        </div>
+
+        <div class="max-w-3xl mx-auto space-y-3" x-data="{ openItem: null }" x-intersect.once="$el.classList.add('animate-in', 'delay-1')">
+            <div class="border border-border rounded-xl bg-card overflow-hidden transition-all shadow-sm hover:shadow-md">
+                <button
+                    @click="openItem = openItem === 1 ? null : 1"
+                    class="w-full px-6 py-6 text-left flex items-center justify-between hover:bg-accent/50 transition-colors"
+                    :aria-expanded="openItem === 1"
+                >
+                    <span class="font-semibold text-base pr-6">{% trans "How does mobile money payment work?" %}</span>
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-muted-foreground transition-transform duration-200 flex-shrink-0" :class="openItem === 1 && 'rotate-180'"></i>
+                </button>
+                <div
+                    x-show="openItem === 1"
+                    x-collapse
+                    class="px-6 pb-6 pt-2 text-muted-foreground leading-relaxed"
+                >
+                    <p>{% trans "When a customer buys a ticket, they receive a payment prompt on their phone. They authorize the payment using their MTN MoMo or Orange Money PIN. Confirmation is instant, and the ticket is sent to their email immediately." %}</p>
+                </div>
+            </div>
+
+            <div class="border border-border rounded-xl bg-card overflow-hidden transition-all shadow-sm hover:shadow-md">
+                <button
+                    @click="openItem = openItem === 2 ? null : 2"
+                    class="w-full px-6 py-6 text-left flex items-center justify-between hover:bg-accent/50 transition-colors"
+                    :aria-expanded="openItem === 2"
+                >
+                    <span class="font-semibold text-base pr-6">{% trans "When do I receive my money?" %}</span>
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-muted-foreground transition-transform duration-200 flex-shrink-0" :class="openItem === 2 && 'rotate-180'"></i>
+                </button>
+                <div
+                    x-show="openItem === 2"
+                    x-collapse
+                    class="px-6 pb-6 pt-2 text-muted-foreground leading-relaxed"
+                >
+                    <p>{% trans "You can request a withdrawal 24 hours after your event ends. Funds are transferred directly to your mobile money account within 24 hours of approval. There's no minimum withdrawal amount." %}</p>
+                </div>
+            </div>
+
+            <div class="border border-border rounded-xl bg-card overflow-hidden transition-all shadow-sm hover:shadow-md">
+                <button
+                    @click="openItem = openItem === 3 ? null : 3"
+                    class="w-full px-6 py-6 text-left flex items-center justify-between hover:bg-accent/50 transition-colors"
+                    :aria-expanded="openItem === 3"
+                >
+                    <span class="font-semibold text-base pr-6">{% trans "Can I sell tickets for free events?" %}</span>
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-muted-foreground transition-transform duration-200 flex-shrink-0" :class="openItem === 3 && 'rotate-180'"></i>
+                </button>
+                <div
+                    x-show="openItem === 3"
+                    x-collapse
+                    class="px-6 pb-6 pt-2 text-muted-foreground leading-relaxed"
+                >
+                    <p>{% trans "Yes! Free tickets have no platform fees. You can use Reckot to manage registrations, send tickets, and check in attendees at zero cost. Perfect for community events and meetups." %}</p>
+                </div>
+            </div>
+
+            <div class="border border-border rounded-xl bg-card overflow-hidden transition-all shadow-sm hover:shadow-md">
+                <button
+                    @click="openItem = openItem === 4 ? null : 4"
+                    class="w-full px-6 py-6 text-left flex items-center justify-between hover:bg-accent/50 transition-colors"
+                    :aria-expanded="openItem === 4"
+                >
+                    <span class="font-semibold text-base pr-6">{% trans "Does QR check-in work offline?" %}</span>
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-muted-foreground transition-transform duration-200 flex-shrink-0" :class="openItem === 4 && 'rotate-180'"></i>
+                </button>
+                <div
+                    x-show="openItem === 4"
+                    x-collapse
+                    class="px-6 pb-6 pt-2 text-muted-foreground leading-relaxed"
+                >
+                    <p>{% trans "Yes. Our QR check-in system works completely offline. Download your attendee list before the event, and you can scan tickets without internet. Data syncs automatically when you're back online." %}</p>
+                </div>
+            </div>
+
+            <div class="border border-border rounded-xl bg-card overflow-hidden transition-all shadow-sm hover:shadow-md">
+                <button
+                    @click="openItem = openItem === 5 ? null : 5"
+                    class="w-full px-6 py-6 text-left flex items-center justify-between hover:bg-accent/50 transition-colors"
+                    :aria-expanded="openItem === 5"
+                >
+                    <span class="font-semibold text-base pr-6">{% trans "What happens if someone wants a refund?" %}</span>
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-muted-foreground transition-transform duration-200 flex-shrink-0" :class="openItem === 5 && 'rotate-180'"></i>
+                </button>
+                <div
+                    x-show="openItem === 5"
+                    x-collapse
+                    class="px-6 pb-6 pt-2 text-muted-foreground leading-relaxed"
+                >
+                    <p>{% trans "Attendees can request refunds through their ticket lookup page. You'll receive the request in your dashboard and can approve or deny it. Approved refunds are processed within 3-5 business days back to the original payment method." %}</p>
+                </div>
+            </div>
+
+            <div class="border border-border rounded-xl bg-card overflow-hidden transition-all shadow-sm hover:shadow-md">
+                <button
+                    @click="openItem = openItem === 6 ? null : 6"
+                    class="w-full px-6 py-6 text-left flex items-center justify-between hover:bg-accent/50 transition-colors"
+                    :aria-expanded="openItem === 6"
+                >
+                    <span class="font-semibold text-base pr-6">{% trans "Can I customize my event page?" %}</span>
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-muted-foreground transition-transform duration-200 flex-shrink-0" :class="openItem === 6 && 'rotate-180'"></i>
+                </button>
+                <div
+                    x-show="openItem === 6"
+                    x-collapse
+                    class="px-6 pb-6 pt-2 text-muted-foreground leading-relaxed"
+                >
+                    <p>{% trans "Yes. You can add your event cover image, description, location, and custom checkout questions. Your organization branding appears on all event pages and tickets. Enterprise plans include full white-label options." %}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-16" x-data x-intersect.once="$el.classList.add('animate-in', 'delay-2')">
+            <p class="text-muted-foreground mb-6 text-lg">{% trans "Still have questions?" %}</p>
+            <a href="mailto:reckot@yokwejuste.me">
+                {% #button variant="outline" %}
+                    {% trans "Contact support" %}
+                    <i data-lucide="mail" class="w-4 h-4"></i>
+                {% /button %}
+            </a>
+        </div>
+    </div>
+</section>
+
 {% if not user_has_events %}
 <section class="py-20 md:py-28">
     <div class="container">

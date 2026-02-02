@@ -114,37 +114,51 @@ class PublicEventDetailView(View):
         now = timezone.localtime(timezone.now())
         all_ticket_types = event.ticket_types.filter(is_active=True)
 
+        event_blocked = False
+        event_block_reason = None
+
+        if event.state == Event.State.CLOSED:
+            event_blocked = True
+            event_block_reason = "Event is closed"
+        elif event.end_at and now > event.end_at:
+            event_blocked = True
+            event_block_reason = "Event has ended"
+
         available_tickets = []
         for tt in all_ticket_types:
             is_available = True
             status_message = None
             sales_started = False
 
-            sales_start = (
-                tt.sales_start.replace(tzinfo=None) if tt.sales_start else None
-            )
-            sales_end = tt.sales_end.replace(tzinfo=None) if tt.sales_end else None
-            now_naive = now.replace(tzinfo=None)
-
-            if sales_start and now_naive < sales_start:
+            if event_blocked:
                 is_available = False
-                if sales_start.date() == now_naive.date():
-                    status_message = (
-                        f"Sales start today at {sales_start.strftime('%I:%M %p')}"
-                    )
-                else:
-                    status_message = (
-                        f"Sales start {sales_start.strftime('%b %d, %Y at %I:%M %p')}"
-                    )
-            elif sales_end and now_naive > sales_end:
-                is_available = False
-                status_message = _("Sales ended")
-            elif tt.available_quantity <= 0:
-                is_available = False
-                status_message = _("Sold out")
+                status_message = event_block_reason
             else:
-                if sales_start and now_naive >= sales_start:
-                    sales_started = True
+                sales_start = (
+                    tt.sales_start.replace(tzinfo=None) if tt.sales_start else None
+                )
+                sales_end = tt.sales_end.replace(tzinfo=None) if tt.sales_end else None
+                now_naive = now.replace(tzinfo=None)
+
+                if sales_start and now_naive < sales_start:
+                    is_available = False
+                    if sales_start.date() == now_naive.date():
+                        status_message = (
+                            f"Sales start today at {sales_start.strftime('%I:%M %p')}"
+                        )
+                    else:
+                        status_message = (
+                            f"Sales start {sales_start.strftime('%b %d, %Y at %I:%M %p')}"
+                        )
+                elif sales_end and now_naive > sales_end:
+                    is_available = False
+                    status_message = _("Sales ended")
+                elif tt.available_quantity <= 0:
+                    is_available = False
+                    status_message = _("Sold out")
+                else:
+                    if sales_start and now_naive >= sales_start:
+                        sales_started = True
 
             tt.is_available = is_available
             tt.status_message = status_message
@@ -161,6 +175,8 @@ class PublicEventDetailView(View):
         except Exception:
             pass
 
+        has_available_tickets = any(tt.is_available for tt in available_tickets)
+
         return render(
             request,
             "events/public_detail.html",
@@ -170,6 +186,7 @@ class PublicEventDetailView(View):
                 "checkout_questions": checkout_questions,
                 "affiliate_code": affiliate_code,
                 "flyer_enabled": flyer_enabled,
+                "has_available_tickets": has_available_tickets,
             },
         )
 
