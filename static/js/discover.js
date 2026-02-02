@@ -1,9 +1,4 @@
-function initializeDiscover() {
-    if (typeof Alpine === 'undefined') {
-        setTimeout(initializeDiscover, 50);
-        return;
-    }
-
+document.addEventListener('alpine:init', () => {
     Alpine.data('discover', () => ({
         searchQuery: '',
         locationQuery: '',
@@ -117,10 +112,4 @@ function initializeDiscover() {
             this.filteredEvents = events;
         }
     }));
-}
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeDiscover);
-} else {
-    initializeDiscover();
-}
+});
