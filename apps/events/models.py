@@ -137,6 +137,9 @@ class Event(models.Model):
         self.save(update_fields=["preview_token"])
         return self.preview_token
 
+    def get_dashboard_url(self):
+        return f"/events/{self.organization.slug}/{self.slug}/dashboard/"
+
 
 class EventCustomization(models.Model):
     class LayoutTemplate(models.TextChoices):

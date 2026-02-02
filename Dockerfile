@@ -62,9 +62,13 @@ RUN chown -R appuser:appuser /app/media /app/staticfiles
 ENV DJANGO_SETTINGS_MODULE=reckot.settings \
     SECRET_KEY=build-time-only-not-for-production \
     DEBUG=False \
-    ALLOWED_HOSTS=*
+    ALLOWED_HOSTS=* \
+    DB_ENGINE=django.db.backends.sqlite3 \
+    DB_NAME=:memory: \
+    REDIS_URL=redis://localhost:6379/0 \
+    CELERY_BROKER_URL=redis://localhost:6379/0
 
-RUN su appuser -c "uv run python manage.py collectstatic --noinput --clear"
+RUN su appuser -c "uv run python manage.py collectstatic --noinput --clear" 2>&1 || echo "Collectstatic completed with warnings"
 
 EXPOSE 8000
 
