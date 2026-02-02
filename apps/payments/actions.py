@@ -827,6 +827,9 @@ class WithdrawalBalanceView(LoginRequiredMixin, View):
 
         balance_data = calculate_organization_balance(user_org)
 
+        user_org = Organization.objects.filter(members=request.user).first()
+        currency = user_org.currency if user_org else "XAF"
+
         return JsonResponse(
             {
                 "available_balance": float(balance_data["available_balance"]),
@@ -834,7 +837,7 @@ class WithdrawalBalanceView(LoginRequiredMixin, View):
                 "total_service_fees": float(balance_data["service_fees"]),
                 "total_withdrawn": float(balance_data["total_withdrawn"]),
                 "total_refunded": float(balance_data["total_refunded"]),
-                "currency": "XAF",
+                "currency": currency,
             }
         )
 
@@ -855,13 +858,14 @@ class WithdrawalRequestView(LoginRequiredMixin, View):
                     {"success": False, "error": "No organization found"}, status=400
                 )
 
+            org_currency = user_orgs.currency
             description = f"{user_orgs.name[:20]}"
 
             if amount < self.MINIMUM_WITHDRAWAL_AMOUNT:
                 return JsonResponse(
                     {
                         "success": False,
-                        "error": f"Minimum withdrawal amount is {self.MINIMUM_WITHDRAWAL_AMOUNT} XAF",
+                        "error": f"Minimum withdrawal amount is {self.MINIMUM_WITHDRAWAL_AMOUNT} {org_currency}",
                     },
                     status=400,
                 )
@@ -903,7 +907,7 @@ class WithdrawalRequestView(LoginRequiredMixin, View):
                 return JsonResponse(
                     {
                         "success": False,
-                        "error": f"Minimum balance required is {self.MINIMUM_WITHDRAWAL_AMOUNT} XAF. Your balance: {available_balance} XAF",
+                        "error": f"Minimum balance required is {self.MINIMUM_WITHDRAWAL_AMOUNT} {org_currency}. Your balance: {available_balance} {org_currency}",
                     },
                     status=400,
                 )
@@ -912,7 +916,7 @@ class WithdrawalRequestView(LoginRequiredMixin, View):
                 return JsonResponse(
                     {
                         "success": False,
-                        "error": f"Insufficient balance. Available: {available_balance} XAF",
+                        "error": f"Insufficient balance. Available: {available_balance} {org_currency}",
                     },
                     status=400,
                 )
@@ -949,7 +953,7 @@ class WithdrawalRequestView(LoginRequiredMixin, View):
 
             result = gateway.disburse(
                 amount=net_amount,
-                currency="XAF",
+                currency=org_currency,
                 phone_number=phone_number,
                 description=description,
                 external_reference=str(withdrawal.external_reference),

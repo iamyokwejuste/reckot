@@ -507,11 +507,13 @@ class RefundTicketView(LoginRequiredMixin, View):
             messages.error(request, _("No confirmed payment found for this ticket"))
             return redirect("tickets:list")
 
+        currency = payment.currency
+
         if refund_amount < Decimal("100"):
             messages.error(
                 request,
-                _("Minimum refund amount is 100 XAF. Provided: %(amount)s XAF")
-                % {"amount": refund_amount}
+                _("Minimum refund amount is 100 %(currency)s. Provided: %(amount)s %(currency)s")
+                % {"amount": refund_amount, "currency": currency}
             )
             return redirect("tickets:list")
 
@@ -522,16 +524,16 @@ class RefundTicketView(LoginRequiredMixin, View):
         if refund_amount > available_balance:
             messages.error(
                 request,
-                _("Insufficient organization balance. Available: %(balance)s XAF, Required: %(amount)s XAF")
-                % {"balance": available_balance, "amount": refund_amount}
+                _("Insufficient organization balance. Available: %(balance)s %(currency)s, Required: %(amount)s %(currency)s")
+                % {"balance": available_balance, "amount": refund_amount, "currency": currency}
             )
             return redirect("tickets:list")
 
         if refund_amount > payment.amount:
             messages.error(
                 request,
-                _("Refund amount (%(refund)s XAF) cannot exceed payment amount (%(payment)s XAF)")
-                % {"refund": refund_amount, "payment": payment.amount}
+                _("Refund amount (%(refund)s %(currency)s) cannot exceed payment amount (%(payment)s %(currency)s)")
+                % {"refund": refund_amount, "payment": payment.amount, "currency": currency}
             )
             return redirect("tickets:list")
 
@@ -569,7 +571,7 @@ class RefundTicketView(LoginRequiredMixin, View):
 
         messages.success(
             request,
-            _("Refund of %(amount)s XAF initiated successfully for ticket %(code)s")
-            % {"amount": refund_amount, "code": ticket_code}
+            _("Refund of %(amount)s %(currency)s initiated successfully for ticket %(code)s")
+            % {"amount": refund_amount, "code": ticket_code, "currency": currency}
         )
         return redirect("tickets:list")

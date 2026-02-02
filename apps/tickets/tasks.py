@@ -166,10 +166,11 @@ def send_admin_sale_notifications_task(booking_id: int):
                 }
 
         total_amount = payment.amount if payment else booking.total_amount
+        currency = payment.currency if payment else organization.currency
 
         for admin in admin_users:
             notification_title = f"New sale for {event.title}"
-            notification_message = f"{booking.buyer_name} purchased {len(tickets)} ticket(s) for {total_amount} XAF"
+            notification_message = f"{booking.buyer_name} purchased {len(tickets)} ticket(s) for {total_amount} {currency}"
             notification_link = f"/events/{organization.slug}/{event.slug}/dashboard/"
 
             Notification.objects.create(

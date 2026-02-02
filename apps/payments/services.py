@@ -1,25 +1,27 @@
 import logging
+from datetime import timedelta
+from decimal import Decimal
+
+from django.conf import settings
 from django.db import transaction
 from django.db.models import Sum
 from django.utils import timezone
-from django.conf import settings
-from datetime import timedelta
-from decimal import Decimal
-from apps.payments.models import Payment, PaymentGatewayConfig, Refund, Withdrawal
+
+from apps.events.models import FlyerBilling
 from apps.payments.gateways import GatewayManager
 from apps.payments.gateways.base import PaymentStatus
 from apps.payments.invoice_service import create_invoice
+from apps.payments.models import Payment, PaymentGatewayConfig, Refund, Withdrawal
 from apps.tickets.models import Booking
-from apps.events.models import FlyerBilling
 
 logger = logging.getLogger(__name__)
 gateway_manager = GatewayManager()
 
 
 def calculate_booking_amount(booking: Booking) -> Decimal:
-    return sum(
-        t.ticket_type.price for t in booking.tickets.select_related("ticket_type")
-    )
+    tickets_qs = booking.ticket_set.select_related("ticket_type")
+    total = sum(Decimal(t.ticket_type.price) for t in tickets_qs)
+    return Decimal(total)
 
 
 def calculate_organization_balance(organization):
@@ -86,13 +88,13 @@ def initiate_payment(
         gateway_config = None
         try:
             gateway_config = PaymentGatewayConfig.objects.filter(
-                organization=organization,
-                provider=provider,
-                is_active=True
+                organization=organization, provider=provider, is_active=True
             ).first()
 
             if not gateway_config:
-                global_credentials = settings.PAYMENT_GATEWAYS.get("CREDENTIALS", {}).get(provider, {})
+                global_credentials = settings.PAYMENT_GATEWAYS.get(
+                    "CREDENTIALS", {}
+                ).get(provider, {})
                 if global_credentials:
                     gateway_config = PaymentGatewayConfig.objects.create(
                         organization=organization,
@@ -100,11 +102,22 @@ def initiate_payment(
                         is_active=True,
                         is_default=True,
                         credentials=global_credentials,
-                        supported_currencies=["XAF", "XOF", "USD", "EUR", "GBP", "NGN", "GHS", "UGX"],
+                        supported_currencies=[
+                            "XAF",
+                            "XOF",
+                            "USD",
+                            "EUR",
+                            "GBP",
+                            "NGN",
+                            "GHS",
+                            "UGX",
+                        ],
                         service_fee_type=PaymentGatewayConfig.ServiceFeeType.PERCENTAGE,
-                        service_fee_percentage=0
+                        service_fee_percentage=0,
                     )
-                    logger.info(f"Created default gateway config for {organization.name} with provider {provider}")
+                    logger.info(
+                        f"Created default gateway config for {organization.name} with provider {provider}"
+                    )
         except Exception as e:
             logger.warning(f"Failed to get/create gateway config: {e}")
 
@@ -265,10 +278,14 @@ def process_refund_payment(refund):
     logger.info(f"Starting refund process for refund ID: {refund.id}")
 
     payment = refund.payment
-    logger.info(f"Payment reference: {payment.reference}, Status: {payment.status}, Provider: {payment.provider}")
+    logger.info(
+        f"Payment reference: {payment.reference}, Status: {payment.status}, Provider: {payment.provider}"
+    )
 
     if not payment.external_reference:
-        logger.error(f"Payment {payment.reference} has no external reference for refund")
+        logger.error(
+            f"Payment {payment.reference} has no external reference for refund"
+        )
         return False
 
     logger.info(f"External reference: {payment.external_reference}")
@@ -276,23 +293,64 @@ def process_refund_payment(refund):
     gateway_config = payment.gateway_config
 
     if not gateway_config:
-        logger.warning(f"Payment {payment.reference} has no gateway config, trying to get from organization")
+        logger.warning(
+            f"Payment {payment.reference} has no gateway config, trying to get from organization"
+        )
 
         try:
             organization = payment.booking.event.organization
             gateway_config = PaymentGatewayConfig.objects.filter(
-                organization=organization,
-                provider=payment.provider,
-                is_active=True
+                organization=organization, provider=payment.provider, is_active=True
             ).first()
 
             if gateway_config:
-                logger.info(f"Using organization gateway config: {gateway_config.provider}")
+                logger.info(
+                    f"Using organization gateway config: {gateway_config.provider}"
+                )
                 payment.gateway_config = gateway_config
-                payment.save(update_fields=['gateway_config'])
+                payment.save(update_fields=["gateway_config"])
             else:
-                logger.error(f"No active gateway config found for organization {organization.name} with provider {payment.provider}")
-                return False
+                if payment.provider == "CAMPAY":
+                    logger.warning(
+                        f"No organization config for {payment.provider}, attempting to use global credentials"
+                    )
+                    global_credentials = settings.PAYMENT_GATEWAYS.get(
+                        "CREDENTIALS", {}
+                    ).get("CAMPAY", {})
+
+                    if global_credentials:
+                        gateway_config = PaymentGatewayConfig.objects.create(
+                            organization=organization,
+                            provider="CAMPAY",
+                            is_active=True,
+                            is_default=True,
+                            credentials=global_credentials,
+                            supported_currencies=[
+                                "XAF",
+                                "XOF",
+                                "USD",
+                                "EUR",
+                                "GBP",
+                                "NGN",
+                                "GHS",
+                                "UGX",
+                            ],
+                            service_fee_type=PaymentGatewayConfig.ServiceFeeType.PERCENTAGE,
+                            service_fee_percentage=0,
+                        )
+                        logger.info(
+                            f"Created default CAMPAY gateway config for {organization.name}"
+                        )
+                        payment.gateway_config = gateway_config
+                        payment.save(update_fields=["gateway_config"])
+                    else:
+                        logger.error("No global CAMPAY credentials found in settings")
+                        return False
+                else:
+                    logger.error(
+                        f"No active gateway config found for organization {organization.name} with provider {payment.provider}"
+                    )
+                    return False
         except Exception as e:
             logger.error(f"Failed to get gateway config from organization: {e}")
             return False
@@ -306,27 +364,36 @@ def process_refund_payment(refund):
         logger.info(f"Calling gateway refund with amount: {refund.amount}")
 
         result = gateway.refund(
-            external_reference=payment.external_reference,
-            amount=refund.amount
+            external_reference=payment.external_reference, amount=refund.amount
         )
 
-        logger.info(f"Gateway refund result - Success: {result.success}, Message: {result.message}")
+        logger.info(
+            f"Gateway refund result - Success: {result.success}, Message: {result.message}"
+        )
 
         if result.success:
             with transaction.atomic():
                 booking = payment.booking
                 if booking and refund.refund_type == refund.Type.FULL:
-                    from apps.tickets.models import Booking
-                    logger.info(f"Updating booking {booking.reference} status to REFUNDED")
+                    logger.info(
+                        f"Updating booking {booking.reference} status to REFUNDED"
+                    )
                     booking.status = Booking.Status.REFUNDED
                     booking.save(update_fields=["status"])
 
-            logger.info(f"Refund processed successfully for payment {payment.reference}")
+            logger.info(
+                f"Refund processed successfully for payment {payment.reference}"
+            )
             return True
         else:
-            logger.error(f"Refund failed for payment {payment.reference}: {result.message}")
+            logger.error(
+                f"Refund failed for payment {payment.reference}: {result.message}"
+            )
             return False
 
     except Exception as e:
-        logger.error(f"Failed to process refund for payment {payment.reference}: {e}", exc_info=True)
+        logger.error(
+            f"Failed to process refund for payment {payment.reference}: {e}",
+            exc_info=True,
+        )
         return False

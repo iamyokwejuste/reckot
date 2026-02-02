@@ -25,7 +25,7 @@ def create_payment_notification(sender, instance, created, **kwargs):
             user=instance.booking.user,
             notification_type=Notification.Type.PAYMENT_CONFIRMED,
             title=f"Payment confirmed",
-            message=f"Your payment of {instance.amount} XAF for {instance.booking.event.title} has been confirmed.",
+            message=f"Your payment of {instance.amount} {instance.currency} for {instance.booking.event.title} has been confirmed.",
             link=f"/tickets/my/",
         )
 
@@ -46,6 +46,6 @@ def create_refund_notification(sender, instance, created, **kwargs):
                 user=instance.payment.booking.user,
                 notification_type=Notification.Type.REFUND_PROCESSED,
                 title="Refund processed",
-                message=f"Your refund of {instance.amount} XAF has been processed and will arrive soon.",
+                message=f"Your refund of {instance.amount} {instance.payment.currency} has been processed and will arrive soon.",
                 link=f"/tickets/my/",
             )
