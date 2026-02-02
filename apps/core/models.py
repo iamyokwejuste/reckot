@@ -110,6 +110,7 @@ class Notification(models.Model):
         REFUND_PROCESSED = "REFUND_PROCESSED", _("Refund Processed")
         EVENT_UPDATE = "EVENT_UPDATE", _("Event Update")
         EVENT_CANCELLED = "EVENT_CANCELLED", _("Event Cancelled")
+        SALE_MADE = "SALE_MADE", _("Sale Made")
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
     notification_type = models.CharField(max_length=20, choices=Type.choices)

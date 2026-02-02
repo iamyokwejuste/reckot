@@ -106,6 +106,8 @@ def initiate_payment(
         callback_base = settings.PAYMENT_GATEWAYS.get("CALLBACK_BASE_URL", "")
         if provider == "CAMPAY":
             callback_url = f"{callback_base}/payments/webhook/campay/"
+        elif provider == "FLUTTERWAVE":
+            callback_url = f"{callback_base}/payments/webhook/flutterwave/"
         else:
             callback_url = f"{callback_base}/payments/webhook/"
 
@@ -128,6 +130,7 @@ def initiate_payment(
             payment.metadata = {
                 "gateway_response": result.raw_response,
                 "transaction_id": result.transaction_id,
+                "payment_method": kwargs.get("payment_method", ""),
             }
             payment.save()
 
@@ -228,3 +231,46 @@ def retry_payment(payment: Payment, method: str, phone: str) -> Payment:
         payment.external_reference = ""
         payment.save()
         return payment
+
+
+def process_refund_payment(refund):
+    from apps.payments.gateways.manager import GatewayManager
+    from apps.payments.models import Refund
+
+    payment = refund.payment
+
+    if not payment.external_reference:
+        logger.warning(f"Payment {payment.reference} has no external reference for refund")
+        return False
+
+    gateway_config = payment.gateway_config
+    if not gateway_config:
+        logger.warning(f"Payment {payment.reference} has no gateway config")
+        return False
+
+    try:
+        gateway_manager = GatewayManager(gateway_config)
+        gateway = gateway_manager.get_gateway(payment.provider)
+
+        result = gateway.refund(
+            external_reference=payment.external_reference,
+            amount=refund.amount
+        )
+
+        if result.success:
+            with transaction.atomic():
+                booking = payment.booking
+                if booking and refund.refund_type == refund.Type.FULL:
+                    from apps.tickets.models import Booking
+                    booking.status = Booking.Status.REFUNDED
+                    booking.save(update_fields=["status"])
+
+            logger.info(f"Refund processed successfully for payment {payment.reference}")
+            return True
+        else:
+            logger.error(f"Refund failed for payment {payment.reference}: {result.message}")
+            return False
+
+    except Exception as e:
+        logger.error(f"Failed to process refund for payment {payment.reference}: {e}")
+        return False

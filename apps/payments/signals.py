@@ -2,9 +2,10 @@ from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
 from apps.payments.models import Payment, Refund, RefundAuditLog
+from apps.payments.services import process_refund_payment
 from apps.payments.tasks import send_refund_notification_task
 from apps.tickets.models import Booking
-from apps.tickets.tasks import send_ticket_confirmation_task
+from apps.tickets.tasks import send_ticket_confirmation_task, send_admin_sale_notifications_task
 
 
 @receiver(post_save, sender=Payment)
@@ -15,6 +16,7 @@ def handle_payment_status_change(sender, instance, created, **kwargs):
             booking.status = Booking.Status.CONFIRMED
             booking.save(update_fields=["status"])
         send_ticket_confirmation_task.delay(booking.id)
+        send_admin_sale_notifications_task.delay(booking.id)
 
 
 @receiver(pre_save, sender=Refund)
@@ -64,5 +66,8 @@ def handle_refund_status_change(sender, instance, created, **kwargs):
             performed_by=instance.processed_by,
             notes=notes,
         )
+
+        if instance.status == Refund.Status.PROCESSED:
+            process_refund_payment(instance)
 
         send_refund_notification_task.delay(instance.id)

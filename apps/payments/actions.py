@@ -284,6 +284,7 @@ class PaymentStartView(View):
             )
         method = request.POST.get("method")
         phone = request.POST.get("phone")
+        payment_method = request.POST.get("payment_method", "mobile_money")
         if not method or not phone:
             return render(
                 request,
@@ -294,7 +295,7 @@ class PaymentStartView(View):
                     )
                 },
             )
-        payment, result = initiate_payment(booking, method, phone)
+        payment, result = initiate_payment(booking, method, phone, payment_method=payment_method)
         if not result.get("success"):
             return render(
                 request,
@@ -510,6 +511,92 @@ class CampayWebhookView(View):
 
     def post(self, request):
         return self._process_webhook(request)
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class FlutterwaveWebhookView(View):
+    def _verify_signature(self, request, payment) -> bool:
+        signature = request.headers.get("verif-hash", "")
+        if not signature:
+            logger.error("Flutterwave webhook missing verif-hash header")
+            return False
+
+        gateway_config = payment.gateway_config
+        if not gateway_config:
+            logger.error("Payment has no gateway config")
+            return False
+
+        credentials = gateway_config.credentials or {}
+        webhook_secret = credentials.get("webhook_secret", "")
+
+        if not webhook_secret:
+            logger.error("Flutterwave webhook secret not configured")
+            return False
+
+        if not hmac.compare_digest(signature, webhook_secret):
+            logger.error("Flutterwave webhook signature mismatch")
+            return False
+
+        logger.info("Flutterwave webhook signature verified")
+        return True
+
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+            logger.info(f"Flutterwave webhook received: {data}")
+        except (json.JSONDecodeError, ValueError):
+            logger.error("Flutterwave webhook invalid JSON")
+            return HttpResponse("Invalid JSON", status=400)
+
+        event_type = data.get("event")
+        if event_type != "charge.completed":
+            logger.info(f"Flutterwave webhook ignored event type: {event_type}")
+            return HttpResponse("OK", status=200)
+
+        tx_data = data.get("data", {})
+        tx_ref = tx_data.get("tx_ref", "")
+        flw_ref = tx_data.get("flw_ref", "")
+        status = tx_data.get("status", "").lower()
+        amount = tx_data.get("amount", 0)
+        currency = tx_data.get("currency", "")
+        payment_type = tx_data.get("payment_type", "")
+
+        if not tx_ref:
+            logger.warning("Flutterwave webhook missing tx_ref")
+            return HttpResponse("Missing tx_ref", status=400)
+
+        payment = get_payment_by_id(tx_ref)
+        if not payment:
+            logger.warning(f"Payment not found for tx_ref: {tx_ref}")
+            return HttpResponse("Payment not found", status=404)
+
+        if not self._verify_signature(request, payment):
+            logger.error(f"Flutterwave webhook signature verification failed for {tx_ref}")
+            return HttpResponse("Invalid signature", status=403)
+
+        webhook_data = {
+            "flutterwave_reference": flw_ref,
+            "amount": amount,
+            "currency": currency,
+            "payment_type": payment_type,
+            "webhook_received_at": timezone.now().isoformat(),
+        }
+
+        if payment.metadata:
+            payment.metadata.update(webhook_data)
+        else:
+            payment.metadata = webhook_data
+        payment.save(update_fields=["metadata"])
+
+        if status == "successful":
+            confirm_payment(payment, flw_ref)
+            logger.info(f"Payment {tx_ref} confirmed via Flutterwave webhook")
+        elif status == "failed":
+            reason = tx_data.get("narration", "") or "Payment failed"
+            fail_payment(payment, reason)
+            logger.info(f"Payment {tx_ref} failed via Flutterwave webhook: {reason}")
+
+        return HttpResponse("OK", status=200)
 
 
 class InvoiceDownloadView(View):

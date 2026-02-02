@@ -1,0 +1,76 @@
+{% extends "emails/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "New Sale Notification" %} - {{ event.title }}{% endblock %}
+
+{% block content %}
+    <h1 style="font-size: 24px; font-weight: 700; margin: 0 0 16px 0; color: #09090b;">
+        {% trans "New Sale!" %}
+    </h1>
+
+    <p style="font-size: 16px; line-height: 24px; color: #09090b; margin: 0 0 24px 0;">
+        {% trans "You just made a sale for" %} <strong>{{ event.title }}</strong>
+    </p>
+
+    <div class="email-card" style="padding: 24px; border-radius: 8px; margin-bottom: 24px;">
+        <h2 style="font-size: 18px; font-weight: 600; margin: 0 0 16px 0; color: #09090b;">
+            {% trans "Sale Details" %}
+        </h2>
+
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="padding: 8px 0; color: #52525b;">{% trans "Buyer Name" %}</td>
+                <td style="padding: 8px 0; text-align: right; font-weight: 500;">{{ booking.buyer_name }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; color: #52525b;">{% trans "Buyer Email" %}</td>
+                <td style="padding: 8px 0; text-align: right; font-weight: 500;">{{ booking.buyer_email }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; color: #52525b;">{% trans "Booking Reference" %}</td>
+                <td style="padding: 8px 0; text-align: right; font-family: monospace; font-weight: 500;">{{ booking.reference }}</td>
+            </tr>
+            {% if payment %}
+            <tr>
+                <td style="padding: 8px 0; color: #52525b;">{% trans "Payment Reference" %}</td>
+                <td style="padding: 8px 0; text-align: right; font-family: monospace; font-weight: 500;">{{ payment.reference }}</td>
+            </tr>
+            {% endif %}
+        </table>
+    </div>
+
+    <div class="email-card" style="padding: 24px; border-radius: 8px; margin-bottom: 24px;">
+        <h2 style="font-size: 18px; font-weight: 600; margin: 0 0 16px 0; color: #09090b;">
+            {% trans "Tickets Purchased" %}
+        </h2>
+
+        <table style="width: 100%; border-collapse: collapse;">
+            {% for ticket_type, data in ticket_summary.items %}
+            <tr>
+                <td style="padding: 8px 0; color: #09090b;">{{ ticket_type }}</td>
+                <td style="padding: 8px 0; text-align: center; color: #52525b;">x{{ data.count }}</td>
+                <td style="padding: 8px 0; text-align: right; font-weight: 500;">{{ data.price|floatformat:0 }} XAF</td>
+            </tr>
+            {% endfor %}
+            <tr style="border-top: 2px solid #e4e4e7;">
+                <td style="padding: 12px 0; font-weight: 600; color: #09090b;">{% trans "Total" %}</td>
+                <td style="padding: 12px 0;"></td>
+                <td style="padding: 12px 0; text-align: right; font-weight: 700; font-size: 18px; color: #09090b;">
+                    {% if payment %}{{ payment.amount|floatformat:0 }}{% else %}{{ booking.total_amount|floatformat:0 }}{% endif %} XAF
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div style="text-align: center; margin: 32px 0;">
+        <a href="https://reckot.com{{ event.get_dashboard_url }}"
+           class="email-button"
+           style="display: inline-block; padding: 12px 32px; border-radius: 6px; text-decoration: none; font-weight: 600;">
+            {% trans "View Event Dashboard" %}
+        </a>
+    </div>
+
+    <p style="font-size: 14px; line-height: 20px; color: #52525b; margin: 24px 0 0 0;">
+        {% trans "This is an automated notification to keep you informed about sales for your events." %}
+    </p>
+{% endblock %}

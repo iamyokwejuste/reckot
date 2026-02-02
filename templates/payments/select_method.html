@@ -43,6 +43,7 @@
                                     type="radio"
                                     name="method"
                                     value="CAMPAY"
+                                    data-payment-method="mobile_money"
                                     class="h-4 w-4 border-2 border-input text-primary focus:ring-primary"
                                     required
                                     checked
@@ -62,7 +63,44 @@
                                 <input
                                     type="radio"
                                     name="method"
+                                    value="FLUTTERWAVE"
+                                    data-payment-method="mobile_money"
+                                    class="h-4 w-4 border-2 border-input text-primary focus:ring-primary"
+                                />
+                                <div class="flex items-center gap-3 flex-1">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
+                                        <i data-lucide="smartphone" class="h-5 w-5 text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                        <span class="font-medium block">{% trans "Mobile Money (Flutterwave)" %}</span>
+                                        <span class="text-xs text-muted-foreground">{% trans "Ghana, Uganda, Cameroon" %}</span>
+                                    </div>
+                                </div>
+                            </label>
+                            <label class="flex cursor-pointer items-center space-x-3 rounded-xl border-2 border-input p-4 hover:bg-accent hover:border-primary/30 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+                                <input
+                                    type="radio"
+                                    name="method"
+                                    value="FLUTTERWAVE"
+                                    data-payment-method="card"
+                                    class="h-4 w-4 border-2 border-input text-primary focus:ring-primary"
+                                />
+                                <div class="flex items-center gap-3 flex-1">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10">
+                                        <i data-lucide="credit-card" class="h-5 w-5 text-purple-600"></i>
+                                    </div>
+                                    <div>
+                                        <span class="font-medium block">{% trans "Debit/Credit Card" %}</span>
+                                        <span class="text-xs text-muted-foreground">{% trans "Visa, Mastercard" %}</span>
+                                    </div>
+                                </div>
+                            </label>
+                            <label class="flex cursor-pointer items-center space-x-3 rounded-xl border-2 border-input p-4 hover:bg-accent hover:border-primary/30 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+                                <input
+                                    type="radio"
+                                    name="method"
                                     value="OFFLINE"
+                                    data-payment-method=""
                                     class="h-4 w-4 border-2 border-input text-primary focus:ring-primary"
                                 />
                                 <div class="flex items-center gap-3">
@@ -77,6 +115,7 @@
                             </label>
                         </div>
                     </div>
+                    <input type="hidden" name="payment_method" id="payment_method" value="mobile_money">
 
                     <div class="space-y-2" x-data="phoneDetector()">
                         <label for="phone" class="block text-sm font-medium">{% trans "Phone Number" %}</label>
@@ -162,5 +201,19 @@ function phoneDetector() {
         }
     }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const methodRadios = document.querySelectorAll('input[name="method"]');
+    const paymentMethodInput = document.getElementById('payment_method');
+
+    methodRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            const paymentMethod = this.getAttribute('data-payment-method');
+            if (paymentMethod) {
+                paymentMethodInput.value = paymentMethod;
+            }
+        });
+    });
+});
 </script>
 {% endblock %}

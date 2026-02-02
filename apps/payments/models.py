@@ -77,6 +77,7 @@ class Payment(models.Model):
         CONFIRMED = "CONFIRMED", _("Confirmed")
         FAILED = "FAILED", _("Failed")
         EXPIRED = "EXPIRED", _("Expired")
+        REFUNDED = "REFUNDED", _("Refunded")
 
     booking = models.OneToOneField(
         Booking, on_delete=models.CASCADE, related_name="payment"

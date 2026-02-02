@@ -1,6 +1,7 @@
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.account.models import EmailAddress
+from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import redirect
 
@@ -11,7 +12,7 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         return super().save_user(request, user, form, commit)
 
     def is_open_for_signup(self, request, sociallogin=None):
-        return True
+        return getattr(settings, 'ACCOUNT_ALLOW_REGISTRATION', True)
 
     def pre_signup(self, request, data):
         email = data.get('email')

@@ -3,6 +3,7 @@ import json
 from datetime import datetime
 from io import BytesIO, StringIO
 
+from django.contrib.staticfiles import finders
 from django.db.models import Count, Sum
 from django.template.loader import render_to_string
 from openpyxl import Workbook
@@ -212,100 +213,8 @@ def generate_pdf_export(event, report_type: str, user, mask_emails: bool = True)
     html_content = render_to_string(template, context)
 
     font_config = FontConfiguration()
-    css = CSS(
-        string="""
-        @page {
-            size: A4;
-            margin: 2cm;
-            @bottom-center {
-                content: "Page " counter(page) " of " counter(pages);
-                font-size: 10px;
-                color: #666;
-            }
-        }
-        body {
-            font-family: 'DejaVu Sans', 'Arial', 'Helvetica', sans-serif;
-            font-size: 12px;
-            line-height: 1.5;
-            color: #1a1a1a;
-        }
-        .cover-page {
-            page-break-after: always;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            text-align: center;
-        }
-        .cover-logo {
-            max-width: 200px;
-            max-height: 100px;
-            margin-bottom: 40px;
-        }
-        .cover-title {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 16px;
-        }
-        .cover-subtitle {
-            font-size: 18px;
-            color: #666;
-            margin-bottom: 8px;
-        }
-        .cover-date {
-            font-size: 14px;
-            color: #999;
-            margin-top: 40px;
-        }
-        h1 { font-size: 24px; font-weight: 700; margin-bottom: 16px; }
-        h2 { font-size: 18px; font-weight: 600; margin: 24px 0 12px; }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 16px 0;
-            table-layout: fixed;
-        }
-        th, td {
-            padding: 8px 12px;
-            text-align: left;
-            border-bottom: 1px solid #e5e5e5;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-        }
-        th {
-            background: #f5f5f5;
-            font-weight: 600;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        tr:nth-child(even) { background: #fafafa; }
-        .stat-card {
-            display: inline-block;
-            padding: 16px 24px;
-            background: #f5f5f5;
-            border-radius: 8px;
-            margin: 8px;
-            text-align: center;
-        }
-        .stat-value {
-            font-size: 28px;
-            font-weight: 700;
-            color: #1a1a1a;
-        }
-        .stat-label {
-            font-size: 12px;
-            color: #666;
-            margin-top: 4px;
-        }
-        .summary-section { margin: 24px 0; }
-        .text-right { text-align: right; }
-        .text-muted { color: #666; }
-        .font-bold { font-weight: 600; }
-    """,
-        font_config=font_config,
-    )
+    css_path = finders.find("css/report_pdf.css")
+    css = CSS(filename=css_path, font_config=font_config)
 
     html = HTML(string=html_content)
     pdf_content = html.write_pdf(stylesheets=[css], font_config=font_config)

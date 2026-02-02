@@ -20,6 +20,7 @@ urlpatterns = [
     ),
     path("webhook/", actions.PaymentWebhookView.as_view(), name="webhook"),
     path("webhook/campay/", actions.CampayWebhookView.as_view(), name="webhook_campay"),
+    path("webhook/flutterwave/", actions.FlutterwaveWebhookView.as_view(), name="webhook_flutterwave"),
     path(
         "<uuid:payment_ref>/invoice/",
         actions.InvoiceDownloadView.as_view(),

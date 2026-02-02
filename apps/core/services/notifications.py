@@ -101,12 +101,18 @@ class NotificationService:
         tickets: list,
         event,
         qr_code_bytes: bytes | None = None,
+        pdf_attachment: bytes | None = None,
     ) -> bool:
         total_amount = sum(t.ticket_type.price for t in tickets)
 
         inline_images = {}
         if qr_code_bytes:
             inline_images["qr_code"] = qr_code_bytes
+
+        attachments = None
+        if pdf_attachment:
+            filename = f"ticket_{booking.reference}.pdf"
+            attachments = [(filename, pdf_attachment, "application/pdf")]
 
         return cls.send_email(
             to_email=to_email,
@@ -119,6 +125,7 @@ class NotificationService:
                 "total_amount": total_amount,
             },
             inline_images=inline_images if inline_images else None,
+            attachments=attachments,
         )
 
     @classmethod
@@ -139,6 +146,29 @@ class NotificationService:
                 "event": event,
                 "original_amount": original_amount,
                 "payment_method": payment_method,
+            },
+        )
+
+    @classmethod
+    def send_admin_sale_notification(
+        cls,
+        to_email: str,
+        booking,
+        event,
+        tickets: list,
+        ticket_summary: dict,
+        payment=None,
+    ) -> bool:
+        return cls.send_email(
+            to_email=to_email,
+            subject=f"New Sale for {event.title} - Reckot",
+            template_name="emails/admin_sale_notification.html",
+            context={
+                "booking": booking,
+                "event": event,
+                "tickets": tickets,
+                "ticket_summary": ticket_summary,
+                "payment": payment,
             },
         )
 

@@ -268,6 +268,8 @@ SOCIALACCOUNT_EMAIL_VERIFICATION = "none"
 SOCIALACCOUNT_EMAIL_REQUIRED = True
 SOCIALACCOUNT_QUERY_EMAIL = True
 
+ACCOUNT_ALLOW_REGISTRATION = os.getenv("ACCOUNT_ALLOW_REGISTRATION", "true").lower() in ("true", "1", "yes")
+
 EMAIL_BACKEND = os.getenv(
     "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
 )
@@ -316,6 +318,7 @@ PAYMENT_GATEWAYS = {
             "secret_key": os.getenv("FLUTTERWAVE_SECRET_KEY", ""),
             "public_key": os.getenv("FLUTTERWAVE_PUBLIC_KEY", ""),
             "encryption_key": os.getenv("FLUTTERWAVE_ENCRYPTION_KEY", ""),
+            "webhook_secret": os.getenv("FLUTTERWAVE_WEBHOOK_SECRET", ""),
         },
     },
     "CALLBACK_BASE_URL": os.getenv("PAYMENT_CALLBACK_URL", "https://reckot.com"),

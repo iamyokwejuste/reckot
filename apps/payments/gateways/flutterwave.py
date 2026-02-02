@@ -29,6 +29,14 @@ class FlutterwaveGateway(PaymentGateway):
             "Content-Type": "application/json",
         }
 
+    def _get_payment_options(self, payment_method: str) -> str:
+        payment_options_map = {
+            "mobile_money": "mobilemoneycameroon,mobilemoneyghana,mobilemoneyuganda",
+            "card": "card",
+            "all": "card,mobilemoneycameroon,mobilemoneyghana,mobilemoneyuganda",
+        }
+        return payment_options_map.get(payment_method, "mobilemoneycameroon,mobilemoneyghana,mobilemoneyuganda")
+
     def initiate_payment(
         self,
         amount: Decimal,
@@ -44,12 +52,15 @@ class FlutterwaveGateway(PaymentGateway):
             email = kwargs.get("email", f"{phone}@reckot.com")
             redirect_url = kwargs.get("redirect_url", callback_url)
 
+            payment_method = kwargs.get("payment_method", "mobile_money")
+            payment_options = self._get_payment_options(payment_method)
+
             payload = {
                 "tx_ref": reference,
                 "amount": str(int(amount)),
                 "currency": currency,
                 "redirect_url": redirect_url,
-                "payment_options": "mobilemoneycameroon,mobilemoneyghana,mobilemoneyuganda",
+                "payment_options": payment_options,
                 "customer": {
                     "email": email,
                     "phone_number": phone,
