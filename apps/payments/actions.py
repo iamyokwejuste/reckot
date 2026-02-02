@@ -40,6 +40,15 @@ from apps.tickets.models import Booking, GuestSession
 from apps.tickets.services import create_multi_ticket_booking
 from apps.tickets.tasks import send_ticket_confirmation_task
 
+logger = logging.getLogger(__name__)
+
+
+def htmx_redirect(request, *args, **kwargs):
+    response = redirect(*args, **kwargs)
+    if request.headers.get("HX-Request"):
+        response["HX-Redirect"] = response.url
+    return response
+
 
 class CheckoutView(View):
     def post(self, request):
@@ -175,9 +184,9 @@ class CheckoutView(View):
                     "Your free tickets have been confirmed! Check your email for details."
                 ),
             )
-            return redirect("tickets:my_tickets")
+            return htmx_redirect(request, "tickets:my_tickets")
 
-        return redirect("payments:select", booking_ref=booking.reference)
+        return htmx_redirect(request, "payments:select", booking_ref=booking.reference)
 
 
 class PaymentListView(LoginRequiredMixin, View):
@@ -451,9 +460,6 @@ class PaymentWebhookView(View):
         if status == "SUCCESS":
             confirm_payment(payment, external_ref)
         return HttpResponse(status=200)
-
-
-logger = logging.getLogger(__name__)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -765,7 +771,7 @@ class RefundRequestView(LoginRequiredMixin, View):
         )
 
         messages.success(request, _("Refund request submitted successfully."))
-        return redirect("payments:success", payment_ref=payment_ref)
+        return htmx_redirect(request, "payments:success", payment_ref=payment_ref)
 
 
 class RefundProcessView(LoginRequiredMixin, View):
@@ -829,7 +835,7 @@ class RefundProcessView(LoginRequiredMixin, View):
             refund.reject(reason, processed_by=request.user)
             messages.success(request, _("Refund rejected."))
 
-        return redirect("payments:refunds")
+        return htmx_redirect(request, "payments:refunds")
 
 
 class TransactionStatusView(View):
