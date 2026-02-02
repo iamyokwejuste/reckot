@@ -486,12 +486,26 @@
                     {% if not has_available_tickets %}
                     <div class="p-4 rounded-lg bg-muted border border-border text-center mt-4">
                         <p class="text-sm text-muted-foreground">
-                            {% trans "Ticket sales are not available at this time." %}
+                            {% if event.state == 'CLOSED' %}
+                                {% trans "Ticket sales have closed for this event." %}
+                            {% elif event.end_at < now %}
+                                {% trans "This event has ended." %}
+                            {% else %}
+                                {% trans "Ticket sales are not available at this time." %}
+                            {% endif %}
                         </p>
                     </div>
                     {% endif %}
                     {% else %}
-                    <p class="text-muted-foreground text-sm">{% trans "No tickets available at this time." %}</p>
+                    <p class="text-muted-foreground text-sm">
+                        {% if event.state == 'CLOSED' %}
+                            {% trans "Ticket sales have closed for this event." %}
+                        {% elif event.end_at < now %}
+                            {% trans "This event has ended." %}
+                        {% else %}
+                            {% trans "No tickets available at this time." %}
+                        {% endif %}
+                    </p>
                     {% endif %}
                 </div>
             </div>

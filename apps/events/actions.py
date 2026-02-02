@@ -187,6 +187,8 @@ class PublicEventDetailView(View):
                 "affiliate_code": affiliate_code,
                 "flyer_enabled": flyer_enabled,
                 "has_available_tickets": has_available_tickets,
+                "now": now,
+                "currency": event.organization.currency,
             },
         )
 
