@@ -8,11 +8,27 @@ from django.utils import timezone
 
 
 class Organization(models.Model):
+    class Currency(models.TextChoices):
+        XAF = "XAF", _("Central African CFA Franc (XAF)")
+        XOF = "XOF", _("West African CFA Franc (XOF)")
+        USD = "USD", _("US Dollar (USD)")
+        EUR = "EUR", _("Euro (EUR)")
+        GBP = "GBP", _("British Pound (GBP)")
+        NGN = "NGN", _("Nigerian Naira (NGN)")
+        GHS = "GHS", _("Ghanaian Cedi (GHS)")
+        UGX = "UGX", _("Ugandan Shilling (UGX)")
+
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=120, unique=True, blank=True)
     description = models.TextField(blank=True)
     logo = models.ImageField(upload_to="org_logos/", blank=True)
     website = models.URLField(blank=True)
+    currency = models.CharField(
+        max_length=3,
+        choices=Currency.choices,
+        default=Currency.XAF,
+        help_text="Default currency for this organization's events",
+    )
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
