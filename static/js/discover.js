@@ -1,4 +1,9 @@
-document.addEventListener('alpine:init', () => {
+function initializeDiscover() {
+    if (typeof Alpine === 'undefined') {
+        setTimeout(initializeDiscover, 50);
+        return;
+    }
+
     Alpine.data('discover', () => ({
         searchQuery: '',
         locationQuery: '',
@@ -11,7 +16,12 @@ document.addEventListener('alpine:init', () => {
         init() {
             this.allEvents = JSON.parse(document.getElementById('events-data').textContent);
             this.categories = JSON.parse(document.getElementById('categories-data').textContent);
-            this.filteredEvents = this.allEvents;
+            this.filterEvents();
+            this.$nextTick(() => {
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+            });
         },
 
         getEventStatus(event) {
@@ -107,4 +117,10 @@ document.addEventListener('alpine:init', () => {
             this.filteredEvents = events;
         }
     }));
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeDiscover);
+} else {
+    initializeDiscover();
+}
