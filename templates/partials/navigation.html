@@ -30,12 +30,12 @@
                 <div class="relative" x-data="{
                     notifOpen: false,
                     notifications: [],
-                    unreadCount: 0,
+                    unreadCount: {{ unread_notifications_count|default:0 }},
                     loading: false,
                     async fetchNotifications() {
                         this.loading = true;
                         try {
-                            const res = await fetch('/api/notifications/');
+                            const res = await fetch('/app/api/notifications/');
                             const data = await res.json();
                             this.notifications = data.notifications || [];
                             this.unreadCount = data.unread_count || 0;
@@ -46,7 +46,7 @@
                     },
                     async markAsRead(id) {
                         try {
-                            await fetch(`/api/notifications/${id}/read/`, {method: 'POST', headers: {'X-CSRFToken': '{{ csrf_token }}'}});
+                            await fetch(`/app/api/notifications/${id}/read/`, {method: 'POST', headers: {'X-CSRFToken': '{{ csrf_token }}'}});
                             const notif = this.notifications.find(n => n.id === id);
                             if (notif && !notif.is_read) {
                                 notif.is_read = true;
@@ -58,15 +58,15 @@
                     },
                     async markAllAsRead() {
                         try {
-                            await fetch('/api/notifications/read-all/', {method: 'POST', headers: {'X-CSRFToken': '{{ csrf_token }}'}});
+                            await fetch('/app/api/notifications/read-all/', {method: 'POST', headers: {'X-CSRFToken': '{{ csrf_token }}'}});
                             this.notifications.forEach(n => n.is_read = true);
                             this.unreadCount = 0;
                         } catch (e) {
                             console.error('Failed to mark all as read', e);
                         }
                     }
-                }" @notif-open.window="fetchNotifications()">
-                    <button @click="notifOpen = !notifOpen; if(notifOpen) fetchNotifications()" @click.outside="notifOpen = false" class="relative p-2 rounded-lg hover:bg-muted transition-colors" aria-label="Notifications">
+                }" @notif-open.window="notifOpen = true; fetchNotifications()" @click.outside="notifOpen = false">
+                    <button @click="notifOpen = !notifOpen; if(notifOpen) fetchNotifications()" class="relative p-2 rounded-lg hover:bg-muted transition-colors" aria-label="Notifications">
                         <i data-lucide="bell" class="h-5 w-5"></i>
                         <span x-show="unreadCount > 0" x-text="unreadCount > 99 ? '99+' : unreadCount" class="absolute -top-1 -right-1 h-5 min-w-5 px-1 flex items-center justify-center bg-destructive text-background text-xs font-bold rounded-full"></span>
                     </button>
@@ -108,15 +108,24 @@
                 </div>
                 <div class="relative" x-data="{ userOpen: false }">
                     <button @click="userOpen = !userOpen" @click.outside="userOpen = false" class="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full hover:bg-muted transition-colors" aria-label="User menu" aria-haspopup="true" :aria-expanded="userOpen.toString()">
+                        {% if user.get_profile_image_url %}
+                        <img src="{{ user.get_profile_image_url }}" alt="{{ user.get_full_name|default:user.email }}" class="h-8 w-8 rounded-full object-cover">
+                        {% else %}
                         <div class="flex h-8 w-8 items-center justify-center rounded-full bg-foreground text-background text-sm font-medium">
-                            {{ user.email|slice:":1"|upper }}
+                            {{ user.get_initials }}
                         </div>
+                        {% endif %}
                         <i data-lucide="chevron-down" class="h-4 w-4 text-muted-foreground" aria-hidden="true"></i>
                     </button>
                     <div x-show="userOpen" x-transition class="absolute right-0 mt-2 w-56 rounded-xl border border-border bg-card p-2 shadow-lg" x-cloak role="menu">
                         <div class="px-3 py-2 border-b border-border mb-2">
                             <p class="text-sm font-medium truncate">{{ user.email }}</p>
                         </div>
+                        <button @click="$dispatch('notif-open'); userOpen = false" class="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors" role="menuitem">
+                            <i data-lucide="bell" class="h-4 w-4" aria-hidden="true"></i>
+                            {% trans "Notifications" %}
+                            <span x-data="{ count: {{ unread_notifications_count|default:0 }} }" x-show="count > 0" x-text="count" class="ml-auto h-5 min-w-5 px-1 flex items-center justify-center bg-destructive text-background text-xs font-bold rounded-full"></span>
+                        </button>
                         <a href="{% url 'events:list' %}" hx-boost="false" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors" role="menuitem">
                             <i data-lucide="calendar" class="h-4 w-4" aria-hidden="true"></i>
                             {% trans "My Events" %}
@@ -146,7 +155,7 @@
                     <i x-show="isDark" x-cloak data-lucide="sun" class="h-5 w-5" aria-hidden="true"></i>
                 </button>
                 {% if user.is_authenticated %}
-                <button @click="$dispatch('notif-open')" class="relative p-2 rounded-lg hover:bg-muted transition-colors touch-manipulation" aria-label="Notifications">
+                <button onclick="openMobileNotifications()" class="relative p-2 rounded-lg hover:bg-muted transition-colors touch-manipulation" aria-label="Notifications">
                     <i data-lucide="bell" class="h-5 w-5"></i>
                     <span x-data="{ count: {{ unread_notifications_count|default:0 }} }" x-show="count > 0" x-text="count > 99 ? '99+' : count" class="absolute -top-1 -right-1 h-5 min-w-5 px-1 flex items-center justify-center bg-destructive text-background text-xs font-bold rounded-full"></span>
                 </button>
@@ -232,6 +241,90 @@
     </div>
 </div>
 
+{% if user.is_authenticated %}
+<div id="mobile-notifications" class="fixed inset-0 bg-background text-foreground flex-col" style="z-index: 60; display: none;" x-data="{
+    notifications: [],
+    unreadCount: 0,
+    loading: false,
+    async fetchNotifications() {
+        this.loading = true;
+        try {
+            const res = await fetch('/app/api/notifications/');
+            const data = await res.json();
+            this.notifications = data.notifications || [];
+            this.unreadCount = data.unread_count || 0;
+        } catch (e) {
+            console.error('Failed to fetch notifications', e);
+        }
+        this.loading = false;
+    },
+    async markAsRead(id) {
+        try {
+            await fetch(`/app/api/notifications/${id}/read/`, {method: 'POST', headers: {'X-CSRFToken': '{{ csrf_token }}'}});
+            const notif = this.notifications.find(n => n.id === id);
+            if (notif && !notif.is_read) {
+                notif.is_read = true;
+                this.unreadCount = Math.max(0, this.unreadCount - 1);
+            }
+        } catch (e) {
+            console.error('Failed to mark as read', e);
+        }
+    },
+    async markAllAsRead() {
+        try {
+            await fetch('/app/api/notifications/read-all/', {method: 'POST', headers: {'X-CSRFToken': '{{ csrf_token }}'}});
+            this.notifications.forEach(n => n.is_read = true);
+            this.unreadCount = 0;
+        } catch (e) {
+            console.error('Failed to mark all as read', e);
+        }
+    }
+}" x-init="fetchNotifications()">
+    <div class="flex items-center justify-between h-16 px-4 border-b border-border">
+        <h2 class="text-lg font-semibold">{% trans "Notifications" %}</h2>
+        <button onclick="closeMobileNotifications()" class="p-2 rounded-lg hover:bg-muted transition-colors touch-manipulation active:scale-95" aria-label="Close notifications">
+            <i data-lucide="x" class="h-6 w-6" aria-hidden="true"></i>
+        </button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto">
+        <template x-if="loading">
+            <div class="p-12 text-center text-muted-foreground">
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-foreground"></div>
+            </div>
+        </template>
+        <template x-if="!loading && notifications.length === 0">
+            <div class="p-12 text-center text-muted-foreground">
+                <i data-lucide="bell-off" class="h-16 w-16 mx-auto mb-4 opacity-50"></i>
+                <p>{% trans "No notifications" %}</p>
+            </div>
+        </template>
+        <template x-if="!loading && notifications.length > 0">
+            <div>
+                <template x-for="notif in notifications" :key="notif.id">
+                    <a :href="notif.link" @click="markAsRead(notif.id); closeMobileNotifications()" :class="notif.is_read ? 'bg-transparent' : 'bg-muted/50'" class="block p-4 border-b border-border active:bg-muted/80 transition-colors touch-manipulation">
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-3 h-3 mt-2 rounded-full" :class="notif.is_read ? 'bg-transparent' : 'bg-primary'"></div>
+                            <div class="flex-1 min-w-0">
+                                <p class="font-medium" x-text="notif.title"></p>
+                                <p class="text-sm text-muted-foreground line-clamp-3 mt-1" x-text="notif.message"></p>
+                                <p class="text-xs text-muted-foreground mt-2" x-text="notif.time_ago"></p>
+                            </div>
+                        </div>
+                    </a>
+                </template>
+            </div>
+        </template>
+    </div>
+
+    <div class="p-4 border-t border-border" x-show="unreadCount > 0">
+        <button @click="markAllAsRead()" class="w-full py-3 px-4 rounded-lg bg-primary text-primary-foreground font-medium active:scale-95 transition-all touch-manipulation">
+            {% trans "Mark all as read" %}
+        </button>
+    </div>
+</div>
+{% endif %}
+
 <script>
 function updateToggleIcon(isOpen) {
     const hamburger = document.getElementById('hamburger-icon');
@@ -260,6 +353,21 @@ function toggleMobileMenu() {
         closeMobileMenu();
     } else {
         openMobileMenu();
+    }
+}
+function openMobileNotifications() {
+    const panel = document.getElementById('mobile-notifications');
+    if (panel) {
+        panel.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+}
+function closeMobileNotifications() {
+    const panel = document.getElementById('mobile-notifications');
+    if (panel) {
+        panel.style.display = 'none';
+        document.body.style.overflow = '';
     }
 }
 document.addEventListener('DOMContentLoaded', function() {

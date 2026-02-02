@@ -127,6 +127,17 @@ class Payment(models.Model):
     def total_amount(self):
         return self.amount + self.service_fee
 
+    def get_payment_method_display(self):
+        if self.provider == PaymentProvider.CAMPAY and self.phone_number:
+            phone = self.phone_number.replace("+", "").replace(" ", "")
+            if phone.startswith("237"):
+                phone = phone[3:]
+            if phone.startswith("67") or phone.startswith("650") or phone.startswith("651") or phone.startswith("652") or phone.startswith("653") or phone.startswith("654"):
+                return _("MTN Mobile Money")
+            elif phone.startswith("69") or phone.startswith("655") or phone.startswith("656") or phone.startswith("657") or phone.startswith("658") or phone.startswith("659"):
+                return _("Orange Money")
+        return self.get_provider_display()
+
 
 class OfflinePayment(models.Model):
     class VerificationStatus(models.TextChoices):

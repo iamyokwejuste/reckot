@@ -1,10 +1,15 @@
 import json
 import logging
+import re
+from datetime import datetime
+from decimal import Decimal
+from pathlib import Path
 from typing import Optional
 from google import genai
 from django.conf import settings
 from django.db.models import Count, Sum, Q, F
 from django.utils import timezone
+from django.utils.html import strip_tags
 
 from django.contrib.auth import get_user_model
 
@@ -16,6 +21,14 @@ from apps.orgs.models import Organization
 User = get_user_model()
 
 logger = logging.getLogger(__name__)
+
+
+def clean_html_content(html_text: str) -> str:
+    if not html_text:
+        return ""
+    text = strip_tags(html_text)
+    text = re.sub(r'\s+', ' ', text)
+    return text.strip()
 
 
 class GeminiService:
@@ -186,164 +199,41 @@ def execute_django_query(query_code: str):
 def generate_event_description(
     title: str, category: str, location: str, date: str, details: str = ""
 ) -> dict:
-    prompt = f"""Generate a compelling event description in English and French for:
-
-Title: {title}
-Category: {category}
-Location: {location}
-Date: {date}
-Additional Details: {details}
-
-Requirements:
-- Make it engaging and professional
-- Highlight key benefits for attendees
-- Include a call-to-action
-- Keep it under 300 words
-- NO emojis
-
-Return as JSON:
-{{"description_en": "...", "description_fr": "..."}}"""
+    template = _load_prompt('event_description.md')
+    prompt = _format_prompt(template, title=title, category=category, location=location, date=date, details=details)
     return gemini.generate_json(prompt, 2048)
 
 
 def generate_social_posts(
     event_title: str, event_date: str, event_location: str, ticket_price: str = ""
 ) -> dict:
-    prompt = f"""Create 3 social media posts for this event:
-
-Event: {event_title}
-Date: {event_date}
-Location: {event_location}
-Price: {ticket_price}
-
-Generate posts for:
-1. Twitter/X (max 280 chars, include hashtags)
-2. Facebook (engaging, can be longer)
-3. Instagram (visual-focused, include emoji)
-
-Return as JSON:
-{{"twitter": "...", "facebook": "...", "instagram": "..."}}"""
+    template = _load_prompt('social_posts.md')
+    prompt = _format_prompt(template, event_title=event_title, event_date=event_date, event_location=event_location, ticket_price=ticket_price)
     return gemini.generate_json(prompt)
 
 
 def generate_email_template(event_title: str, event_details: dict) -> dict:
-    prompt = f"""Create an event invitation email template:
-
-Event: {event_title}
-Details: {json.dumps(event_details)}
-
-Include:
-- Catchy subject line
-- Engaging opening
-- Event highlights
-- Clear CTA to buy tickets
-- Professional closing
-
-Return as JSON:
-{{"subject": "...", "body_html": "...", "body_text": "..."}}"""
+    template = _load_prompt('email_template.md')
+    prompt = _format_prompt(template, event_title=event_title, event_details=json.dumps(event_details))
     return gemini.generate_json(prompt)
 
 
-SUPPORT_SYSTEM_PROMPT = """You are Reckot's AI Assistant with DATABASE QUERY capabilities. Reckot is an event ticketing platform in Cameroon.
+def _load_prompt(filename: str) -> str:
+    prompt_path = Path(settings.BASE_DIR) / 'static' / 'markdown' / filename
+    return prompt_path.read_text(encoding='utf-8')
 
-CRITICAL: You have FULL ACCESS to public event data. ALWAYS execute queries for public events (is_public=True, state='PUBLISHED'). NO authentication required for public events.
 
-TONE AND STYLE:
-- Be friendly, relaxed, and conversational (not overly formal)
-- Keep responses SHORT and DIRECT - get to the point quickly
-- Use simple, clear language - avoid jargon when possible
-- Break up long responses with line breaks for readability
-- Maximum 3-4 sentences per paragraph
-- For lists, keep to 3-5 items maximum
+def _format_prompt(template: str, **kwargs) -> str:
+    return template.format(**kwargs)
 
-IMPORTANT SCOPE: You ONLY answer questions about Reckot and its features (events, tickets, payments, organizations, check-in, etc.).
-REFUSE to answer general knowledge questions, trivia, or topics unrelated to Reckot. If asked about unrelated topics, politely respond: "I can only help with questions about Reckot, our event ticketing platform. How can I assist you with events, tickets, payments, or check-in?"
 
-Event Search Questions:
-When users ask about finding specific types of events (e.g., "any cake events?", "food events near me?", "music concerts?"), EXECUTE a query to search for matching events.
-- Search in BOTH title and description fields using Q objects
-- ALWAYS filter is_public=True and state='PUBLISHED'
-- Limit results to 5 events using [:5]
-- Use .values() to get required fields including organization__slug
-- Example for single keyword: {{"action": "execute_query", "query": "list(Event.objects.filter(Q(title__icontains='cake') | Q(description__icontains='cake'), is_public=True, state='PUBLISHED').values('title', 'slug', 'organization__slug', 'start_at', 'location')[:5])"}}
-- For multiple keywords (e.g. "food or cake"), search for the primary keyword only
-- You will receive a list of event dictionaries
-- Format each event as: **[Event Title](/events/org-slug/event-slug/)** - Location, Date
-- Build URL using: /events/{{organization__slug}}/{{slug}}/
-- If no events found, suggest they [browse all events](/events/discover/)
-
-When users ask questions about data (counts, statistics, totals, latest/last/recent events, etc.), you MUST:
-1. ALWAYS execute query for PUBLIC events - NO authentication check needed
-2. Generate a Django ORM query to fetch the actual data
-3. Return the query in this JSON format: {{"action": "execute_query", "query": "YourModel.objects.filter(...).count()"}}
-4. For events, ALWAYS use is_public=True to exclude private events
-5. For organizations, only show public data
-6. ONLY check authentication for: payments, tickets (bookings), analytics, withdrawals
-
-Available Models and Fields:
-{schema}
-
-Query Examples (ALL of these should execute WITHOUT authentication):
-- "How many events?" → {{"action": "execute_query", "query": "Event.objects.filter(is_public=True, state='PUBLISHED').count()"}}
-- "What was the last event?" → {{"action": "execute_query", "query": "list(Event.objects.filter(is_public=True, state='PUBLISHED').order_by('-start_at').values('title', 'slug', 'organization__slug', 'start_at', 'location')[:1])"}}
-- "Recent events?" → {{"action": "execute_query", "query": "list(Event.objects.filter(is_public=True, state='PUBLISHED').order_by('-start_at').values('title', 'slug', 'organization__slug', 'start_at', 'location')[:5])"}}
-- "Total tickets sold?" → {{"action": "execute_query", "query": "Ticket.objects.filter(status='VALID').count()"}}
-- "Revenue this month?" → {{"action": "execute_query", "query": "Payment.objects.filter(status='COMPLETED', created_at__month=timezone.now().month).aggregate(total=Sum('amount'))['total'] or 0"}}
-
-Rules:
-- ALWAYS filter is_public=True for events (exclude private)
-- Use Django ORM syntax only
-- No SQL, only Python/Django ORM
-- Keep queries simple and safe
-- Return single value or simple aggregate
-
-Authentication & Access Control:
-- Public Events: ALWAYS accessible to everyone (is_public=True, state='PUBLISHED')
-  * Event counts, searches, listings - NO authentication required
-  * Anyone can query public event data (title, description, location, date, price, etc.)
-- Public Organizations: Accessible to everyone
-  * Organization counts and public info - NO authentication required
-- Private data requires authentication (check user_id/user_email in User Context):
-  * Payments: MUST filter by user (booking__event__organization__members__id=user_id)
-  * Tickets: MUST scope to user's events/bookings
-  * Withdrawals: MUST filter by user's organization
-  * Analytics: MUST scope to user's events
-  * Private events (is_public=False)
-- NEVER query private data without authentication
-- NEVER expose other users' private data
-- If user asks for private data while unauthenticated: "Please [log in to your account](/accounts/login/) to view this information"
-
-Response Formatting:
-- Use markdown for links: [text](url)
-- Common page links to use in responses:
-  * Login: [log in to your account](/accounts/login/)
-  * Browse/discover events: [browse events](/events/discover/) or [discover events](/events/discover/)
-  * Create event: [create a new event](/events/create/)
-  * Dashboard/Reports: [your dashboard](/reports/) or [analytics dashboard](/reports/)
-  * Events list: [your events](/events/)
-  * My tickets: [view your tickets](/tickets/my/)
-  * Bookings/tickets list: [view your bookings](/tickets/)
-  * Organizations: [manage your organization](/orgs/)
-  * Settings: [account settings](/app/settings/)
-- When user asks about specific event types (food, music, tech, etc.), suggest they [search for events on the discover page](/events/discover/)
-- Format responses with **bold** and *italic* where appropriate
-- Use code blocks with backticks for technical details
-
-For support tickets:
-{{"action": "create_ticket", "category": "PAYMENT|TICKET|EVENT|OTHER", "priority": "LOW|MEDIUM|HIGH|URGENT", "subject": "...", "description": "..."}}
-
-Be concise and accurate."""
+SUPPORT_SYSTEM_PROMPT = _load_prompt('support_assistant.md')
 
 
 def _format_query_result(result):
-    """Format query results for user-friendly display."""
-    from decimal import Decimal
-
-    # Handle None/empty results
     if result is None:
         return "No data found."
 
-    # Handle simple types
     if isinstance(result, (int, float)):
         return f"**{result:,}**"
 
@@ -353,9 +243,7 @@ def _format_query_result(result):
     if isinstance(result, Decimal):
         return f"**{float(result):,.2f} XAF**"
 
-    # Handle dictionaries
     if isinstance(result, dict):
-        # Check if it's an aggregation result
         if len(result) == 1:
             key, value = next(iter(result.items()))
             if isinstance(value, Decimal):
@@ -363,7 +251,6 @@ def _format_query_result(result):
             elif isinstance(value, (int, float)):
                 return f"**{value:,}**"
 
-        # Format as key-value pairs
         lines = []
         for key, value in result.items():
             if key.startswith('_'):
@@ -378,12 +265,10 @@ def _format_query_result(result):
             lines.append(f"**{formatted_key}:** {formatted_value}")
         return "\n".join(lines) if lines else str(result)
 
-    # Handle lists
     if isinstance(result, list):
         if not result:
             return "No results found."
 
-        # Check if it's a list of dictionaries (common for .values() queries)
         if all(isinstance(item, dict) for item in result):
             formatted_items = []
             for item in result:
@@ -400,10 +285,8 @@ def _format_query_result(result):
                 formatted_items.append(" | ".join(parts))
             return "\n".join(formatted_items)
 
-        # Simple list of values
         return "\n".join([f"• {_format_query_result(item)}" for item in result[:10]])
 
-    # Fallback for other types
     return str(result)
 
 
@@ -468,7 +351,6 @@ If this is a data question, respond with execute_query action. Otherwise provide
                                 if location:
                                     details.append(location)
                                 if start_at:
-                                    from datetime import datetime
                                     try:
                                         if isinstance(start_at, str):
                                             date_obj = datetime.fromisoformat(start_at.replace('Z', '+00:00'))
@@ -510,20 +392,8 @@ If this is a data question, respond with execute_query action. Otherwise provide
 
 
 def analyze_issue(issue_description: str, error_logs: str = "") -> dict:
-    prompt = f"""Analyze this technical issue and provide debugging suggestions:
-
-Issue: {issue_description}
-Error Logs: {error_logs}
-
-Provide:
-1. Likely cause
-2. Suggested solutions (step by step)
-3. Whether this needs human support (yes/no)
-4. Priority level (LOW/MEDIUM/HIGH/URGENT)
-
-Return as JSON:
-{{"cause": "...", "solutions": ["..."], "needs_human": true/false, "priority": "...", "summary": "..."}}"""
-
+    template = _load_prompt('issue_analysis.md')
+    prompt = _format_prompt(template, issue_description=issue_description, error_logs=error_logs)
     result = gemini.generate_json(prompt)
     if "error" in result:
         return {
@@ -537,35 +407,12 @@ Return as JSON:
 
 
 def analyze_event_performance(event_data: dict) -> str:
-    prompt = f"""Analyze this event's performance data and provide actionable insights:
-
-Event Data:
-{json.dumps(event_data, indent=2)}
-
-Provide:
-1. 3-5 key insights about ticket sales and attendance
-2. Recommendations for improvement
-3. Comparison to typical events (if possible)
-4. Predicted final attendance
-
-Format as clear, actionable bullet points. NO emojis."""
+    template = _load_prompt('event_performance.md')
+    prompt = _format_prompt(template, event_data=json.dumps(event_data, indent=2))
     return gemini.generate(prompt)
 
 
 def suggest_pricing(event_details: dict, market_data: Optional[dict] = None) -> str:
-    prompt = f"""Suggest optimal ticket pricing for this event:
-
-Event Details:
-{json.dumps(event_details, indent=2)}
-
-Market Context:
-{json.dumps(market_data or {}, indent=2)}
-
-Consider:
-- Event type and target audience
-- Location and venue costs
-- Competitor pricing
-- Early bird vs regular pricing strategy
-
-Provide specific price recommendations in XAF with reasoning."""
+    template = _load_prompt('pricing_suggestion.md')
+    prompt = _format_prompt(template, event_details=json.dumps(event_details, indent=2), market_data=json.dumps(market_data or {}, indent=2))
     return gemini.generate(prompt)

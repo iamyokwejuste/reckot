@@ -41,7 +41,7 @@
             <div class="billing-info">
                 <strong>{% trans "Invoice Date:" %}</strong> {{ invoice.issued_at|date:"M d, Y" }}<br>
                 <strong>{% trans "Payment Date:" %}</strong> {{ payment.confirmed_at|date:"M d, Y" }}<br>
-                <strong>{% trans "Payment Method:" %}</strong> {{ payment.get_provider_display }}<br>
+                <strong>{% trans "Payment Method:" %}</strong> {{ payment.get_payment_method_display }}<br>
                 <strong>{% trans "Reference:" %}</strong> {{ payment.reference }}
             </div>
         </div>

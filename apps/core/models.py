@@ -12,9 +12,25 @@ class User(AbstractUser):
     email_verified = models.BooleanField(default=False)
     phone_verified = models.BooleanField(default=False)
     ai_features_enabled = models.BooleanField(default=False)
+    profile_image = models.ImageField(upload_to='profile_images/', blank=True, null=True)
+    social_avatar_url = models.URLField(max_length=500, blank=True, null=True)
 
     def __str__(self):
         return self.email or self.username
+
+    def get_profile_image_url(self):
+        if self.profile_image:
+            return self.profile_image.url
+        return self.social_avatar_url if self.social_avatar_url else None
+
+    def get_initials(self):
+        if self.first_name and self.last_name:
+            return f"{self.first_name[0]}{self.last_name[0]}".upper()
+        elif self.first_name:
+            return self.first_name[0].upper()
+        elif self.email:
+            return self.email[0].upper()
+        return "U"
 
 
 class OTPVerification(models.Model):

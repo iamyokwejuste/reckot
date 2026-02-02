@@ -30,7 +30,7 @@
             <td>{{ forloop.counter }}</td>
             <td>{{ payment.reference }}</td>
             <td>{{ payment.customer }}</td>
-            <td>{{ payment.provider }}</td>
+            <td>{{ payment.get_payment_method_display }}</td>
             <td>{{ payment.date }}</td>
             <td class="text-right">{{ payment.amount }}</td>
             <td>{{ payment.status }}</td>

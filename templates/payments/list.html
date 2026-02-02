@@ -82,7 +82,7 @@
                             {% endif %}
                         </td>
                         <td class="p-4">
-                            <span class="text-sm">{{ payment.get_provider_display }}</span>
+                            <span class="text-sm">{{ payment.get_payment_method_display }}</span>
                         </td>
                         <td class="p-4">
                             {% if payment.status == 'CONFIRMED' %}

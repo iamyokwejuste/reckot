@@ -55,7 +55,6 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         if sociallogin.account.extra_data:
             extra_data = sociallogin.account.extra_data
 
-            # Google returns 'name' field with full name
             if not user.first_name and not user.last_name:
                 full_name = extra_data.get('name', '')
                 if full_name:
@@ -64,9 +63,13 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
                     if len(name_parts) > 1:
                         user.last_name = name_parts[1]
                 else:
-                    # Fallback to given_name/family_name if name is not present
                     user.first_name = extra_data.get('given_name', '')
                     user.last_name = extra_data.get('family_name', '')
+
+            if not user.social_avatar_url:
+                picture_url = extra_data.get('picture', '')
+                if picture_url:
+                    user.social_avatar_url = picture_url
 
         email_address, created = EmailAddress.objects.get_or_create(
             user=user,
@@ -85,7 +88,6 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         user = super().populate_user(request, sociallogin, data)
         user.username = user.email
 
-        # Google returns 'name' field with full name
         if not user.first_name and not user.last_name:
             full_name = data.get('name', '')
             if full_name:
@@ -94,8 +96,11 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
                 if len(name_parts) > 1:
                     user.last_name = name_parts[1]
             else:
-                # Fallback to given_name/family_name if name is not present
                 user.first_name = data.get('given_name', '')
                 user.last_name = data.get('family_name', '')
+
+        picture_url = data.get('picture', '')
+        if picture_url:
+            user.social_avatar_url = picture_url
 
         return user
