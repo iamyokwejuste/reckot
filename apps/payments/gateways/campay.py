@@ -295,7 +295,7 @@ class CampayGateway(PaymentGateway):
                 success=False, status=PaymentStatus.PENDING, message=str(e)
             )
 
-    def refund(self, external_reference: str, amount: Decimal) -> PaymentResult:
+    def refund(self, external_reference: str, amount: Decimal, phone_number: str = None) -> PaymentResult:  # type: ignore[override]
         logger.info(f"Campay processing refund for transaction {external_reference}, amount: {amount}")
 
         token = self._get_token()
@@ -306,6 +306,8 @@ class CampayGateway(PaymentGateway):
                 message="Token error. Please check your credentials.",
             )
 
+        customer_phone = None
+
         try:
             transaction_response = requests.get(
                 f"{self.host}/api/transaction/{external_reference}/",
@@ -313,23 +315,23 @@ class CampayGateway(PaymentGateway):
                 timeout=30,
             )
 
-            if not transaction_response.ok:
-                logger.error(f"Failed to fetch transaction details: {transaction_response.text}")
-                return PaymentResult(
-                    success=False,
-                    status=PaymentStatus.FAILED,
-                    message="Could not retrieve transaction details for refund"
-                )
+            if transaction_response.ok:
+                transaction_data = transaction_response.json()
+                customer_phone = transaction_data.get("external_user")
+                logger.info(f"Retrieved phone from transaction: {customer_phone}")
+            else:
+                logger.warning(f"Could not fetch transaction details: {transaction_response.text}")
 
-            transaction_data = transaction_response.json()
-            customer_phone = transaction_data.get("external_user")
+            if not customer_phone and phone_number:
+                customer_phone = phone_number
+                logger.info(f"Using phone from payment record: {customer_phone}")
 
             if not customer_phone:
-                logger.error("No customer phone number found in transaction")
+                logger.error("No customer phone number available for refund")
                 return PaymentResult(
                     success=False,
                     status=PaymentStatus.FAILED,
-                    message="Customer phone number not found"
+                    message="PHONE_REQUIRED"
                 )
 
             logger.info(f"Refunding {amount} to {customer_phone}")

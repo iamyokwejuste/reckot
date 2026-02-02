@@ -781,6 +781,13 @@ class RefundProcessView(LoginRequiredMixin, View):
             refund.approve(processed_by=request.user)
             messages.success(request, _("Refund approved."))
         elif action == "process":
+            manual_phone = request.POST.get("manual_phone_number", "").strip()
+
+            if manual_phone:
+                refund.payment.phone_number = manual_phone
+                refund.payment.save(update_fields=["phone_number"])
+                messages.info(request, _("Updated payment phone number."))
+
             success = process_refund_payment(refund)
 
             if success:

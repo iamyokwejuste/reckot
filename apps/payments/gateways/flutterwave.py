@@ -224,7 +224,7 @@ class FlutterwaveGateway(PaymentGateway):
     def check_status(self, external_reference: str) -> PaymentResult:
         return self.verify_payment(external_reference)
 
-    def refund(self, external_reference: str, amount: Decimal) -> PaymentResult:
+    def refund(self, external_reference: str, amount: Decimal, phone_number: str = None) -> PaymentResult:
         try:
             verify_result = self.verify_payment(external_reference)
             if not verify_result.transaction_id:

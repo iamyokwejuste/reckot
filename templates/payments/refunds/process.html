@@ -129,11 +129,32 @@
             {% csrf_token %}
             <input type="hidden" name="action" value="process">
             <p class="text-sm text-muted-foreground mb-4">
-                {% trans "Mark this refund as processed once you've completed the refund through your payment provider." %}
+                {% trans "This will process the refund and send the money back to the customer." %}
             </p>
+
+            {% if not refund.payment.phone_number or refund.payment.provider == 'CAMPAY' or refund.payment.provider == 'MTN_MOMO' or refund.payment.provider == 'ORANGE_MONEY' %}
+            <div class="mb-4 p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                <p class="text-sm font-medium text-amber-700 mb-2">
+                    <i data-lucide="phone" class="w-4 h-4 inline"></i>
+                    {% trans "Customer Phone Number Required" %}
+                </p>
+                <p class="text-sm text-muted-foreground mb-3">
+                    {% trans "Enter the customer's mobile money number to process the refund." %}
+                </p>
+                <input
+                    type="tel"
+                    name="manual_phone_number"
+                    placeholder="{% trans "e.g. 237XXXXXXXXX" %}"
+                    value="{{ refund.payment.phone_number }}"
+                    {% if not refund.payment.phone_number %}required{% endif %}
+                    class="input w-full"
+                >
+            </div>
+            {% endif %}
+
             {% #button type="submit" variant="default" %}
                 <i data-lucide="check-circle" class="w-4 h-4"></i>
-                {% trans "Mark as Processed" %}
+                {% trans "Process Refund" %}
             {% /button %}
         </form>
         {% endif %}

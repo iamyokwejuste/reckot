@@ -69,7 +69,7 @@ class PaymentGateway(ABC):
     def check_status(self, reference: str) -> PaymentResult:
         pass
 
-    def refund(self, external_reference: str, amount: Decimal) -> PaymentResult:
+    def refund(self, external_reference: str, amount: Decimal, phone_number: str = None) -> PaymentResult:
         return PaymentResult(
             success=False, message="Refunds not supported by this gateway"
         )
