@@ -98,7 +98,7 @@
 
         {% if refund.status == 'PENDING' %}
         <div class="grid sm:grid-cols-2 gap-4">
-            <form method="post">
+            <form method="post" hx-boost="false">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="approve">
                 {% #button type="submit" variant="default" class="w-full" %}
@@ -112,7 +112,7 @@
                     <i data-lucide="x" class="w-4 h-4"></i>
                     {% trans "Reject Refund" %}
                 {% /button %}
-                <form method="post" x-show="showReject" x-cloak class="mt-4">
+                <form method="post" x-show="showReject" x-cloak class="mt-4" hx-boost="false">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="reject">
                     <textarea name="rejection_reason" rows="2" required
@@ -125,7 +125,7 @@
             </div>
         </div>
         {% elif refund.status == 'APPROVED' %}
-        <form method="post">
+        <form method="post" hx-boost="false">
             {% csrf_token %}
             <input type="hidden" name="action" value="process">
             <p class="text-sm text-muted-foreground mb-4">

@@ -295,6 +295,89 @@ class CampayGateway(PaymentGateway):
                 success=False, status=PaymentStatus.PENDING, message=str(e)
             )
 
+    def refund(self, external_reference: str, amount: Decimal) -> PaymentResult:
+        logger.info(f"Campay processing refund for transaction {external_reference}, amount: {amount}")
+
+        token = self._get_token()
+        if not token:
+            return PaymentResult(
+                success=False,
+                status=PaymentStatus.FAILED,
+                message="Token error. Please check your credentials.",
+            )
+
+        try:
+            transaction_response = requests.get(
+                f"{self.host}/api/transaction/{external_reference}/",
+                headers=self._headers(token),
+                timeout=30,
+            )
+
+            if not transaction_response.ok:
+                logger.error(f"Failed to fetch transaction details: {transaction_response.text}")
+                return PaymentResult(
+                    success=False,
+                    status=PaymentStatus.FAILED,
+                    message="Could not retrieve transaction details for refund"
+                )
+
+            transaction_data = transaction_response.json()
+            customer_phone = transaction_data.get("external_user")
+
+            if not customer_phone:
+                logger.error("No customer phone number found in transaction")
+                return PaymentResult(
+                    success=False,
+                    status=PaymentStatus.FAILED,
+                    message="Customer phone number not found"
+                )
+
+            logger.info(f"Refunding {amount} to {customer_phone}")
+
+            withdraw_data = {
+                "amount": str(int(amount)),
+                "currency": "XAF",
+                "to": self.format_phone(customer_phone),
+                "description": f"Refund for transaction {external_reference}",
+                "external_reference": f"REFUND-{external_reference}",
+            }
+
+            response = requests.post(
+                f"{self.host}/api/withdraw/",
+                json=withdraw_data,
+                headers=self._headers(token),
+                timeout=60,
+            )
+
+            if response.ok:
+                data = response.json()
+                logger.info(f"Campay refund response: {data}")
+
+                return PaymentResult(
+                    success=True,
+                    transaction_id=data.get("reference"),
+                    external_reference=external_reference,
+                    status=PaymentStatus.SUCCESS,
+                    message="Refund processed successfully",
+                    raw_response=data,
+                )
+            else:
+                data = response.json()
+                message = data.get("message", "Refund failed")
+                logger.error(f"Campay refund error: {message}")
+                return PaymentResult(
+                    success=False,
+                    status=PaymentStatus.FAILED,
+                    message=message,
+                    raw_response=data,
+                )
+
+        except Exception as e:
+            logger.error(f"Campay refund exception: {e}")
+            return PaymentResult(
+                success=False, status=PaymentStatus.FAILED, message=str(e)
+            )
+
     def disburse(
         self,
         amount: Decimal,
