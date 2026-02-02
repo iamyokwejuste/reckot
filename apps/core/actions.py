@@ -197,6 +197,7 @@ class SettingsView(LoginRequiredMixin, View):
         first_name = request.POST.get("first_name", "").strip()
         last_name = request.POST.get("last_name", "").strip()
         phone = request.POST.get("phone", "").strip()
+        profile_image = request.FILES.get("profile_image")
 
         if first_name:
             user.first_name = first_name
@@ -204,6 +205,8 @@ class SettingsView(LoginRequiredMixin, View):
             user.last_name = last_name
         if phone:
             user.phone_number = re.sub(r"[\s\-\(\)]", "", phone)
+        if profile_image:
+            user.profile_image = profile_image
 
         user.save()
         messages.success(request, _("Settings updated successfully."))

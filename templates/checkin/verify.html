@@ -1,5 +1,5 @@
 {% extends "layouts/dashboard.html" %}
-{% load slippers i18n %}
+{% load slippers i18n static %}
 
 {% block title %}{% trans "Scan Tickets" %} - {{ event.title }} - Reckot{% endblock %}
 
@@ -27,16 +27,45 @@
 {% endblock %}
 
 {% block header_actions %}
-<a href="{% url 'checkin:dashboard' org_slug=event.organization.slug event_slug=event.slug %}">
-    {% #button variant="outline" size="sm" %}
-        <i data-lucide="arrow-left" class="mr-2 h-4 w-4"></i>
-        {% trans "Back to Dashboard" %}
-    {% /button %}
-</a>
+<div class="flex items-center gap-2">
+    <div id="offline-mode-indicator" class="hidden flex items-center gap-2">
+        {% #badge id="offline-status-badge" variant="warning" %}Offline{% /badge %}
+        <span id="pending-sync-count" class="text-xs text-muted-foreground hidden"></span>
+    </div>
+    <a href="{% url 'checkin:dashboard' org_slug=event.organization.slug event_slug=event.slug %}">
+        {% #button variant="outline" size="sm" %}
+            <i data-lucide="arrow-left" class="mr-2 h-4 w-4"></i>
+            {% trans "Back to Dashboard" %}
+        {% /button %}
+    </a>
+</div>
 {% endblock %}
 
 {% block content %}
+<div id="notification-container" class="fixed top-4 right-4 z-50 space-y-2 w-80"></div>
+
 <div class="space-y-6">
+    <div data-animate="fade-up">
+        {% #card %}
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="font-semibold">{% trans "Offline Mode" %}</h3>
+                    <p class="text-sm text-muted-foreground">{% trans "Cache data for offline check-ins" %}</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="offline-mode-toggle" class="toggle">
+                        <span class="text-sm">{% trans "Enable" %}</span>
+                    </label>
+                    {% #button id="sync-now-btn" variant="outline" size="sm" %}
+                        <i data-lucide="refresh-cw" class="mr-2 h-4 w-4"></i>
+                        {% trans "Sync Data" %}
+                    {% /button %}
+                </div>
+            </div>
+        {% /card %}
+    </div>
+
     <div class="grid gap-6 lg:grid-cols-2">
         <div>
             <div data-animate="fade-up" data-delay="0.1">
@@ -103,4 +132,22 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/offline-sync.js' %}"></script>
+<script src="{% static 'js/checkin-offline.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        window.checkinOffline = new CheckInOffline('{{ event.slug }}', '{{ event.organization.slug }}');
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/static/sw.js').then((registration) => {
+                console.log('[ServiceWorker] Registered:', registration);
+            }).catch((error) => {
+                console.error('[ServiceWorker] Registration failed:', error);
+            });
+        }
+    });
+</script>
 {% endblock %}

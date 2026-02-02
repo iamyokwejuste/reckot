@@ -1,5 +1,5 @@
 from django.urls import path
-from apps.checkin import actions
+from apps.checkin import actions, api
 
 app_name = "checkin"
 
@@ -32,3 +32,19 @@ urlpatterns = [
         name="stats",
     ),
 ]
+
+api_urlpatterns = [
+    path(
+        "api/checkin/<slug:org_slug>/<slug:event_slug>/offline-data/",
+        api.OfflineDataView.as_view(),
+        name="offline_data",
+    ),
+    path("api/checkin/sync/", api.SyncCheckinView.as_view(), name="sync_checkin"),
+    path(
+        "api/checkin/swag/sync/",
+        api.SyncSwagCollectionView.as_view(),
+        name="sync_swag",
+    ),
+]
+
+urlpatterns += api_urlpatterns
