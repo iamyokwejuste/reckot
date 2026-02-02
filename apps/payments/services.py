@@ -297,6 +297,16 @@ def process_refund_payment(refund):
         )
         return False
 
+    organization = payment.booking.event.organization
+    balance_data = calculate_organization_balance(organization)
+    available_balance = balance_data["available_balance"]
+
+    if available_balance < refund.amount:
+        logger.error(
+            f"Insufficient balance for refund. Available: {available_balance} {payment.currency}, Required: {refund.amount} {payment.currency}"
+        )
+        return False
+
     logger.info(f"External reference: {payment.external_reference}")
 
     gateway_config = payment.gateway_config

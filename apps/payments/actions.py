@@ -3,11 +3,11 @@ import hmac
 import json
 import logging
 import re
-import requests
 from datetime import timedelta
 from decimal import Decimal
 
 import jwt
+import requests
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -252,19 +252,23 @@ class PaymentSelectMethodView(View):
 
     def _get_user_country(self, request):
         try:
-            x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+            x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
             if x_forwarded_for:
-                ip = x_forwarded_for.split(',')[0].strip()
+                ip = x_forwarded_for.split(",")[0].strip()
             else:
-                ip = request.META.get('REMOTE_ADDR')
+                ip = request.META.get("REMOTE_ADDR")
 
-            if ip in ['127.0.0.1', 'localhost'] or ip.startswith('192.168.') or ip.startswith('10.'):
+            if (
+                ip in ["127.0.0.1", "localhost"]
+                or ip.startswith("192.168.")
+                or ip.startswith("10.")
+            ):
                 return None
 
-            response = requests.get(f'https://ipinfo.io/{ip}/json', timeout=2)
+            response = requests.get(f"https://ipinfo.io/{ip}/json", timeout=2)
             if response.status_code == 200:
                 data = response.json()
-                return data.get('country')
+                return data.get("country")
         except Exception:
             pass
         return None
@@ -272,10 +276,11 @@ class PaymentSelectMethodView(View):
     def _get_available_payment_methods(self, country_code):
         all_methods = PaymentProvider.choices
 
-        if country_code == 'CM':
+        if country_code == "CM":
             return [
-                (code, label) for code, label in all_methods
-                if code in ['CAMPAY', 'OFFLINE']
+                (code, label)
+                for code, label in all_methods
+                if code in ["CAMPAY", "OFFLINE"]
             ]
 
         return all_methods
@@ -331,7 +336,9 @@ class PaymentStartView(View):
                     )
                 },
             )
-        payment, result = initiate_payment(booking, method, phone, payment_method=payment_method)
+        payment, result = initiate_payment(
+            booking, method, phone, payment_method=payment_method
+        )
         if not result.get("success"):
             return render(
                 request,
@@ -607,7 +614,9 @@ class FlutterwaveWebhookView(View):
             return HttpResponse("Payment not found", status=404)
 
         if not self._verify_signature(request, payment):
-            logger.error(f"Flutterwave webhook signature verification failed for {tx_ref}")
+            logger.error(
+                f"Flutterwave webhook signature verification failed for {tx_ref}"
+            )
             return HttpResponse("Invalid signature", status=403)
 
         webhook_data = {
@@ -788,16 +797,33 @@ class RefundProcessView(LoginRequiredMixin, View):
                 refund.payment.save(update_fields=["phone_number"])
                 messages.info(request, _("Updated payment phone number."))
 
-            success = process_refund_payment(refund)
+            organization = refund.payment.booking.event.organization
+            balance_data = calculate_organization_balance(organization)
+            available_balance = balance_data["available_balance"]
 
-            if success:
-                refund.process(processed_by=request.user)
-                messages.success(request, _("Refund processed successfully and marked as completed."))
-            else:
+            if available_balance < refund.amount:
                 messages.error(
                     request,
-                    _("Failed to process refund with payment provider. Please check the logs and try again.")
+                    _(
+                        f"Insufficient balance to process refund. Available: {available_balance} {refund.payment.currency}, Required: {refund.amount} {refund.payment.currency}"
+                    ),
                 )
+            else:
+                success = process_refund_payment(refund)
+
+                if success:
+                    refund.process(processed_by=request.user)
+                    messages.success(
+                        request,
+                        _("Refund processed successfully and marked as completed."),
+                    )
+                else:
+                    messages.error(
+                        request,
+                        _(
+                            "Failed to process refund with payment provider. Please check the logs and try again."
+                        ),
+                    )
         elif action == "reject":
             reason = request.POST.get("rejection_reason", "")
             refund.reject(reason, processed_by=request.user)
