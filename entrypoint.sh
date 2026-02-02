@@ -15,12 +15,12 @@ done
 
 if [ "$RUN_MIGRATIONS" = "true" ]; then
     echo "==> Running migrations..."
-    su -s /bin/bash appuser -c "uv run python manage.py migrate --noinput"
+    su -s /bin/bash appuser -c "python manage.py migrate --noinput"
 fi
 
 if [ "$COLLECT_STATIC" = "true" ]; then
     echo "==> Collecting static files..."
-    su -s /bin/bash appuser -c "uv run python manage.py collectstatic --noinput"
+    su -s /bin/bash appuser -c "python manage.py collectstatic --noinput"
 fi
 
 echo "==> Starting application..."

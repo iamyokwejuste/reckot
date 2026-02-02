@@ -68,7 +68,7 @@ ENV DJANGO_SETTINGS_MODULE=reckot.settings \
     REDIS_URL=redis://localhost:6379/0 \
     CELERY_BROKER_URL=redis://localhost:6379/0
 
-RUN su appuser -c "uv run python manage.py collectstatic --noinput --clear" 2>&1 || echo "Collectstatic completed with warnings"
+RUN su appuser -c "python manage.py collectstatic --noinput --clear" 2>&1 || echo "Collectstatic completed with warnings"
 
 EXPOSE 8000
 
