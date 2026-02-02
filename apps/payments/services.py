@@ -10,12 +10,21 @@ from django.utils import timezone
 from apps.events.models import FlyerBilling
 from apps.payments.gateways import GatewayManager
 from apps.payments.gateways.base import PaymentStatus
+from apps.payments.gateways.campay import CampayGateway
+from apps.payments.gateways.flutterwave import FlutterwaveGateway
+from apps.payments.gateways.pawapay import PawapayGateway
 from apps.payments.invoice_service import create_invoice
 from apps.payments.models import Payment, PaymentGatewayConfig, Refund, Withdrawal
 from apps.tickets.models import Booking
 
 logger = logging.getLogger(__name__)
 gateway_manager = GatewayManager()
+
+GATEWAY_CLASSES = {
+    "CAMPAY": CampayGateway,
+    "PAWAPAY": PawapayGateway,
+    "FLUTTERWAVE": FlutterwaveGateway,
+}
 
 
 def calculate_booking_amount(booking: Booking) -> Decimal:
@@ -358,8 +367,12 @@ def process_refund_payment(refund):
     logger.info(f"Gateway config found: {gateway_config.provider}")
 
     try:
-        gateway_manager = GatewayManager(gateway_config)
-        gateway = gateway_manager.get_gateway(payment.provider)
+        gateway_class = GATEWAY_CLASSES.get(payment.provider)
+        if not gateway_class:
+            logger.error(f"Unknown payment provider: {payment.provider}")
+            return False
+
+        gateway = gateway_class(gateway_config.credentials)
 
         logger.info(f"Calling gateway refund with amount: {refund.amount}")
 
