@@ -10,6 +10,8 @@ from django.http import JsonResponse, HttpResponse
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.templatetags.static import static
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 
 from apps.core.models import OTPVerification, User
 from apps.core.tasks import resend_otp_task, send_otp_sms_task
@@ -99,11 +101,19 @@ class WhyUsView(View):
         return render(request, "core/why_us.html")
 
 
+@method_decorator(csrf_exempt, name="dispatch")
+class HealthCheckView(View):
+    def get(self, request):
+        return JsonResponse({"status": "ok", "service": "reckot"})
+
+
+@method_decorator(csrf_exempt, name="dispatch")
 class PrivacyView(View):
     def get(self, request):
         return render(request, "core/privacy.html")
 
 
+@method_decorator(csrf_exempt, name="dispatch")
 class TermsView(View):
     def get(self, request):
         return render(request, "core/terms.html")
