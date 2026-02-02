@@ -33,6 +33,13 @@ class CustomAccountAdapter(DefaultAccountAdapter):
 class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
     def pre_social_login(self, request, sociallogin):
         if sociallogin.is_existing:
+            user = sociallogin.user
+            if sociallogin.account.extra_data:
+                extra_data = sociallogin.account.extra_data
+                picture_url = extra_data.get('picture', '')
+                if picture_url and picture_url != user.social_avatar_url:
+                    user.social_avatar_url = picture_url
+                    user.save(update_fields=['social_avatar_url'])
             return
 
         if sociallogin.user.email:
@@ -67,10 +74,9 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
                     user.first_name = extra_data.get('given_name', '')
                     user.last_name = extra_data.get('family_name', '')
 
-            if not user.social_avatar_url:
-                picture_url = extra_data.get('picture', '')
-                if picture_url:
-                    user.social_avatar_url = picture_url
+            picture_url = extra_data.get('picture', '')
+            if picture_url:
+                user.social_avatar_url = picture_url
 
         email_address, created = EmailAddress.objects.get_or_create(
             user=user,
