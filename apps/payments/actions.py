@@ -3,6 +3,7 @@ import hmac
 import json
 import logging
 import re
+import requests
 from datetime import timedelta
 from decimal import Decimal
 
@@ -249,6 +250,36 @@ class PaymentSelectMethodView(View):
             return Decimal("50")
         return (Decimal(str(amount)) * Decimal("0.04")).quantize(Decimal("1"))
 
+    def _get_user_country(self, request):
+        try:
+            x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+            if x_forwarded_for:
+                ip = x_forwarded_for.split(',')[0].strip()
+            else:
+                ip = request.META.get('REMOTE_ADDR')
+
+            if ip in ['127.0.0.1', 'localhost'] or ip.startswith('192.168.') or ip.startswith('10.'):
+                return None
+
+            response = requests.get(f'https://ipinfo.io/{ip}/json', timeout=2)
+            if response.status_code == 200:
+                data = response.json()
+                return data.get('country')
+        except Exception:
+            pass
+        return None
+
+    def _get_available_payment_methods(self, country_code):
+        all_methods = PaymentProvider.choices
+
+        if country_code == 'CM':
+            return [
+                (code, label) for code, label in all_methods
+                if code in ['CAMPAY', 'OFFLINE']
+            ]
+
+        return all_methods
+
     def get(self, request, booking_ref):
         booking, error = get_booking_for_request(request, booking_ref)
         if error:
@@ -262,16 +293,20 @@ class PaymentSelectMethodView(View):
         withdrawal_fee = self._calculate_withdrawal_fee(subtotal)
         total_with_fee = subtotal + withdrawal_fee
 
+        country_code = self._get_user_country(request)
+        available_methods = self._get_available_payment_methods(country_code)
+
         return render(
             request,
             "payments/select_method.html",
             {
                 "booking": booking,
                 "existing_payment": existing_payment,
-                "methods": PaymentProvider.choices,
+                "methods": available_methods,
                 "subtotal": subtotal,
                 "withdrawal_fee": withdrawal_fee,
                 "total_with_fee": total_with_fee,
+                "user_country": country_code,
             },
         )
 

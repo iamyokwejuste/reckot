@@ -82,6 +82,32 @@ def initiate_payment(
         else:
             default_email = booking.guest_email or ""
 
+        organization = booking.event.organization
+        gateway_config = None
+        try:
+            gateway_config = PaymentGatewayConfig.objects.filter(
+                organization=organization,
+                provider=provider,
+                is_active=True
+            ).first()
+
+            if not gateway_config:
+                global_credentials = settings.PAYMENT_GATEWAYS.get("CREDENTIALS", {}).get(provider, {})
+                if global_credentials:
+                    gateway_config = PaymentGatewayConfig.objects.create(
+                        organization=organization,
+                        provider=provider,
+                        is_active=True,
+                        is_default=True,
+                        credentials=global_credentials,
+                        supported_currencies=["XAF", "XOF", "USD", "EUR", "GBP", "NGN", "GHS", "UGX"],
+                        service_fee_type=PaymentGatewayConfig.ServiceFeeType.PERCENTAGE,
+                        service_fee_percentage=0
+                    )
+                    logger.info(f"Created default gateway config for {organization.name} with provider {provider}")
+        except Exception as e:
+            logger.warning(f"Failed to get/create gateway config: {e}")
+
         existing_payment = Payment.objects.filter(
             booking=booking, status=Payment.Status.PENDING
         ).first()
@@ -89,6 +115,7 @@ def initiate_payment(
         if existing_payment:
             existing_payment.phone_number = phone
             existing_payment.provider = provider
+            existing_payment.gateway_config = gateway_config
             existing_payment.expires_at = timezone.now() + timedelta(minutes=30)
             existing_payment.save()
             payment = existing_payment
@@ -100,6 +127,7 @@ def initiate_payment(
                 provider=provider,
                 phone_number=phone,
                 customer_email=kwargs.get("email", default_email),
+                gateway_config=gateway_config,
                 expires_at=timezone.now() + timedelta(minutes=30),
             )
 
