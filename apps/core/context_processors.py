@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.utils import timezone
 
+from apps.core.models import Notification
+
 
 def platform_settings(request):
     return {
@@ -12,7 +14,6 @@ def platform_settings(request):
 
 def unread_notifications(request):
     if request.user.is_authenticated:
-        from apps.core.models import Notification
         count = Notification.objects.filter(
             user=request.user,
             is_read=False

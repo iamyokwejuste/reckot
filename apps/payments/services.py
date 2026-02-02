@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.conf import settings
 from datetime import timedelta
 from decimal import Decimal
-from apps.payments.models import Payment, Refund, Withdrawal
+from apps.payments.models import Payment, PaymentGatewayConfig, Refund, Withdrawal
 from apps.payments.gateways import GatewayManager
 from apps.payments.gateways.base import PaymentStatus
 from apps.payments.invoice_service import create_invoice
@@ -234,9 +234,6 @@ def retry_payment(payment: Payment, method: str, phone: str) -> Payment:
 
 
 def process_refund_payment(refund):
-    from apps.payments.gateways.manager import GatewayManager
-    from apps.payments.models import Refund
-
     logger.info(f"Starting refund process for refund ID: {refund.id}")
 
     payment = refund.payment
