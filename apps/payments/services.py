@@ -249,9 +249,28 @@ def process_refund_payment(refund):
     logger.info(f"External reference: {payment.external_reference}")
 
     gateway_config = payment.gateway_config
+
     if not gateway_config:
-        logger.error(f"Payment {payment.reference} has no gateway config")
-        return False
+        logger.warning(f"Payment {payment.reference} has no gateway config, trying to get from organization")
+
+        try:
+            organization = payment.booking.event.organization
+            gateway_config = PaymentGatewayConfig.objects.filter(
+                organization=organization,
+                provider=payment.provider,
+                is_active=True
+            ).first()
+
+            if gateway_config:
+                logger.info(f"Using organization gateway config: {gateway_config.provider}")
+                payment.gateway_config = gateway_config
+                payment.save(update_fields=['gateway_config'])
+            else:
+                logger.error(f"No active gateway config found for organization {organization.name} with provider {payment.provider}")
+                return False
+        except Exception as e:
+            logger.error(f"Failed to get gateway config from organization: {e}")
+            return False
 
     logger.info(f"Gateway config found: {gateway_config.provider}")
 
