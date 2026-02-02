@@ -21,6 +21,13 @@ from apps.payments.models import Payment, Refund
 from apps.payments.services import calculate_organization_balance
 
 
+def htmx_redirect(request, *args, **kwargs):
+    response = redirect(*args, **kwargs)
+    if request.headers.get("HX-Request"):
+        response["HX-Redirect"] = response.url
+    return response
+
+
 class TicketListView(LoginRequiredMixin, View):
     def get(self, request):
         export_format = request.GET.get("export")
