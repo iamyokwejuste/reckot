@@ -237,31 +237,43 @@ def process_refund_payment(refund):
     from apps.payments.gateways.manager import GatewayManager
     from apps.payments.models import Refund
 
+    logger.info(f"Starting refund process for refund ID: {refund.id}")
+
     payment = refund.payment
+    logger.info(f"Payment reference: {payment.reference}, Status: {payment.status}, Provider: {payment.provider}")
 
     if not payment.external_reference:
-        logger.warning(f"Payment {payment.reference} has no external reference for refund")
+        logger.error(f"Payment {payment.reference} has no external reference for refund")
         return False
+
+    logger.info(f"External reference: {payment.external_reference}")
 
     gateway_config = payment.gateway_config
     if not gateway_config:
-        logger.warning(f"Payment {payment.reference} has no gateway config")
+        logger.error(f"Payment {payment.reference} has no gateway config")
         return False
+
+    logger.info(f"Gateway config found: {gateway_config.provider}")
 
     try:
         gateway_manager = GatewayManager(gateway_config)
         gateway = gateway_manager.get_gateway(payment.provider)
+
+        logger.info(f"Calling gateway refund with amount: {refund.amount}")
 
         result = gateway.refund(
             external_reference=payment.external_reference,
             amount=refund.amount
         )
 
+        logger.info(f"Gateway refund result - Success: {result.success}, Message: {result.message}")
+
         if result.success:
             with transaction.atomic():
                 booking = payment.booking
                 if booking and refund.refund_type == refund.Type.FULL:
                     from apps.tickets.models import Booking
+                    logger.info(f"Updating booking {booking.reference} status to REFUNDED")
                     booking.status = Booking.Status.REFUNDED
                     booking.save(update_fields=["status"])
 
@@ -272,5 +284,5 @@ def process_refund_payment(refund):
             return False
 
     except Exception as e:
-        logger.error(f"Failed to process refund for payment {payment.reference}: {e}")
+        logger.error(f"Failed to process refund for payment {payment.reference}: {e}", exc_info=True)
         return False
