@@ -81,7 +81,6 @@ services:
         condition: service_healthy
     volumes:
       - media_data:/app/media
-      - static_data:/app/staticfiles
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://127.0.0.1:$${PORT:-8000}/health/ || exit 1"]
       interval: 10s
@@ -176,5 +175,4 @@ volumes:
   redis_data:
   media_data:
   backup_data:
-  static_data:
   celery_beat_data:

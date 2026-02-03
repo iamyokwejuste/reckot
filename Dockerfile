@@ -46,7 +46,7 @@ ENV DJANGO_SETTINGS_MODULE=reckot.settings \
     DB_ENGINE=django.db.backends.sqlite3 \
     DB_NAME=:memory:
 
-RUN su appuser -c "python manage.py collectstatic --noinput --clear" || true
+RUN su appuser -c "python manage.py collectstatic --noinput --clear || python manage.py collectstatic --noinput"
 
 EXPOSE 8000
 
