@@ -149,6 +149,7 @@
                     </div>
                     {% if flyer_enabled %}
                     <div class="mt-4 pt-4 border-t border-border">
+                        {% if event.end_at >= now %}
                         <a href="{% url 'events:flyer_generator' org_slug=event.organization.slug event_slug=event.slug %}">
                             {% #button variant="default" size="sm" class="w-full" %}
                                 <i data-lucide="image-plus" class="w-4 h-4 mr-2"></i>
@@ -156,6 +157,13 @@
                             {% /button %}
                         </a>
                         <p class="text-xs text-muted-foreground mt-2 text-center">{% trans "Generate a personalized flyer to share" %}</p>
+                        {% else %}
+                        {% #button variant="outline" size="sm" class="w-full opacity-50 cursor-not-allowed" attrs="disabled" %}
+                            <i data-lucide="image-plus" class="w-4 h-4 mr-2"></i>
+                            {% trans "Create \"I Will Be There\" Flyer" %}
+                        {% /button %}
+                        <p class="text-xs text-muted-foreground mt-2 text-center">{% trans "You can't be there at a past event" %}</p>
+                        {% endif %}
                     </div>
                     {% endif %}
                 </div>
