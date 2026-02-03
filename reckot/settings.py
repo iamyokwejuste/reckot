@@ -2,6 +2,9 @@ import os
 from pathlib import Path
 from decimal import Decimal
 from dotenv import load_dotenv
+from django.templatetags.static import static
+from django.urls import reverse_lazy
+from django.utils.translation import gettext_lazy as _
 
 load_dotenv()
 
@@ -24,6 +27,9 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 INSTALLED_APPS = [
+    "unfold",
+    "unfold.contrib.filters",
+    "unfold.contrib.forms",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -48,17 +54,20 @@ INSTALLED_APPS = [
     "apps.widgets",
     "apps.marketing",
     "apps.ai",
+    "apps.analytics",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "reckot.middleware.admin_redirect.AdminRootRedirectMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "apps.core.middleware.RateLimitMiddleware",
+    "reckot.middleware.admin_only.AdminOnlyMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
@@ -384,3 +393,631 @@ LOGGING = {
         },
     },
 }
+
+UNFOLD = {
+    "SITE_TITLE": "Reckot Admin",
+    "SITE_HEADER": "Reckot Administration",
+    "SITE_URL": "/",
+    "SITE_ICON": "apps.core.utils.get_logo_path",
+    "SITE_LOGO": "apps.core.utils.get_logo_path",
+    "SITE_SYMBOL": "event",
+    "SHOW_HISTORY": True,
+    "SHOW_VIEW_ON_SITE": True,
+    "ENVIRONMENT": "apps.core.utils.environment_callback",
+    "DASHBOARD_CALLBACK": "apps.analytics.views.dashboard_callback",
+    "STYLES": [
+        lambda request: static("css/admin_custom.css"),
+    ],
+    "COLORS": {
+        "primary": {
+            "50": "250 245 255",
+            "100": "243 232 255",
+            "200": "233 213 255",
+            "300": "216 180 254",
+            "400": "192 132 252",
+            "500": "168 85 247",
+            "600": "147 51 234",
+            "700": "126 34 206",
+            "800": "107 33 168",
+            "900": "88 28 135",
+            "950": "59 7 100",
+        },
+    },
+    "EXTENSIONS": {
+        "modeltranslation": {
+            "flags": {
+                "en": "🇬🇧",
+                "fr": "🇫🇷",
+                "nl": "🇧🇪",
+            },
+        },
+    },
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": False,
+        "navigation": [
+            {
+                "items": [
+                    {
+                        "title": _("Dashboard"),
+                        "icon": "dashboard",
+                        "link": reverse_lazy("admin:index"),
+                    },
+                ],
+            },
+            {
+                "title": _("Analytics"),
+                "collapsible": True,
+                "icon": "analytics",
+                "items": [
+                    {
+                        "title": _("Revenue"),
+                        "icon": "attach_money",
+                        "link": "/admin/reports/revenue/",
+                    },
+                    {
+                        "title": _("Event Performance"),
+                        "icon": "bar_chart",
+                        "link": "/admin/reports/events/",
+                    },
+                    {
+                        "title": _("Ticket Sales"),
+                        "icon": "confirmation_number",
+                        "link": "/admin/reports/tickets/",
+                    },
+                    {
+                        "title": _("Payment Tracking"),
+                        "icon": "payment",
+                        "link": "/admin/reports/payments/",
+                    },
+                ],
+            },
+            {
+                "title": _("Organizations"),
+                "collapsible": True,
+                "icon": "business",
+                "items": [
+                    {
+                        "title": _("Organizations"),
+                        "icon": "corporate_fare",
+                        "link": reverse_lazy("admin:orgs_organization_changelist"),
+                    },
+                    {
+                        "title": _("Members"),
+                        "icon": "people",
+                        "link": reverse_lazy("admin:orgs_membership_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Events"),
+                "collapsible": True,
+                "icon": "event",
+                "items": [
+                    {
+                        "title": _("Events"),
+                        "icon": "event_available",
+                        "link": reverse_lazy("admin:events_event_changelist"),
+                    },
+                    {
+                        "title": _("Event Categories"),
+                        "icon": "category",
+                        "link": reverse_lazy("admin:events_eventcategory_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Tickets & Sales"),
+                "collapsible": True,
+                "icon": "receipt",
+                "items": [
+                    {
+                        "title": _("Tickets"),
+                        "icon": "local_activity",
+                        "link": reverse_lazy("admin:tickets_ticket_changelist"),
+                    },
+                    {
+                        "title": _("Bookings"),
+                        "icon": "shopping_cart",
+                        "link": reverse_lazy("admin:tickets_booking_changelist"),
+                    },
+                    {
+                        "title": _("Ticket Types"),
+                        "icon": "confirmation_number",
+                        "link": reverse_lazy("admin:tickets_tickettype_changelist"),
+                    },
+                    {
+                        "title": _("Guest Sessions"),
+                        "icon": "person_outline",
+                        "link": reverse_lazy("admin:tickets_guestsession_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Payments"),
+                "collapsible": True,
+                "icon": "payments",
+                "items": [
+                    {
+                        "title": _("Transactions"),
+                        "icon": "receipt_long",
+                        "link": reverse_lazy("admin:payments_payment_changelist"),
+                    },
+                    {
+                        "title": _("Offline Payments"),
+                        "icon": "money",
+                        "link": reverse_lazy("admin:payments_offlinepayment_changelist"),
+                    },
+                    {
+                        "title": _("Refunds"),
+                        "icon": "currency_exchange",
+                        "link": reverse_lazy("admin:payments_refund_changelist"),
+                    },
+                    {
+                        "title": _("Withdrawals"),
+                        "icon": "account_balance_wallet",
+                        "link": reverse_lazy("admin:payments_withdrawal_changelist"),
+                    },
+                    {
+                        "title": _("Payment Gateways"),
+                        "icon": "credit_card",
+                        "link": reverse_lazy("admin:payments_paymentgatewayconfig_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Check-in & Swag"),
+                "collapsible": True,
+                "icon": "how_to_reg",
+                "items": [
+                    {
+                        "title": _("Check-ins"),
+                        "icon": "check_circle",
+                        "link": reverse_lazy("admin:checkin_checkin_changelist"),
+                    },
+                    {
+                        "title": _("Swag Items"),
+                        "icon": "card_giftcard",
+                        "link": reverse_lazy("admin:checkin_swagitem_changelist"),
+                    },
+                    {
+                        "title": _("Swag Collections"),
+                        "icon": "shopping_bag",
+                        "link": reverse_lazy("admin:checkin_swagcollection_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Marketing"),
+                "collapsible": True,
+                "icon": "campaign",
+                "items": [
+                    {
+                        "title": _("Affiliate Links"),
+                        "icon": "people_outline",
+                        "link": reverse_lazy("admin:marketing_affiliatelink_changelist"),
+                    },
+                    {
+                        "title": _("Conversions"),
+                        "icon": "trending_up",
+                        "link": reverse_lazy("admin:marketing_affiliateconversion_changelist"),
+                    },
+                    {
+                        "title": _("Social Shares"),
+                        "icon": "share",
+                        "link": reverse_lazy("admin:marketing_socialshare_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("AI & Support"),
+                "collapsible": True,
+                "icon": "support_agent",
+                "items": [
+                    {
+                        "title": _("Support Tickets"),
+                        "icon": "support",
+                        "link": reverse_lazy("admin:ai_supportticket_changelist"),
+                    },
+                    {
+                        "title": _("AI Conversations"),
+                        "icon": "chat",
+                        "link": reverse_lazy("admin:ai_aiconversation_changelist"),
+                    },
+                    {
+                        "title": _("AI Messages"),
+                        "icon": "message",
+                        "link": reverse_lazy("admin:ai_aimessage_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Messaging"),
+                "collapsible": True,
+                "icon": "mail",
+                "items": [
+                    {
+                        "title": _("Campaigns"),
+                        "icon": "campaign",
+                        "link": reverse_lazy("admin:messaging_messagecampaign_changelist"),
+                    },
+                    {
+                        "title": _("Templates"),
+                        "icon": "email",
+                        "link": reverse_lazy("admin:messaging_messagetemplate_changelist"),
+                    },
+                    {
+                        "title": _("Message Delivery"),
+                        "icon": "send",
+                        "link": reverse_lazy("admin:messaging_messagedelivery_changelist"),
+                    },
+                    {
+                        "title": _("Notifications"),
+                        "icon": "notifications",
+                        "link": reverse_lazy("admin:core_notification_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Widgets"),
+                "collapsible": True,
+                "icon": "widgets",
+                "items": [
+                    {
+                        "title": _("Embed Widgets"),
+                        "icon": "code",
+                        "link": reverse_lazy("admin:widgets_embedwidget_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Users & Permissions"),
+                "collapsible": True,
+                "icon": "group",
+                "items": [
+                    {
+                        "title": _("Users"),
+                        "icon": "person",
+                        "link": reverse_lazy("admin:core_user_changelist"),
+                    },
+                    {
+                        "title": _("Groups"),
+                        "icon": "group_work",
+                        "link": reverse_lazy("admin:auth_group_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Analytics Data"),
+                "collapsible": True,
+                "icon": "assessment",
+                "items": [
+                    {
+                        "title": _("Daily Metrics"),
+                        "icon": "calendar_today",
+                        "link": reverse_lazy("admin:analytics_dailymetrics_changelist"),
+                    },
+                    {
+                        "title": _("Event Metrics"),
+                        "icon": "insights",
+                        "link": reverse_lazy("admin:analytics_eventmetrics_changelist"),
+                    },
+                    {
+                        "title": _("Payment Metrics"),
+                        "icon": "analytics",
+                        "link": reverse_lazy("admin:analytics_paymentmetrics_changelist"),
+                    },
+                    {
+                        "title": _("Organization Metrics"),
+                        "icon": "business_center",
+                        "link": reverse_lazy("admin:analytics_organizationmetrics_changelist"),
+                    },
+                ],
+            },
+        ],
+    },
+    "SIDEBAR_CUSTOM_BACKUP": {
+        "show_search": True,
+        "show_all_applications": False,
+        "navigation_expanded": True,
+        "navigation": [
+            {
+                "title": _("Dashboard"),
+                "separator": True,
+                "collapsible": True,
+                "icon": "dashboard",
+                "items": [
+                    {
+                        "title": _("Overview"),
+                        "icon": "dashboard",
+                        "link": reverse_lazy("admin:index"),
+                    },
+                ],
+            },
+            {
+                "title": _("Analytics"),
+                "separator": True,
+                "separator": True,
+                "collapsible": True,
+                "icon": "analytics",
+                "items": [
+                    {
+                        "title": _("Revenue"),
+                        "icon": "attach_money",
+                        "link": "/admin/reports/revenue/",
+                    },
+                    {
+                        "title": _("Event Performance"),
+                        "icon": "bar_chart",
+                        "link": "/admin/reports/events/",
+                    },
+                    {
+                        "title": _("Ticket Sales"),
+                        "icon": "confirmation_number",
+                        "link": "/admin/reports/tickets/",
+                    },
+                    {
+                        "title": _("Payment Tracking"),
+                        "icon": "payment",
+                        "link": "/admin/reports/payments/",
+                    },
+                ],
+            },
+            {
+                "title": _("Organizations"),
+                "separator": True,
+                "collapsible": True,
+                "icon": "business",
+                "items": [
+                    {
+                        "title": _("Organizations"),
+                        "icon": "corporate_fare",
+                        "link": reverse_lazy("admin:orgs_organization_changelist"),
+                    },
+                    {
+                        "title": _("Members"),
+                        "icon": "people",
+                        "link": reverse_lazy("admin:orgs_membership_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Events"),
+                "separator": True,
+                "collapsible": True,
+                "icon": "event",
+                "items": [
+                    {
+                        "title": _("Events"),
+                        "icon": "event_available",
+                        "link": reverse_lazy("admin:events_event_changelist"),
+                    },
+                    {
+                        "title": _("Event Categories"),
+                        "icon": "category",
+                        "link": reverse_lazy("admin:events_eventcategory_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Tickets & Sales"),
+                "separator": True,
+                "collapsible": True,
+                "icon": "receipt",
+                "items": [
+                    {
+                        "title": _("Tickets"),
+                        "icon": "local_activity",
+                        "link": reverse_lazy("admin:tickets_ticket_changelist"),
+                    },
+                    {
+                        "title": _("Bookings"),
+                        "icon": "shopping_cart",
+                        "link": reverse_lazy("admin:tickets_booking_changelist"),
+                    },
+                    {
+                        "title": _("Ticket Types"),
+                        "icon": "confirmation_number",
+                        "link": reverse_lazy("admin:tickets_tickettype_changelist"),
+                    },
+                    {
+                        "title": _("Guest Sessions"),
+                        "icon": "person_outline",
+                        "link": reverse_lazy("admin:tickets_guestsession_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Payments"),
+                "separator": True,
+                "collapsible": True,
+                "icon": "payments",
+                "items": [
+                    {
+                        "title": _("Transactions"),
+                        "icon": "receipt_long",
+                        "link": reverse_lazy("admin:payments_payment_changelist"),
+                    },
+                    {
+                        "title": _("Offline Payments"),
+                        "icon": "money",
+                        "link": reverse_lazy("admin:payments_offlinepayment_changelist"),
+                    },
+                    {
+                        "title": _("Refunds"),
+                        "icon": "currency_exchange",
+                        "link": reverse_lazy("admin:payments_refund_changelist"),
+                    },
+                    {
+                        "title": _("Withdrawals"),
+                        "icon": "account_balance_wallet",
+                        "link": reverse_lazy("admin:payments_withdrawal_changelist"),
+                    },
+                    {
+                        "title": _("Payment Gateways"),
+                        "icon": "credit_card",
+                        "link": reverse_lazy("admin:payments_paymentgatewayconfig_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Check-in & Swag"),
+                "separator": True,
+                "collapsible": True,
+                "icon": "how_to_reg",
+                "items": [
+                    {
+                        "title": _("Check-ins"),
+                        "icon": "check_circle",
+                        "link": reverse_lazy("admin:checkin_checkin_changelist"),
+                    },
+                    {
+                        "title": _("Swag Items"),
+                        "icon": "card_giftcard",
+                        "link": reverse_lazy("admin:checkin_swagitem_changelist"),
+                    },
+                    {
+                        "title": _("Swag Collections"),
+                        "icon": "shopping_bag",
+                        "link": reverse_lazy("admin:checkin_swagcollection_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Marketing"),
+                "separator": True,
+                "collapsible": True,
+                "icon": "campaign",
+                "items": [
+                    {
+                        "title": _("Affiliate Links"),
+                        "icon": "people_outline",
+                        "link": reverse_lazy("admin:marketing_affiliatelink_changelist"),
+                    },
+                    {
+                        "title": _("Conversions"),
+                        "icon": "trending_up",
+                        "link": reverse_lazy("admin:marketing_affiliateconversion_changelist"),
+                    },
+                    {
+                        "title": _("Social Shares"),
+                        "icon": "share",
+                        "link": reverse_lazy("admin:marketing_socialshare_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("AI & Support"),
+                "separator": True,
+                "collapsible": True,
+                "icon": "support_agent",
+                "items": [
+                    {
+                        "title": _("Support Tickets"),
+                        "icon": "support",
+                        "link": reverse_lazy("admin:ai_supportticket_changelist"),
+                    },
+                    {
+                        "title": _("AI Conversations"),
+                        "icon": "chat",
+                        "link": reverse_lazy("admin:ai_aiconversation_changelist"),
+                    },
+                    {
+                        "title": _("AI Messages"),
+                        "icon": "message",
+                        "link": reverse_lazy("admin:ai_aimessage_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Messaging"),
+                "separator": True,
+                "collapsible": True,
+                "icon": "mail",
+                "items": [
+                    {
+                        "title": _("Campaigns"),
+                        "icon": "campaign",
+                        "link": reverse_lazy("admin:messaging_messagecampaign_changelist"),
+                    },
+                    {
+                        "title": _("Templates"),
+                        "icon": "email",
+                        "link": reverse_lazy("admin:messaging_messagetemplate_changelist"),
+                    },
+                    {
+                        "title": _("Message Delivery"),
+                        "icon": "send",
+                        "link": reverse_lazy("admin:messaging_messagedelivery_changelist"),
+                    },
+                    {
+                        "title": _("Notifications"),
+                        "icon": "notifications",
+                        "link": reverse_lazy("admin:core_notification_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Widgets"),
+                "separator": True,
+                "collapsible": True,
+                "icon": "widgets",
+                "items": [
+                    {
+                        "title": _("Embed Widgets"),
+                        "icon": "code",
+                        "link": reverse_lazy("admin:widgets_embedwidget_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Users & Permissions"),
+                "separator": True,
+                "collapsible": True,
+                "icon": "group",
+                "items": [
+                    {
+                        "title": _("Users"),
+                        "icon": "person",
+                        "link": reverse_lazy("admin:core_user_changelist"),
+                    },
+                    {
+                        "title": _("Groups"),
+                        "icon": "group_work",
+                        "link": reverse_lazy("admin:auth_group_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Analytics Data"),
+                "separator": True,
+                "collapsible": True,
+                "icon": "assessment",
+                "items": [
+                    {
+                        "title": _("Daily Metrics"),
+                        "icon": "calendar_today",
+                        "link": reverse_lazy("admin:analytics_dailymetrics_changelist"),
+                    },
+                    {
+                        "title": _("Event Metrics"),
+                        "icon": "insights",
+                        "link": reverse_lazy("admin:analytics_eventmetrics_changelist"),
+                    },
+                    {
+                        "title": _("Payment Metrics"),
+                        "icon": "analytics",
+                        "link": reverse_lazy("admin:analytics_paymentmetrics_changelist"),
+                    },
+                    {
+                        "title": _("Organization Metrics"),
+                        "icon": "business_center",
+                        "link": reverse_lazy("admin:analytics_organizationmetrics_changelist"),
+                    },
+                ],
+            },
+        ],
+    }
+}
+
+ADMIN_ONLY_MODE = os.getenv("ADMIN_ONLY_MODE", "False").lower() in ("true", "1", "yes")

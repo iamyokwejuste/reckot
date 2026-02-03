@@ -1,13 +1,15 @@
-{% with color=color|default:"blue" %}
-<div class="stat-card {{ class }}" {{ attrs }}>
-    <div class="flex items-center gap-3">
-        <div class="h-10 w-10 rounded-lg bg-{{ color }}-500/10 flex items-center justify-center">
-            <i data-lucide="{{ icon }}" class="h-5 w-5 text-{{ color }}-500"></i>
+{% load static %}
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+    <div class="flex items-center justify-between">
+        <div class="flex-1">
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ title }}</p>
+            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ value }}</p>
+            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ trend }}</p>
         </div>
-        <div>
-            <p class="text-2xl font-bold">{{ value }}{% if suffix %} {{ suffix }}{% endif %}</p>
-            <p class="text-xs text-muted-foreground">{{ label }}</p>
+        <div class="ml-4">
+            <span class="material-symbols-rounded text-4xl {% if color == 'primary' %}text-primary-600 dark:text-primary-400{% elif color == 'success' %}text-green-600 dark:text-green-400{% elif color == 'warning' %}text-amber-600 dark:text-amber-400{% elif color == 'danger' %}text-red-600 dark:text-red-400{% else %}text-blue-600 dark:text-blue-400{% endif %}">
+                {{ icon }}
+            </span>
         </div>
     </div>
 </div>
-{% endwith %}

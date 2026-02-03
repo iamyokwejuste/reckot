@@ -1,0 +1,58 @@
+.analytics-kpi {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.analytics-kpi .card {
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.analytics-kpi .card-title {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+}
+
+.analytics-kpi .card-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #111827;
+}
+
+.analytics-kpi .card-footer {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    margin-top: 0.5rem;
+}
+
+.chart-wrapper {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+}
+
+.chart-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #111827;
+}
+
+[data-theme="light"] img[src*="reckto_logo_light_mode.png"] {
+    content: url('/static/images/logo/reckto_logo_light_mode.png');
+}
+
+[data-theme="dark"] img[src*="reckto_logo_light_mode.png"] {
+    content: url('/static/images/logo/reckto_logo_dark_mode.png');
+}
+
+.dark img[src*="reckto_logo_light_mode.png"] {
+    content: url('/static/images/logo/reckto_logo_dark_mode.png');
+}

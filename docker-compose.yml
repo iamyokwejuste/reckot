@@ -88,6 +88,34 @@ services:
       retries: 3
       start_period: 40s
 
+  admin:
+    <<: *app-build
+    stop_grace_period: 240s
+    ports:
+      - "${ADMIN_PORT:-8001}:8001"
+    environment:
+      <<: [*common-env, *db-env, *redis-env, *email-env, *payment-env, *third-party-env]
+      ALLOWED_HOSTS: ${ADMIN_ALLOWED_HOSTS:-*}
+      CSRF_TRUSTED_ORIGINS: ${ADMIN_CSRF_TRUSTED_ORIGINS:-}
+      SITE_ID: ${SITE_ID:-1}
+      PORT: "8001"
+      RUN_MIGRATIONS: "false"
+      COLLECT_STATIC: "false"
+      ADMIN_ONLY_MODE: "true"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - media_data:/app/media
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://127.0.0.1:8001/health/ || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
   celery_worker:
     <<: *app-build
     stop_grace_period: 300s

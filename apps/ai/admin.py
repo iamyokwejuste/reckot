@@ -1,9 +1,10 @@
+from unfold.admin import ModelAdmin
 from django.contrib import admin
 from apps.ai.models import SupportTicket, AIConversation, AIMessage
 
 
 @admin.register(SupportTicket)
-class SupportTicketAdmin(admin.ModelAdmin):
+class SupportTicketAdmin(ModelAdmin):
     list_display = [
         "reference",
         "subject",
@@ -20,7 +21,7 @@ class SupportTicketAdmin(admin.ModelAdmin):
 
 
 @admin.register(AIConversation)
-class AIConversationAdmin(admin.ModelAdmin):
+class AIConversationAdmin(ModelAdmin):
     list_display = ["session_id", "user", "created_at", "updated_at"]
     list_filter = ["created_at"]
     search_fields = ["session_id", "user__email"]
@@ -28,7 +29,7 @@ class AIConversationAdmin(admin.ModelAdmin):
 
 
 @admin.register(AIMessage)
-class AIMessageAdmin(admin.ModelAdmin):
+class AIMessageAdmin(ModelAdmin):
     list_display = ["conversation", "role", "created_at"]
     list_filter = ["role", "created_at"]
     search_fields = ["content"]

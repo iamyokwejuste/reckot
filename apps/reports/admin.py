@@ -1,1 +1,1 @@
-# Register your models here.
+from unfold.admin import ModelAdmin

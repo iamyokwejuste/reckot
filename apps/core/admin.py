@@ -1,9 +1,28 @@
+from unfold.admin import ModelAdmin
 from django.contrib import admin
-from apps.core.models import Notification
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin, GroupAdmin as BaseGroupAdmin
+from django.contrib.auth.models import Group
+from apps.core.models import Notification, User
+
+
+@admin.register(User)
+class UserAdmin(BaseUserAdmin, ModelAdmin):
+    list_display = ["email", "first_name", "last_name", "is_staff", "is_active", "date_joined"]
+    list_filter = ["is_staff", "is_superuser", "is_active", "groups"]
+    search_fields = ["email", "first_name", "last_name"]
+    ordering = ["-date_joined"]
+
+
+admin.site.unregister(Group)
+
+
+@admin.register(Group)
+class GroupAdmin(BaseGroupAdmin, ModelAdmin):
+    pass
 
 
 @admin.register(Notification)
-class NotificationAdmin(admin.ModelAdmin):
+class NotificationAdmin(ModelAdmin):
     list_display = ["title", "user", "notification_type", "is_read", "created_at", "expires_at"]
     list_filter = ["notification_type", "is_read", "created_at"]
     search_fields = ["title", "message", "user__email"]

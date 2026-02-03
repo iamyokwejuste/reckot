@@ -1,3 +1,4 @@
+from unfold.admin import ModelAdmin
 from django.contrib import admin
 from django.utils import timezone
 from apps.events.models import Event, EventCategory, EventFlyerConfig, CheckoutQuestion
@@ -5,7 +6,7 @@ from apps.tickets.models import TicketType
 
 
 @admin.register(EventCategory)
-class EventCategoryAdmin(admin.ModelAdmin):
+class EventCategoryAdmin(ModelAdmin):
     list_display = ["name", "slug", "icon", "color", "is_active", "display_order"]
     list_filter = ["is_active"]
     search_fields = ["name", "description"]
@@ -18,7 +19,8 @@ class EventCategoryAdmin(admin.ModelAdmin):
     readonly_fields = ["created_at", "updated_at"]
 
 
-class TicketTypeInline(admin.TabularInline):
+from unfold.admin import TabularInline
+class TicketTypeInline(TabularInline):
     model = TicketType
     extra = 0
     fields = ["name", "price", "quantity", "available_quantity", "is_active"]
@@ -26,7 +28,7 @@ class TicketTypeInline(admin.TabularInline):
 
 
 @admin.register(Event)
-class EventAdmin(admin.ModelAdmin):
+class EventAdmin(ModelAdmin):
     list_display = [
         "title",
         "organization",
@@ -140,7 +142,7 @@ class EventAdmin(admin.ModelAdmin):
 
 
 @admin.register(TicketType)
-class TicketTypeAdmin(admin.ModelAdmin):
+class TicketTypeAdmin(ModelAdmin):
     list_display = [
         "name",
         "event",
@@ -154,7 +156,7 @@ class TicketTypeAdmin(admin.ModelAdmin):
 
 
 @admin.register(EventFlyerConfig)
-class EventFlyerConfigAdmin(admin.ModelAdmin):
+class EventFlyerConfigAdmin(ModelAdmin):
     list_display = [
         "event",
         "is_enabled",
@@ -166,7 +168,7 @@ class EventFlyerConfigAdmin(admin.ModelAdmin):
 
 
 @admin.register(CheckoutQuestion)
-class CheckoutQuestionAdmin(admin.ModelAdmin):
+class CheckoutQuestionAdmin(ModelAdmin):
     list_display = ["question", "event", "field_type", "is_required", "order"]
     list_filter = ["field_type", "is_required"]
     search_fields = ["question", "event__title"]

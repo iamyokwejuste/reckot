@@ -50,6 +50,7 @@ urlpatterns = [
     path("why-us/", WhyUsView.as_view(), name="why_us"),
     path("privacy/", PrivacyView.as_view(), name="privacy"),
     path("terms/", TermsView.as_view(), name="terms"),
+    path("admin/reports/", include("apps.analytics.urls")),
     path("admin/", admin.site.urls),
     path("events/", include("apps.events.urls")),
     path("orgs/", include("apps.orgs.urls")),
