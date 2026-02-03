@@ -59,4 +59,39 @@ urlpatterns = [
         name="generate_cover_image",
     ),
     path("demo/", hackathon_views.AIFeaturesDemoView.as_view(), name="demo"),
+    path(
+        "event-concierge/<slug:org_slug>/<slug:event_slug>/",
+        hackathon_views.EventConciergeView.as_view(),
+        name="event_concierge",
+    ),
+    path(
+        "event-concierge/<slug:org_slug>/<slug:event_slug>/audit/",
+        hackathon_views.EventConciergeAuditView.as_view(),
+        name="event_concierge_audit",
+    ),
+    path(
+        "smart-scanner/",
+        hackathon_views.SmartEventScannerView.as_view(),
+        name="smart_scanner",
+    ),
+    path(
+        "metrics/dashboard/",
+        hackathon_views.AIMetricsDashboardView.as_view(),
+        name="metrics_dashboard",
+    ),
+    path(
+        "assistant/chat/stream/",
+        hackathon_views.StreamingChatView.as_view(),
+        name="streaming_chat",
+    ),
+    path(
+        "low-bandwidth/",
+        hackathon_views.LowBandwidthModeView.as_view(),
+        name="low_bandwidth",
+    ),
+    path(
+        "community-templates/",
+        hackathon_views.CommunityTemplateView.as_view(),
+        name="community_templates",
+    ),
 ]

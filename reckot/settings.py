@@ -302,7 +302,11 @@ TWILIO_MESSAGING_SERVICE_SID = os.getenv("TWILIO_MESSAGING_SERVICE_SID", "")
 TWILIO_VERIFY_SERVICE_SID = os.getenv("TWILIO_VERIFY_SERVICE_SID", "")
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3-flash-preview")
+GEMINI_MODEL_THINKING = os.getenv("GEMINI_MODEL_THINKING", "gemini-3-flash-preview")
+GEMINI_IMAGE_MODEL = os.getenv("GEMINI_IMAGE_MODEL", "gemini-2.5-flash-image")
+GEMINI_LITE_MODEL = os.getenv("GEMINI_LITE_MODEL", "gemini-1.5-flash-8b")
+RECKOT_AI_CHAT_DAILY_LIMIT = int(os.getenv("RECKOT_AI_CHAT_DAILY_LIMIT", "50"))
 
 RECKOT_PLATFORM_FEE_PERCENTAGE = Decimal(
     os.getenv("RECKOT_PLATFORM_FEE_PERCENTAGE", "7")

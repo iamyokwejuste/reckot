@@ -16,9 +16,15 @@ from apps.ai.predictive_analytics import (
     optimize_ticket_pricing,
     generate_marketing_strategy,
 )
+from apps.ai.agent_orchestration import event_concierge
+from apps.ai.smart_scanner import smart_scanner
 from apps.ai.decorators import ai_feature_required, ai_rate_limit, log_ai_usage
 from apps.events.models import Event
 from apps.core.services.ai import gemini_ai
+from apps.tickets.models import Booking, Ticket
+from django.db.models import Count, Sum, Q, F
+from django.utils import timezone
+from datetime import timedelta
 
 
 def crop_to_aspect_ratio(image_bytes: bytes, aspect_width: int, aspect_height: int) -> bytes:
@@ -505,3 +511,321 @@ class AIFeaturesDemoView(View):
                 ],
             }
         )
+
+
+@method_decorator([csrf_protect, ai_feature_required, ai_rate_limit], name="dispatch")
+class EventConciergeView(LoginRequiredMixin, View):
+    def get(self, request, org_slug, event_slug):
+        try:
+            event = Event.objects.select_related('organization').get(
+                slug=event_slug,
+                organization__slug=org_slug
+            )
+
+            if not request.user.has_perm('events.view_event', event):
+                return JsonResponse({"error": "Permission denied"}, status=403)
+
+            event_data = self._build_event_data(event)
+            conversation = event_concierge.orchestrate_discussion(event_data)
+
+            return JsonResponse({
+                "success": True,
+                "event": {
+                    "title": event.title,
+                    "slug": event.slug,
+                    "org_slug": event.organization.slug,
+                },
+                "conversation": [
+                    {
+                        "agent": msg.agent_name,
+                        "role": msg.role,
+                        "content": msg.content,
+                        "emoji": msg.emoji,
+                        "timestamp": msg.timestamp,
+                    }
+                    for msg in conversation
+                ],
+                "agent_count": len(conversation),
+            })
+
+        except Event.DoesNotExist:
+            return JsonResponse({"error": "Event not found"}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    def _build_event_data(self, event):
+        now = timezone.now()
+        days_until = (event.start_at - now).days if event.start_at > now else 0
+
+        bookings = Booking.objects.filter(event=event, status='CONFIRMED')
+        tickets_sold = Ticket.objects.filter(booking__event=event, status='VALID').count()
+        revenue = bookings.aggregate(total=Sum('total_amount'))['total'] or 0
+
+        attendance_count = Ticket.objects.filter(
+            booking__event=event,
+            status='USED'
+        ).count()
+        attendance_rate = (attendance_count / tickets_sold * 100) if tickets_sold > 0 else 0
+
+        ticket_types = []
+        for tt in event.ticket_types.all():
+            sold = Ticket.objects.filter(ticket_type=tt, status__in=['VALID', 'USED']).count()
+            ticket_types.append({
+                'name': tt.name,
+                'price': float(tt.price),
+                'quantity': tt.quantity,
+                'sold': sold,
+            })
+
+        return {
+            'title': event.title,
+            'description': event.description,
+            'location': event.location,
+            'start_date': event.start_at.strftime('%Y-%m-%d') if event.start_at else None,
+            'category': event.category,
+            'capacity': event.capacity,
+            'metrics': {
+                'tickets_sold': tickets_sold,
+                'revenue': float(revenue),
+                'attendance_rate': round(attendance_rate, 1),
+                'conversion_rate': 0,
+                'days_until_event': days_until,
+            },
+            'ticket_types': ticket_types,
+        }
+
+
+@method_decorator([csrf_protect, ai_feature_required, ai_rate_limit], name="dispatch")
+class EventConciergeAuditView(LoginRequiredMixin, View):
+    @log_ai_usage("event_concierge_audit")
+    def post(self, request, org_slug, event_slug):
+        try:
+            event = Event.objects.select_related('organization').get(
+                slug=event_slug,
+                organization__slug=org_slug
+            )
+
+            if not request.user.has_perm('events.view_event', event):
+                return JsonResponse({"error": "Permission denied"}, status=403)
+
+            event_view = EventConciergeView()
+            event_data = event_view._build_event_data(event)
+
+            body = json.loads(request.body)
+            focus_areas = body.get('focus_areas', None)
+
+            if focus_areas:
+                conversation = event_concierge.orchestrate_discussion(event_data, focus_areas)
+            else:
+                audit_result = event_concierge.quick_audit(event_data)
+                return JsonResponse({"success": True, "audit": audit_result})
+
+            return JsonResponse({
+                "success": True,
+                "conversation": [
+                    {
+                        "agent": msg.agent_name,
+                        "role": msg.role,
+                        "content": msg.content,
+                        "emoji": msg.emoji,
+                    }
+                    for msg in conversation
+                ],
+            })
+
+        except Event.DoesNotExist:
+            return JsonResponse({"error": "Event not found"}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+
+@method_decorator([csrf_protect, ai_feature_required, ai_rate_limit], name="dispatch")
+class SmartEventScannerView(LoginRequiredMixin, View):
+    @log_ai_usage("smart_event_scanner")
+    def post(self, request):
+        try:
+            body = json.loads(request.body)
+            image_b64 = body.get('image')
+
+            if not image_b64:
+                return JsonResponse({"error": "No image provided"}, status=400)
+
+            if ',' in image_b64:
+                image_b64 = image_b64.split(',', 1)[1]
+
+            image_data = base64.b64decode(image_b64)
+            image_mime = body.get('mime_type', 'image/jpeg')
+
+            scan_mode = body.get('mode', 'extract')
+
+            if scan_mode == 'validate':
+                result = smart_scanner.validate_event_poster(image_data, image_mime)
+                return JsonResponse({"success": True, "validation": result})
+
+            elif scan_mode == 'competitor':
+                your_event = body.get('your_event', {})
+                result = smart_scanner.scan_competitor_event(
+                    image_data,
+                    image_mime,
+                    your_event
+                )
+                return JsonResponse({"success": True, "analysis": result})
+
+            else:
+                result = smart_scanner.scan_event_image(image_data, image_mime)
+
+                if not result:
+                    return JsonResponse({
+                        "error": "Unable to extract data from image"
+                    }, status=422)
+
+                return JsonResponse({"success": True, "extracted_data": result})
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+        except Exception as e:
+            logger.error(f"Smart scanner error: {e}")
+            return JsonResponse({"error": str(e)}, status=500)
+
+
+@method_decorator([csrf_protect], name="dispatch")
+class AIMetricsDashboardView(LoginRequiredMixin, View):
+    def get(self, request):
+        if not request.user.is_staff:
+            return JsonResponse({"error": "Admin access required"}, status=403)
+
+        try:
+            from apps.ai.monitoring import metrics_collector
+
+            view_type = request.GET.get('view', 'system')
+
+            if view_type == 'realtime':
+                data = metrics_collector.get_real_time_metrics()
+            elif view_type == 'historical':
+                hours = int(request.GET.get('hours', 24))
+                data = metrics_collector.get_historical_metrics(hours)
+            elif view_type == 'user':
+                user_id = int(request.GET.get('user_id', request.user.id))
+                days = int(request.GET.get('days', 7))
+                data = metrics_collector.get_user_metrics(user_id, days)
+            else:
+                data = metrics_collector.get_system_health()
+
+            return JsonResponse({"success": True, "metrics": data})
+
+        except Exception as e:
+            logger.error(f"Metrics dashboard error: {e}")
+            return JsonResponse({"error": str(e)}, status=500)
+
+
+class StreamingChatView(LoginRequiredMixin, View):
+    async def post(self, request):
+        try:
+            from apps.ai.streaming import streaming_service
+            from django.http import StreamingHttpResponse
+            
+            body = json.loads(request.body)
+            user_message = body.get('message', '')
+            conversation_history = body.get('history', [])
+
+            if not user_message:
+                return JsonResponse({"error": "No message provided"}, status=400)
+
+            async def event_stream():
+                yield 'data: {"status": "connected"}\n\n'
+                
+                async for chunk_data in streaming_service.stream_chat(
+                    user_message,
+                    conversation_history
+                ):
+                    yield f'data: {chunk_data}\n\n'
+
+            response = StreamingHttpResponse(
+                event_stream(),
+                content_type='text/event-stream'
+            )
+            response['Cache-Control'] = 'no-cache'
+            response['X-Accel-Buffering'] = 'no'
+            return response
+
+        except Exception as e:
+            logger.error(f"Streaming chat error: {e}")
+            return JsonResponse({"error": str(e)}, status=500)
+
+
+@method_decorator([csrf_protect, ai_feature_required, ai_rate_limit], name="dispatch")
+class LowBandwidthModeView(LoginRequiredMixin, View):
+    @log_ai_usage("low_bandwidth_mode")
+    def post(self, request):
+        try:
+            from apps.ai.low_bandwidth import low_bandwidth_service
+            
+            body = json.loads(request.body)
+            mode = body.get('mode', 'summarize')
+
+            if mode == 'summarize':
+                text = body.get('text', '')
+                max_words = int(body.get('max_words', 50))
+                result = low_bandwidth_service.summarize_for_mobile(text, max_words)
+                
+            elif mode == 'quick_description':
+                title = body.get('title', '')
+                category = body.get('category', '')
+                location = body.get('location', '')
+                result = low_bandwidth_service.quick_event_description(title, category, location)
+                
+            elif mode == 'mobile_response':
+                query = body.get('query', '')
+                context = body.get('context', '')
+                result = low_bandwidth_service.mobile_friendly_response(query, context)
+                
+            else:
+                return JsonResponse({"error": "Invalid mode"}, status=400)
+
+            if not result:
+                return JsonResponse({"error": "Generation failed"}, status=500)
+
+            return JsonResponse({"success": True, "result": result})
+
+        except Exception as e:
+            logger.error(f"Low-bandwidth mode error: {e}")
+            return JsonResponse({"error": str(e)}, status=500)
+
+
+@method_decorator([csrf_protect, ai_feature_required, ai_rate_limit], name="dispatch")
+class CommunityTemplateView(LoginRequiredMixin, View):
+    @log_ai_usage("community_template")
+    def post(self, request):
+        try:
+            from apps.ai.community_templates import community_templates
+            
+            body = json.loads(request.body)
+            action = body.get('action', 'generate')
+
+            if action == 'suggestions':
+                event_type = body.get('event_type', '')
+                result = community_templates.get_template_suggestions(event_type)
+                return JsonResponse({"success": True, "suggestions": result})
+
+            elif action == 'generate':
+                event_type = body.get('event_type', '')
+                title = body.get('title', '')
+                location = body.get('location', '')
+                date = body.get('date', '')
+                details = body.get('additional_details', '')
+
+                result = community_templates.generate_community_event(
+                    event_type, title, location, date, details
+                )
+
+                if not result:
+                    return JsonResponse({"error": "Generation failed"}, status=500)
+
+                return JsonResponse({"success": True, "template": result})
+
+            else:
+                return JsonResponse({"error": "Invalid action"}, status=400)
+
+        except Exception as e:
+            logger.error(f"Community template error: {e}")
+            return JsonResponse({"error": str(e)}, status=500)
