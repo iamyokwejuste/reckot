@@ -14,15 +14,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="{% static 'css/output.css' %}" rel="stylesheet">
-    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
-    <script defer src="https://unpkg.com/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
-    <script defer src="https://unpkg.com/@alpinejs/intersect@3.x.x/dist/cdn.min.js"></script>
-    <script src="{% static 'js/chatbot.js' %}"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-    <script src="https://unpkg.com/motion@10.18.0/dist/motion.min.js"></script>
-    <script defer src="{% static 'js/offline.js' %}"></script>
-    <script defer src="{% static 'js/components.js' %}"></script>
     <script>
         function themeHandler() {
             const mode = localStorage.getItem('theme') || 'system';
@@ -49,81 +40,6 @@
                     this.updateTheme();
                 }
             }
-        }
-        document.addEventListener("DOMContentLoaded", () => lucide.createIcons());
-        document.addEventListener("htmx:afterSwap", (evt) => {
-            lucide.createIcons();
-
-            const scripts = evt.detail.target.querySelectorAll('script');
-            scripts.forEach(script => {
-                if (script.innerHTML) {
-                    const newScript = document.createElement('script');
-                    newScript.innerHTML = script.innerHTML;
-                    script.parentNode.replaceChild(newScript, script);
-                }
-            });
-
-            if (typeof Alpine !== 'undefined') {
-                const alpineElements = evt.detail.target.querySelectorAll('[x-data]');
-                alpineElements.forEach(el => {
-                    if (!el.__x) {
-                        Alpine.initTree(el);
-                    }
-                });
-            }
-        });
-
-        document.addEventListener("showToast", (e) => {
-            const { type, message } = e.detail;
-            showToast(type, message);
-        });
-
-        window.showToast = function(type, message) {
-            const container = document.getElementById('toast-container') || createToastContainer();
-            const toast = document.createElement('div');
-            toast.className = `pointer-events-auto rounded-lg border shadow-lg p-4 flex items-start gap-3 transition-all duration-300 transform translate-x-4 opacity-0`;
-
-            const colors = {
-                success: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400',
-                warning: 'bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-400',
-                error: 'bg-red-500/10 border-red-500/20 text-red-700 dark:text-red-400',
-                info: 'bg-card border-border'
-            };
-            const icons = {
-                success: 'check-circle',
-                warning: 'alert-triangle',
-                error: 'x-circle',
-                info: 'info'
-            };
-
-            toast.classList.add(...(colors[type] || colors.info).split(' '));
-            toast.innerHTML = `
-                <i data-lucide="${icons[type] || icons.info}" class="h-5 w-5 shrink-0 mt-0.5"></i>
-                <p class="text-sm flex-1">${message}</p>
-                <button onclick="this.parentElement.remove()" class="shrink-0 -mr-1 -mt-1 p-1 rounded hover:bg-black/5 dark:hover:bg-white/10">
-                    <i data-lucide="x" class="h-4 w-4"></i>
-                </button>
-            `;
-
-            container.appendChild(toast);
-            lucide.createIcons();
-
-            requestAnimationFrame(() => {
-                toast.classList.remove('translate-x-4', 'opacity-0');
-            });
-
-            setTimeout(() => {
-                toast.classList.add('translate-x-4', 'opacity-0');
-                setTimeout(() => toast.remove(), 300);
-            }, 5000);
-        };
-
-        function createToastContainer() {
-            const container = document.createElement('div');
-            container.id = 'toast-container';
-            container.className = 'fixed bottom-4 right-4 z-[100] flex flex-col gap-2 max-w-sm w-full pointer-events-none';
-            document.body.appendChild(container);
-            return container;
         }
     </script>
     <style>
@@ -271,7 +187,7 @@
         </aside>
 
         <div class="flex-1 flex flex-col w-full max-w-full overflow-x-hidden" :class="collapsed ? 'lg:pl-[68px]' : 'lg:pl-64'" style="transition: padding-left 0.2s ease-in-out">
-            <header class="sticky top-0 z-30 flex h-14 items-center gap-2 sm:gap-4 border-b border-border bg-card px-3 sm:px-4 lg:px-6 w-full max-w-full">
+            <header class="sticky top-0 z-30 flex h-14 items-center gap-2 sm:gap-4 border-b border-border bg-card backdrop-blur-sm supports-[backdrop-filter]:bg-card/95 px-3 sm:px-4 lg:px-6 w-full max-w-full">
                 <button @click="sidebarOpen = true" class="lg:hidden -ml-2 p-2 rounded-md hover:bg-muted shrink-0">
                     <i data-lucide="menu" class="h-5 w-5"></i>
                 </button>
@@ -336,6 +252,7 @@
             </main>
         </div>
     </div>
+    {% include "partials/scripts.html" with is_dashboard=True use_motion=True %}
     {% block extra_scripts %}{% endblock %}
 
     {% include "partials/floating_chatbot.html" %}

@@ -1031,3 +1031,21 @@
     resize: none;
     background: var(--color-muted);
 }
+
+@supports (-webkit-overflow-scrolling: touch) {
+    header.sticky {
+        position: -webkit-sticky;
+        position: sticky;
+    }
+}
+
+@media (max-width: 768px) {
+    header[class*="sticky"] {
+        position: -webkit-sticky;
+        position: sticky;
+        top: 0;
+        will-change: transform;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
+}

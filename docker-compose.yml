@@ -1,60 +1,77 @@
+# Common configurations
+x-common-env: &common-env
+  SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+  DEBUG: ${DEBUG:-False}
+  TIME_ZONE: ${TIME_ZONE:-Africa/Douala}
+
+x-db-env: &db-env
+  DB_ENGINE: django.db.backends.postgresql
+  DB_NAME: ${DB_NAME:-reckot}
+  DB_USER: ${DB_USER:-reckot}
+  DB_PASSWORD: ${DB_PASSWORD:-changeme}
+  DB_HOST: db
+  DB_PORT: 5432
+
+x-redis-env: &redis-env
+  REDIS_URL: redis://redis:6379/0
+  CELERY_BROKER_URL: redis://redis:6379/0
+  CELERY_RESULT_BACKEND: redis://redis:6379/0
+
+x-email-env: &email-env
+  EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.smtp.EmailBackend}
+  EMAIL_HOST: ${EMAIL_HOST:-smtp.gmail.com}
+  EMAIL_PORT: ${EMAIL_PORT:-587}
+  EMAIL_USE_TLS: ${EMAIL_USE_TLS:-True}
+  EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
+  EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
+  DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-}
+
+x-payment-env: &payment-env
+  PAYMENT_PRIMARY_GATEWAY: ${PAYMENT_PRIMARY_GATEWAY:-CAMPAY}
+  PAYMENT_FALLBACK_GATEWAYS: ${PAYMENT_FALLBACK_GATEWAYS:-}
+  PAYMENT_CALLBACK_URL: ${PAYMENT_CALLBACK_URL:-}
+  DEFAULT_CURRENCY: ${DEFAULT_CURRENCY:-XAF}
+  RECKOT_PLATFORM_FEE_PERCENTAGE: ${RECKOT_PLATFORM_FEE_PERCENTAGE:-7}
+  CAMPAY_APP_USERNAME: ${CAMPAY_APP_USERNAME:-}
+  CAMPAY_APP_PASSWORD: ${CAMPAY_APP_PASSWORD:-}
+  CAMPAY_PERMANENT_TOKEN: ${CAMPAY_PERMANENT_TOKEN:-}
+  CAMPAY_WEBHOOK_KEY: ${CAMPAY_WEBHOOK_KEY:-}
+  CAMPAY_IS_PRODUCTION: ${CAMPAY_IS_PRODUCTION:-False}
+  PAWAPAY_API_TOKEN: ${PAWAPAY_API_TOKEN:-}
+  PAWAPAY_IS_PRODUCTION: ${PAWAPAY_IS_PRODUCTION:-False}
+  FLUTTERWAVE_SECRET_KEY: ${FLUTTERWAVE_SECRET_KEY:-}
+  FLUTTERWAVE_PUBLIC_KEY: ${FLUTTERWAVE_PUBLIC_KEY:-}
+  FLUTTERWAVE_ENCRYPTION_KEY: ${FLUTTERWAVE_ENCRYPTION_KEY:-}
+
+x-third-party-env: &third-party-env
+  TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+  TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+  TWILIO_PHONE_NUMBER: ${TWILIO_PHONE_NUMBER:-}
+  TWILIO_MESSAGING_SERVICE_SID: ${TWILIO_MESSAGING_SERVICE_SID:-}
+  TWILIO_VERIFY_SERVICE_SID: ${TWILIO_VERIFY_SERVICE_SID:-}
+  GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+  GEMINI_MODEL: ${GEMINI_MODEL:-gemini-1.5-flash}
+  GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+  GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+
+x-app-build: &app-build
+  build:
+    context: .
+    dockerfile: Dockerfile
+  restart: unless-stopped
+
 services:
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: unless-stopped
+    <<: *app-build
     stop_grace_period: 240s
     expose:
       - "8000"
     environment:
-      SECRET_KEY: ${SECRET_KEY:-change-me-in-production-use-a-long-random-string}
-      DEBUG: ${DEBUG:-False}
+      <<: [*common-env, *db-env, *redis-env, *email-env, *payment-env, *third-party-env]
       ALLOWED_HOSTS: ${ALLOWED_HOSTS:-*}
       CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-}
       SITE_ID: ${SITE_ID:-1}
-      TIME_ZONE: ${TIME_ZONE:-Africa/Douala}
-      DB_ENGINE: django.db.backends.postgresql
-      DB_NAME: ${DB_NAME:-reckot}
-      DB_USER: ${DB_USER:-reckot}
-      DB_PASSWORD: ${DB_PASSWORD:-changeme}
-      DB_HOST: db
-      DB_PORT: 5432
-      EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.smtp.EmailBackend}
-      EMAIL_HOST: ${EMAIL_HOST:-smtp.gmail.com}
-      EMAIL_PORT: ${EMAIL_PORT:-587}
-      EMAIL_USE_TLS: ${EMAIL_USE_TLS:-True}
-      EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
-      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
-      DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       ACCOUNT_EMAIL_VERIFICATION: ${ACCOUNT_EMAIL_VERIFICATION:-none}
-      PAYMENT_PRIMARY_GATEWAY: ${PAYMENT_PRIMARY_GATEWAY:-CAMPAY}
-      PAYMENT_FALLBACK_GATEWAYS: ${PAYMENT_FALLBACK_GATEWAYS:-}
-      CAMPAY_APP_USERNAME: ${CAMPAY_APP_USERNAME:-}
-      CAMPAY_APP_PASSWORD: ${CAMPAY_APP_PASSWORD:-}
-      CAMPAY_PERMANENT_TOKEN: ${CAMPAY_PERMANENT_TOKEN:-}
-      CAMPAY_WEBHOOK_KEY: ${CAMPAY_WEBHOOK_KEY:-}
-      CAMPAY_IS_PRODUCTION: ${CAMPAY_IS_PRODUCTION:-False}
-      PAWAPAY_API_TOKEN: ${PAWAPAY_API_TOKEN:-}
-      PAWAPAY_IS_PRODUCTION: ${PAWAPAY_IS_PRODUCTION:-False}
-      FLUTTERWAVE_SECRET_KEY: ${FLUTTERWAVE_SECRET_KEY:-}
-      FLUTTERWAVE_PUBLIC_KEY: ${FLUTTERWAVE_PUBLIC_KEY:-}
-      FLUTTERWAVE_ENCRYPTION_KEY: ${FLUTTERWAVE_ENCRYPTION_KEY:-}
-      PAYMENT_CALLBACK_URL: ${PAYMENT_CALLBACK_URL:-}
-      DEFAULT_CURRENCY: ${DEFAULT_CURRENCY:-XAF}
-      RECKOT_PLATFORM_FEE_PERCENTAGE: ${RECKOT_PLATFORM_FEE_PERCENTAGE:-7}
-      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
-      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
-      TWILIO_PHONE_NUMBER: ${TWILIO_PHONE_NUMBER:-}
-      TWILIO_MESSAGING_SERVICE_SID: ${TWILIO_MESSAGING_SERVICE_SID:-}
-      TWILIO_VERIFY_SERVICE_SID: ${TWILIO_VERIFY_SERVICE_SID:-}
-      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
-      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-1.5-flash}
-      REDIS_URL: redis://redis:6379/0
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/0
       RUN_MIGRATIONS: "true"
       COLLECT_STATIC: "false"
     depends_on:
@@ -67,67 +84,17 @@ services:
       - static_data:/app/staticfiles
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
-      interval: 10s
-      timeout: 5s
-      retries: 60
+      interval: 30s
+      timeout: 10s
+      retries: 3
       start_period: 60s
 
-  redis:
-    image: redis:7-alpine
-    restart: unless-stopped
-    command: redis-server --appendonly yes
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 30
-      start_period: 10s
-
   celery_worker:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: unless-stopped
+    <<: *app-build
     stop_grace_period: 300s
     command: uv run celery -A reckot worker --loglevel=info --concurrency=4 -Q default,emails,payments,exports
     environment:
-      SECRET_KEY: ${SECRET_KEY:-change-me-in-production-use-a-long-random-string}
-      DEBUG: "False"
-      DB_ENGINE: django.db.backends.postgresql
-      DB_NAME: ${DB_NAME:-reckot}
-      DB_USER: ${DB_USER:-reckot}
-      DB_PASSWORD: ${DB_PASSWORD:-changeme}
-      DB_HOST: db
-      DB_PORT: 5432
-      REDIS_URL: redis://redis:6379/0
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/0
-      EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.smtp.EmailBackend}
-      EMAIL_HOST: ${EMAIL_HOST:-smtp.gmail.com}
-      EMAIL_PORT: ${EMAIL_PORT:-587}
-      EMAIL_USE_TLS: ${EMAIL_USE_TLS:-True}
-      EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
-      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
-      DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-}
-      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
-      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
-      TWILIO_PHONE_NUMBER: ${TWILIO_PHONE_NUMBER:-}
-      TWILIO_MESSAGING_SERVICE_SID: ${TWILIO_MESSAGING_SERVICE_SID:-}
-      TWILIO_VERIFY_SERVICE_SID: ${TWILIO_VERIFY_SERVICE_SID:-}
-      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
-      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-1.5-flash}
-      CAMPAY_APP_USERNAME: ${CAMPAY_APP_USERNAME:-}
-      CAMPAY_APP_PASSWORD: ${CAMPAY_APP_PASSWORD:-}
-      CAMPAY_PERMANENT_TOKEN: ${CAMPAY_PERMANENT_TOKEN:-}
-      CAMPAY_WEBHOOK_KEY: ${CAMPAY_WEBHOOK_KEY:-}
-      CAMPAY_IS_PRODUCTION: ${CAMPAY_IS_PRODUCTION:-False}
-      PAWAPAY_API_TOKEN: ${PAWAPAY_API_TOKEN:-}
-      PAWAPAY_IS_PRODUCTION: ${PAWAPAY_IS_PRODUCTION:-False}
-      FLUTTERWAVE_SECRET_KEY: ${FLUTTERWAVE_SECRET_KEY:-}
-      FLUTTERWAVE_PUBLIC_KEY: ${FLUTTERWAVE_PUBLIC_KEY:-}
-      FLUTTERWAVE_ENCRYPTION_KEY: ${FLUTTERWAVE_ENCRYPTION_KEY:-}
+      <<: [*common-env, *db-env, *redis-env, *email-env, *payment-env, *third-party-env]
       RUN_MIGRATIONS: "false"
     depends_on:
       db:
@@ -138,24 +105,11 @@ services:
       - media_data:/app/media
 
   celery_beat:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: unless-stopped
+    <<: *app-build
     stop_grace_period: 60s
     command: uv run celery -A reckot beat --loglevel=info --schedule=/tmp/celerybeat-schedule
     environment:
-      SECRET_KEY: ${SECRET_KEY:-change-me-in-production-use-a-long-random-string}
-      DEBUG: "False"
-      DB_ENGINE: django.db.backends.postgresql
-      DB_NAME: ${DB_NAME:-reckot}
-      DB_USER: ${DB_USER:-reckot}
-      DB_PASSWORD: ${DB_PASSWORD:-changeme}
-      DB_HOST: db
-      DB_PORT: 5432
-      REDIS_URL: redis://redis:6379/0
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      <<: [*common-env, *db-env, *redis-env]
       RUN_MIGRATIONS: "false"
     depends_on:
       redis:
@@ -164,8 +118,20 @@ services:
       - media_data:/app/media
       - celery_beat_data:/tmp
 
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
   db:
-    image: postgres:16.6-alpine3.21
+    image: postgres:16.6-alpine
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${DB_NAME:-reckot}
@@ -174,11 +140,10 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
-      interval: 5s
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
       timeout: 5s
-      retries: 30
-      start_period: 60s
+      retries: 5
 
   db-backup:
     image: prodrigestivill/postgres-backup-local:16
@@ -202,7 +167,7 @@ services:
       - backup_data:/backups
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/"]
-      interval: 60s
+      interval: 120s
       timeout: 10s
       retries: 3
 
