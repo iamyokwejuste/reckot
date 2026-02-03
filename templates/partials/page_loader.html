@@ -46,6 +46,18 @@
     const loader = document.getElementById('page-loader');
     if (!loader) return;
 
+    window.alpineReady = new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+            console.warn('Alpine initialization timeout - showing page anyway');
+            reject(new Error('Alpine timeout'));
+        }, 5000);
+
+        document.addEventListener('alpine:init', () => {
+            clearTimeout(timeout);
+            resolve();
+        });
+    });
+
     function hideLoader() {
         loader.style.opacity = '0';
         setTimeout(() => {
@@ -53,12 +65,12 @@
         }, 300);
     }
 
-    if (document.readyState === 'complete') {
-        setTimeout(hideLoader, 800);
-    } else {
-        window.addEventListener('load', () => {
-            setTimeout(hideLoader, 800);
+    window.alpineReady
+        .then(() => {
+            setTimeout(hideLoader, 300);
+        })
+        .catch(() => {
+            setTimeout(hideLoader, 300);
         });
-    }
 })();
 </script>

@@ -3,8 +3,9 @@
 <script src="https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js"></script>
 <script defer src="https://unpkg.com/@alpinejs/collapse@3.14.8/dist/cdn.min.js"></script>
 <script defer src="https://unpkg.com/@alpinejs/intersect@3.14.8/dist/cdn.min.js"></script>
-<script src="{% static 'js/chatbot.js' %}"></script>
+<script defer src="{% static 'js/alpine-components.js' %}"></script>
 <script defer src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js"></script>
+<script defer src="{% static 'js/chatbot.js' %}"></script>
 <script defer src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
 
 {% if use_motion %}
@@ -65,11 +66,30 @@
 
         setupEventListeners() {
             document.addEventListener('DOMContentLoaded', () => this.onDOMReady());
+            document.addEventListener('htmx:beforeRequest', () => this.onHTMXBeforeRequest());
             document.addEventListener('htmx:afterSwap', (evt) => this.onHTMXSwap(evt));
+            document.addEventListener('htmx:afterSettle', (evt) => this.onHTMXAfterSettle(evt));
+        },
+
+        onHTMXBeforeRequest() {
+            const loader = document.getElementById('page-loader');
+            if (loader && loader.style.display === 'none') {
+                loader.style.display = 'flex';
+                loader.style.opacity = '1';
+            }
         },
 
         onDOMReady() {
             this.initializeLucide();
+            this.notifyReady();
+        },
+
+        notifyReady() {
+            if (typeof Alpine !== 'undefined' && Alpine.version) {
+                document.dispatchEvent(new CustomEvent('app:ready'));
+            } else {
+                setTimeout(() => this.notifyReady(), 50);
+            }
         },
 
         onHTMXSwap(evt) {
@@ -81,6 +101,23 @@
                 this.initializeAlpine(target);
                 this.initializeLucide();
             });
+        },
+
+        onHTMXAfterSettle(evt) {
+            requestAnimationFrame(() => {
+                this.initializeLucide();
+                this.hideLoader();
+            });
+        },
+
+        hideLoader() {
+            const loader = document.getElementById('page-loader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                }, 300);
+            }
         },
 
         executeInlineScripts(container) {
