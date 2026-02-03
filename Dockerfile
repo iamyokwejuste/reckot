@@ -49,5 +49,9 @@ ENV DJANGO_SETTINGS_MODULE=reckot.settings \
 RUN su appuser -c "python manage.py collectstatic --noinput --clear" || true
 
 EXPOSE 8000
+
+HEALTHCHECK --interval=10s --timeout=10s --start-period=40s --retries=3 \
+  CMD curl -f http://127.0.0.1:${PORT:-8000}/health/ || exit 1
+
 ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["/bin/sh", "-c", "gunicorn reckot.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 4 --threads 2 --worker-class gthread --worker-tmp-dir /dev/shm --access-logfile - --error-logfile -"]

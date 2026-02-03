@@ -28,5 +28,8 @@ if [ "$COLLECT_STATIC" = "true" ]; then
     su -s /bin/bash appuser -c "python manage.py collectstatic --noinput"
 fi
 
-echo "==> Starting application..."
+echo "==> Waiting 2 seconds for services to stabilize..."
+sleep 2
+
+echo "==> Starting application on port ${PORT:-8000}..."
 exec su -s /bin/bash appuser -c 'exec "$@"' -- appuser "$@"

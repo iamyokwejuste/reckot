@@ -72,7 +72,7 @@ services:
       CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-}
       SITE_ID: ${SITE_ID:-1}
       ACCOUNT_EMAIL_VERIFICATION: ${ACCOUNT_EMAIL_VERIFICATION:-none}
-      RUN_MIGRATIONS: "true"
+      RUN_MIGRATIONS: "false"
       COLLECT_STATIC: "false"
     depends_on:
       db:
@@ -83,11 +83,11 @@ services:
       - media_data:/app/media
       - static_data:/app/staticfiles
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
-      interval: 30s
+      test: ["CMD-SHELL", "curl -f http://127.0.0.1:$${PORT:-8000}/health/ || exit 1"]
+      interval: 10s
       timeout: 10s
       retries: 3
-      start_period: 60s
+      start_period: 40s
 
   celery_worker:
     <<: *app-build

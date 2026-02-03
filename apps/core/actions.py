@@ -12,6 +12,8 @@ from django.utils.translation import gettext_lazy as _
 from django.templatetags.static import static
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from django.db import connection
+from django.core.cache import cache
 
 from apps.core.models import OTPVerification, User
 from apps.core.tasks import resend_otp_task, send_otp_sms_task
@@ -104,7 +106,31 @@ class WhyUsView(View):
 @method_decorator(csrf_exempt, name="dispatch")
 class HealthCheckView(View):
     def get(self, request):
-        return JsonResponse({"status": "ok", "service": "reckot"})
+        status = {"status": "ok", "service": "reckot"}
+        http_status = 200
+
+        try:
+            connection.ensure_connection()
+            status["database"] = "connected"
+        except Exception as e:
+            status["database"] = f"error: {str(e)}"
+            status["status"] = "unhealthy"
+            http_status = 503
+
+        try:
+            cache.set("health_check", "ok", 10)
+            if cache.get("health_check") == "ok":
+                status["redis"] = "connected"
+            else:
+                status["redis"] = "cache test failed"
+                status["status"] = "unhealthy"
+                http_status = 503
+        except Exception as e:
+            status["redis"] = f"error: {str(e)}"
+            status["status"] = "unhealthy"
+            http_status = 503
+
+        return JsonResponse(status, status=http_status)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
