@@ -164,13 +164,16 @@
             <div class="lg:col-span-1 self-start">
                 <div class="card p-6 sticky top-24"
                      x-data="{
-                         eventDate: new Date('{{ event.start_at|date:'Y-m-d' }}T{{ event.start_at|date:'H:i:s' }}'),
+                         eventStartDate: new Date('{{ event.start_at|date:'Y-m-d' }}T{{ event.start_at|date:'H:i:s' }}'),
+                         eventEndDate: new Date('{{ event.end_at|date:'Y-m-d' }}T{{ event.end_at|date:'H:i:s' }}'),
                          years: 0,
                          days: 0,
                          hours: 0,
                          minutes: 0,
                          seconds: 0,
-                         isPast: false,
+                         isBeforeEvent: true,
+                         isEventOngoing: false,
+                         isEventEnded: false,
                          showYears: false,
                          init() {
                              this.updateCountdown();
@@ -178,9 +181,23 @@
                          },
                          updateCountdown() {
                              const now = new Date();
-                             const diff = this.eventDate - now;
-                             if (diff <= 0) {
-                                 this.isPast = true;
+                             const diffToStart = this.eventStartDate - now;
+                             const diffToEnd = this.eventEndDate - now;
+
+                             if (diffToEnd <= 0) {
+                                 this.isBeforeEvent = false;
+                                 this.isEventOngoing = false;
+                                 this.isEventEnded = true;
+                                 this.years = 0;
+                                 this.days = 0;
+                                 this.hours = 0;
+                                 this.minutes = 0;
+                                 this.seconds = 0;
+                                 this.showYears = false;
+                             } else if (diffToStart <= 0 && diffToEnd > 0) {
+                                 this.isBeforeEvent = false;
+                                 this.isEventOngoing = true;
+                                 this.isEventEnded = false;
                                  this.years = 0;
                                  this.days = 0;
                                  this.hours = 0;
@@ -188,8 +205,10 @@
                                  this.seconds = 0;
                                  this.showYears = false;
                              } else {
-                                 this.isPast = false;
-                                 const totalDays = Math.floor(diff / (1000 * 60 * 60 * 24));
+                                 this.isBeforeEvent = true;
+                                 this.isEventOngoing = false;
+                                 this.isEventEnded = false;
+                                 const totalDays = Math.floor(diffToStart / (1000 * 60 * 60 * 24));
                                  if (totalDays >= 365) {
                                      this.showYears = true;
                                      this.years = Math.floor(totalDays / 365);
@@ -199,15 +218,15 @@
                                      this.years = 0;
                                      this.days = totalDays;
                                  }
-                                 this.hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                                 this.minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                                 this.seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                                 this.hours = Math.floor((diffToStart % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                 this.minutes = Math.floor((diffToStart % (1000 * 60 * 60)) / (1000 * 60));
+                                 this.seconds = Math.floor((diffToStart % (1000 * 60)) / 1000);
                              }
                          }
                      }">
                     <h3 class="font-semibold mb-4">{% trans "Tickets" %}</h3>
 
-                    <div class="mb-4 p-3 rounded-lg bg-muted/50 border border-border" x-show="!isPast">
+                    <div class="mb-4 p-3 rounded-lg bg-muted/50 border border-border" x-show="isBeforeEvent">
                         <div class="text-xs text-muted-foreground text-center mb-1">{% trans "Event starts in" %}</div>
                         <div class="flex justify-center gap-2 text-center">
                             <template x-if="showYears">
@@ -235,8 +254,8 @@
                         </div>
                     </div>
 
-                    <div class="mb-4 p-3 rounded-lg bg-primary/10 border border-primary/20 text-center" x-show="isPast" x-cloak>
-                        <div class="text-sm font-medium text-primary">{% trans "Event has started!" %}</div>
+                    <div class="mb-4 p-3 rounded-lg bg-success/10 border border-success/20 text-center" x-show="isEventOngoing" x-cloak>
+                        <div class="text-sm font-medium text-success">{% trans "Event is ongoing!" %}</div>
                     </div>
 
                     {% if ticket_types and has_available_tickets %}
