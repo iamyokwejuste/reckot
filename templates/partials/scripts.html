@@ -1,11 +1,12 @@
 {% load static %}
 
 <script src="https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js"></script>
+<script src="{% static 'js/alpine-components.js' %}"></script>
+<script src="{% static 'js/chatbot.js' %}"></script>
+<script src="{% static 'js/event_checkout.js' %}"></script>
 <script defer src="https://unpkg.com/@alpinejs/collapse@3.14.8/dist/cdn.min.js"></script>
 <script defer src="https://unpkg.com/@alpinejs/intersect@3.14.8/dist/cdn.min.js"></script>
-<script defer src="{% static 'js/alpine-components.js' %}"></script>
 <script defer src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js"></script>
-<script defer src="{% static 'js/chatbot.js' %}"></script>
 <script defer src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
 
 {% if use_motion %}
