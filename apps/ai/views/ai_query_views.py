@@ -6,7 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from apps.ai.services import AIQueryService, SchemaValidator
-from apps.ai.decorators import ai_rate_limit
+from apps.ai.utils.decorators import ai_rate_limit
 
 logger = logging.getLogger(__name__)
 

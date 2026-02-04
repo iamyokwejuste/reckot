@@ -47,11 +47,6 @@
 - **Conversion rate analytics**
 - **Daily metrics** aggregation
 
-## Documentation
-
-- **[Database Schema](DATABASE_SCHEMA.md)** - Complete ER diagram and schema documentation
-- **[AI Governance](AI_GOVERNANCE.md)** - Security framework for AI database queries
-
 ## Architecture
 
 ### Technology Stack
@@ -69,23 +64,23 @@
 ```
 reckot/
 ├── apps/
-│   ├── ai/              # AI chat, support tickets, query execution
-│   ├── analytics/       # Metrics and dashboards
-│   ├── checkin/         # Event check-in and swag distribution
-│   ├── core/            # User model, notifications, OTP
-│   ├── events/          # Event management and customization
-│   ├── marketing/       # Affiliate links and social sharing
-│   ├── messaging/       # Email campaigns and templates
-│   ├── orgs/            # Organizations and membership
-│   ├── payments/        # Payment processing and refunds
-│   ├── reports/         # Report generation and exports
-│   ├── tickets/         # Ticket types, bookings, tickets
-│   └── widgets/         # Embeddable event widgets
-├── reckot/              # Project settings and config
-├── templates/           # Django templates
-├── static/              # Static assets (CSS, JS, images)
-├── media/               # User-uploaded files
-└── locale/              # Translations (English, French)
+│   ├── ai/
+│   ├── analytics/
+│   ├── checkin/
+│   ├── core/
+│   ├── events/
+│   ├── marketing/
+│   ├── messaging/
+│   ├── orgs/
+│   ├── payments/
+│   ├── reports/
+│   ├── tickets/
+│   └── widgets/
+├── reckot/
+├── templates/
+├── static/
+├── media/
+└── locale/
 ```
 
 ## Security Features
@@ -108,17 +103,14 @@ Our new **AI Governance Framework** provides enterprise-grade security for AI-po
 - **Rate limiting** per user and access level
 - **Risk scoring** for query analysis
 
-See [AI_GOVERNANCE.md](AI_GOVERNANCE.md) for full details.
 
 ## Getting Started
 
 ### Prerequisites
-- Python 3.12+
-- PostgreSQL 14+ (or SQLite for development)
-- Redis 7+
-- Node.js 18+ (for TailwindCSS)
+- **Docker** and **Docker Compose** (recommended)
+- OR Python 3.12+, PostgreSQL 14+, Redis 7+
 
-### Installation
+### Quick Start with Docker (Recommended)
 
 1. **Clone the repository**
    ```bash
@@ -126,42 +118,293 @@ See [AI_GOVERNANCE.md](AI_GOVERNANCE.md) for full details.
    cd Reckot
    ```
 
-2. **Create virtual environment**
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-   ```
-
-3. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt  # or use uv
-   ```
-
-4. **Configure environment**
+2. **Create environment file**
    ```bash
    cp .env.example .env
-   # Edit .env with your settings
    ```
 
-5. **Run migrations**
+3. **Start all services**
+   ```bash
+   docker-compose -f docker-compose-dev.yml up -d
+   ```
+
+4. **Run migrations**
+   ```bash
+   docker-compose -f docker-compose-dev.yml exec web python manage.py migrate
+   ```
+
+5. **Create superuser**
+   ```bash
+   docker-compose -f docker-compose-dev.yml exec web python manage.py createsuperuser
+   ```
+
+6. **Access the application**
+   - Web: http://localhost:8000
+   - Admin: http://localhost:8000/admin
+   - Health: http://localhost:8000/health/
+
+### Manual Installation (Without Docker)
+
+1. **Clone and setup virtual environment**
+   ```bash
+   git clone <repository-url>
+   cd Reckot
+   python -m venv .venv
+   source .venv/bin/activate
+   ```
+
+2. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Configure environment**
+   ```bash
+   cp .env.example .env
+   ```
+
+4. **Run migrations and create superuser**
    ```bash
    python manage.py migrate
-   ```
-
-6. **Create superuser**
-   ```bash
    python manage.py createsuperuser
    ```
 
-7. **Run development server**
+5. **Start services**
    ```bash
-   python manage.py runserver
+   redis-server &
+   python manage.py runserver &
+   celery -A reckot worker -l info &
    ```
 
-8. **Start Celery worker** (in another terminal)
-   ```bash
-   celery -A reckot worker -l info
-   ```
+## Docker Commands Reference
+
+### Starting Services
+```bash
+docker-compose -f docker-compose-dev.yml up -d
+docker-compose -f docker-compose-dev.yml ps
+```
+
+### Viewing Logs
+```bash
+docker-compose -f docker-compose-dev.yml logs -f
+docker-compose -f docker-compose-dev.yml logs -f web
+docker-compose -f docker-compose-dev.yml logs -f celery_worker
+```
+
+### Running Django Commands
+```bash
+docker-compose -f docker-compose-dev.yml exec web python manage.py migrate
+docker-compose -f docker-compose-dev.yml exec web python manage.py createsuperuser
+docker-compose -f docker-compose-dev.yml exec web python manage.py shell
+docker-compose -f docker-compose-dev.yml exec web python manage.py makemigrations
+docker-compose -f docker-compose-dev.yml exec web python manage.py collectstatic --noinput
+```
+
+### Stopping Services
+```bash
+docker-compose -f docker-compose-dev.yml stop
+docker-compose -f docker-compose-dev.yml down
+docker-compose -f docker-compose-dev.yml down -v
+```
+
+### Rebuilding After Code Changes
+```bash
+docker-compose -f docker-compose-dev.yml up -d --build
+docker-compose -f docker-compose-dev.yml restart web
+```
+
+### Database Operations
+```bash
+docker-compose -f docker-compose-dev.yml exec db psql -U reckot -d reckot
+docker-compose -f docker-compose-dev.yml exec web python manage.py dbshell
+```
+
+### Redis Operations
+```bash
+docker-compose -f docker-compose-dev.yml exec redis redis-cli
+docker-compose -f docker-compose-dev.yml exec redis redis-cli FLUSHALL
+```
+
+## Local Development
+
+### Running Locally with Port Access
+
+#### Option 1: Basic Local Access (localhost only)
+```bash
+redis-server
+
+python manage.py runserver
+
+celery -A reckot worker -l info
+
+celery -A reckot beat -l info
+```
+
+#### Option 2: Expose on All Network Interfaces (accessible from other devices)
+```bash
+python manage.py runserver 0.0.0.0:8000
+
+ALLOWED_HOSTS=*
+```
+
+#### Option 3: WSL2 Port Forwarding (Windows Subsystem for Linux)
+If you're running in WSL2, Windows should automatically forward ports. If not:
+
+```powershell
+netsh interface portproxy add v4tov4 listenport=8000 listenaddress=0.0.0.0 connectport=8000 connectaddress=<WSL-IP>
+
+wsl hostname -I
+```
+
+To remove port forwarding later:
+```powershell
+netsh interface portproxy delete v4tov4 listenport=8000 listenaddress=0.0.0.0
+```
+
+#### Option 4: Using ngrok for External Access (testing webhooks, etc.)
+```bash
+ngrok http 8000
+```
+
+### Development Services Setup
+
+#### PostgreSQL Setup
+```bash
+sudo apt update
+sudo apt install postgresql postgresql-contrib
+
+sudo -u postgres psql
+postgres=# CREATE DATABASE reckot;
+postgres=# CREATE USER reckot WITH PASSWORD 'changeme';
+postgres=# GRANT ALL PRIVILEGES ON DATABASE reckot TO reckot;
+postgres=# \q
+
+DB_ENGINE=django.db.backends.postgresql
+DB_NAME=reckot
+DB_USER=reckot
+DB_PASSWORD=changeme
+DB_HOST=localhost
+DB_PORT=5432
+```
+
+#### SQLite Setup (Simpler for Development)
+```bash
+DB_ENGINE=django.db.backends.sqlite3
+DB_NAME=db.sqlite3
+```
+
+#### Redis Setup
+```bash
+sudo apt update
+sudo apt install redis-server
+
+sudo systemctl start redis-server
+
+redis-cli ping
+
+REDIS_URL=redis://127.0.0.1:6379/1
+```
+
+### Running All Services Together
+
+Use this script to start all services (create `start-dev.sh`):
+
+```bash
+redis-server --daemonize yes
+
+python manage.py runserver 0.0.0.0:8000 &
+DJANGO_PID=$!
+
+celery -A reckot worker -l info &
+CELERY_PID=$!
+
+celery -A reckot beat -l info &
+BEAT_PID=$!
+
+echo "Services started:"
+echo "Django: PID $DJANGO_PID (http://localhost:8000)"
+echo "Celery: PID $CELERY_PID"
+echo "Beat: PID $BEAT_PID"
+echo ""
+echo "Press Ctrl+C to stop all services"
+
+trap "kill $DJANGO_PID $CELERY_PID $BEAT_PID; exit" INT
+wait
+```
+
+Make it executable and run:
+```bash
+chmod +x start-dev.sh
+./start-dev.sh
+```
+
+### Accessing the Application
+
+Once running, access:
+- **Main site**: http://localhost:8000
+- **Admin panel**: http://localhost:8000/admin
+- **API endpoints**: http://localhost:8000/api/
+- **Health check**: http://localhost:8000/health/
+
+### Common Development Tasks
+
+```bash
+python manage.py makemigrations
+
+python manage.py migrate
+
+python manage.py collectstatic --noinput
+
+python manage.py shell
+>>> from apps.core.models import User
+>>> from apps.orgs.models import Organization
+
+python manage.py shell
+>>> from django.core.cache import cache
+>>> cache.clear()
+
+tail -f logs/django.log
+```
+
+### Troubleshooting
+
+#### Port Already in Use
+```bash
+lsof -i :8000
+netstat -ano | findstr :8000
+
+kill -9 <PID>
+taskkill /PID <PID> /F
+
+python manage.py runserver 0.0.0.0:8080
+```
+
+#### Redis Connection Issues
+```bash
+redis-cli ping
+
+redis-server
+
+tail -f /var/log/redis/redis-server.log
+```
+
+#### Database Connection Issues
+```bash
+psql -U reckot -d reckot -h localhost
+
+sudo systemctl status postgresql
+
+sudo systemctl restart postgresql
+```
+
+#### Migration Issues
+```bash
+python manage.py migrate --fake app_name zero
+python manage.py migrate app_name
+
+dropdb reckot && createdb reckot
+python manage.py migrate
+```
 
 ### Environment Variables
 
@@ -210,8 +453,6 @@ The platform uses a comprehensive relational schema with 35+ tables. Key entity 
 - **Events** track analytics through **EventMetrics**
 - **AI** conversations help users through **AIConversation** and **AIMessage**
 
-See the complete [Database Schema Documentation](DATABASE_SCHEMA.md) with visual ER diagram.
-
 ## AI Features
 
 ### Current Capabilities
@@ -229,8 +470,6 @@ We're implementing a secure AI query system that:
 - Provides full audit trails
 - Implements rate limiting
 
-Learn more in [AI_GOVERNANCE.md](AI_GOVERNANCE.md).
-
 ## Internationalization
 
 Reckot supports multiple languages:
@@ -240,20 +479,16 @@ Reckot supports multiple languages:
 To add translations:
 ```bash
 python manage.py makemessages -l fr
-# Edit locale/fr/LC_MESSAGES/django.po
 python manage.py compilemessages
 ```
 
 ## Testing
 
 ```bash
-# Run all tests
 python manage.py test
 
-# Run specific app tests
 python manage.py test apps.events
 
-# With coverage
 coverage run --source='.' manage.py test
 coverage report
 ```
@@ -276,13 +511,10 @@ coverage report
 
 ### Docker Deployment
 ```bash
-# Build and run
 docker-compose up -d
 
-# Run migrations
 docker-compose exec web python manage.py migrate
 
-# Create superuser
 docker-compose exec web python manage.py createsuperuser
 ```
 
@@ -304,7 +536,7 @@ Contributions are welcome! Please:
 
 For questions or issues:
 - Create an issue on GitHub
-- Email: [your-email@example.com]
+- Email: [yokwejuste@gmail.com]
 
 ## Acknowledgments
 

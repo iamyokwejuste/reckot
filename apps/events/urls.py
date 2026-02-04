@@ -1,5 +1,5 @@
 from django.urls import path
-from apps.events import actions
+from apps.events.views import actions
 
 app_name = "events"
 

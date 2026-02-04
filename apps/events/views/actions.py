@@ -5,7 +5,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.paginator import Paginator
 from django.db import models
 from django.db.models import Q, Count, Sum
 from django.http import JsonResponse, HttpResponse, FileResponse
@@ -14,8 +13,8 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from apps.events.forms import EventForm, TicketTypeForm
-from apps.events.services import create_event
-from apps.events.queries import get_user_events
+from apps.events.services.event_service import create_event
+from apps.events.services.queries import get_user_events
 from apps.events.models import (
     Event,
     EventCategory,
@@ -27,13 +26,13 @@ from apps.events.models import (
     FlyerGeneration,
     FlyerBilling,
 )
-from apps.events.flyer_service import generate_flyer
+from apps.events.services.flyer_service import generate_flyer
 from apps.orgs.models import Organization, Membership, MemberRole
-from apps.tickets.forms import BookingForm
+from apps.tickets.utils.forms import BookingForm
 from apps.tickets.services import create_booking
 from apps.tickets.models import Ticket, TicketType, Booking
 from apps.payments.models import Payment
-from apps.payments.services import calculate_organization_balance
+from apps.payments.services.payment_service import calculate_organization_balance
 from decimal import Decimal
 
 

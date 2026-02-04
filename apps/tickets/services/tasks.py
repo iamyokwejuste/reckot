@@ -8,7 +8,7 @@ from apps.core.services.notifications import NotificationService
 from apps.core.services.qrcode import QRCodeService
 from apps.orgs.models import MemberRole
 from apps.tickets.models import Booking, Ticket
-from apps.tickets.ticket_pdf_service import generate_single_ticket_pdf, generate_multi_ticket_pdf
+from apps.tickets.services.ticket_pdf_service import generate_single_ticket_pdf, generate_multi_ticket_pdf
 
 logger = logging.getLogger(__name__)
 

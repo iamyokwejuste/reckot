@@ -13,7 +13,7 @@ from apps.payments.gateways.base import PaymentStatus
 from apps.payments.gateways.campay import CampayGateway
 from apps.payments.gateways.flutterwave import FlutterwaveGateway
 from apps.payments.gateways.pawapay import PawapayGateway
-from apps.payments.invoice_service import create_invoice
+from apps.payments.services.invoice_service import create_invoice
 from apps.payments.models import Payment, PaymentGatewayConfig, Refund, Withdrawal
 from apps.tickets.models import Booking
 

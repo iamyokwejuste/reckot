@@ -66,7 +66,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "apps.core.middleware.RateLimitMiddleware",
+    "apps.core.utils.middleware.RateLimitMiddleware",
     "reckot.middleware.admin_only.AdminOnlyMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -92,9 +92,9 @@ TEMPLATES = [
                 "django.template.context_processors.csrf",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "apps.core.context_processors.platform_settings",
-                "apps.core.context_processors.unread_notifications",
-                "apps.core.context_processors.user_currency",
+                "apps.core.utils.context_processors.platform_settings",
+                "apps.core.utils.context_processors.unread_notifications",
+                "apps.core.utils.context_processors.user_currency",
             ],
             "builtins": [
                 "slippers.templatetags.slippers",
@@ -301,8 +301,8 @@ if _google_client_id and _google_client_secret:
         "AUTH_PARAMS": {"access_type": "online"},
     }
 
-ACCOUNT_ADAPTER = "apps.core.adapters.CustomAccountAdapter"
-SOCIALACCOUNT_ADAPTER = "apps.core.adapters.CustomSocialAccountAdapter"
+ACCOUNT_ADAPTER = "apps.core.services.adapters.CustomAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "apps.core.services.adapters.CustomSocialAccountAdapter"
 ACCOUNT_FORMS = {
     "signup": "apps.core.forms.CustomSignupForm",
 }
@@ -438,12 +438,12 @@ UNFOLD = {
     "SITE_TITLE": "Reckot Admin",
     "SITE_HEADER": "Reckot Administration",
     "SITE_URL": "/",
-    "SITE_ICON": "apps.core.utils.get_logo_path",
-    "SITE_LOGO": "apps.core.utils.get_logo_path",
+    "SITE_ICON": "apps.core.services.utils.get_logo_path",
+    "SITE_LOGO": "apps.core.services.utils.get_logo_path",
     "SITE_SYMBOL": "event",
     "SHOW_HISTORY": True,
     "SHOW_VIEW_ON_SITE": True,
-    "ENVIRONMENT": "apps.core.utils.environment_callback",
+    "ENVIRONMENT": "apps.core.services.utils.environment_callback",
     "DASHBOARD_CALLBACK": "apps.analytics.views.dashboard_callback",
     "STYLES": [
         lambda request: static("css/admin_custom.css"),

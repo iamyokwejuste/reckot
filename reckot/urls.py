@@ -5,7 +5,7 @@ from django.contrib.sitemaps.views import sitemap
 from django.views.static import serve
 from django.views.generic import RedirectView
 
-from apps.core.actions import (
+from apps.core.views.actions import (
     HomeView,
     WhyUsView,
     PrivacyView,
@@ -22,7 +22,7 @@ from apps.core.actions import (
     PhoneSignupRequestView,
     PhoneSignupVerifyView,
 )
-from apps.core.sitemaps import StaticViewSitemap, HomeSitemap
+from apps.core.utils.sitemaps import StaticViewSitemap, HomeSitemap
 
 sitemaps = {
     "static": StaticViewSitemap,
@@ -92,7 +92,7 @@ urlpatterns += [
     re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
 ]
 
-handler400 = "apps.core.views.handler400"
-handler403 = "apps.core.views.handler403"
-handler404 = "apps.core.views.handler404"
-handler500 = "apps.core.views.handler500"
+handler400 = "apps.core.views.views.handler400"
+handler403 = "apps.core.views.views.handler403"
+handler404 = "apps.core.views.views.handler404"
+handler500 = "apps.core.views.views.handler500"

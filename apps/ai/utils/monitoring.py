@@ -4,7 +4,7 @@ from typing import Dict, Any, List, Optional
 from collections import defaultdict
 from datetime import datetime, timedelta
 from django.core.cache import cache
-from django.db.models import Count, Sum, Avg, F
+from django.db.models import Count, Sum, Avg
 from django.utils import timezone
 from apps.ai.models import AIUsageLog
 

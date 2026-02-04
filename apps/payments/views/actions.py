@@ -25,10 +25,10 @@ from django.views.decorators.csrf import csrf_exempt
 from apps.events.models import Coupon, Event
 from apps.orgs.models import Organization
 from apps.payments.gateways.campay import CampayGateway
-from apps.payments.invoice_service import create_invoice, get_invoice_pdf
+from apps.payments.services.invoice_service import create_invoice, get_invoice_pdf
 from apps.payments.models import Invoice, Payment, PaymentProvider, Refund, Withdrawal
-from apps.payments.queries import get_booking_payment, get_payment_by_id
-from apps.payments.services import (
+from apps.payments.services.queries import get_booking_payment, get_payment_by_id
+from apps.payments.services.payment_service import (
     calculate_organization_balance,
     confirm_payment,
     fail_payment,
@@ -38,7 +38,7 @@ from apps.payments.services import (
 )
 from apps.tickets.models import Booking, GuestSession
 from apps.tickets.services import create_multi_ticket_booking
-from apps.tickets.tasks import send_ticket_confirmation_task
+from apps.tickets.services.tasks import send_ticket_confirmation_task
 
 logger = logging.getLogger(__name__)
 

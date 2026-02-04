@@ -113,7 +113,6 @@ class MemberRole(models.TextChoices):
     VIEWER = "VIEWER", _("Viewer")
 
 
-# Permission definitions for each role
 ROLE_PERMISSIONS = {
     MemberRole.OWNER: [
         "manage_organization",
@@ -425,5 +424,4 @@ class OrganizationSubscription(models.Model):
         return True
 
 
-# Backwards compatibility alias
 Role = CustomRole

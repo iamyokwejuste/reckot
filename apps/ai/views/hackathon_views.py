@@ -9,22 +9,21 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from decimal import Decimal
 from PIL import Image
 
-from apps.ai.verification import verify_event_authenticity, get_fraud_prevention_tips
-from apps.ai.voice_creator import create_event_from_voice, enhance_voice_created_event
-from apps.ai.predictive_analytics import (
+from apps.ai.utils.verification import verify_event_authenticity, get_fraud_prevention_tips
+from apps.ai.services.voice_creator import create_event_from_voice, enhance_voice_created_event
+from apps.ai.services.predictive_analytics import (
     predict_ticket_sales,
     optimize_ticket_pricing,
     generate_marketing_strategy,
 )
-from apps.ai.agent_orchestration import event_concierge
-from apps.ai.smart_scanner import smart_scanner
-from apps.ai.decorators import ai_feature_required, ai_rate_limit, log_ai_usage
+from apps.ai.services.agent_orchestration import event_concierge
+from apps.ai.services.smart_scanner import smart_scanner
+from apps.ai.utils.decorators import ai_feature_required, ai_rate_limit, log_ai_usage
 from apps.events.models import Event
 from apps.core.services.ai import gemini_ai
 from apps.tickets.models import Booking, Ticket
-from django.db.models import Count, Sum, Q, F
+from django.db.models import Sum
 from django.utils import timezone
-from datetime import timedelta
 
 
 def crop_to_aspect_ratio(image_bytes: bytes, aspect_width: int, aspect_height: int) -> bytes:
@@ -695,7 +694,7 @@ class AIMetricsDashboardView(LoginRequiredMixin, View):
             return JsonResponse({"error": "Admin access required"}, status=403)
 
         try:
-            from apps.ai.monitoring import metrics_collector
+            from apps.ai.utils.monitoring import metrics_collector
 
             view_type = request.GET.get('view', 'system')
 
@@ -721,7 +720,7 @@ class AIMetricsDashboardView(LoginRequiredMixin, View):
 class StreamingChatView(LoginRequiredMixin, View):
     async def post(self, request):
         try:
-            from apps.ai.streaming import streaming_service
+            from apps.ai.utils.streaming import streaming_service
             from django.http import StreamingHttpResponse
             
             body = json.loads(request.body)
@@ -758,7 +757,7 @@ class LowBandwidthModeView(LoginRequiredMixin, View):
     @log_ai_usage("low_bandwidth_mode")
     def post(self, request):
         try:
-            from apps.ai.low_bandwidth import low_bandwidth_service
+            from apps.ai.services.low_bandwidth import low_bandwidth_service
             
             body = json.loads(request.body)
             mode = body.get('mode', 'summarize')
@@ -797,7 +796,7 @@ class CommunityTemplateView(LoginRequiredMixin, View):
     @log_ai_usage("community_template")
     def post(self, request):
         try:
-            from apps.ai.community_templates import community_templates
+            from apps.ai.examples.community_templates import community_templates
             
             body = json.loads(request.body)
             action = body.get('action', 'generate')

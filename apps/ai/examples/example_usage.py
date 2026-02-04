@@ -18,7 +18,7 @@ def example_1_direct_sql():
     result = executor.execute_query(sql, access_level='PUBLIC')
 
     if result['success']:
-        print(f"✓ Query executed successfully")
+        print("✓ Query executed successfully")
         print(f"  Rows returned: {result['row_count']}")
         print(f"  Columns: {', '.join(result['columns'])}")
         print(f"\n  First row: {result['data'][0] if result['data'] else 'No data'}")
@@ -43,7 +43,7 @@ def example_2_ai_question():
     result = service.answer_question(question, user=None)
 
     if result['success']:
-        print(f"✓ Query successful")
+        print("✓ Query successful")
         print(f"  Generated SQL: {result['sql']}")
         print(f"  Result: {result['data']}")
         print(f"  Access Level: {result['access_level']}")
@@ -106,7 +106,7 @@ def example_5_table_preview():
     result = executor.get_table_preview('events_event', access_level='PUBLIC', limit=3)
 
     if result['success']:
-        print(f"✓ Preview successful")
+        print("✓ Preview successful")
         print(f"  Rows: {len(result['data'])}")
         for i, row in enumerate(result['data'], 1):
             print(f"\n  Row {i}:")

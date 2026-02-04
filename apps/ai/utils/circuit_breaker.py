@@ -4,7 +4,6 @@ from enum import Enum
 from typing import Callable, Any, Optional
 from collections import deque
 from threading import Lock
-from django.core.cache import cache
 from django.conf import settings
 
 logger = logging.getLogger(__name__)

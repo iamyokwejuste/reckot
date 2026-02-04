@@ -1,13 +1,12 @@
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.db.models import Sum, Count
+from django.db.models import Sum
 from decimal import Decimal
 from datetime import date
 
 from apps.payments.models import Payment
 from apps.tickets.models import Booking, Ticket
 from apps.events.models import Event
-from apps.orgs.models import Organization
 from .models import DailyMetrics, EventMetrics, PaymentMetrics, OrganizationMetrics
 
 

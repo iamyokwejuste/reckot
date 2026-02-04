@@ -1,5 +1,5 @@
 from django.urls import path
-from apps.core import actions, notification_views
+from apps.core.views import actions, notification_views
 from apps.core.api import ai
 
 app_name = "core"

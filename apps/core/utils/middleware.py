@@ -14,7 +14,8 @@ class RateLimitMiddleware:
         if not self.enabled:
             return self.get_response(request)
 
-        if request.path.startswith("/admin/") or request.path.startswith("/static/"):
+        exempt_paths = ["/admin/", "/static/", "/health/"]
+        if any(request.path.startswith(path) for path in exempt_paths):
             return self.get_response(request)
 
         client_ip = self.get_client_ip(request)

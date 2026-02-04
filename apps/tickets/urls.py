@@ -1,5 +1,5 @@
 from django.urls import path
-from apps.tickets import actions
+from apps.tickets.views import actions
 
 app_name = "tickets"
 

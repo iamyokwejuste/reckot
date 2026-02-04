@@ -5,7 +5,6 @@ from decimal import Decimal
 import random
 from apps.payments.models import Payment, PaymentProvider, Currency
 from apps.tickets.models import Booking, Event
-from apps.orgs.models import Organization
 from django.contrib.auth import get_user_model
 
 User = get_user_model()

@@ -11,6 +11,9 @@ x-db-env: &db-env
   DB_PASSWORD: ${DB_PASSWORD:-changeme}
   DB_HOST: db
   DB_PORT: 5432
+  AI_PUBLIC_READONLY_PASSWORD: ${AI_PUBLIC_READONLY_PASSWORD:-readonly_public_pass}
+  AI_AUTH_READONLY_PASSWORD: ${AI_AUTH_READONLY_PASSWORD:-readonly_auth_pass}
+  AI_ORG_READONLY_PASSWORD: ${AI_ORG_READONLY_PASSWORD:-readonly_org_pass}
 
 x-redis-env: &redis-env
   REDIS_URL: redis://redis:6379/0
@@ -57,7 +60,7 @@ x-third-party-env: &third-party-env
 x-app-build: &app-build
   build:
     context: .
-    dockerfile: Dockerfile
+    dockerfile: docker/Dockerfile
   restart: unless-stopped
 
 services:
@@ -91,8 +94,8 @@ services:
   admin:
     <<: *app-build
     stop_grace_period: 240s
-    ports:
-      - "${ADMIN_PORT:-8001}:8001"
+    expose:
+      - "8001"
     environment:
       <<: [*common-env, *db-env, *redis-env, *email-env, *payment-env, *third-party-env]
       ALLOWED_HOSTS: ${ADMIN_ALLOWED_HOSTS:-*}
@@ -164,8 +167,13 @@ services:
       POSTGRES_DB: ${DB_NAME:-reckot}
       POSTGRES_USER: ${DB_USER:-reckot}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+      AI_PUBLIC_READONLY_PASSWORD: ${AI_PUBLIC_READONLY_PASSWORD:-readonly_public_pass}
+      AI_AUTH_READONLY_PASSWORD: ${AI_AUTH_READONLY_PASSWORD:-readonly_auth_pass}
+      AI_ORG_READONLY_PASSWORD: ${AI_ORG_READONLY_PASSWORD:-readonly_org_pass}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init-readonly-users.sql:/docker-entrypoint-initdb.d/init-readonly-users.sql:ro
+      - ./docker/postgres/init-readonly-users.sh:/docker-entrypoint-initdb.d/init-readonly-users.sh:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 10s

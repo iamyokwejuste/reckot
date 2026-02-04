@@ -1,5 +1,5 @@
 from django.urls import path
-from apps.ai import actions, hackathon_views, ai_query_views
+from apps.ai.views import actions, hackathon_views, ai_query_views
 
 app_name = "ai"
 

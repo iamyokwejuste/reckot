@@ -1,6 +1,5 @@
 from django.contrib import admin
 from unfold.admin import ModelAdmin
-from unfold.decorators import display
 from apps.orgs.models import Organization, Membership
 
 

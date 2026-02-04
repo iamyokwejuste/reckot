@@ -1,15 +1,11 @@
 import logging
-from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
-from django.db import transaction
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
-from django.utils.timezone import make_aware
 from django.views import View
-from django.views.decorators.csrf import csrf_exempt
 
-from apps.checkin.models import CheckIn, SwagCollection
+from apps.checkin.models import CheckIn
 from apps.checkin.queries import get_event_swag_items
 from apps.checkin.services import verify_and_checkin, collect_swag
 from apps.events.models import Event

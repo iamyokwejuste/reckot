@@ -1,7 +1,7 @@
 import json
 import logging
 import asyncio
-from typing import AsyncIterator, Optional
+from typing import AsyncIterator
 from django.conf import settings
 from google import genai
 

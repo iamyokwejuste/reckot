@@ -182,7 +182,7 @@ As {agent_persona.name}, provide expert analysis on {agent_persona.specializatio
 
         if event_data.get('metrics'):
             metrics = event_data['metrics']
-            context_parts.append(f"\n\nMETRICS:")
+            context_parts.append("\n\nMETRICS:")
             context_parts.append(f"- Tickets Sold: {metrics.get('tickets_sold', 0)}")
             context_parts.append(f"- Revenue: {metrics.get('revenue', 0):,} XAF")
             context_parts.append(f"- Attendance Rate: {metrics.get('attendance_rate', 0)}%")
@@ -190,7 +190,7 @@ As {agent_persona.name}, provide expert analysis on {agent_persona.specializatio
             context_parts.append(f"- Days Until Event: {metrics.get('days_until_event', 'N/A')}")
 
         if event_data.get('ticket_types'):
-            context_parts.append(f"\n\nTICKET TYPES:")
+            context_parts.append("\n\nTICKET TYPES:")
             for ticket in event_data['ticket_types']:
                 context_parts.append(
                     f"- {ticket['name']}: {ticket['price']:,} XAF "
@@ -198,7 +198,7 @@ As {agent_persona.name}, provide expert analysis on {agent_persona.specializatio
                 )
 
         if event_data.get('booking_patterns'):
-            context_parts.append(f"\n\nBOOKING PATTERNS:")
+            context_parts.append("\n\nBOOKING PATTERNS:")
             patterns = event_data['booking_patterns']
             if patterns.get('peak_hours'):
                 context_parts.append(f"- Peak booking hours: {patterns['peak_hours']}")

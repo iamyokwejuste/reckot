@@ -2,10 +2,9 @@ from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
 from apps.payments.models import Payment, Refund, RefundAuditLog
-from apps.payments.services import process_refund_payment
 from apps.payments.tasks import send_refund_notification_task
 from apps.tickets.models import Booking
-from apps.tickets.tasks import send_ticket_confirmation_task, send_admin_sale_notifications_task
+from apps.tickets.services.tasks import send_ticket_confirmation_task, send_admin_sale_notifications_task
 
 
 @receiver(post_save, sender=Payment)

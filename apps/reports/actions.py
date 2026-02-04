@@ -18,7 +18,7 @@ from django.views import View
 from apps.events.models import CheckoutQuestion, Event
 from apps.orgs.models import Organization
 from apps.payments.models import Payment
-from apps.payments.services import calculate_organization_balance
+from apps.payments.services.payment_service import calculate_organization_balance
 from apps.reports.queries import (
     get_event_summary,
     get_questions_summary,

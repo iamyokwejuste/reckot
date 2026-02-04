@@ -7,18 +7,21 @@ from pathlib import Path
 from typing import Optional
 from google import genai
 from django.conf import settings
-from django.db.models import Count, Sum, Q, F
-from django.utils import timezone
+
 from django.utils.html import strip_tags
 
 from django.contrib.auth import get_user_model
 
-from apps.events.models import Event
-from apps.tickets.models import Ticket, Booking, TicketType
-from apps.payments.models import Payment
-from apps.orgs.models import Organization
-
 User = get_user_model()
+
+_ai_query_service = None
+
+def _get_ai_query_service():
+    global _ai_query_service
+    if _ai_query_service is None:
+        from apps.ai.services.ai_query_service import AIQueryService
+        _ai_query_service = AIQueryService()
+    return _ai_query_service
 
 logger = logging.getLogger(__name__)
 
@@ -84,116 +87,8 @@ class GeminiService:
 gemini = GeminiService()
 
 
-def get_model_schema():
-    schema = {
-        "User": {
-            "description": "User accounts (DO NOT expose sensitive data)",
-            "fields": {
-                "username": "Username",
-                "email": "Email address (PRIVATE)",
-                "first_name": "First name",
-                "last_name": "Last name",
-                "is_active": "Is account active",
-            },
-            "security": "NEVER expose emails or personal data publicly. Only count users.",
-        },
-        "Event": {
-            "description": "Events in the system",
-            "fields": {
-                "title": "Event title",
-                "description": "Event description",
-                "location": "Event location",
-                "start_at": "Start datetime",
-                "end_at": "End datetime",
-                "is_public": "Is event public (True) or private (False)",
-                "state": "DRAFT, PUBLISHED, or CANCELLED",
-                "capacity": "Maximum capacity",
-                "organization": "ForeignKey to Organization",
-            },
-            "filtering": "ALWAYS filter is_public=True when counting public events",
-        },
-        "Ticket": {
-            "description": "Individual tickets",
-            "fields": {
-                "booking": "ForeignKey to Booking",
-                "ticket_type": "ForeignKey to TicketType",
-                "status": "VALID, USED, CANCELLED, or REFUNDED",
-                "checked_in_at": "Check-in timestamp",
-            },
-        },
-        "Booking": {
-            "description": "Ticket bookings",
-            "fields": {
-                "event": "ForeignKey to Event",
-                "user": "ForeignKey to User",
-                "status": "PENDING, CONFIRMED, CANCELLED, or REFUNDED",
-                "total_amount": "Total payment amount in XAF",
-                "created_at": "Booking creation time",
-            },
-        },
-        "Payment": {
-            "description": "Payment transactions",
-            "fields": {
-                "booking": "ForeignKey to Booking",
-                "amount": "Payment amount in XAF",
-                "status": "PENDING, COMPLETED, FAILED, or REFUNDED",
-                "gateway": "Payment gateway used",
-                "created_at": "Payment timestamp",
-            },
-        },
-        "Organization": {
-            "description": "Event organizations",
-            "fields": {
-                "name": "Organization name",
-                "slug": "URL slug",
-                "members": "ManyToMany to User",
-            },
-        },
-    }
-    return schema
 
 
-def execute_django_query(query_code: str):
-    try:
-        safe_namespace = {
-            "User": User,
-            "Event": Event,
-            "Ticket": Ticket,
-            "Booking": Booking,
-            "Payment": Payment,
-            "Organization": Organization,
-            "TicketType": TicketType,
-            "Count": Count,
-            "Sum": Sum,
-            "Q": Q,
-            "F": F,
-            "timezone": timezone,
-            "list": list,
-            "dict": dict,
-            "str": str,
-            "int": int,
-            "float": float,
-            "bool": bool,
-        }
-
-        result = eval(query_code, {"__builtins__": {}}, safe_namespace)
-
-        if hasattr(result, "__iter__") and not isinstance(result, (str, dict)):
-            if isinstance(result, list):
-                return result[:100]
-            elif hasattr(result, "values") and callable(result.values):
-                return list(result.values())[:100]
-            return list(result)[:100]
-        elif hasattr(result, "__dict__"):
-            return {
-                k: str(v) for k, v in result.__dict__.items() if not k.startswith("_")
-            }
-        else:
-            return result
-
-    except Exception as e:
-        logger.error(f"Query execution error: {str(e)}\nQuery: {query_code}")
-        return {"error": str(e), "query": query_code}
 
 
 def generate_event_description(
@@ -293,9 +188,21 @@ def _format_query_result(result):
 def chat_with_assistant(
     user_message: str, conversation_history: list, context: Optional[dict] = None
 ) -> dict:
-    context_str = (
-        f"\n\nUser Context:\n{json.dumps(context, indent=2)}" if context else ""
-    )
+    ai_service = _get_ai_query_service()
+
+    user = None
+    if context:
+        user_id = context.get('user_id')
+        if user_id:
+            try:
+                user = User.objects.get(id=user_id)
+            except User.DoesNotExist:
+                pass
+
+    context_str = ""
+    if context:
+        safe_context = {k: v for k, v in context.items() if k != 'user_id'}
+        context_str = f"\n\nUser Context:\n{json.dumps(safe_context, indent=2)}"
 
     history_str = "\n".join(
         [
@@ -304,36 +211,31 @@ def chat_with_assistant(
         ]
     )
 
-    schema = get_model_schema()
-    schema_str = json.dumps(schema, indent=2)
+    prompt = f"""{SUPPORT_SYSTEM_PROMPT}
+        {context_str}
 
-    prompt = f"""{SUPPORT_SYSTEM_PROMPT.format(schema=schema_str)}
-{context_str}
+        Conversation History:
+        {history_str}
 
-Conversation History:
-{history_str}
-
-User: {user_message}
-
-If this is a data question, respond with execute_query action. Otherwise provide helpful text."""
+        User: {user_message}"""
 
     response = gemini.generate(prompt, max_tokens=2048)
     result = {"message": response, "action": None}
 
     try:
-        if '{"action": "execute_query"' in response:
-            start = response.find('{"action": "execute_query"')
-            end = response.find("}", start) + 1
-            query_data = json.loads(response[start:end])
-            query_code = query_data.get("query", "")
+        is_data_question = any(keyword in user_message.lower() for keyword in [
+            'how many', 'count', 'total', 'list', 'show', 'find', 'search',
+            'latest', 'recent', 'last', 'events', 'tickets', 'revenue'
+        ])
 
-            query_result = execute_django_query(query_code)
+        if '{"action": "execute_query"' in response or is_data_question:
+            query_response = ai_service.answer_question(user_message, user)
 
-            if isinstance(query_result, dict) and "error" in query_result:
-                result["message"] = (
-                    f"I encountered an error executing the query: {query_result['error']}"
-                )
+            if not query_response['success']:
+                result["message"] = f"I encountered an error: {query_response.get('error', 'Unknown error')}"
             else:
+                query_result = query_response.get('data', [])
+
                 if isinstance(query_result, list) and len(query_result) > 0:
                     if all(isinstance(item, dict) and 'slug' in item and 'organization__slug' in item for item in query_result):
                         formatted_events = []
@@ -387,6 +289,9 @@ If this is a data question, respond with execute_query action. Otherwise provide
     except json.JSONDecodeError as e:
         logger.error(f"JSON parse error: {e}\nResponse: {response}")
         pass
+    except Exception as e:
+        logger.error(f"Error in chat_with_assistant: {str(e)}", exc_info=True)
+        result["message"] = "Sorry, I encountered an error processing your request."
 
     return result
 

@@ -14,7 +14,7 @@ from django.conf import settings
 
 from apps.ai.models import SupportTicket, AIConversation, AIMessage
 from apps.ai import services
-from apps.ai.decorators import (
+from apps.ai.utils.decorators import (
     ai_feature_required,
     ai_rate_limit,
     log_ai_usage,
