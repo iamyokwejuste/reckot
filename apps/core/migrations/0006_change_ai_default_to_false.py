@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0005_notification'),
+        ("core", "0005_notification"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='user',
-            name='ai_features_enabled',
+            model_name="user",
+            name="ai_features_enabled",
             field=models.BooleanField(default=False),
         ),
     ]

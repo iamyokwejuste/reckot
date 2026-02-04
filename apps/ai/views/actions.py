@@ -95,20 +95,22 @@ class AIAssistantChatView(View):
             )
 
         if request.user.is_authenticated:
-            today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            today_start = timezone.now().replace(
+                hour=0, minute=0, second=0, microsecond=0
+            )
             user_messages_today = AIMessage.objects.filter(
                 conversation__user=request.user,
                 role=AIMessage.Role.USER,
-                created_at__gte=today_start
+                created_at__gte=today_start,
             ).count()
 
-            daily_limit = getattr(settings, 'RECKOT_AI_CHAT_DAILY_LIMIT', 50)
+            daily_limit = getattr(settings, "RECKOT_AI_CHAT_DAILY_LIMIT", 50)
             if user_messages_today >= daily_limit:
                 return JsonResponse(
                     {
                         "error": f"Daily chat limit reached. You can send up to {daily_limit} messages per day. Please try again tomorrow."
                     },
-                    status=429
+                    status=429,
                 )
 
         conversation = self._get_or_create_conversation(request, session_id)
@@ -334,14 +336,22 @@ class ClearConversationView(View):
 
         if session_id:
             # Delete the conversation by session_id
-            deleted_count, _ = AIConversation.objects.filter(session_id=session_id).delete()
-            logger.info(f"Deleted conversation with session_id {session_id}: {deleted_count} records")
+            deleted_count, _ = AIConversation.objects.filter(
+                session_id=session_id
+            ).delete()
+            logger.info(
+                f"Deleted conversation with session_id {session_id}: {deleted_count} records"
+            )
             return JsonResponse({"status": "ok", "deleted": deleted_count})
         else:
             # If no session_id, delete all conversations for the authenticated user
             if request.user.is_authenticated:
-                deleted_count, _ = AIConversation.objects.filter(user=request.user).delete()
-                logger.info(f"Deleted all conversations for user {request.user.id}: {deleted_count} records")
+                deleted_count, _ = AIConversation.objects.filter(
+                    user=request.user
+                ).delete()
+                logger.info(
+                    f"Deleted all conversations for user {request.user.id}: {deleted_count} records"
+                )
                 return JsonResponse({"status": "ok", "deleted": deleted_count})
 
         return JsonResponse({"status": "ok", "deleted": 0})
@@ -370,4 +380,6 @@ class AudioTranscribeView(View):
 
         except Exception as e:
             logger.error(f"Error transcribing audio: {str(e)}", exc_info=True)
-            return JsonResponse({"error": f"Transcription failed: {str(e)}"}, status=500)
+            return JsonResponse(
+                {"error": f"Transcription failed: {str(e)}"}, status=500
+            )

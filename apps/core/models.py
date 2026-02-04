@@ -12,7 +12,9 @@ class User(AbstractUser):
     email_verified = models.BooleanField(default=False)
     phone_verified = models.BooleanField(default=False)
     ai_features_enabled = models.BooleanField(default=False)
-    profile_image = models.ImageField(upload_to='profile_images/', blank=True, null=True)
+    profile_image = models.ImageField(
+        upload_to="profile_images/", blank=True, null=True
+    )
     social_avatar_url = models.URLField(max_length=500, blank=True, null=True)
 
     def __str__(self):
@@ -112,7 +114,9 @@ class Notification(models.Model):
         EVENT_CANCELLED = "EVENT_CANCELLED", _("Event Cancelled")
         SALE_MADE = "SALE_MADE", _("Sale Made")
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="notifications"
+    )
     notification_type = models.CharField(max_length=20, choices=Type.choices)
     title = models.CharField(max_length=200)
     message = models.TextField()

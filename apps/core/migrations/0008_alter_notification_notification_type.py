@@ -4,15 +4,25 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0007_user_profile_image_user_social_avatar_url'),
+        ("core", "0007_user_profile_image_user_social_avatar_url"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='notification',
-            name='notification_type',
-            field=models.CharField(choices=[('TICKET_PURCHASE', 'Ticket Purchase'), ('PAYMENT_CONFIRMED', 'Payment Confirmed'), ('REFUND_APPROVED', 'Refund Approved'), ('REFUND_PROCESSED', 'Refund Processed'), ('EVENT_UPDATE', 'Event Update'), ('EVENT_CANCELLED', 'Event Cancelled'), ('SALE_MADE', 'Sale Made')], max_length=20),
+            model_name="notification",
+            name="notification_type",
+            field=models.CharField(
+                choices=[
+                    ("TICKET_PURCHASE", "Ticket Purchase"),
+                    ("PAYMENT_CONFIRMED", "Payment Confirmed"),
+                    ("REFUND_APPROVED", "Refund Approved"),
+                    ("REFUND_PROCESSED", "Refund Processed"),
+                    ("EVENT_UPDATE", "Event Update"),
+                    ("EVENT_CANCELLED", "Event Cancelled"),
+                    ("SALE_MADE", "Sale Made"),
+                ],
+                max_length=20,
+            ),
         ),
     ]

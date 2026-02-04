@@ -5,40 +5,75 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('events', '0017_remove_flyer_unique_constraints'),
-        ('orgs', '0007_organization_plans'),
+        ("events", "0017_remove_flyer_unique_constraints"),
+        ("orgs", "0007_organization_plans"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='EventCategory',
+            name="EventCategory",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100, unique=True)),
-                ('slug', models.SlugField(blank=True, max_length=110, unique=True)),
-                ('description', models.TextField(blank=True)),
-                ('icon', models.CharField(blank=True, help_text='Lucide icon name (e.g., music, briefcase, graduation-cap)', max_length=50)),
-                ('color', models.CharField(default='#09090b', help_text='Hex color code for category badge', max_length=7)),
-                ('is_active', models.BooleanField(default=True)),
-                ('display_order', models.PositiveIntegerField(default=0)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100, unique=True)),
+                ("slug", models.SlugField(blank=True, max_length=110, unique=True)),
+                ("description", models.TextField(blank=True)),
+                (
+                    "icon",
+                    models.CharField(
+                        blank=True,
+                        help_text="Lucide icon name (e.g., music, briefcase, graduation-cap)",
+                        max_length=50,
+                    ),
+                ),
+                (
+                    "color",
+                    models.CharField(
+                        default="#09090b",
+                        help_text="Hex color code for category badge",
+                        max_length=7,
+                    ),
+                ),
+                ("is_active", models.BooleanField(default=True)),
+                ("display_order", models.PositiveIntegerField(default=0)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
             ],
             options={
-                'verbose_name_plural': 'Event Categories',
-                'ordering': ['display_order', 'name'],
-                'indexes': [models.Index(fields=['is_active', 'display_order'], name='events_even_is_acti_d2292e_idx')],
+                "verbose_name_plural": "Event Categories",
+                "ordering": ["display_order", "name"],
+                "indexes": [
+                    models.Index(
+                        fields=["is_active", "display_order"],
+                        name="events_even_is_acti_d2292e_idx",
+                    )
+                ],
             },
         ),
         migrations.AddField(
-            model_name='event',
-            name='category',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='events', to='events.eventcategory'),
+            model_name="event",
+            name="category",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="events",
+                to="events.eventcategory",
+            ),
         ),
         migrations.AddIndex(
-            model_name='event',
-            index=models.Index(fields=['category', 'is_public', 'state'], name='events_even_categor_d0a275_idx'),
+            model_name="event",
+            index=models.Index(
+                fields=["category", "is_public", "state"],
+                name="events_even_categor_d0a275_idx",
+            ),
         ),
     ]

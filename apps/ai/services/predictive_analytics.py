@@ -31,71 +31,11 @@ def predict_ticket_sales(
 
     days_until_event = (start_date - datetime.now()).days
 
-    prompt = f"""You are a data scientist specializing in African event markets. Predict ticket sales for this event.
-
-Event Details:
-Title: {event_title}
-Type: {event_type}
-Price: {price} XAF
-Capacity: {capacity}
-Location: {location}
-Days until event: {days_until_event}
-
-{history_context}
-{market_context}
-
-Factors to consider:
-1. Price elasticity in African markets
-2. Event type popularity
-3. Day of week / time of day
-4. Organizer track record
-5. Location accessibility
-6. Typical sales curves (early vs late buyers)
-
-Provide prediction in JSON:
-{{
-    "predicted_sales": <number>,
-    "predicted_percentage": <0-100>,
-    "confidence": <0-1>,
-    "sales_curve": [
-        {{"days_before_event": 30, "cumulative_sales": 10}},
-        {{"days_before_event": 15, "cumulative_sales": 40}},
-        {{"days_before_event": 7, "cumulative_sales": 65}},
-        {{"days_before_event": 1, "cumulative_sales": 85}}
-    ],
-    "recommendations": [
-        "specific actionable advice"
-    ],
-    "risk_factors": [
-        "potential issues that might reduce sales"
-    ],
-    "optimal_price": <suggested price in XAF>,
-    "pricing_analysis": {{
-        "current_price_rating": "LOW|OPTIMAL|HIGH",
-        "price_elasticity": "description",
-        "suggested_tiers": [
-            {{"type": "Early Bird", "price": 3000, "quantity": 50}},
-            {{"type": "Regular", "price": 5000, "quantity": 80}},
-            {{"type": "VIP", "price": 10000, "quantity": 20}}
-        ]
-    }},
-    "best_launch_time": "optimal day/time to launch ticket sales",
-    "marketing_strategy": [
-        "channel-specific recommendations"
-    ]
-}}
-
-Base predictions on African market realities:
-- Mobile money payment behavior
-- Last-minute buying patterns common
-- WhatsApp marketing effectiveness
-- Price sensitivity varies by region
-"""
+    prompt = f"""{event_title} ({event_type}): {price} XAF, {capacity} cap, {location}, {days_until_event}d. {history_context} {market_context}. Return JSON: predicted_sales, predicted_percentage, confidence, sales_curve, recommendations, risk_factors, optimal_price, pricing_analysis, best_launch_time, marketing_strategy."""
 
     result = gemini_ai.chat(prompt)
 
     try:
-
         prediction = json.loads(result)
         prediction["generated_at"] = datetime.now().isoformat()
         prediction["model_version"] = "gemini-predictive-v1"
@@ -111,7 +51,9 @@ Base predictions on African market realities:
 
 
 def optimize_ticket_pricing(
-    event_data: Dict, competitor_events: List[Dict] | None = None, demand_signals: Dict | None = None
+    event_data: Dict,
+    competitor_events: List[Dict] | None = None,
+    demand_signals: Dict | None = None,
 ) -> Dict:
     competitor_context = ""
     if competitor_events:
@@ -179,7 +121,6 @@ Return JSON:
     result = gemini_ai.chat(prompt)
 
     try:
-
         return json.loads(result)
     except json.JSONDecodeError:
         return {"error": "Pricing optimization failed"}
@@ -232,7 +173,6 @@ Return actionable strategy in JSON:
     result = gemini_ai.chat(prompt)
 
     try:
-
         return json.loads(result)
     except json.JSONDecodeError:
         return {"error": "Marketing strategy generation failed"}

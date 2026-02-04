@@ -1,16 +1,25 @@
 import json
 import base64
 import io
+import logging
 from django.http import JsonResponse
 from django.views import View
 from django.views.decorators.csrf import csrf_protect
 from django.utils.decorators import method_decorator
 from django.contrib.auth.mixins import LoginRequiredMixin
 from decimal import Decimal
+from django.db.models import Sum
+from django.utils import timezone
 from PIL import Image
 
-from apps.ai.utils.verification import verify_event_authenticity, get_fraud_prevention_tips
-from apps.ai.services.voice_creator import create_event_from_voice, enhance_voice_created_event
+from apps.ai.utils.verification import (
+    verify_event_authenticity,
+    get_fraud_prevention_tips,
+)
+from apps.ai.services.voice_creator import (
+    create_event_from_voice,
+    enhance_voice_created_event,
+)
 from apps.ai.services.predictive_analytics import (
     predict_ticket_sales,
     optimize_ticket_pricing,
@@ -22,30 +31,38 @@ from apps.ai.utils.decorators import ai_feature_required, ai_rate_limit, log_ai_
 from apps.events.models import Event
 from apps.core.services.ai import gemini_ai
 from apps.tickets.models import Booking, Ticket
-from django.db.models import Sum
-from django.utils import timezone
+
+logger = logging.getLogger(__name__)
 
 
-def crop_to_aspect_ratio(image_bytes: bytes, aspect_width: int, aspect_height: int) -> bytes:
+def crop_and_resize_image(
+    image_bytes: bytes,
+    aspect_width: int,
+    aspect_height: int,
+    target_width: int = None,
+    target_height: int = None,
+) -> bytes:
     img = Image.open(io.BytesIO(image_bytes))
     current_width, current_height = img.size
     target_aspect = aspect_width / aspect_height
     current_aspect = current_width / current_height
 
-    if abs(current_aspect - target_aspect) < 0.01:
-        return image_bytes
+    if abs(current_aspect - target_aspect) > 0.01:
+        if current_aspect > target_aspect:
+            new_width = int(current_height * target_aspect)
+            left = (current_width - new_width) // 2
+            img = img.crop((left, 0, left + new_width, current_height))
+        else:
+            new_height = int(current_width / target_aspect)
+            top = (current_height - new_height) // 2
+            img = img.crop((0, top, current_width, top + new_height))
 
-    if current_aspect > target_aspect:
-        new_width = int(current_height * target_aspect)
-        left = (current_width - new_width) // 2
-        img = img.crop((left, 0, left + new_width, current_height))
-    else:
-        new_height = int(current_width / target_aspect)
-        top = (current_height - new_height) // 2
-        img = img.crop((0, top, current_width, top + new_height))
+    if target_width and target_height:
+        if img.size != (target_width, target_height):
+            img = img.resize((target_width, target_height), Image.Resampling.LANCZOS)
 
     output = io.BytesIO()
-    img.save(output, format='PNG', quality=95)
+    img.save(output, format="PNG", quality=95, optimize=True)
     return output.getvalue()
 
 
@@ -380,49 +397,50 @@ class GenerateCoverImageView(LoginRequiredMixin, View):
             visual_guide = event_visuals.get(event_type, event_visuals["general"])
 
             aspect_ratios = {
-                "16:9": "1920x1080 pixels (landscape, 16:9 ratio)",
-                "1:1": "1080x1080 pixels (square, 1:1 ratio)",
-                "4:3": "1600x1200 pixels (landscape, 4:3 ratio)",
-                "3:2": "1800x1200 pixels (landscape, 3:2 ratio)",
-                "40x65cm": "2400x3900 pixels (landscape, 8:13 ratio, print size: 40cm height x 65cm width at 300 DPI)",
+                "16:9": {
+                    "width": 1920,
+                    "height": 1080,
+                    "aspect": (16, 9),
+                    "desc": "landscape, 16:9 ratio",
+                },
+                "1:1": {
+                    "width": 1080,
+                    "height": 1080,
+                    "aspect": (1, 1),
+                    "desc": "square, 1:1 ratio",
+                },
+                "4:3": {
+                    "width": 1600,
+                    "height": 1200,
+                    "aspect": (4, 3),
+                    "desc": "landscape, 4:3 ratio",
+                },
+                "3:2": {
+                    "width": 1800,
+                    "height": 1200,
+                    "aspect": (3, 2),
+                    "desc": "landscape, 3:2 ratio",
+                },
+                "40x65cm": {
+                    "width": 2400,
+                    "height": 3900,
+                    "aspect": (40, 65),
+                    "desc": "landscape poster, 40x65cm at 300 DPI",
+                },
             }
-            dimension_spec = aspect_ratios.get(aspect_ratio, aspect_ratios["40x65cm"])
+            ratio_spec = aspect_ratios.get(aspect_ratio, aspect_ratios["40x65cm"])
+            target_w, target_h = ratio_spec["width"], ratio_spec["height"]
 
-            physical_size = ""
-            if aspect_ratio == "40x65cm":
-                physical_size = "\n- Physical print size: 40cm (height) x 65cm (width)"
-
-            image_prompt = f"""Create a realistic, professional event cover image.
-
-Event: {title}
-Type: {event_type}
-Context: {description[:200]}
-
-Image Specifications:
-- Dimensions: {dimension_spec}{physical_size}
-- Orientation: Landscape, suitable for event covers, posters, and banners
-- Print-ready quality at 300 DPI
-
-Visual Requirements:
-- Photorealistic style (NOT illustrated, NOT abstract, NOT surreal, NOT fantasy)
-- Show: {visual_guide}
-- African context: Black people attending/participating in the event, African venue/setting
-- Modern, clean, professional composition
-- Natural lighting and realistic colors
-- High resolution, print-quality with sharp details
-- People should be Black/African, representing African event attendees
-- No text, no typography, no logos, no graphic overlays
-- No fantasy elements, no abstract art, no surrealism, no artistic interpretation
-- Professional photography style, as if taken by a professional event photographer
-- Focus on real, tangible elements that clearly represent the event type
-- Realistic perspective and proportions
-- Suitable for large-format printing and professional event marketing"""
+            image_prompt = f"Professional event cover: '{title}'. {description[:150]}. Style: {visual_guide}. Aspect ratio {aspect_ratio}, {target_w}x{target_h}px exactly. Photorealistic, vibrant, modern African aesthetic, professional photography quality. NO TEXT overlays or typography."
 
             image_bytes = gemini_ai.generate_image(image_prompt)
 
             if image_bytes:
-                if aspect_ratio == "40x65cm":
-                    image_bytes = crop_to_aspect_ratio(image_bytes, 40, 65)
+                aspect_w, aspect_h = ratio_spec["aspect"]
+                target_w, target_h = ratio_spec["width"], ratio_spec["height"]
+                image_bytes = crop_and_resize_image(
+                    image_bytes, aspect_w, aspect_h, target_w, target_h
+                )
 
                 image_base64 = base64.b64encode(image_bytes).decode("utf-8")
                 return JsonResponse(
@@ -516,36 +534,37 @@ class AIFeaturesDemoView(View):
 class EventConciergeView(LoginRequiredMixin, View):
     def get(self, request, org_slug, event_slug):
         try:
-            event = Event.objects.select_related('organization').get(
-                slug=event_slug,
-                organization__slug=org_slug
+            event = Event.objects.select_related("organization").get(
+                slug=event_slug, organization__slug=org_slug
             )
 
-            if not request.user.has_perm('events.view_event', event):
+            if not request.user.has_perm("events.view_event", event):
                 return JsonResponse({"error": "Permission denied"}, status=403)
 
             event_data = self._build_event_data(event)
             conversation = event_concierge.orchestrate_discussion(event_data)
 
-            return JsonResponse({
-                "success": True,
-                "event": {
-                    "title": event.title,
-                    "slug": event.slug,
-                    "org_slug": event.organization.slug,
-                },
-                "conversation": [
-                    {
-                        "agent": msg.agent_name,
-                        "role": msg.role,
-                        "content": msg.content,
-                        "emoji": msg.emoji,
-                        "timestamp": msg.timestamp,
-                    }
-                    for msg in conversation
-                ],
-                "agent_count": len(conversation),
-            })
+            return JsonResponse(
+                {
+                    "success": True,
+                    "event": {
+                        "title": event.title,
+                        "slug": event.slug,
+                        "org_slug": event.organization.slug,
+                    },
+                    "conversation": [
+                        {
+                            "agent": msg.agent_name,
+                            "role": msg.role,
+                            "content": msg.content,
+                            "emoji": msg.emoji,
+                            "timestamp": msg.timestamp,
+                        }
+                        for msg in conversation
+                    ],
+                    "agent_count": len(conversation),
+                }
+            )
 
         except Event.DoesNotExist:
             return JsonResponse({"error": "Event not found"}, status=404)
@@ -556,41 +575,50 @@ class EventConciergeView(LoginRequiredMixin, View):
         now = timezone.now()
         days_until = (event.start_at - now).days if event.start_at > now else 0
 
-        bookings = Booking.objects.filter(event=event, status='CONFIRMED')
-        tickets_sold = Ticket.objects.filter(booking__event=event, status='VALID').count()
-        revenue = bookings.aggregate(total=Sum('total_amount'))['total'] or 0
+        bookings = Booking.objects.filter(event=event, status="CONFIRMED")
+        tickets_sold = Ticket.objects.filter(
+            booking__event=event, status="VALID"
+        ).count()
+        revenue = bookings.aggregate(total=Sum("total_amount"))["total"] or 0
 
         attendance_count = Ticket.objects.filter(
-            booking__event=event,
-            status='USED'
+            booking__event=event, status="USED"
         ).count()
-        attendance_rate = (attendance_count / tickets_sold * 100) if tickets_sold > 0 else 0
+        attendance_rate = (
+            (attendance_count / tickets_sold * 100) if tickets_sold > 0 else 0
+        )
 
         ticket_types = []
         for tt in event.ticket_types.all():
-            sold = Ticket.objects.filter(ticket_type=tt, status__in=['VALID', 'USED']).count()
-            ticket_types.append({
-                'name': tt.name,
-                'price': float(tt.price),
-                'quantity': tt.quantity,
-                'sold': sold,
-            })
+            sold = Ticket.objects.filter(
+                ticket_type=tt, status__in=["VALID", "USED"]
+            ).count()
+            ticket_types.append(
+                {
+                    "name": tt.name,
+                    "price": float(tt.price),
+                    "quantity": tt.quantity,
+                    "sold": sold,
+                }
+            )
 
         return {
-            'title': event.title,
-            'description': event.description,
-            'location': event.location,
-            'start_date': event.start_at.strftime('%Y-%m-%d') if event.start_at else None,
-            'category': event.category,
-            'capacity': event.capacity,
-            'metrics': {
-                'tickets_sold': tickets_sold,
-                'revenue': float(revenue),
-                'attendance_rate': round(attendance_rate, 1),
-                'conversion_rate': 0,
-                'days_until_event': days_until,
+            "title": event.title,
+            "description": event.description,
+            "location": event.location,
+            "start_date": event.start_at.strftime("%Y-%m-%d")
+            if event.start_at
+            else None,
+            "category": event.category,
+            "capacity": event.capacity,
+            "metrics": {
+                "tickets_sold": tickets_sold,
+                "revenue": float(revenue),
+                "attendance_rate": round(attendance_rate, 1),
+                "conversion_rate": 0,
+                "days_until_event": days_until,
             },
-            'ticket_types': ticket_types,
+            "ticket_types": ticket_types,
         }
 
 
@@ -599,38 +627,41 @@ class EventConciergeAuditView(LoginRequiredMixin, View):
     @log_ai_usage("event_concierge_audit")
     def post(self, request, org_slug, event_slug):
         try:
-            event = Event.objects.select_related('organization').get(
-                slug=event_slug,
-                organization__slug=org_slug
+            event = Event.objects.select_related("organization").get(
+                slug=event_slug, organization__slug=org_slug
             )
 
-            if not request.user.has_perm('events.view_event', event):
+            if not request.user.has_perm("events.view_event", event):
                 return JsonResponse({"error": "Permission denied"}, status=403)
 
             event_view = EventConciergeView()
             event_data = event_view._build_event_data(event)
 
             body = json.loads(request.body)
-            focus_areas = body.get('focus_areas', None)
+            focus_areas = body.get("focus_areas", None)
 
             if focus_areas:
-                conversation = event_concierge.orchestrate_discussion(event_data, focus_areas)
+                conversation = event_concierge.orchestrate_discussion(
+                    event_data, focus_areas
+                )
             else:
                 audit_result = event_concierge.quick_audit(event_data)
                 return JsonResponse({"success": True, "audit": audit_result})
 
-            return JsonResponse({
-                "success": True,
-                "conversation": [
-                    {
-                        "agent": msg.agent_name,
-                        "role": msg.role,
-                        "content": msg.content,
-                        "emoji": msg.emoji,
-                    }
-                    for msg in conversation
-                ],
-            })
+            return JsonResponse(
+                {
+                    "success": True,
+                    "conversation": [
+                        {
+                            "agent": msg.agent_name,
+                            "role": msg.role,
+                            "content": msg.content,
+                            "emoji": msg.emoji,
+                        }
+                        for msg in conversation
+                    ],
+                }
+            )
 
         except Event.DoesNotExist:
             return JsonResponse({"error": "Event not found"}, status=404)
@@ -644,29 +675,27 @@ class SmartEventScannerView(LoginRequiredMixin, View):
     def post(self, request):
         try:
             body = json.loads(request.body)
-            image_b64 = body.get('image')
+            image_b64 = body.get("image")
 
             if not image_b64:
                 return JsonResponse({"error": "No image provided"}, status=400)
 
-            if ',' in image_b64:
-                image_b64 = image_b64.split(',', 1)[1]
+            if "," in image_b64:
+                image_b64 = image_b64.split(",", 1)[1]
 
             image_data = base64.b64decode(image_b64)
-            image_mime = body.get('mime_type', 'image/jpeg')
+            image_mime = body.get("mime_type", "image/jpeg")
 
-            scan_mode = body.get('mode', 'extract')
+            scan_mode = body.get("mode", "extract")
 
-            if scan_mode == 'validate':
+            if scan_mode == "validate":
                 result = smart_scanner.validate_event_poster(image_data, image_mime)
                 return JsonResponse({"success": True, "validation": result})
 
-            elif scan_mode == 'competitor':
-                your_event = body.get('your_event', {})
+            elif scan_mode == "competitor":
+                your_event = body.get("your_event", {})
                 result = smart_scanner.scan_competitor_event(
-                    image_data,
-                    image_mime,
-                    your_event
+                    image_data, image_mime, your_event
                 )
                 return JsonResponse({"success": True, "analysis": result})
 
@@ -674,9 +703,9 @@ class SmartEventScannerView(LoginRequiredMixin, View):
                 result = smart_scanner.scan_event_image(image_data, image_mime)
 
                 if not result:
-                    return JsonResponse({
-                        "error": "Unable to extract data from image"
-                    }, status=422)
+                    return JsonResponse(
+                        {"error": "Unable to extract data from image"}, status=422
+                    )
 
                 return JsonResponse({"success": True, "extracted_data": result})
 
@@ -696,16 +725,16 @@ class AIMetricsDashboardView(LoginRequiredMixin, View):
         try:
             from apps.ai.utils.monitoring import metrics_collector
 
-            view_type = request.GET.get('view', 'system')
+            view_type = request.GET.get("view", "system")
 
-            if view_type == 'realtime':
+            if view_type == "realtime":
                 data = metrics_collector.get_real_time_metrics()
-            elif view_type == 'historical':
-                hours = int(request.GET.get('hours', 24))
+            elif view_type == "historical":
+                hours = int(request.GET.get("hours", 24))
                 data = metrics_collector.get_historical_metrics(hours)
-            elif view_type == 'user':
-                user_id = int(request.GET.get('user_id', request.user.id))
-                days = int(request.GET.get('days', 7))
+            elif view_type == "user":
+                user_id = int(request.GET.get("user_id", request.user.id))
+                days = int(request.GET.get("days", 7))
                 data = metrics_collector.get_user_metrics(user_id, days)
             else:
                 data = metrics_collector.get_system_health()
@@ -722,29 +751,27 @@ class StreamingChatView(LoginRequiredMixin, View):
         try:
             from apps.ai.utils.streaming import streaming_service
             from django.http import StreamingHttpResponse
-            
+
             body = json.loads(request.body)
-            user_message = body.get('message', '')
-            conversation_history = body.get('history', [])
+            user_message = body.get("message", "")
+            conversation_history = body.get("history", [])
 
             if not user_message:
                 return JsonResponse({"error": "No message provided"}, status=400)
 
             async def event_stream():
                 yield 'data: {"status": "connected"}\n\n'
-                
+
                 async for chunk_data in streaming_service.stream_chat(
-                    user_message,
-                    conversation_history
+                    user_message, conversation_history
                 ):
-                    yield f'data: {chunk_data}\n\n'
+                    yield f"data: {chunk_data}\n\n"
 
             response = StreamingHttpResponse(
-                event_stream(),
-                content_type='text/event-stream'
+                event_stream(), content_type="text/event-stream"
             )
-            response['Cache-Control'] = 'no-cache'
-            response['X-Accel-Buffering'] = 'no'
+            response["Cache-Control"] = "no-cache"
+            response["X-Accel-Buffering"] = "no"
             return response
 
         except Exception as e:
@@ -758,26 +785,28 @@ class LowBandwidthModeView(LoginRequiredMixin, View):
     def post(self, request):
         try:
             from apps.ai.services.low_bandwidth import low_bandwidth_service
-            
-            body = json.loads(request.body)
-            mode = body.get('mode', 'summarize')
 
-            if mode == 'summarize':
-                text = body.get('text', '')
-                max_words = int(body.get('max_words', 50))
+            body = json.loads(request.body)
+            mode = body.get("mode", "summarize")
+
+            if mode == "summarize":
+                text = body.get("text", "")
+                max_words = int(body.get("max_words", 50))
                 result = low_bandwidth_service.summarize_for_mobile(text, max_words)
-                
-            elif mode == 'quick_description':
-                title = body.get('title', '')
-                category = body.get('category', '')
-                location = body.get('location', '')
-                result = low_bandwidth_service.quick_event_description(title, category, location)
-                
-            elif mode == 'mobile_response':
-                query = body.get('query', '')
-                context = body.get('context', '')
+
+            elif mode == "quick_description":
+                title = body.get("title", "")
+                category = body.get("category", "")
+                location = body.get("location", "")
+                result = low_bandwidth_service.quick_event_description(
+                    title, category, location
+                )
+
+            elif mode == "mobile_response":
+                query = body.get("query", "")
+                context = body.get("context", "")
                 result = low_bandwidth_service.mobile_friendly_response(query, context)
-                
+
             else:
                 return JsonResponse({"error": "Invalid mode"}, status=400)
 
@@ -797,21 +826,21 @@ class CommunityTemplateView(LoginRequiredMixin, View):
     def post(self, request):
         try:
             from apps.ai.examples.community_templates import community_templates
-            
-            body = json.loads(request.body)
-            action = body.get('action', 'generate')
 
-            if action == 'suggestions':
-                event_type = body.get('event_type', '')
+            body = json.loads(request.body)
+            action = body.get("action", "generate")
+
+            if action == "suggestions":
+                event_type = body.get("event_type", "")
                 result = community_templates.get_template_suggestions(event_type)
                 return JsonResponse({"success": True, "suggestions": result})
 
-            elif action == 'generate':
-                event_type = body.get('event_type', '')
-                title = body.get('title', '')
-                location = body.get('location', '')
-                date = body.get('date', '')
-                details = body.get('additional_details', '')
+            elif action == "generate":
+                event_type = body.get("event_type", "")
+                title = body.get("title", "")
+                location = body.get("location", "")
+                date = body.get("date", "")
+                details = body.get("additional_details", "")
 
                 result = community_templates.generate_community_event(
                     event_type, title, location, date, details
@@ -827,4 +856,129 @@ class CommunityTemplateView(LoginRequiredMixin, View):
 
         except Exception as e:
             logger.error(f"Community template error: {e}")
+            return JsonResponse({"error": str(e)}, status=500)
+
+
+@method_decorator([csrf_protect, ai_feature_required, ai_rate_limit], name="dispatch")
+class ConversationalVoiceStartView(LoginRequiredMixin, View):
+    @log_ai_usage("voice_conversation_start")
+    def post(self, request):
+        try:
+            from apps.ai.services.conversational_voice import ConversationalEventCreator
+
+            body = json.loads(request.body)
+            audio_b64 = body.get("audio")
+
+            if not audio_b64:
+                return JsonResponse({"error": "No audio provided"}, status=400)
+
+            if "," in audio_b64:
+                audio_b64 = audio_b64.split(",", 1)[1]
+
+            audio_data = base64.b64decode(audio_b64)
+
+            creator = ConversationalEventCreator()
+            result = creator.start_conversation(audio_data, request.user.id)
+
+            request.session["voice_conversation"] = {
+                "extracted_data": creator.extracted_data,
+                "missing_fields": creator.missing_fields,
+                "history": creator.conversation_history,
+            }
+
+            return JsonResponse(result)
+
+        except Exception as e:
+            logger.error(f"Voice conversation start error: {e}")
+            return JsonResponse({"error": str(e)}, status=500)
+
+
+@method_decorator([csrf_protect, ai_feature_required, ai_rate_limit], name="dispatch")
+class ConversationalVoiceContinueView(LoginRequiredMixin, View):
+    @log_ai_usage("voice_conversation_continue")
+    def post(self, request):
+        try:
+            from apps.ai.services.conversational_voice import ConversationalEventCreator
+
+            body = json.loads(request.body)
+            audio_b64 = body.get("audio")
+
+            if not audio_b64:
+                return JsonResponse({"error": "No audio provided"}, status=400)
+
+            if "," in audio_b64:
+                audio_b64 = audio_b64.split(",", 1)[1]
+
+            audio_data = base64.b64decode(audio_b64)
+
+            session_data = request.session.get("voice_conversation", {})
+            creator = ConversationalEventCreator()
+            creator.extracted_data = session_data.get("extracted_data", {})
+            creator.missing_fields = session_data.get("missing_fields", [])
+            creator.conversation_history = session_data.get("history", [])
+
+            result = creator.continue_conversation(audio_data)
+
+            request.session["voice_conversation"] = {
+                "extracted_data": creator.extracted_data,
+                "missing_fields": creator.missing_fields,
+                "history": creator.conversation_history,
+            }
+
+            return JsonResponse(result)
+
+        except Exception as e:
+            logger.error(f"Voice conversation continue error: {e}")
+            return JsonResponse({"error": str(e)}, status=500)
+
+
+@method_decorator([csrf_protect, ai_feature_required, ai_rate_limit], name="dispatch")
+class ConversationalVoiceFinalizeView(LoginRequiredMixin, View):
+    @log_ai_usage("voice_conversation_finalize")
+    def post(self, request):
+        try:
+            from apps.ai.services.conversational_voice import ConversationalEventCreator
+
+            body = json.loads(request.body)
+            org_id = body.get("organization_id")
+
+            if not org_id:
+                return JsonResponse({"error": "Organization ID required"}, status=400)
+
+            session_data = request.session.get("voice_conversation", {})
+            creator = ConversationalEventCreator()
+            creator.extracted_data = session_data.get("extracted_data", {})
+            creator.conversation_history = session_data.get("history", [])
+
+            result = creator.finalize_event(org_id, request.user.id)
+
+            if result.get("success"):
+                event = creator.create_event_in_db(result["event_data"], org_id)
+
+                if event:
+                    del request.session["voice_conversation"]
+
+                    return JsonResponse(
+                        {
+                            "success": True,
+                            "event_id": event.id,
+                            "event_slug": event.slug,
+                            "org_slug": event.organization.slug,
+                            "event_url": f"/events/{event.organization.slug}/{event.slug}/",
+                            "message": "Event created successfully via voice!",
+                        }
+                    )
+                else:
+                    return JsonResponse(
+                        {
+                            "success": False,
+                            "error": "Failed to create event in database",
+                        },
+                        status=500,
+                    )
+            else:
+                return JsonResponse(result, status=500)
+
+        except Exception as e:
+            logger.error(f"Voice conversation finalize error: {e}")
             return JsonResponse({"error": str(e)}, status=500)

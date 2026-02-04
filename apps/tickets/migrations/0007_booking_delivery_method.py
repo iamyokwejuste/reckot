@@ -4,15 +4,22 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('tickets', '0006_change_ticket_code_format'),
+        ("tickets", "0006_change_ticket_code_format"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='booking',
-            name='delivery_method',
-            field=models.CharField(choices=[('EMAIL_ALL', 'Email me all tickets'), ('EMAIL_INDIVIDUALLY', 'Email tickets individually')], default='EMAIL_ALL', help_text='How tickets should be delivered to recipients', max_length=20),
+            model_name="booking",
+            name="delivery_method",
+            field=models.CharField(
+                choices=[
+                    ("EMAIL_ALL", "Email me all tickets"),
+                    ("EMAIL_INDIVIDUALLY", "Email tickets individually"),
+                ],
+                default="EMAIL_ALL",
+                help_text="How tickets should be delivered to recipients",
+                max_length=20,
+            ),
         ),
     ]

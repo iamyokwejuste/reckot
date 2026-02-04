@@ -687,5 +687,8 @@ class OrganizationDeleteView(LoginRequiredMixin, OrgPermissionMixin, View):
         org_name = organization.name
         organization.delete()
 
-        messages.success(request, _("Organization '{}' has been deleted successfully.").format(org_name))
+        messages.success(
+            request,
+            _("Organization '{}' has been deleted successfully.").format(org_name),
+        )
         return redirect("orgs:list")

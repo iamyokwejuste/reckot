@@ -22,10 +22,7 @@ class LowBandwidthAIService:
         return self._client
 
     def generate_compressed(
-        self,
-        prompt: str,
-        max_tokens: int = 512,
-        temperature: float = 0.5
+        self, prompt: str, max_tokens: int = 512, temperature: float = 0.5
     ) -> Optional[str]:
         if not self.client:
             return None
@@ -34,10 +31,7 @@ class LowBandwidthAIService:
             response = self.client.models.generate_content(
                 model=self.lite_model,
                 contents=prompt,
-                config={
-                    "max_output_tokens": max_tokens,
-                    "temperature": temperature
-                }
+                config={"max_output_tokens": max_tokens, "temperature": temperature},
             )
             return response.text
         except Exception as e:
@@ -55,10 +49,7 @@ Summary:"""
         return self.generate_compressed(prompt, max_tokens=200)
 
     def quick_event_description(
-        self,
-        title: str,
-        category: str,
-        location: str
+        self, title: str, category: str, location: str
     ) -> Optional[str]:
         prompt = f"""Generate a brief event description (30-50 words).
 

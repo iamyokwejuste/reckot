@@ -21,7 +21,13 @@ class SwagItemAdmin(ModelAdmin):
 
 @admin.register(CheckIn)
 class CheckInAdmin(ModelAdmin):
-    list_display = ["ticket", "event_name", "attendee_name", "checked_in_at", "checked_in_by"]
+    list_display = [
+        "ticket",
+        "event_name",
+        "attendee_name",
+        "checked_in_at",
+        "checked_in_by",
+    ]
     list_filter = ["checked_in_at"]
     search_fields = ["ticket__attendee_name", "ticket__attendee_email"]
     readonly_fields = ["checked_in_at"]
@@ -48,15 +54,15 @@ class SwagCollectionAdmin(ModelAdmin):
 
     @display(description="Item")
     def item_name(self, obj):
-        return getattr(obj, 'swag_item', '-')
+        return getattr(obj, "swag_item", "-")
 
     @display(description="Ticket")
     def ticket_ref(self, obj):
-        return getattr(obj, 'ticket', '-')
+        return getattr(obj, "ticket", "-")
 
     @display(description="Attendee")
     def attendee_name(self, obj):
-        ticket = getattr(obj, 'ticket', None)
+        ticket = getattr(obj, "ticket", None)
         if ticket:
             return ticket.attendee_name or ticket.booking.guest_name
         return "-"

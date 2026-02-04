@@ -7,9 +7,9 @@ from apps.core.models import Notification
 
 class NotificationListView(LoginRequiredMixin, View):
     def get(self, request):
-        notifications = Notification.objects.filter(
-            user=request.user
-        ).exclude(expires_at__lt=timezone.now())[:20]
+        notifications = Notification.objects.filter(user=request.user).exclude(
+            expires_at__lt=timezone.now()
+        )[:20]
 
         data = []
         for n in notifications:
@@ -23,25 +23,30 @@ class NotificationListView(LoginRequiredMixin, View):
             else:
                 time_ago = "just now"
 
-            data.append({
-                "id": n.id,
-                "title": n.title,
-                "message": n.message,
-                "link": n.link or "#",
-                "is_read": n.is_read,
-                "time_ago": time_ago,
-                "notification_type": n.notification_type,
-            })
+            data.append(
+                {
+                    "id": n.id,
+                    "title": n.title,
+                    "message": n.message,
+                    "link": n.link or "#",
+                    "is_read": n.is_read,
+                    "time_ago": time_ago,
+                    "notification_type": n.notification_type,
+                }
+            )
 
-        unread_count = Notification.objects.filter(
-            user=request.user,
-            is_read=False
-        ).exclude(expires_at__lt=timezone.now()).count()
+        unread_count = (
+            Notification.objects.filter(user=request.user, is_read=False)
+            .exclude(expires_at__lt=timezone.now())
+            .count()
+        )
 
-        return JsonResponse({
-            "notifications": data,
-            "unread_count": unread_count,
-        })
+        return JsonResponse(
+            {
+                "notifications": data,
+                "unread_count": unread_count,
+            }
+        )
 
 
 class NotificationMarkReadView(LoginRequiredMixin, View):
@@ -57,5 +62,7 @@ class NotificationMarkReadView(LoginRequiredMixin, View):
 
 class NotificationMarkAllReadView(LoginRequiredMixin, View):
     def post(self, request):
-        Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+        Notification.objects.filter(user=request.user, is_read=False).update(
+            is_read=True
+        )
         return JsonResponse({"success": True})

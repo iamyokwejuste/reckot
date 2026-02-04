@@ -126,9 +126,11 @@ class SyncSwagCollectionView(View):
             if not ticket_code or not swag_item_id:
                 return JsonResponse({"error": "Missing required fields"}, status=400)
 
-            checkin = CheckIn.objects.filter(
-                ticket__code=ticket_code
-            ).select_related("ticket").first()
+            checkin = (
+                CheckIn.objects.filter(ticket__code=ticket_code)
+                .select_related("ticket")
+                .first()
+            )
 
             if not checkin:
                 return JsonResponse({"error": "Check-in not found"}, status=404)

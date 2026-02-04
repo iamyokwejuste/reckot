@@ -19,7 +19,11 @@ def create_ticket_purchase_notification(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=Payment)
 def create_payment_notification(sender, instance, created, **kwargs):
-    if not created and instance.status == Payment.Status.CONFIRMED and instance.booking.user:
+    if (
+        not created
+        and instance.status == Payment.Status.CONFIRMED
+        and instance.booking.user
+    ):
         Notification.objects.create(
             user=instance.booking.user,
             notification_type=Notification.Type.PAYMENT_CONFIRMED,

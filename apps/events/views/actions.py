@@ -48,28 +48,45 @@ class PublicEventListView(View):
         events_data = []
         for event in events:
             ticket_types = event.ticket_types.filter(is_active=True)
-            min_price = ticket_types.aggregate(min_price=models.Min("price"))["min_price"] or 0
+            min_price = (
+                ticket_types.aggregate(min_price=models.Min("price"))["min_price"] or 0
+            )
 
-            events_data.append({
-                "id": event.id,
-                "title": event.title,
-                "description": event.description or "",
-                "short_description": event.short_description or event.description[:150] if event.description else "",
-                "location": event.location or "",
-                "city": event.city or "",
-                "location_short": (event.location or event.city or "Online")[:20],
-                "start_at": event.start_at.isoformat(),
-                "end_at": event.end_at.isoformat() if event.end_at else event.start_at.isoformat(),
-                "date_formatted": event.start_at.strftime("%b %d, %Y"),
-                "category_name": event.category.name if event.category else "",
-                "category_slug": event.category.slug if event.category else "",
-                "cover_image": event.cover_image.url if event.cover_image else "",
-                "is_free": event.is_free,
-                "min_price": float(min_price),
-                "url": reverse("events:public_detail", kwargs={"org_slug": event.organization.slug, "event_slug": event.slug}),
-            })
+            events_data.append(
+                {
+                    "id": event.id,
+                    "title": event.title,
+                    "description": event.description or "",
+                    "short_description": event.short_description
+                    or event.description[:150]
+                    if event.description
+                    else "",
+                    "location": event.location or "",
+                    "city": event.city or "",
+                    "location_short": (event.location or event.city or "Online")[:20],
+                    "start_at": event.start_at.isoformat(),
+                    "end_at": event.end_at.isoformat()
+                    if event.end_at
+                    else event.start_at.isoformat(),
+                    "date_formatted": event.start_at.strftime("%b %d, %Y"),
+                    "category_name": event.category.name if event.category else "",
+                    "category_slug": event.category.slug if event.category else "",
+                    "cover_image": event.cover_image.url if event.cover_image else "",
+                    "is_free": event.is_free,
+                    "min_price": float(min_price),
+                    "url": reverse(
+                        "events:public_detail",
+                        kwargs={
+                            "org_slug": event.organization.slug,
+                            "event_slug": event.slug,
+                        },
+                    ),
+                }
+            )
 
-        categories = EventCategory.objects.filter(is_active=True).order_by("display_order", "name")
+        categories = EventCategory.objects.filter(is_active=True).order_by(
+            "display_order", "name"
+        )
         categories_data = [
             {
                 "id": cat.id,
@@ -146,9 +163,7 @@ class PublicEventDetailView(View):
                             f"Sales start today at {sales_start.strftime('%I:%M %p')}"
                         )
                     else:
-                        status_message = (
-                            f"Sales start {sales_start.strftime('%b %d, %Y at %I:%M %p')}"
-                        )
+                        status_message = f"Sales start {sales_start.strftime('%b %d, %Y at %I:%M %p')}"
                 elif sales_end and now_naive > sales_end:
                     is_available = False
                     status_message = _("Sales ended")
@@ -1367,14 +1382,15 @@ class EventDeleteView(LoginRequiredMixin, View):
 
         if event.organization.owner != request.user:
             messages.error(request, _("Only the organization owner can delete events."))
-            return redirect("events:dashboard", org_slug=org_slug, event_slug=event_slug)
+            return redirect(
+                "events:dashboard", org_slug=org_slug, event_slug=event_slug
+            )
 
         event_title = event.title
         org_slug = event.organization.slug
         event.delete()
 
         messages.success(
-            request,
-            _("Event '{}' has been deleted successfully.").format(event_title)
+            request, _("Event '{}' has been deleted successfully.").format(event_title)
         )
         return redirect("orgs:detail", slug=org_slug)

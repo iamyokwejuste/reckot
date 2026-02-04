@@ -4,18 +4,17 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('events', '0016_add_ticket_prefix'),
+        ("events", "0016_add_ticket_prefix"),
     ]
 
     operations = [
         migrations.RemoveConstraint(
-            model_name='flyergeneration',
-            name='unique_flyer_per_email',
+            model_name="flyergeneration",
+            name="unique_flyer_per_email",
         ),
         migrations.RemoveConstraint(
-            model_name='flyergeneration',
-            name='unique_flyer_per_phone',
+            model_name="flyergeneration",
+            name="unique_flyer_per_phone",
         ),
     ]

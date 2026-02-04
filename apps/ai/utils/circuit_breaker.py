@@ -25,7 +25,7 @@ class GeminiCircuitBreaker:
         failure_threshold: int = 5,
         recovery_timeout: int = 60,
         expected_exception: type = Exception,
-        name: str = "gemini_circuit"
+        name: str = "gemini_circuit",
     ):
         self.failure_threshold = failure_threshold
         self.recovery_timeout = recovery_timeout
@@ -67,7 +67,9 @@ class GeminiCircuitBreaker:
     def _on_success(self):
         with self._lock:
             if self._state == CircuitState.HALF_OPEN:
-                logger.info(f"Circuit breaker {self.name} call succeeded, closing circuit")
+                logger.info(
+                    f"Circuit breaker {self.name} call succeeded, closing circuit"
+                )
                 self._state = CircuitState.CLOSED
                 self._failure_count = 0
 
@@ -75,10 +77,12 @@ class GeminiCircuitBreaker:
         with self._lock:
             self._failure_count += 1
             self._last_failure_time = time.time()
-            self._failure_history.append({
-                'timestamp': self._last_failure_time,
-                'failure_count': self._failure_count
-            })
+            self._failure_history.append(
+                {
+                    "timestamp": self._last_failure_time,
+                    "failure_count": self._failure_count,
+                }
+            )
 
             logger.warning(
                 f"Circuit breaker {self.name} failure {self._failure_count}/{self.failure_threshold}"
@@ -100,13 +104,13 @@ class GeminiCircuitBreaker:
     def get_metrics(self) -> dict:
         with self._lock:
             return {
-                'name': self.name,
-                'state': self._state.value,
-                'failure_count': self._failure_count,
-                'failure_threshold': self.failure_threshold,
-                'last_failure_time': self._last_failure_time,
-                'recovery_timeout': self.recovery_timeout,
-                'recent_failures': list(self._failure_history)
+                "name": self.name,
+                "state": self._state.value,
+                "failure_count": self._failure_count,
+                "failure_threshold": self.failure_threshold,
+                "last_failure_time": self._last_failure_time,
+                "recovery_timeout": self.recovery_timeout,
+                "recent_failures": list(self._failure_history),
             }
 
 
@@ -152,11 +156,9 @@ class RequestQueue:
 
     def enqueue(self, request_data: dict):
         with self._lock:
-            self.queue.append({
-                'data': request_data,
-                'timestamp': time.time(),
-                'retry_count': 0
-            })
+            self.queue.append(
+                {"data": request_data, "timestamp": time.time(), "retry_count": 0}
+            )
             logger.info(f"Request queued. Queue size: {len(self.queue)}")
 
     def dequeue(self) -> Optional[dict]:
@@ -176,9 +178,7 @@ class RequestQueue:
 
 
 gemini_circuit_breaker = GeminiCircuitBreaker(
-    failure_threshold=5,
-    recovery_timeout=60,
-    name="gemini_primary"
+    failure_threshold=5, recovery_timeout=60, name="gemini_primary"
 )
 
 model_fallback = ModelFallbackStrategy()

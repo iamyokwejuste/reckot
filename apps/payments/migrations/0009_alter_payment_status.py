@@ -4,15 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payments', '0008_remove_payment_payment_status_expires_idx_and_more'),
+        ("payments", "0008_remove_payment_payment_status_expires_idx_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='payment',
-            name='status',
-            field=models.CharField(choices=[('PENDING', 'Pending'), ('CONFIRMED', 'Confirmed'), ('FAILED', 'Failed'), ('EXPIRED', 'Expired'), ('REFUNDED', 'Refunded')], default='PENDING', max_length=20),
+            model_name="payment",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("PENDING", "Pending"),
+                    ("CONFIRMED", "Confirmed"),
+                    ("FAILED", "Failed"),
+                    ("EXPIRED", "Expired"),
+                    ("REFUNDED", "Refunded"),
+                ],
+                default="PENDING",
+                max_length=20,
+            ),
         ),
     ]

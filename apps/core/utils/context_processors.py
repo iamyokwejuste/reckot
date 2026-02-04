@@ -15,10 +15,11 @@ def platform_settings(request):
 
 def unread_notifications(request):
     if request.user.is_authenticated:
-        count = Notification.objects.filter(
-            user=request.user,
-            is_read=False
-        ).exclude(expires_at__lt=timezone.now()).count()
+        count = (
+            Notification.objects.filter(user=request.user, is_read=False)
+            .exclude(expires_at__lt=timezone.now())
+            .count()
+        )
         return {"unread_notifications_count": count}
     return {"unread_notifications_count": 0}
 

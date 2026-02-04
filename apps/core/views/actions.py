@@ -54,20 +54,24 @@ def manifest_view(request):
         "description": "Modern event ticketing and management platform",
         "icons": [
             {
-                "src": request.build_absolute_uri(static("images/favicon/android-chrome-192x192.png")),
+                "src": request.build_absolute_uri(
+                    static("images/favicon/android-chrome-192x192.png")
+                ),
                 "sizes": "192x192",
-                "type": "image/png"
+                "type": "image/png",
             },
             {
-                "src": request.build_absolute_uri(static("images/favicon/android-chrome-512x512.png")),
+                "src": request.build_absolute_uri(
+                    static("images/favicon/android-chrome-512x512.png")
+                ),
                 "sizes": "512x512",
-                "type": "image/png"
-            }
+                "type": "image/png",
+            },
         ],
         "theme_color": "#000000",
         "background_color": "#ffffff",
         "display": "standalone",
-        "start_url": "/"
+        "start_url": "/",
     }
     return JsonResponse(manifest, content_type="application/manifest+json")
 
@@ -464,19 +468,21 @@ class PhoneSignupVerifyView(View):
 class DeleteAccountView(LoginRequiredMixin, View):
     def post(self, request):
         password = request.POST.get("password", "")
-        
+
         if not request.user.check_password(password):
-            messages.error(request, _("Incorrect password. Account deletion cancelled."))
+            messages.error(
+                request, _("Incorrect password. Account deletion cancelled.")
+            )
             return redirect("core:settings")
-        
+
         user = request.user
-        
+
         logout(request)
 
         user.delete()
-        
+
         messages.success(
-            request, 
-            _("Your account has been permanently deleted. We're sorry to see you go.")
+            request,
+            _("Your account has been permanently deleted. We're sorry to see you go."),
         )
         return redirect("home")

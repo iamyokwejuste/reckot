@@ -14,12 +14,17 @@ class EventCategoryAdmin(ModelAdmin):
     fieldsets = (
         (None, {"fields": ("name", "slug", "description")}),
         ("Display", {"fields": ("icon", "color", "is_active", "display_order")}),
-        ("Timestamps", {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
+        (
+            "Timestamps",
+            {"fields": ("created_at", "updated_at"), "classes": ("collapse",)},
+        ),
     )
     readonly_fields = ["created_at", "updated_at"]
 
 
 from unfold.admin import TabularInline
+
+
 class TicketTypeInline(TabularInline):
     model = TicketType
     extra = 0
@@ -39,7 +44,14 @@ class EventAdmin(ModelAdmin):
         "feature_status",
         "start_at",
     ]
-    list_filter = ["state", "category", "is_public", "is_featured", "event_type", "created_at"]
+    list_filter = [
+        "state",
+        "category",
+        "is_public",
+        "is_featured",
+        "event_type",
+        "created_at",
+    ]
     search_fields = ["title", "organization__name", "description"]
     readonly_fields = ["slug", "created_at", "updated_at", "feature_requested_at"]
     inlines = [TicketTypeInline]

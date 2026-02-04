@@ -9,7 +9,9 @@ from django.db.models import F
 from apps.ai.models import AIRateLimit, AIUsageLog
 
 
-def ai_feature_required(view_func: Callable[..., HttpResponse]) -> Callable[..., HttpResponse]:
+def ai_feature_required(
+    view_func: Callable[..., HttpResponse],
+) -> Callable[..., HttpResponse]:
     @wraps(view_func)
     def wrapped_view(request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         if not request.user.is_authenticated:
@@ -34,10 +36,16 @@ def ai_feature_required(view_func: Callable[..., HttpResponse]) -> Callable[...,
     return wrapped_view
 
 
-def ai_rate_limit(limit: int = 30) -> Callable[[Callable[..., HttpResponse]], Callable[..., HttpResponse]]:
-    def decorator(view_func: Callable[..., HttpResponse]) -> Callable[..., HttpResponse]:
+def ai_rate_limit(
+    limit: int = 30,
+) -> Callable[[Callable[..., HttpResponse]], Callable[..., HttpResponse]]:
+    def decorator(
+        view_func: Callable[..., HttpResponse],
+    ) -> Callable[..., HttpResponse]:
         @wraps(view_func)
-        def wrapped_view(request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        def wrapped_view(
+            request: HttpRequest, *args: Any, **kwargs: Any
+        ) -> HttpResponse:
             if not request.user.is_authenticated:
                 return view_func(request, *args, **kwargs)
 
@@ -68,10 +76,16 @@ def ai_rate_limit(limit: int = 30) -> Callable[[Callable[..., HttpResponse]], Ca
     return decorator
 
 
-def log_ai_usage(operation: str) -> Callable[[Callable[..., HttpResponse]], Callable[..., HttpResponse]]:
-    def decorator(view_func: Callable[..., HttpResponse]) -> Callable[..., HttpResponse]:
+def log_ai_usage(
+    operation: str,
+) -> Callable[[Callable[..., HttpResponse]], Callable[..., HttpResponse]]:
+    def decorator(
+        view_func: Callable[..., HttpResponse],
+    ) -> Callable[..., HttpResponse]:
         @wraps(view_func)
-        def wrapped_view(request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        def wrapped_view(
+            request: HttpRequest, *args: Any, **kwargs: Any
+        ) -> HttpResponse:
             start_time = time.time()
             error = ""
 
@@ -110,8 +124,17 @@ def log_ai_usage(operation: str) -> Callable[[Callable[..., HttpResponse]], Call
     return decorator
 
 
-def validate_query(view_func: Callable[..., HttpResponse]) -> Callable[..., HttpResponse]:
-    ALLOWED_MODELS = ["Event", "Ticket", "Payment", "Organization", "Booking", "TicketType"]
+def validate_query(
+    view_func: Callable[..., HttpResponse],
+) -> Callable[..., HttpResponse]:
+    ALLOWED_MODELS = [
+        "Event",
+        "Ticket",
+        "Payment",
+        "Organization",
+        "Booking",
+        "TicketType",
+    ]
     FORBIDDEN_PATTERNS = [
         r"\.delete\(",
         r"\.update\(",
@@ -130,12 +153,6 @@ def validate_query(view_func: Callable[..., HttpResponse]) -> Callable[..., Http
         r"vars\(",
         r"__",
     ]
-    ALLOWED_SAFE_METHODS = [
-        "filter", "exclude", "get", "all", "first", "last",
-        "count", "exists", "values", "values_list",
-        "order_by", "distinct", "annotate", "aggregate",
-        "select_related", "prefetch_related", "only", "defer"
-    ]
 
     @wraps(view_func)
     def wrapped_view(request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
@@ -153,7 +170,10 @@ def validate_query(view_func: Callable[..., HttpResponse]) -> Callable[..., Http
 
                     if not query:
                         return JsonResponse(
-                            {"error": "Query blocked: empty query", "query_blocked": True},
+                            {
+                                "error": "Query blocked: empty query",
+                                "query_blocked": True,
+                            },
                             status=403,
                         )
 
@@ -179,7 +199,10 @@ def validate_query(view_func: Callable[..., HttpResponse]) -> Callable[..., Http
 
                     if len(query) > 2000:
                         return JsonResponse(
-                            {"error": "Query blocked: query too long", "query_blocked": True},
+                            {
+                                "error": "Query blocked: query too long",
+                                "query_blocked": True,
+                            },
                             status=403,
                         )
 

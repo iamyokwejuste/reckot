@@ -8,7 +8,7 @@ from apps.payments.models import (
     Refund,
     RefundAuditLog,
     Invoice,
-    Withdrawal
+    Withdrawal,
 )
 
 
@@ -21,7 +21,15 @@ class PaymentGatewayConfigAdmin(ModelAdmin):
 
 @admin.register(Payment)
 class PaymentAdmin(ModelAdmin):
-    list_display = ["reference", "booking_info", "amount", "currency", "provider", "status_badge", "created_at"]
+    list_display = [
+        "reference",
+        "booking_info",
+        "amount",
+        "currency",
+        "provider",
+        "status_badge",
+        "created_at",
+    ]
     list_filter = ["status", "provider", "currency", "created_at"]
     search_fields = ["reference", "booking__reference"]
     readonly_fields = ["reference", "created_at", "expires_at"]
@@ -48,7 +56,13 @@ class PaymentAdmin(ModelAdmin):
 
 @admin.register(OfflinePayment)
 class OfflinePaymentAdmin(ModelAdmin):
-    list_display = ["id", "payment", "method_description", "verification_status", "verified_by"]
+    list_display = [
+        "id",
+        "payment",
+        "method_description",
+        "verification_status",
+        "verified_by",
+    ]
     list_filter = ["verification_status"]
     search_fields = ["payment__reference"]
 
@@ -82,7 +96,7 @@ class InvoiceAdmin(ModelAdmin):
 
     @display(description="Order")
     def order(self, obj):
-        return getattr(obj, 'booking', '-') or getattr(obj, 'order', '-')
+        return getattr(obj, "booking", "-") or getattr(obj, "order", "-")
 
 
 @admin.register(Withdrawal)

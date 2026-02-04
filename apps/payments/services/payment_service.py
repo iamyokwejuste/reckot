@@ -384,12 +384,14 @@ def process_refund_payment(refund):
 
         gateway = gateway_class(gateway_config.credentials)
 
-        logger.info(f"Calling gateway refund with amount: {refund.amount}, phone: {payment.phone_number}")
+        logger.info(
+            f"Calling gateway refund with amount: {refund.amount}, phone: {payment.phone_number}"
+        )
 
         result = gateway.refund(
             external_reference=payment.external_reference,
             amount=refund.amount,
-            phone_number=payment.phone_number
+            phone_number=payment.phone_number,
         )
 
         logger.info(

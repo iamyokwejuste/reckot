@@ -8,7 +8,10 @@ from apps.core.services.notifications import NotificationService
 from apps.core.services.qrcode import QRCodeService
 from apps.orgs.models import MemberRole
 from apps.tickets.models import Booking, Ticket
-from apps.tickets.services.ticket_pdf_service import generate_single_ticket_pdf, generate_multi_ticket_pdf
+from apps.tickets.services.ticket_pdf_service import (
+    generate_single_ticket_pdf,
+    generate_multi_ticket_pdf,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -45,9 +48,13 @@ def send_ticket_confirmation_task(booking_id: int):
                     qr_bytes = qr_buffer.getvalue()
 
                     try:
-                        pdf_bytes = generate_single_ticket_pdf(ticket, booking, qr_bytes)
+                        pdf_bytes = generate_single_ticket_pdf(
+                            ticket, booking, qr_bytes
+                        )
                     except Exception as e:
-                        logger.error(f"Failed to generate PDF for ticket {ticket.code}: {e}")
+                        logger.error(
+                            f"Failed to generate PDF for ticket {ticket.code}: {e}"
+                        )
                         pdf_bytes = None
 
                     NotificationService.send_ticket_confirmation(
@@ -69,9 +76,13 @@ def send_ticket_confirmation_task(booking_id: int):
                     qr_bytes = qr_buffer.getvalue()
 
                     try:
-                        pdf_bytes = generate_single_ticket_pdf(ticket, booking, qr_bytes)
+                        pdf_bytes = generate_single_ticket_pdf(
+                            ticket, booking, qr_bytes
+                        )
                     except Exception as e:
-                        logger.error(f"Failed to generate PDF for ticket {ticket.code}: {e}")
+                        logger.error(
+                            f"Failed to generate PDF for ticket {ticket.code}: {e}"
+                        )
                         pdf_bytes = None
 
                     NotificationService.send_ticket_confirmation(
@@ -162,7 +173,7 @@ def send_admin_sale_notifications_task(booking_id: int):
             else:
                 ticket_summary[ticket_type_name] = {
                     "count": 1,
-                    "price": ticket.ticket_type.price
+                    "price": ticket.ticket_type.price,
                 }
 
         total_amount = payment.amount if payment else booking.total_amount
@@ -179,7 +190,7 @@ def send_admin_sale_notifications_task(booking_id: int):
                 title=notification_title,
                 message=notification_message,
                 link=notification_link,
-                expires_at=timezone.now() + timedelta(days=30)
+                expires_at=timezone.now() + timedelta(days=30),
             )
 
             if admin.email:

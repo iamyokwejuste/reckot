@@ -61,10 +61,16 @@ def create_multi_ticket_booking(
         now_naive = now.replace(tzinfo=None)
 
         if event.state == Event.State.CLOSED:
-            return None, "This event is closed and ticket sales are no longer available."
+            return (
+                None,
+                "This event is closed and ticket sales are no longer available.",
+            )
 
         if event.end_at and now > event.end_at:
-            return None, "This event has ended and ticket sales are no longer available."
+            return (
+                None,
+                "This event has ended and ticket sales are no longer available.",
+            )
 
         for ticket_type_id, quantity in ticket_selections.items():
             if quantity <= 0:

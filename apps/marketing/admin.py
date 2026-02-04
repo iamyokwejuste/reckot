@@ -53,16 +53,19 @@ class AffiliateConversionAdmin(ModelAdmin):
     date_hierarchy = "created_at"
 
     fieldsets = (
-        ("Conversion Information", {
-            "fields": ("affiliate_link", "booking", "order_amount", "commission_amount")
-        }),
-        ("Status", {
-            "fields": ("status", "paid_at")
-        }),
-        ("Timestamps", {
-            "fields": ("created_at",),
-            "classes": ("collapse",)
-        }),
+        (
+            "Conversion Information",
+            {
+                "fields": (
+                    "affiliate_link",
+                    "booking",
+                    "order_amount",
+                    "commission_amount",
+                )
+            },
+        ),
+        ("Status", {"fields": ("status", "paid_at")}),
+        ("Timestamps", {"fields": ("created_at",), "classes": ("collapse",)}),
     )
 
     @display(description="Booking")

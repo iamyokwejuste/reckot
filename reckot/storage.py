@@ -1,7 +1,9 @@
 from whitenoise.storage import CompressedManifestStaticFilesStorage
 
 
-class NonStrictCompressedManifestStaticFilesStorage(CompressedManifestStaticFilesStorage):
+class NonStrictCompressedManifestStaticFilesStorage(
+    CompressedManifestStaticFilesStorage
+):
     manifest_strict = False
 
     def hashed_name(self, name, content=None, filename=None):

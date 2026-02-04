@@ -24,10 +24,7 @@ class StreamingGeminiService:
         return self._client
 
     async def stream_generate(
-        self,
-        prompt: str,
-        max_tokens: int = 2048,
-        temperature: float = 0.7
+        self, prompt: str, max_tokens: int = 2048, temperature: float = 0.7
     ) -> AsyncIterator[str]:
         if not self.client:
             yield json.dumps({"error": "AI service not configured"})
@@ -37,10 +34,7 @@ class StreamingGeminiService:
             response = self.client.models.generate_content_stream(
                 model=self.model,
                 contents=prompt,
-                config={
-                    "max_output_tokens": max_tokens,
-                    "temperature": temperature
-                }
+                config={"max_output_tokens": max_tokens, "temperature": temperature},
             )
 
             for chunk in response:
@@ -55,15 +49,14 @@ class StreamingGeminiService:
             yield json.dumps({"error": str(e), "done": True})
 
     async def stream_chat(
-        self,
-        user_message: str,
-        conversation_history: list,
-        system_prompt: str = ""
+        self, user_message: str, conversation_history: list, system_prompt: str = ""
     ) -> AsyncIterator[str]:
-        history_str = "\n".join([
-            f"{'User' if m['role'] == 'user' else 'Assistant'}: {m['content']}"
-            for m in conversation_history[-10:]
-        ])
+        history_str = "\n".join(
+            [
+                f"{'User' if m['role'] == 'user' else 'Assistant'}: {m['content']}"
+                for m in conversation_history[-10:]
+            ]
+        )
 
         full_prompt = f"""{system_prompt}
 

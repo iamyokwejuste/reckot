@@ -4,15 +4,28 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('orgs', '0007_organization_plans'),
+        ("orgs", "0007_organization_plans"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='organization',
-            name='currency',
-            field=models.CharField(choices=[('XAF', 'Central African CFA Franc (XAF)'), ('XOF', 'West African CFA Franc (XOF)'), ('USD', 'US Dollar (USD)'), ('EUR', 'Euro (EUR)'), ('GBP', 'British Pound (GBP)'), ('NGN', 'Nigerian Naira (NGN)'), ('GHS', 'Ghanaian Cedi (GHS)'), ('UGX', 'Ugandan Shilling (UGX)')], default='XAF', help_text="Default currency for this organization's events", max_length=3),
+            model_name="organization",
+            name="currency",
+            field=models.CharField(
+                choices=[
+                    ("XAF", "Central African CFA Franc (XAF)"),
+                    ("XOF", "West African CFA Franc (XOF)"),
+                    ("USD", "US Dollar (USD)"),
+                    ("EUR", "Euro (EUR)"),
+                    ("GBP", "British Pound (GBP)"),
+                    ("NGN", "Nigerian Naira (NGN)"),
+                    ("GHS", "Ghanaian Cedi (GHS)"),
+                    ("UGX", "Ugandan Shilling (UGX)"),
+                ],
+                default="XAF",
+                help_text="Default currency for this organization's events",
+                max_length=3,
+            ),
         ),
     ]

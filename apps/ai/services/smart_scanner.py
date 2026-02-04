@@ -10,7 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 class SmartEventScanner:
-
     def __init__(self):
         self.api_key = getattr(settings, "GEMINI_API_KEY", "")
         self.model = getattr(settings, "GEMINI_MODEL", "gemini-3-flash-preview")
@@ -27,13 +26,13 @@ class SmartEventScanner:
         return self._client
 
     def _load_prompt(self) -> str:
-        prompt_path = Path(settings.BASE_DIR) / 'static' / 'markdown' / 'smart_scanner.md'
-        return prompt_path.read_text(encoding='utf-8')
+        prompt_path = (
+            Path(settings.BASE_DIR) / "static" / "markdown" / "smart_scanner.md"
+        )
+        return prompt_path.read_text(encoding="utf-8")
 
     def scan_event_image(
-        self,
-        image_data: bytes,
-        image_mime: str = "image/jpeg"
+        self, image_data: bytes, image_mime: str = "image/jpeg"
     ) -> Optional[Dict[str, Any]]:
         if not self.client:
             logger.warning("Gemini client not available")
@@ -41,7 +40,7 @@ class SmartEventScanner:
 
         contents = [
             types.Part.from_bytes(data=image_data, mime_type=image_mime),
-            self.system_prompt
+            self.system_prompt,
         ]
 
         try:
@@ -72,7 +71,7 @@ class SmartEventScanner:
         self,
         image_data: bytes,
         image_mime: str = "image/jpeg",
-        your_event_data: Dict[str, Any] = None
+        your_event_data: Dict[str, Any] = None,
     ) -> Optional[Dict[str, Any]]:
         base_scan = self.scan_event_image(image_data, image_mime)
 
@@ -88,11 +87,11 @@ COMPETITOR EVENT:
 {json.dumps(base_scan, indent=2)}
 
 OUR EVENT:
-Title: {your_event_data.get('title')}
-Date: {your_event_data.get('date')}
-Location: {your_event_data.get('location')}
-Prices: {your_event_data.get('prices')}
-Category: {your_event_data.get('category')}
+Title: {your_event_data.get("title")}
+Date: {your_event_data.get("date")}
+Location: {your_event_data.get("location")}
+Prices: {your_event_data.get("prices")}
+Category: {your_event_data.get("category")}
 
 Provide competitive analysis with:
 1. Pricing strategy comparison
@@ -117,7 +116,7 @@ Return JSON:
         try:
             contents = [
                 types.Part.from_bytes(data=image_data, mime_type=image_mime),
-                comparison_prompt
+                comparison_prompt,
             ]
 
             response = self.client.models.generate_content(
@@ -141,9 +140,7 @@ Return JSON:
             return {"competitor_scan": base_scan}
 
     def validate_event_poster(
-        self,
-        image_data: bytes,
-        image_mime: str = "image/jpeg"
+        self, image_data: bytes, image_mime: str = "image/jpeg"
     ) -> Dict[str, Any]:
         scan_result = self.scan_event_image(image_data, image_mime)
 
@@ -152,35 +149,35 @@ Return JSON:
                 "valid": False,
                 "score": 0,
                 "issues": ["Unable to scan image"],
-                "recommendations": ["Please provide a clearer image"]
+                "recommendations": ["Please provide a clearer image"],
             }
 
         issues = []
         score = 100
 
-        if not scan_result.get('title'):
+        if not scan_result.get("title"):
             issues.append("Missing event title")
             score -= 20
 
-        if not scan_result.get('date'):
+        if not scan_result.get("date"):
             issues.append("Missing event date")
             score -= 15
 
-        if not scan_result.get('location'):
+        if not scan_result.get("location"):
             issues.append("Missing location/venue")
             score -= 15
 
-        if not scan_result.get('prices'):
+        if not scan_result.get("prices"):
             issues.append("Missing ticket prices")
             score -= 10
 
-        if scan_result.get('missing_info'):
-            for missing in scan_result['missing_info']:
+        if scan_result.get("missing_info"):
+            for missing in scan_result["missing_info"]:
                 if missing not in [i.lower() for i in issues]:
                     issues.append(f"Missing {missing}")
                     score -= 5
 
-        confidence = scan_result.get('confidence_score', 50)
+        confidence = scan_result.get("confidence_score", 50)
         if confidence < 70:
             score -= (70 - confidence) * 0.5
 
@@ -189,7 +186,7 @@ Return JSON:
             recommendations.append("Add missing information to improve discoverability")
         if confidence < 80:
             recommendations.append("Use higher resolution image with clearer text")
-        if not scan_result.get('social_handles'):
+        if not scan_result.get("social_handles"):
             recommendations.append("Add social media handles for promotion")
 
         return {
@@ -197,7 +194,7 @@ Return JSON:
             "score": max(0, int(score)),
             "scan_data": scan_result,
             "issues": issues,
-            "recommendations": recommendations
+            "recommendations": recommendations,
         }
 
 

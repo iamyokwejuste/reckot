@@ -271,7 +271,9 @@ class TicketPDFView(LoginRequiredMixin, View):
         pdf_content = generate_ticket_pdf(ticket)
 
         response = HttpResponse(pdf_content, content_type="application/pdf")
-        response["Content-Disposition"] = f'attachment; filename="ticket-{ticket.code}.pdf"'
+        response["Content-Disposition"] = (
+            f'attachment; filename="ticket-{ticket.code}.pdf"'
+        )
         response["X-Content-Type-Options"] = "nosniff"
         response["Cache-Control"] = "no-cache, no-store, must-revalidate"
         return response
@@ -436,12 +438,13 @@ class PublicBookingPDFView(View):
 class CancelBookingView(LoginRequiredMixin, View):
     def post(self, request, booking_ref):
         booking = get_object_or_404(
-            Booking.objects.select_related("event", "user"),
-            reference=booking_ref
+            Booking.objects.select_related("event", "user"), reference=booking_ref
         )
 
         if booking.user != request.user:
-            messages.error(request, _("You don't have permission to cancel this booking."))
+            messages.error(
+                request, _("You don't have permission to cancel this booking.")
+            )
             return redirect("tickets:my_tickets")
 
         if booking.status not in [Booking.Status.CONFIRMED]:
@@ -449,8 +452,7 @@ class CancelBookingView(LoginRequiredMixin, View):
             return redirect("tickets:my_tickets")
 
         payment = Payment.objects.filter(
-            booking=booking,
-            status=Payment.Status.CONFIRMED
+            booking=booking, status=Payment.Status.CONFIRMED
         ).first()
 
         with transaction.atomic():
@@ -461,7 +463,7 @@ class CancelBookingView(LoginRequiredMixin, View):
                     refund_type=Refund.Type.FULL,
                     status=Refund.Status.APPROVED,
                     reason="Booking cancelled by user",
-                    requested_by=request.user
+                    requested_by=request.user,
                 )
                 booking.status = Booking.Status.REFUNDED
             else:
@@ -469,7 +471,12 @@ class CancelBookingView(LoginRequiredMixin, View):
 
             booking.save()
 
-        messages.success(request, _("Your booking has been cancelled successfully. Refund will be processed shortly."))
+        messages.success(
+            request,
+            _(
+                "Your booking has been cancelled successfully. Refund will be processed shortly."
+            ),
+        )
         return redirect("tickets:my_tickets")
 
 
@@ -491,9 +498,7 @@ class RefundTicketView(LoginRequiredMixin, View):
 
         ticket = get_object_or_404(
             Ticket.objects.select_related(
-                "booking__event__organization",
-                "booking__user",
-                "ticket_type"
+                "booking__event__organization", "booking__user", "ticket_type"
             ),
             code=ticket_code,
             booking__event__organization__members=request.user,
@@ -507,8 +512,7 @@ class RefundTicketView(LoginRequiredMixin, View):
 
         try:
             payment = Payment.objects.get(
-                booking=booking,
-                status=Payment.Status.CONFIRMED
+                booking=booking, status=Payment.Status.CONFIRMED
             )
         except Payment.DoesNotExist:
             messages.error(request, _("No confirmed payment found for this ticket"))
@@ -519,8 +523,10 @@ class RefundTicketView(LoginRequiredMixin, View):
         if refund_amount < Decimal("100"):
             messages.error(
                 request,
-                _("Minimum refund amount is 100 %(currency)s. Provided: %(amount)s %(currency)s")
-                % {"amount": refund_amount, "currency": currency}
+                _(
+                    "Minimum refund amount is 100 %(currency)s. Provided: %(amount)s %(currency)s"
+                )
+                % {"amount": refund_amount, "currency": currency},
             )
             return redirect("tickets:list")
 
@@ -531,28 +537,43 @@ class RefundTicketView(LoginRequiredMixin, View):
         if refund_amount > available_balance:
             messages.error(
                 request,
-                _("Insufficient organization balance. Available: %(balance)s %(currency)s, Required: %(amount)s %(currency)s")
-                % {"balance": available_balance, "amount": refund_amount, "currency": currency}
+                _(
+                    "Insufficient organization balance. Available: %(balance)s %(currency)s, Required: %(amount)s %(currency)s"
+                )
+                % {
+                    "balance": available_balance,
+                    "amount": refund_amount,
+                    "currency": currency,
+                },
             )
             return redirect("tickets:list")
 
         if refund_amount > payment.amount:
             messages.error(
                 request,
-                _("Refund amount (%(refund)s %(currency)s) cannot exceed payment amount (%(payment)s %(currency)s)")
-                % {"refund": refund_amount, "payment": payment.amount, "currency": currency}
+                _(
+                    "Refund amount (%(refund)s %(currency)s) cannot exceed payment amount (%(payment)s %(currency)s)"
+                )
+                % {
+                    "refund": refund_amount,
+                    "payment": payment.amount,
+                    "currency": currency,
+                },
             )
             return redirect("tickets:list")
 
         existing_refund = Refund.objects.filter(
             payment=payment,
-            status__in=[Refund.Status.PENDING, Refund.Status.APPROVED, Refund.Status.PROCESSED]
+            status__in=[
+                Refund.Status.PENDING,
+                Refund.Status.APPROVED,
+                Refund.Status.PROCESSED,
+            ],
         ).first()
 
         if existing_refund:
             messages.error(
-                request,
-                _("A refund is already in progress for this ticket")
+                request, _("A refund is already in progress for this ticket")
             )
             return redirect("tickets:list")
 
@@ -578,7 +599,9 @@ class RefundTicketView(LoginRequiredMixin, View):
 
         messages.success(
             request,
-            _("Refund of %(amount)s %(currency)s initiated successfully for ticket %(code)s")
-            % {"amount": refund_amount, "code": ticket_code, "currency": currency}
+            _(
+                "Refund of %(amount)s %(currency)s initiated successfully for ticket %(code)s"
+            )
+            % {"amount": refund_amount, "code": ticket_code, "currency": currency},
         )
         return redirect("tickets:list")

@@ -6,28 +6,63 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0004_add_ai_features_enabled'),
+        ("core", "0004_add_ai_features_enabled"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Notification',
+            name="Notification",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('notification_type', models.CharField(choices=[('TICKET_PURCHASE', 'Ticket Purchase'), ('PAYMENT_CONFIRMED', 'Payment Confirmed'), ('REFUND_APPROVED', 'Refund Approved'), ('REFUND_PROCESSED', 'Refund Processed'), ('EVENT_UPDATE', 'Event Update'), ('EVENT_CANCELLED', 'Event Cancelled')], max_length=20)),
-                ('title', models.CharField(max_length=200)),
-                ('message', models.TextField()),
-                ('link', models.CharField(blank=True, max_length=500)),
-                ('is_read', models.BooleanField(default=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('expires_at', models.DateTimeField()),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='notifications', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "notification_type",
+                    models.CharField(
+                        choices=[
+                            ("TICKET_PURCHASE", "Ticket Purchase"),
+                            ("PAYMENT_CONFIRMED", "Payment Confirmed"),
+                            ("REFUND_APPROVED", "Refund Approved"),
+                            ("REFUND_PROCESSED", "Refund Processed"),
+                            ("EVENT_UPDATE", "Event Update"),
+                            ("EVENT_CANCELLED", "Event Cancelled"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                ("title", models.CharField(max_length=200)),
+                ("message", models.TextField()),
+                ("link", models.CharField(blank=True, max_length=500)),
+                ("is_read", models.BooleanField(default=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("expires_at", models.DateTimeField()),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="notifications",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
-                'indexes': [models.Index(fields=['user', 'is_read', '-created_at'], name='core_notifi_user_id_f286cd_idx'), models.Index(fields=['expires_at'], name='core_notifi_expires_084cc5_idx')],
+                "ordering": ["-created_at"],
+                "indexes": [
+                    models.Index(
+                        fields=["user", "is_read", "-created_at"],
+                        name="core_notifi_user_id_f286cd_idx",
+                    ),
+                    models.Index(
+                        fields=["expires_at"], name="core_notifi_expires_084cc5_idx"
+                    ),
+                ],
             },
         ),
     ]

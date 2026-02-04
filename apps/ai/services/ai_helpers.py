@@ -16,12 +16,15 @@ User = get_user_model()
 
 _ai_query_service = None
 
+
 def _get_ai_query_service():
     global _ai_query_service
     if _ai_query_service is None:
         from apps.ai.services.ai_query_service import AIQueryService
+
         _ai_query_service = AIQueryService()
     return _ai_query_service
+
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +33,7 @@ def clean_html_content(html_text: str) -> str:
     if not html_text:
         return ""
     text = strip_tags(html_text)
-    text = re.sub(r'\s+', ' ', text)
+    text = re.sub(r"\s+", " ", text)
     return text.strip()
 
 
@@ -87,42 +90,53 @@ class GeminiService:
 gemini = GeminiService()
 
 
-
-
-
-
 def generate_event_description(
     title: str, category: str, location: str, date: str, details: str = ""
 ) -> dict:
-    template = _load_prompt('event_description.md')
-    prompt = _format_prompt(template, title=title, category=category, location=location, date=date, details=details)
+    template = _load_prompt("event_description.md")
+    prompt = _format_prompt(
+        template,
+        title=title,
+        category=category,
+        location=location,
+        date=date,
+        details=details,
+    )
     return gemini.generate_json(prompt, 2048)
 
 
 def generate_social_posts(
     event_title: str, event_date: str, event_location: str, ticket_price: str = ""
 ) -> dict:
-    template = _load_prompt('social_posts.md')
-    prompt = _format_prompt(template, event_title=event_title, event_date=event_date, event_location=event_location, ticket_price=ticket_price)
+    template = _load_prompt("social_posts.md")
+    prompt = _format_prompt(
+        template,
+        event_title=event_title,
+        event_date=event_date,
+        event_location=event_location,
+        ticket_price=ticket_price,
+    )
     return gemini.generate_json(prompt)
 
 
 def generate_email_template(event_title: str, event_details: dict) -> dict:
-    template = _load_prompt('email_template.md')
-    prompt = _format_prompt(template, event_title=event_title, event_details=json.dumps(event_details))
+    template = _load_prompt("email_template.md")
+    prompt = _format_prompt(
+        template, event_title=event_title, event_details=json.dumps(event_details)
+    )
     return gemini.generate_json(prompt)
 
 
 def _load_prompt(filename: str) -> str:
-    prompt_path = Path(settings.BASE_DIR) / 'static' / 'markdown' / filename
-    return prompt_path.read_text(encoding='utf-8')
+    prompt_path = Path(settings.BASE_DIR) / "static" / "markdown" / filename
+    return prompt_path.read_text(encoding="utf-8")
 
 
 def _format_prompt(template: str, **kwargs) -> str:
     return template.format(**kwargs)
 
 
-SUPPORT_SYSTEM_PROMPT = _load_prompt('support_assistant.md')
+SUPPORT_SYSTEM_PROMPT = _load_prompt("support_assistant.md")
 
 
 def _format_query_result(result):
@@ -148,9 +162,9 @@ def _format_query_result(result):
 
         lines = []
         for key, value in result.items():
-            if key.startswith('_'):
+            if key.startswith("_"):
                 continue
-            formatted_key = key.replace('_', ' ').title()
+            formatted_key = key.replace("_", " ").title()
             if isinstance(value, Decimal):
                 formatted_value = f"{float(value):,.2f} XAF"
             elif isinstance(value, (int, float)):
@@ -169,10 +183,12 @@ def _format_query_result(result):
             for item in result:
                 parts = []
                 for key, value in item.items():
-                    if key.startswith('_'):
+                    if key.startswith("_"):
                         continue
                     if isinstance(value, Decimal):
-                        parts.append(f"**{key.replace('_', ' ').title()}:** {float(value):,.2f} XAF")
+                        parts.append(
+                            f"**{key.replace('_', ' ').title()}:** {float(value):,.2f} XAF"
+                        )
                     elif isinstance(value, (int, float)):
                         parts.append(f"**{key.replace('_', ' ').title()}:** {value:,}")
                     else:
@@ -192,7 +208,7 @@ def chat_with_assistant(
 
     user = None
     if context:
-        user_id = context.get('user_id')
+        user_id = context.get("user_id")
         if user_id:
             try:
                 user = User.objects.get(id=user_id)
@@ -201,7 +217,7 @@ def chat_with_assistant(
 
     context_str = ""
     if context:
-        safe_context = {k: v for k, v in context.items() if k != 'user_id'}
+        safe_context = {k: v for k, v in context.items() if k != "user_id"}
         context_str = f"\n\nUser Context:\n{json.dumps(safe_context, indent=2)}"
 
     history_str = "\n".join(
@@ -223,28 +239,49 @@ def chat_with_assistant(
     result = {"message": response, "action": None}
 
     try:
-        is_data_question = any(keyword in user_message.lower() for keyword in [
-            'how many', 'count', 'total', 'list', 'show', 'find', 'search',
-            'latest', 'recent', 'last', 'events', 'tickets', 'revenue'
-        ])
+        is_data_question = any(
+            keyword in user_message.lower()
+            for keyword in [
+                "how many",
+                "count",
+                "total",
+                "list",
+                "show",
+                "find",
+                "search",
+                "latest",
+                "recent",
+                "last",
+                "events",
+                "tickets",
+                "revenue",
+            ]
+        )
 
         if '{"action": "execute_query"' in response or is_data_question:
             query_response = ai_service.answer_question(user_message, user)
 
-            if not query_response['success']:
-                result["message"] = f"I encountered an error: {query_response.get('error', 'Unknown error')}"
+            if not query_response["success"]:
+                result["message"] = (
+                    f"I encountered an error: {query_response.get('error', 'Unknown error')}"
+                )
             else:
-                query_result = query_response.get('data', [])
+                query_result = query_response.get("data", [])
 
                 if isinstance(query_result, list) and len(query_result) > 0:
-                    if all(isinstance(item, dict) and 'slug' in item and 'organization__slug' in item for item in query_result):
+                    if all(
+                        isinstance(item, dict)
+                        and "slug" in item
+                        and "organization__slug" in item
+                        for item in query_result
+                    ):
                         formatted_events = []
                         for event in query_result:
-                            title = event.get('title', 'Untitled Event')
-                            org_slug = event.get('organization__slug', '')
-                            event_slug = event.get('slug', '')
-                            location = event.get('location', '')
-                            start_at = event.get('start_at', '')
+                            title = event.get("title", "Untitled Event")
+                            org_slug = event.get("organization__slug", "")
+                            event_slug = event.get("slug", "")
+                            location = event.get("location", "")
+                            start_at = event.get("start_at", "")
 
                             event_url = f"/events/{org_slug}/{event_slug}/"
                             event_line = f"**[{title}]({event_url})**"
@@ -255,21 +292,28 @@ def chat_with_assistant(
                                 if start_at:
                                     try:
                                         if isinstance(start_at, str):
-                                            date_obj = datetime.fromisoformat(start_at.replace('Z', '+00:00'))
+                                            date_obj = datetime.fromisoformat(
+                                                start_at.replace("Z", "+00:00")
+                                            )
                                         else:
                                             date_obj = start_at
-                                        details.append(date_obj.strftime('%b %d, %Y'))
+                                        details.append(date_obj.strftime("%b %d, %Y"))
                                     except (ValueError, AttributeError, TypeError):
                                         pass
                                 event_line += f" - {', '.join(details)}"
                             formatted_events.append(event_line)
 
-                        result["message"] = f"I found {len(formatted_events)} event{'s' if len(formatted_events) != 1 else ''}:\n\n" + "\n".join(formatted_events)
+                        result["message"] = (
+                            f"I found {len(formatted_events)} event{'s' if len(formatted_events) != 1 else ''}:\n\n"
+                            + "\n".join(formatted_events)
+                        )
                     else:
                         result["message"] = _format_query_result(query_result)
                 else:
                     if isinstance(query_result, list) and len(query_result) == 0:
-                        result["message"] = "I couldn't find any events matching your search. You can [browse all events](/events/discover/) to see what's available!"
+                        result["message"] = (
+                            "I couldn't find any events matching your search. You can [browse all events](/events/discover/) to see what's available!"
+                        )
                     else:
                         result["message"] = _format_query_result(query_result)
                 result["action"] = "execute_query"
@@ -297,8 +341,10 @@ def chat_with_assistant(
 
 
 def analyze_issue(issue_description: str, error_logs: str = "") -> dict:
-    template = _load_prompt('issue_analysis.md')
-    prompt = _format_prompt(template, issue_description=issue_description, error_logs=error_logs)
+    template = _load_prompt("issue_analysis.md")
+    prompt = _format_prompt(
+        template, issue_description=issue_description, error_logs=error_logs
+    )
     result = gemini.generate_json(prompt)
     if "error" in result:
         return {
@@ -312,12 +358,16 @@ def analyze_issue(issue_description: str, error_logs: str = "") -> dict:
 
 
 def analyze_event_performance(event_data: dict) -> str:
-    template = _load_prompt('event_performance.md')
+    template = _load_prompt("event_performance.md")
     prompt = _format_prompt(template, event_data=json.dumps(event_data, indent=2))
     return gemini.generate(prompt)
 
 
 def suggest_pricing(event_details: dict, market_data: Optional[dict] = None) -> str:
-    template = _load_prompt('pricing_suggestion.md')
-    prompt = _format_prompt(template, event_details=json.dumps(event_details, indent=2), market_data=json.dumps(market_data or {}, indent=2))
+    template = _load_prompt("pricing_suggestion.md")
+    prompt = _format_prompt(
+        template,
+        event_details=json.dumps(event_details, indent=2),
+        market_data=json.dumps(market_data or {}, indent=2),
+    )
     return gemini.generate(prompt)

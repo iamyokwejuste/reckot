@@ -319,7 +319,9 @@ SOCIALACCOUNT_EMAIL_VERIFICATION = "none"
 SOCIALACCOUNT_EMAIL_REQUIRED = True
 SOCIALACCOUNT_QUERY_EMAIL = True
 
-ACCOUNT_ALLOW_REGISTRATION = os.getenv("ACCOUNT_ALLOW_REGISTRATION", "true").lower() in ("true", "1", "yes")
+ACCOUNT_ALLOW_REGISTRATION = os.getenv(
+    "ACCOUNT_ALLOW_REGISTRATION", "true"
+).lower() in ("true", "1", "yes")
 
 EMAIL_BACKEND = os.getenv(
     "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
@@ -348,9 +350,7 @@ RECKOT_PLATFORM_FEE_PERCENTAGE = Decimal(
     os.getenv("RECKOT_PLATFORM_FEE_PERCENTAGE", "7")
 )
 
-RECKOT_AI_CHAT_DAILY_LIMIT = int(
-    os.getenv("RECKOT_AI_CHAT_DAILY_LIMIT", "50")
-)
+RECKOT_AI_CHAT_DAILY_LIMIT = int(os.getenv("RECKOT_AI_CHAT_DAILY_LIMIT", "50"))
 
 # campay docs: https://documenter.getpostman.com/view/2391374/T1LV8PVA
 PAYMENT_GATEWAYS = {
@@ -586,7 +586,9 @@ UNFOLD = {
                     {
                         "title": _("Offline Payments"),
                         "icon": "money",
-                        "link": reverse_lazy("admin:payments_offlinepayment_changelist"),
+                        "link": reverse_lazy(
+                            "admin:payments_offlinepayment_changelist"
+                        ),
                     },
                     {
                         "title": _("Refunds"),
@@ -601,7 +603,9 @@ UNFOLD = {
                     {
                         "title": _("Payment Gateways"),
                         "icon": "credit_card",
-                        "link": reverse_lazy("admin:payments_paymentgatewayconfig_changelist"),
+                        "link": reverse_lazy(
+                            "admin:payments_paymentgatewayconfig_changelist"
+                        ),
                     },
                 ],
             },
@@ -635,12 +639,16 @@ UNFOLD = {
                     {
                         "title": _("Affiliate Links"),
                         "icon": "people_outline",
-                        "link": reverse_lazy("admin:marketing_affiliatelink_changelist"),
+                        "link": reverse_lazy(
+                            "admin:marketing_affiliatelink_changelist"
+                        ),
                     },
                     {
                         "title": _("Conversions"),
                         "icon": "trending_up",
-                        "link": reverse_lazy("admin:marketing_affiliateconversion_changelist"),
+                        "link": reverse_lazy(
+                            "admin:marketing_affiliateconversion_changelist"
+                        ),
                     },
                     {
                         "title": _("Social Shares"),
@@ -679,17 +687,23 @@ UNFOLD = {
                     {
                         "title": _("Campaigns"),
                         "icon": "campaign",
-                        "link": reverse_lazy("admin:messaging_messagecampaign_changelist"),
+                        "link": reverse_lazy(
+                            "admin:messaging_messagecampaign_changelist"
+                        ),
                     },
                     {
                         "title": _("Templates"),
                         "icon": "email",
-                        "link": reverse_lazy("admin:messaging_messagetemplate_changelist"),
+                        "link": reverse_lazy(
+                            "admin:messaging_messagetemplate_changelist"
+                        ),
                     },
                     {
                         "title": _("Message Delivery"),
                         "icon": "send",
-                        "link": reverse_lazy("admin:messaging_messagedelivery_changelist"),
+                        "link": reverse_lazy(
+                            "admin:messaging_messagedelivery_changelist"
+                        ),
                     },
                     {
                         "title": _("Notifications"),
@@ -745,12 +759,16 @@ UNFOLD = {
                     {
                         "title": _("Payment Metrics"),
                         "icon": "analytics",
-                        "link": reverse_lazy("admin:analytics_paymentmetrics_changelist"),
+                        "link": reverse_lazy(
+                            "admin:analytics_paymentmetrics_changelist"
+                        ),
                     },
                     {
                         "title": _("Organization Metrics"),
                         "icon": "business_center",
-                        "link": reverse_lazy("admin:analytics_organizationmetrics_changelist"),
+                        "link": reverse_lazy(
+                            "admin:analytics_organizationmetrics_changelist"
+                        ),
                     },
                 ],
             },
@@ -881,7 +899,9 @@ UNFOLD = {
                     {
                         "title": _("Offline Payments"),
                         "icon": "money",
-                        "link": reverse_lazy("admin:payments_offlinepayment_changelist"),
+                        "link": reverse_lazy(
+                            "admin:payments_offlinepayment_changelist"
+                        ),
                     },
                     {
                         "title": _("Refunds"),
@@ -896,7 +916,9 @@ UNFOLD = {
                     {
                         "title": _("Payment Gateways"),
                         "icon": "credit_card",
-                        "link": reverse_lazy("admin:payments_paymentgatewayconfig_changelist"),
+                        "link": reverse_lazy(
+                            "admin:payments_paymentgatewayconfig_changelist"
+                        ),
                     },
                 ],
             },
@@ -932,12 +954,16 @@ UNFOLD = {
                     {
                         "title": _("Affiliate Links"),
                         "icon": "people_outline",
-                        "link": reverse_lazy("admin:marketing_affiliatelink_changelist"),
+                        "link": reverse_lazy(
+                            "admin:marketing_affiliatelink_changelist"
+                        ),
                     },
                     {
                         "title": _("Conversions"),
                         "icon": "trending_up",
-                        "link": reverse_lazy("admin:marketing_affiliateconversion_changelist"),
+                        "link": reverse_lazy(
+                            "admin:marketing_affiliateconversion_changelist"
+                        ),
                     },
                     {
                         "title": _("Social Shares"),
@@ -978,17 +1004,23 @@ UNFOLD = {
                     {
                         "title": _("Campaigns"),
                         "icon": "campaign",
-                        "link": reverse_lazy("admin:messaging_messagecampaign_changelist"),
+                        "link": reverse_lazy(
+                            "admin:messaging_messagecampaign_changelist"
+                        ),
                     },
                     {
                         "title": _("Templates"),
                         "icon": "email",
-                        "link": reverse_lazy("admin:messaging_messagetemplate_changelist"),
+                        "link": reverse_lazy(
+                            "admin:messaging_messagetemplate_changelist"
+                        ),
                     },
                     {
                         "title": _("Message Delivery"),
                         "icon": "send",
-                        "link": reverse_lazy("admin:messaging_messagedelivery_changelist"),
+                        "link": reverse_lazy(
+                            "admin:messaging_messagedelivery_changelist"
+                        ),
                     },
                     {
                         "title": _("Notifications"),
@@ -1047,17 +1079,21 @@ UNFOLD = {
                     {
                         "title": _("Payment Metrics"),
                         "icon": "analytics",
-                        "link": reverse_lazy("admin:analytics_paymentmetrics_changelist"),
+                        "link": reverse_lazy(
+                            "admin:analytics_paymentmetrics_changelist"
+                        ),
                     },
                     {
                         "title": _("Organization Metrics"),
                         "icon": "business_center",
-                        "link": reverse_lazy("admin:analytics_organizationmetrics_changelist"),
+                        "link": reverse_lazy(
+                            "admin:analytics_organizationmetrics_changelist"
+                        ),
                     },
                 ],
             },
         ],
-    }
+    },
 }
 
 ADMIN_ONLY_MODE = os.getenv("ADMIN_ONLY_MODE", "False").lower() in ("true", "1", "yes")

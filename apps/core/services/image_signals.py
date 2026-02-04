@@ -7,7 +7,7 @@ from apps.events.models import Event, EventCustomization
 
 def delete_file_if_exists(file_field):
     """Helper function to delete a file from storage if it exists."""
-    if file_field and hasattr(file_field, 'path'):
+    if file_field and hasattr(file_field, "path"):
         try:
             if os.path.isfile(file_field.path):
                 os.remove(file_field.path)
@@ -43,7 +43,10 @@ def delete_old_event_cover_on_update(sender, instance, **kwargs):
 
     try:
         old_instance = Event.objects.get(pk=instance.pk)
-        if old_instance.cover_image and old_instance.cover_image != instance.cover_image:
+        if (
+            old_instance.cover_image
+            and old_instance.cover_image != instance.cover_image
+        ):
             delete_file_if_exists(old_instance.cover_image)
     except Event.DoesNotExist:
         pass

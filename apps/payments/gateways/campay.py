@@ -295,8 +295,12 @@ class CampayGateway(PaymentGateway):
                 success=False, status=PaymentStatus.PENDING, message=str(e)
             )
 
-    def refund(self, external_reference: str, amount: Decimal, phone_number: str = None) -> PaymentResult:  # type: ignore[override]
-        logger.info(f"Campay processing refund for transaction {external_reference}, amount: {amount}")
+    def refund(
+        self, external_reference: str, amount: Decimal, phone_number: str = None
+    ) -> PaymentResult:  # type: ignore[override]
+        logger.info(
+            f"Campay processing refund for transaction {external_reference}, amount: {amount}"
+        )
 
         token = self._get_token()
         if not token:
@@ -320,7 +324,9 @@ class CampayGateway(PaymentGateway):
                 customer_phone = transaction_data.get("external_user")
                 logger.info(f"Retrieved phone from transaction: {customer_phone}")
             else:
-                logger.warning(f"Could not fetch transaction details: {transaction_response.text}")
+                logger.warning(
+                    f"Could not fetch transaction details: {transaction_response.text}"
+                )
 
             if not customer_phone and phone_number:
                 customer_phone = phone_number
@@ -329,9 +335,7 @@ class CampayGateway(PaymentGateway):
             if not customer_phone:
                 logger.error("No customer phone number available for refund")
                 return PaymentResult(
-                    success=False,
-                    status=PaymentStatus.FAILED,
-                    message="PHONE_REQUIRED"
+                    success=False, status=PaymentStatus.FAILED, message="PHONE_REQUIRED"
                 )
 
             logger.info(f"Refunding {amount} to {customer_phone}")

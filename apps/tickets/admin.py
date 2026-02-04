@@ -21,7 +21,14 @@ class GuestSessionAdmin(ModelAdmin):
 
 @admin.register(Booking)
 class BookingAdmin(ModelAdmin):
-    list_display = ["reference", "event", "customer_info", "status_badge", "total_amount", "created_at"]
+    list_display = [
+        "reference",
+        "event",
+        "customer_info",
+        "status_badge",
+        "total_amount",
+        "created_at",
+    ]
     list_filter = ["status", "delivery_method", "created_at"]
     search_fields = ["reference", "guest_email", "guest_name"]
     readonly_fields = ["reference", "created_at", "updated_at"]
@@ -47,7 +54,13 @@ class BookingAdmin(ModelAdmin):
 
 @admin.register(Ticket)
 class TicketAdmin(ModelAdmin):
-    list_display = ["id", "booking", "ticket_type", "attendee_name", "checked_in_status"]
+    list_display = [
+        "id",
+        "booking",
+        "ticket_type",
+        "attendee_name",
+        "checked_in_status",
+    ]
     list_filter = ["ticket_type__event__organization"]
     search_fields = ["attendee_name", "attendee_email", "booking__reference"]
 

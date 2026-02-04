@@ -35,7 +35,9 @@ class FlutterwaveGateway(PaymentGateway):
             "card": "card",
             "all": "card,mobilemoneycameroon,mobilemoneyghana,mobilemoneyuganda",
         }
-        return payment_options_map.get(payment_method, "mobilemoneycameroon,mobilemoneyghana,mobilemoneyuganda")
+        return payment_options_map.get(
+            payment_method, "mobilemoneycameroon,mobilemoneyghana,mobilemoneyuganda"
+        )
 
     def initiate_payment(
         self,
@@ -224,7 +226,9 @@ class FlutterwaveGateway(PaymentGateway):
     def check_status(self, external_reference: str) -> PaymentResult:
         return self.verify_payment(external_reference)
 
-    def refund(self, external_reference: str, amount: Decimal, phone_number: str = None) -> PaymentResult:
+    def refund(
+        self, external_reference: str, amount: Decimal, phone_number: str = None
+    ) -> PaymentResult:
         try:
             verify_result = self.verify_payment(external_reference)
             if not verify_result.transaction_id:
