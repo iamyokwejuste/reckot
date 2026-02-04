@@ -120,32 +120,78 @@
                     <div class="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">{{ event.description|safe }}</div>
                 </div>
 
-                <div class="card p-6" x-data="{ shareOpen: false }">
+                <div class="card p-6"
+                     x-data="{
+                         eventStartDate: new Date('{{ event.start_at|date:'Y-m-d' }}T{{ event.start_at|date:'H:i:s' }}'),
+                         eventEndDate: new Date('{{ event.end_at|date:'Y-m-d' }}T{{ event.end_at|date:'H:i:s' }}'),
+                         isBeforeEvent: true,
+                         isEventOngoing: false,
+                         isEventEnded: false,
+                         init() {
+                             this.updateEventStatus();
+                             setInterval(() => this.updateEventStatus(), 60000);
+                         },
+                         updateEventStatus() {
+                             const now = new Date();
+                             const diffToStart = this.eventStartDate - now;
+                             const diffToEnd = this.eventEndDate - now;
+
+                             if (diffToEnd <= 0) {
+                                 this.isEventEnded = true;
+                                 this.isEventOngoing = false;
+                                 this.isBeforeEvent = false;
+                             } else if (diffToStart <= 0 && diffToEnd > 0) {
+                                 this.isEventOngoing = true;
+                                 this.isEventEnded = false;
+                                 this.isBeforeEvent = false;
+                             } else {
+                                 this.isBeforeEvent = true;
+                                 this.isEventOngoing = false;
+                                 this.isEventEnded = false;
+                             }
+                         },
+                         getShareMessage() {
+                             const eventDetails = '{{ event.title|escapejs }} - {{ event.start_at|date:"F j, Y" }} at {{ event.location|escapejs }}';
+                             if (this.isEventEnded) {
+                                 return `I attended ${eventDetails}`;
+                             } else if (this.isEventOngoing) {
+                                 return `I am attending ${eventDetails}`;
+                             } else {
+                                 return `I will be attending ${eventDetails}`;
+                             }
+                         },
+                         getEncodedShareMessage() {
+                             return encodeURIComponent(this.getShareMessage());
+                         }
+                     }">
                     <h3 class="font-semibold mb-4">{% trans "Share this event" %}</h3>
                     <div class="flex flex-wrap gap-2">
-                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank" @click="$refs.shareTrack.submit()">
+                        <a :href="'https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri|urlencode }}&quote=' + getEncodedShareMessage()" target="_blank">
                             {% #button variant="outline" size="sm" %}
                                 <i data-lucide="facebook" class="w-4 h-4"></i>
                             {% /button %}
                         </a>
-                        <a href="https://twitter.com/intent/tweet?text={{ event.title|urlencode }}&url={{ request.build_absolute_uri }}" target="_blank">
+                        <a :href="'https://twitter.com/intent/tweet?text=' + getEncodedShareMessage() + '&url={{ request.build_absolute_uri|urlencode }}'" target="_blank">
                             {% #button variant="outline" size="sm" %}
                                 <i data-lucide="twitter" class="w-4 h-4"></i>
                             {% /button %}
                         </a>
-                        <a href="https://wa.me/?text={{ event.title|urlencode }}%20{{ request.build_absolute_uri }}" target="_blank">
+                        <a :href="'https://wa.me/?text=' + getEncodedShareMessage() + '%20{{ request.build_absolute_uri|urlencode }}'" target="_blank">
                             {% #button variant="outline" size="sm" %}
                                 <i data-lucide="message-circle" class="w-4 h-4"></i>
                             {% /button %}
                         </a>
-                        <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.build_absolute_uri }}" target="_blank">
+                        <a :href="'https://www.linkedin.com/sharing/share-offsite/?url={{ request.build_absolute_uri|urlencode }}&summary=' + getEncodedShareMessage()" target="_blank">
                             {% #button variant="outline" size="sm" %}
                                 <i data-lucide="linkedin" class="w-4 h-4"></i>
                             {% /button %}
                         </a>
-                        {% #button type="button" variant="outline" size="sm" attrs="@click=\"navigator.clipboard.writeText('{{ request.build_absolute_uri }}'); $dispatch('notice', {type: 'success', text: 'Link copied!'})\"" %}
+                        {% #button type="button" variant="outline" size="sm" attrs="@click=\"navigator.clipboard.writeText(getShareMessage() + ' - {{ request.build_absolute_uri }}'); $dispatch('notice', {type: 'success', text: 'Link copied!'})\"" %}
                             <i data-lucide="link" class="w-4 h-4"></i>
                         {% /button %}
+                    </div>
+                    <div class="mt-3 p-3 rounded-lg bg-muted/30 border border-border">
+                        <p class="text-xs text-muted-foreground text-center" x-text="getShareMessage()"></p>
                     </div>
                     {% if flyer_enabled %}
                     <div class="mt-4 pt-4 border-t border-border">
