@@ -58,8 +58,8 @@ class AIAssistantView(View):
     def _build_user_context(self, request):
         context = {}
         if request.user.is_authenticated:
-            context["user_email"] = request.user.email
             context["user_name"] = request.user.get_full_name() or request.user.username
+            context["is_authenticated"] = True
         return context
 
 
@@ -176,8 +176,8 @@ class AIAssistantChatView(View):
     def _build_context(self, request):
         context = {"timestamp": timezone.now().isoformat()}
         if request.user.is_authenticated:
-            context["user_email"] = request.user.email
-            context["user_id"] = request.user.id
+            context["is_authenticated"] = True
+            context["user_name"] = request.user.get_full_name() or request.user.username
         return context
 
     def _create_ticket(self, request, ticket_data, conversation):
