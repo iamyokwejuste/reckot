@@ -194,7 +194,10 @@ def generate_cover_from_voice_event(
     target_width, target_height = dimensions.get(aspect_ratio, (1920, 1080))
     aspect_desc = f"{target_width}x{target_height}" if aspect_ratio == "40x65cm" else aspect_ratio
 
-    prompt = f"""{event_type} event image: {title}. {description[:120]}. Aspect ratio {aspect_desc}, {target_width}x{target_height}px exactly. Photorealistic African venue, vibrant modern aesthetic, professional photography quality. NO TEXT overlays."""
+    date_info = event_data.get("start_at", "")
+    location = event_data.get("location", "")
+
+    prompt = f"""Create a promotional event banner/poster for: {title}. Event type: {event_type}. {description[:100]}. Include bold, readable text with event title, date ({date_info}), and location ({location}). Professional advertising design, vibrant colors, modern African aesthetic, eye-catching typography. Aspect ratio {aspect_desc}, {target_width}x{target_height}px. Make it look like a professional event advertisement that attracts attendees."""
 
     try:
         image_bytes = gemini_ai.generate_image(prompt)

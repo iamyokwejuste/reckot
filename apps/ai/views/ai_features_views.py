@@ -431,7 +431,7 @@ class GenerateCoverImageView(LoginRequiredMixin, View):
             ratio_spec = aspect_ratios.get(aspect_ratio, aspect_ratios["40x65cm"])
             target_w, target_h = ratio_spec["width"], ratio_spec["height"]
 
-            image_prompt = f"Professional event cover: '{title}'. {description[:150]}. Style: {visual_guide}. Aspect ratio {aspect_ratio}, {target_w}x{target_h}px exactly. Photorealistic, vibrant, modern African aesthetic, professional photography quality. NO TEXT overlays or typography."
+            image_prompt = f"Create a promotional event banner/advertisement for: '{title}'. {description[:120]}. Visual style: {visual_guide}. Include bold, readable text with the event title prominently displayed. Professional advertising design, vibrant colors, modern African aesthetic, eye-catching typography that attracts attendees. Aspect ratio {aspect_ratio}, {target_w}x{target_h}px. Design it like a professional event poster/flyer with text and visual appeal."
 
             image_bytes = gemini_ai.generate_image(image_prompt)
 
