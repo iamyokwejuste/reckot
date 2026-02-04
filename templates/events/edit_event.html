@@ -153,7 +153,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto" x-data="editEvent({
+<div class="max-w-2xl mx-auto" x-data="editEvent({
     eventType: '{{ event.event_type }}',
     coverPreview: {% if event.cover_image %}'{{ event.cover_image.url }}'{% else %}null{% endif %},
     title: '{{ event.title|escapejs }}',
@@ -194,11 +194,9 @@
 
         <div x-show="step === 1" x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
-            <div class="card p-6">
-                <h2 class="text-lg font-semibold mb-4">{% trans "Basic Information" %}</h2>
-
-                <div class="grid gap-6 md:grid-cols-2">
-                    <div class="md:col-span-2">
+            <div class="card p-6 space-y-4">
+                <h2 class="text-lg font-semibold">{% trans "Basic Information" %}</h2>
+                    <div >
                         <label class="block text-sm font-medium mb-2">{% trans "Organization" %}</label>
                         <div class="input bg-muted text-muted-foreground cursor-not-allowed flex items-center">
                             {{ event.organization.name }}
@@ -222,7 +220,7 @@
                                value="{{ event.short_description|default:'' }}">
                     </div>
 
-                    <div class="md:col-span-2">
+                    <div >
                         <label for="id_description" class="block text-sm font-medium mb-2">{% trans "Full Description" %} <span class="text-red-500">*</span></label>
                         <textarea name="description" id="id_description" rows="4" required
                                   placeholder="{% trans "Tell attendees what to expect..." %}"
@@ -233,7 +231,7 @@
                         <p x-show="errors.description" x-cloak class="text-sm text-red-500 mt-1" x-text="errors.description"></p>
                     </div>
 
-                    <div class="md:col-span-2">
+                    <div >
                         <label class="block text-sm font-medium mb-2">{% trans "Cover Image" %}</label>
                         <div class="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-muted-foreground/50 transition-colors cursor-pointer"
                              @click="$refs.coverInput.click()">
@@ -338,11 +336,9 @@
 
         <div x-show="step === 3" x-cloak x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
-            <div class="card p-6">
-                <h2 class="text-lg font-semibold mb-4">{% trans "Location" %}</h2>
-
-                <div class="grid gap-6 md:grid-cols-2">
-                    <div class="md:col-span-2">
+            <div class="card p-6 space-y-4">
+                <h2 class="text-lg font-semibold">{% trans "Location" %}</h2>
+                    <div >
                         <label class="block text-sm font-medium mb-2">{% trans "Event Type" %}</label>
                     <div x-data="{
                         open: false,
@@ -380,7 +376,7 @@
                     </div>
 
                     <template x-if="eventType !== 'ONLINE'">
-                        <div class="md:col-span-2">
+                        <div >
                             <label for="id_venue_name" class="block text-sm font-medium mb-2">{% trans "Venue Name" %}</label>
                             <input type="text" name="venue_name" id="id_venue_name" placeholder="{% trans "e.g., Convention Center" %}" class="input"
                                    value="{{ event.venue_name|default:'' }}">
@@ -388,7 +384,7 @@
                     </template>
 
                     <template x-if="eventType !== 'ONLINE'">
-                        <div class="md:col-span-2">
+                        <div >
                             <label for="id_location" class="block text-sm font-medium mb-2">{% trans "Address" %} <span class="text-red-500">*</span></label>
                             <input type="text" name="location" id="id_location" placeholder="{% trans "Street address" %}"
                                    class="input" :class="{ 'border-red-500': errors.location }"
@@ -416,7 +412,7 @@
                     </template>
 
                     <template x-if="eventType !== 'IN_PERSON'">
-                        <div class="md:col-span-2">
+                        <div >
                             <label for="id_online_url" class="block text-sm font-medium mb-2">{% trans "Meeting Link" %}</label>
                             <input type="url" name="online_url" id="id_online_url" placeholder="https://zoom.us/j/..." class="input"
                                    value="{{ event.online_url|default:'' }}">
@@ -429,10 +425,8 @@
 
         <div x-show="step === 4" x-cloak x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
-            <div class="card p-6">
-                <h2 class="text-lg font-semibold mb-4">{% trans "Additional Details" %}</h2>
-
-                <div class="grid gap-6 md:grid-cols-2">
+            <div class="card p-6 space-y-4">
+                <h2 class="text-lg font-semibold">{% trans "Additional Details" %}</h2>
                     <div>
                         <label for="id_capacity" class="block text-sm font-medium mb-2">{% trans "Capacity" %}</label>
                         <input type="number" name="capacity" id="id_capacity" min="0" required class="input"
@@ -446,7 +440,7 @@
                                value="{{ event.website|default:'' }}">
                     </div>
 
-                    <div class="md:col-span-2 flex items-center gap-3 p-3 rounded-lg bg-muted/50 border border-border/50">
+                    <div class="flex items-center gap-3 p-3 rounded-lg bg-muted/50 border border-border/50">
                         <input type="checkbox" id="id_is_free_display" class="h-4 w-4 rounded border-border opacity-50 cursor-not-allowed"
                                {% if event.is_free %}checked{% endif %} disabled>
                         <input type="hidden" name="is_free" value="{% if event.is_free %}on{% endif %}">
@@ -456,10 +450,10 @@
                         </label>
                     </div>
 
-                    <div class="md:col-span-2">
+                    <div >
                         <label class="block text-sm font-medium mb-2">{% trans "Contact Information" %} <span class="text-red-500">*</span></label>
                         <p class="text-xs text-muted-foreground mb-3">{% trans "At least one contact method is required" %}</p>
-                        <div class="grid gap-4 md:grid-cols-2">
+                        <div class="grid gap-4 sm:grid-cols-2">
                             <div>
                                 <label for="id_contact_email" class="block text-xs text-muted-foreground mb-1">{% trans "Email" %}</label>
                                 <input type="email" name="contact_email" id="id_contact_email" placeholder="contact@event.com"
