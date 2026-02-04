@@ -119,7 +119,43 @@ DATABASES = {
         "PORT": os.getenv("DB_PORT", ""),
         "CONN_MAX_AGE": 600,
         "ATOMIC_REQUESTS": True,
-    }
+    },
+    "ai_public_readonly": {
+        "ENGINE": os.getenv("DB_ENGINE", "django.db.backends.sqlite3"),
+        "NAME": os.getenv("DB_NAME", BASE_DIR / "db.sqlite3"),
+        "USER": "reckot_ai_public_readonly",
+        "PASSWORD": os.getenv("AI_PUBLIC_READONLY_PASSWORD", ""),
+        "HOST": os.getenv("DB_HOST", ""),
+        "PORT": os.getenv("DB_PORT", ""),
+        "CONN_MAX_AGE": 60,
+        "OPTIONS": {
+            "connect_timeout": 5,
+        },
+    },
+    "ai_auth_readonly": {
+        "ENGINE": os.getenv("DB_ENGINE", "django.db.backends.sqlite3"),
+        "NAME": os.getenv("DB_NAME", BASE_DIR / "db.sqlite3"),
+        "USER": "reckot_ai_auth_readonly",
+        "PASSWORD": os.getenv("AI_AUTH_READONLY_PASSWORD", ""),
+        "HOST": os.getenv("DB_HOST", ""),
+        "PORT": os.getenv("DB_PORT", ""),
+        "CONN_MAX_AGE": 60,
+        "OPTIONS": {
+            "connect_timeout": 5,
+        },
+    },
+    "ai_org_readonly": {
+        "ENGINE": os.getenv("DB_ENGINE", "django.db.backends.sqlite3"),
+        "NAME": os.getenv("DB_NAME", BASE_DIR / "db.sqlite3"),
+        "USER": "reckot_ai_org_readonly",
+        "PASSWORD": os.getenv("AI_ORG_READONLY_PASSWORD", ""),
+        "HOST": os.getenv("DB_HOST", ""),
+        "PORT": os.getenv("DB_PORT", ""),
+        "CONN_MAX_AGE": 60,
+        "OPTIONS": {
+            "connect_timeout": 5,
+        },
+    },
 }
 
 CACHES = {

@@ -1,9 +1,14 @@
 from django.urls import path
-from apps.ai import actions, hackathon_views
+from apps.ai import actions, hackathon_views, ai_query_views
 
 app_name = "ai"
 
 urlpatterns = [
+    path("query/public/", ai_query_views.AIQueryPublicView.as_view(), name="query_public"),
+    path("query/authenticated/", ai_query_views.AIQueryAuthenticatedView.as_view(), name="query_authenticated"),
+    path("query/validate/", ai_query_views.AIQueryValidateView.as_view(), name="query_validate"),
+    path("query/generate-sql/", ai_query_views.AIGenerateSQLView.as_view(), name="generate_sql"),
+    path("query/schema-info/", ai_query_views.AISchemaInfoView.as_view(), name="schema_info"),
     path("assistant/chat/", actions.AIAssistantChatView.as_view(), name="chat"),
     path("assistant/clear/", actions.ClearConversationView.as_view(), name="clear"),
     path("assistant/transcribe/", actions.AudioTranscribeView.as_view(), name="transcribe"),
