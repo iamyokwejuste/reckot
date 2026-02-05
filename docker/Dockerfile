@@ -52,4 +52,4 @@ HEALTHCHECK --interval=10s --timeout=10s --start-period=40s --retries=3 \
   CMD curl -f http://127.0.0.1:${PORT:-8000}/health/ || exit 1
 
 ENTRYPOINT ["/app/entrypoint.sh"]
-CMD ["/bin/sh", "-c", "gunicorn reckot.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 4 --threads 2 --worker-class gthread --worker-tmp-dir /dev/shm --access-logfile - --error-logfile -"]
+CMD ["/bin/sh", "-c", "gunicorn reckot.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 4 --threads 2 --timeout 120 --graceful-timeout 120 --worker-class gthread --worker-tmp-dir /dev/shm --access-logfile - --error-logfile -"]

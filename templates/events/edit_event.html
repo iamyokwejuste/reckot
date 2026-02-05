@@ -7,120 +7,6 @@
 
 {% block extra_head %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<script>
-(function() {
-    function registerEditEvent() {
-        if (typeof Alpine === 'undefined') {
-            return;
-        }
-
-        Alpine.data('editEvent', (eventData) => ({
-            step: 1,
-            totalSteps: 4,
-            eventType: eventData.eventType,
-            coverPreview: eventData.coverPreview,
-            title: eventData.title,
-            description: eventData.description,
-            startAt: eventData.startAt,
-            endAt: eventData.endAt,
-            location: eventData.location,
-            contactEmail: eventData.contactEmail,
-            contactPhone: eventData.contactPhone,
-            errors: {},
-
-            async handleCoverUpload(e) {
-                const file = e.target.files[0];
-                if (file && window.ImageCompressor) {
-                    const compressed = await ImageCompressor.processFileInput(e.target);
-                    this.coverPreview = URL.createObjectURL(compressed);
-                } else if (file) {
-                    this.coverPreview = URL.createObjectURL(file);
-                }
-            },
-
-            clearError(field) {
-                delete this.errors[field];
-            },
-
-            validateStep1() {
-                this.errors = {};
-                if (!this.title.trim()) this.errors.title = 'Event title is required';
-                if (!this.description.trim()) this.errors.description = 'Description is required';
-                return Object.keys(this.errors).length === 0;
-            },
-
-            validateStep2() {
-                this.errors = {};
-                if (!this.startAt) this.errors.startAt = 'Start date and time is required';
-                if (!this.endAt) this.errors.endAt = 'End date and time is required';
-                return Object.keys(this.errors).length === 0;
-            },
-
-            validateStep3() {
-                this.errors = {};
-                if (this.eventType !== 'ONLINE' && !this.location.trim()) {
-                    this.errors.location = 'Address is required for in-person events';
-                }
-                return Object.keys(this.errors).length === 0;
-            },
-
-            validateStep4() {
-                this.errors = {};
-                if (!this.contactEmail && !this.contactPhone) {
-                    this.errors.contact = 'Please provide at least one contact method';
-                }
-                return Object.keys(this.errors).length === 0;
-            },
-
-            nextStep() {
-                let valid = false;
-                if (this.step === 1) valid = this.validateStep1();
-                else if (this.step === 2) valid = this.validateStep2();
-                else if (this.step === 3) valid = this.validateStep3();
-                else valid = true;
-                if (valid && this.step < this.totalSteps) this.step++;
-            },
-
-            prevStep() {
-                this.errors = {};
-                if (this.step > 1) this.step--;
-            },
-
-            submitForm(e) {
-                if (!this.validateStep4()) {
-                    e.preventDefault();
-                }
-            },
-
-            init() {
-                this.$watch('step', (value) => {
-                    if (value === 2) {
-                        const tryInit = (attempts = 0) => {
-                            if (attempts >= 5) return;
-                            setTimeout(() => {
-                                if (window.initDatePickers && !window.initDatePickers()) {
-                                    tryInit(attempts + 1);
-                                }
-                            }, 100 + (attempts * 100));
-                        };
-                        tryInit();
-                    }
-                });
-            }
-        }));
-    }
-
-    // Register on Alpine init or immediately if Alpine is loaded
-    if (typeof Alpine !== 'undefined') {
-        registerEditEvent();
-    } else {
-        document.addEventListener('alpine:init', registerEditEvent);
-    }
-
-    // Also register on HTMX afterSwap
-    document.addEventListener('htmx:afterSwap', registerEditEvent);
-})();
-</script>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -153,7 +39,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto" x-data="editEvent({
+<div class="max-w-2xl mx-auto pb-24" x-data="editEvent({
     eventType: '{{ event.event_type }}',
     coverPreview: {% if event.cover_image %}'{{ event.cover_image.url }}'{% else %}null{% endif %},
     title: '{{ event.title|escapejs }}',
@@ -175,7 +61,7 @@
         </div>
     </div>
 
-    <form method="post" enctype="multipart/form-data" hx-boost="false" @submit="submitForm($event)">
+    <form id="edit-event-form" method="post" enctype="multipart/form-data" hx-boost="false" @submit="submitForm($event)">
         {% csrf_token %}
 
         {% if form.errors %}
@@ -224,7 +110,6 @@
                         <label for="id_description" class="block text-sm font-medium mb-2">{% trans "Full Description" %} <span class="text-red-500">*</span></label>
                         <textarea name="description" id="id_description" rows="4" required
                                   placeholder="{% trans "Tell attendees what to expect..." %}"
-                                  class="hidden"
                                   x-model="description"
                                   @input="clearError('description')"
                                   data-richtext>{{ event.description|safe }}</textarea>
@@ -475,36 +360,31 @@
             </div>
         </div>
 
-        <div class="flex items-center justify-between mt-6">
-            <template x-if="step > 1">
-                {% #button type="button" variant="outline" attrs='@click="prevStep()"' %}
-                    <i data-lucide="chevron-left" class="w-4 h-4 mr-1"></i>
-                    <span>{% trans "Back" %}</span>
-                {% /button %}
-            </template>
-            <div x-show="step === 1">
-                <a href="{% url 'events:dashboard' event.organization.slug event.slug %}">
-                    {% #button type="button" variant="outline" %}
-                        {% trans "Cancel" %}
-                    {% /button %}
-                </a>
-            </div>
-
-            <template x-if="step < totalSteps">
-                {% #button type="button" variant="default" attrs='@click="nextStep()"' %}
-                    {% trans "Next" %}
-                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                {% /button %}
-            </template>
-
-            <template x-if="step === totalSteps">
-                {% #button type="submit" variant="default" %}
-                    {% trans "Save Changes" %}
-                    <i data-lucide="check" class="w-4 h-4"></i>
-                {% /button %}
-            </template>
-        </div>
     </form>
+
+    <div class="flex items-center justify-between gap-4 mt-6 mb-8">
+        <div>
+            <button x-show="step > 1" type="button" @click="prevStep()" class="btn btn-outline">
+                <i data-lucide="chevron-left" class="w-4 h-4 mr-1"></i>
+                <span>{% trans "Back" %}</span>
+            </button>
+            <a x-show="step === 1" href="{% url 'events:dashboard' event.organization.slug event.slug %}" class="btn btn-outline">
+                <span>{% trans "Cancel" %}</span>
+            </a>
+        </div>
+
+        <div class="ml-auto">
+            <button x-show="step < totalSteps" type="button" @click="nextStep()" class="btn btn-default">
+                <span>{% trans "Next" %}</span>
+                <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
+            </button>
+
+            <button x-show="step === totalSteps" type="button" @click="$el.closest('[x-data]').querySelector('form').submit()" class="btn btn-default">
+                <span>{% trans "Save Changes" %}</span>
+                <i data-lucide="check" class="w-4 h-4 ml-1"></i>
+            </button>
+        </div>
+    </div>
 
     {% if is_owner %}
     <div class="card p-6 border-red-500/20 mt-6" x-data="{ deleteModalOpen: false }">

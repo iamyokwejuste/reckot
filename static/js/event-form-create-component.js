@@ -1,0 +1,125 @@
+// Event Create Form Alpine Component
+(function() {
+    'use strict';
+
+    console.log('[CreateEvent] Component script loading...');
+
+    const componentFactory = () => ({
+        step: 1,
+        totalSteps: 4,
+        eventType: 'IN_PERSON',
+        coverPreview: null,
+        organization: '',
+        title: '',
+        description: '',
+        startAt: '',
+        endAt: '',
+        location: '',
+        contactEmail: '',
+        contactPhone: '',
+        errors: {},
+
+        async handleCoverUpload(e) {
+            const file = e.target.files[0];
+            if (file && window.ImageCompressor) {
+                const compressed = await ImageCompressor.processFileInput(e.target);
+                this.coverPreview = URL.createObjectURL(compressed);
+            } else if (file) {
+                this.coverPreview = URL.createObjectURL(file);
+            }
+        },
+
+        clearError(field) {
+            delete this.errors[field];
+        },
+
+        validateStep1() {
+            this.errors = {};
+            if (!this.organization) this.errors.organization = 'Please select an organization';
+            if (!this.title.trim()) this.errors.title = 'Event title is required';
+            if (!this.description.trim()) this.errors.description = 'Description is required';
+            return Object.keys(this.errors).length === 0;
+        },
+
+        validateStep2() {
+            this.errors = {};
+            if (!this.startAt) this.errors.startAt = 'Start date and time is required';
+            if (!this.endAt) this.errors.endAt = 'End date and time is required';
+            return Object.keys(this.errors).length === 0;
+        },
+
+        validateStep3() {
+            this.errors = {};
+            if (this.eventType !== 'ONLINE' && !this.location.trim()) {
+                this.errors.location = 'Address is required for in-person events';
+            }
+            return Object.keys(this.errors).length === 0;
+        },
+
+        validateStep4() {
+            this.errors = {};
+            if (!this.contactEmail && !this.contactPhone) {
+                this.errors.contact = 'Please provide at least one contact method';
+            }
+            return Object.keys(this.errors).length === 0;
+        },
+
+        nextStep() {
+            let valid = false;
+            if (this.step === 1) valid = this.validateStep1();
+            else if (this.step === 2) valid = this.validateStep2();
+            else if (this.step === 3) valid = this.validateStep3();
+            else valid = true;
+            if (valid && this.step < this.totalSteps) this.step++;
+        },
+
+        prevStep() {
+            this.errors = {};
+            if (this.step > 1) this.step--;
+        },
+
+        submitForm(e) {
+            if (!this.validateStep4()) {
+                e.preventDefault();
+            }
+        },
+
+        init() {
+            this.$watch('step', (value) => {
+                if (value === 2) {
+                    const tryInit = (attempts = 0) => {
+                        if (attempts >= 5) return;
+                        setTimeout(() => {
+                            if (window.initDatePickers && !window.initDatePickers()) {
+                                tryInit(attempts + 1);
+                            }
+                        }, 100 + (attempts * 100));
+                    };
+                    tryInit();
+                }
+            });
+        }
+    });
+
+    // Use the global component registration system
+    console.log('[CreateEvent] Attempting registration, registerAlpineComponent available:', !!window.registerAlpineComponent);
+    console.log('[CreateEvent] Alpine available:', typeof Alpine !== 'undefined');
+
+    if (window.registerAlpineComponent) {
+        console.log('[CreateEvent] Registering via window.registerAlpineComponent');
+        window.registerAlpineComponent('createEvent', componentFactory);
+    } else {
+        console.log('[CreateEvent] Registration system not available, waiting...');
+        // Fallback: wait for the registration system to be available
+        const checkAndRegister = () => {
+            if (window.registerAlpineComponent) {
+                console.log('[CreateEvent] Registration system now available, registering...');
+                window.registerAlpineComponent('createEvent', componentFactory);
+            } else {
+                console.log('[CreateEvent] Still waiting for registration system...');
+                setTimeout(checkAndRegister, 50);
+            }
+        };
+        checkAndRegister();
+    }
+})();

@@ -7,124 +7,6 @@
 
 {% block extra_head %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<script>
-(function() {
-    function registerCreateEvent() {
-        if (typeof Alpine === 'undefined') {
-            console.log('Alpine not loaded yet, waiting...');
-            return;
-        }
-
-        console.log('Registering createEvent component');
-        Alpine.data('createEvent', () => ({
-            step: 1,
-            totalSteps: 4,
-            eventType: 'IN_PERSON',
-            coverPreview: null,
-            organization: '',
-            title: '',
-            description: '',
-            startAt: '',
-            endAt: '',
-            location: '',
-            contactEmail: '',
-            contactPhone: '',
-            errors: {},
-
-            async handleCoverUpload(e) {
-                const file = e.target.files[0];
-                if (file && window.ImageCompressor) {
-                    const compressed = await ImageCompressor.processFileInput(e.target);
-                    this.coverPreview = URL.createObjectURL(compressed);
-                } else if (file) {
-                    this.coverPreview = URL.createObjectURL(file);
-                }
-            },
-
-            clearError(field) {
-                delete this.errors[field];
-            },
-
-            validateStep1() {
-                this.errors = {};
-                if (!this.organization) this.errors.organization = 'Please select an organization';
-                if (!this.title.trim()) this.errors.title = 'Event title is required';
-                if (!this.description.trim()) this.errors.description = 'Description is required';
-                return Object.keys(this.errors).length === 0;
-            },
-
-            validateStep2() {
-                this.errors = {};
-                if (!this.startAt) this.errors.startAt = 'Start date and time is required';
-                if (!this.endAt) this.errors.endAt = 'End date and time is required';
-                return Object.keys(this.errors).length === 0;
-            },
-
-            validateStep3() {
-                this.errors = {};
-                if (this.eventType !== 'ONLINE' && !this.location.trim()) {
-                    this.errors.location = 'Address is required for in-person events';
-                }
-                return Object.keys(this.errors).length === 0;
-            },
-
-            validateStep4() {
-                this.errors = {};
-                if (!this.contactEmail && !this.contactPhone) {
-                    this.errors.contact = 'Please provide at least one contact method';
-                }
-                return Object.keys(this.errors).length === 0;
-            },
-
-            nextStep() {
-                let valid = false;
-                if (this.step === 1) valid = this.validateStep1();
-                else if (this.step === 2) valid = this.validateStep2();
-                else if (this.step === 3) valid = this.validateStep3();
-                else valid = true;
-                if (valid && this.step < this.totalSteps) this.step++;
-            },
-
-            prevStep() {
-                this.errors = {};
-                if (this.step > 1) this.step--;
-            },
-
-            submitForm(e) {
-                if (!this.validateStep4()) {
-                    e.preventDefault();
-                }
-            },
-
-            init() {
-                this.$watch('step', (value) => {
-                    if (value === 2) {
-                        const tryInit = (attempts = 0) => {
-                            if (attempts >= 5) return;
-                            setTimeout(() => {
-                                if (window.initDatePickers && !window.initDatePickers()) {
-                                    tryInit(attempts + 1);
-                                }
-                            }, 100 + (attempts * 100));
-                        };
-                        tryInit();
-                    }
-                });
-            }
-        }));
-    }
-
-    // Register on Alpine init or immediately if Alpine is loaded
-    if (typeof Alpine !== 'undefined') {
-        registerCreateEvent();
-    } else {
-        document.addEventListener('alpine:init', registerCreateEvent);
-    }
-
-    // Also register on HTMX afterSwap
-    document.addEventListener('htmx:afterSwap', registerCreateEvent);
-})();
-</script>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -145,7 +27,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto" x-data="createEvent()">
+<div class="max-w-2xl mx-auto pb-24" x-data="createEvent()">
     <div class="mb-8">
         <div class="flex items-center justify-between mb-2">
             <span class="text-sm font-medium">Step <span x-text="step"></span> of <span x-text="totalSteps"></span></span>
@@ -157,7 +39,7 @@
         </div>
     </div>
 
-    <form method="post" enctype="multipart/form-data" hx-boost="false" @submit="submitForm($event)">
+    <form id="create-event-form" method="post" enctype="multipart/form-data" hx-boost="false" @submit="submitForm($event)">
         {% csrf_token %}
 
         {% if errors %}
@@ -191,9 +73,9 @@
                                 return this.options.filter(o => o.name.toLowerCase().includes(this.search.toLowerCase()));
                             }
                         }">
-                            <input type="hidden" name="organization" :value="organization" required>
+                            <input type="hidden" name="organization" :value="$root.organization" required>
                             <button type="button" @click="open = !open" @click.outside="open = false"
-                                    class="custom-select-trigger" :class="{ 'custom-select-trigger-active': open, 'border-red-500': errors.organization }">
+                                    class="custom-select-trigger" :class="{ 'custom-select-trigger-active': open, 'border-red-500': $root.errors.organization }">
                                 <span class="custom-select-value" :class="{ 'custom-select-placeholder': !label }" x-text="label || '{% trans "Select organization" %}'"></span>
                                 <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4" :class="{ 'rotate-180': open }"></i>
                             </button>
@@ -204,10 +86,10 @@
                                 </div>
                                 <div class="custom-select-options">
                                     <template x-for="org in filteredOptions" :key="org.id">
-                                        <button type="button" @click="organization = org.id; label = org.name; open = false; search = ''; clearError('organization')"
-                                                class="custom-select-option" :class="{ 'custom-select-option-selected': organization === org.id }">
+                                        <button type="button" @click="$root.organization = org.id; label = org.name; open = false; search = ''; $root.clearError('organization')"
+                                                class="custom-select-option" :class="{ 'custom-select-option-selected': $root.organization === org.id }">
                                             <span x-text="org.name"></span>
-                                            <i x-show="organization === org.id" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                                            <i x-show="$root.organization === org.id" data-lucide="check" class="custom-select-check w-4 h-4"></i>
                                         </button>
                                     </template>
                                     <div x-show="filteredOptions.length === 0" class="custom-select-empty">
@@ -216,8 +98,8 @@
                                 </div>
                             </div>
                         </div>
-                        <p x-show="errors.organization" x-cloak class="text-sm text-red-500 mt-1" x-text="errors.organization"></p>
-                    <p x-show="!errors.organization" class="text-xs text-muted-foreground mt-1">
+                        <p x-show="$root.errors.organization" x-cloak class="text-sm text-red-500 mt-1" x-text="$root.errors.organization"></p>
+                    <p x-show="!$root.errors.organization" class="text-xs text-muted-foreground mt-1">
                         <a href="{% url 'orgs:create' %}" class="text-primary hover:underline">{% trans "Create a new organization" %}</a>
                     </p>
                 </div>
@@ -240,7 +122,6 @@
                     <label for="id_description" class="block text-sm font-medium mb-2">{% trans "Full Description" %} <span class="text-red-500">*</span></label>
                     <textarea name="description" id="id_description" rows="4" required
                               placeholder="{% trans "Tell attendees what to expect..." %}"
-                              class="hidden"
                               x-model="description"
                               @input="clearError('description')"
                               data-richtext></textarea>
@@ -362,7 +243,7 @@
                             this.value = val;
                             this.label = lbl;
                             this.open = false;
-                            eventType = val;
+                            $root.eventType = val;
                         }
                     }">
                         <input type="hidden" name="event_type" x-model="value">
@@ -470,30 +351,28 @@
             </div>
         </div>
 
-        <div class="flex items-center justify-between mt-6">
-            <template x-if="step > 1">
-                {% #button type="button" variant="outline" attrs='@click="prevStep()"' %}
-                    <i data-lucide="chevron-left" class="w-4 h-4 mr-1"></i>
-                    <span>{% trans "Back" %}</span>
-                {% /button %}
-            </template>
-            <div x-show="step === 1"></div>
-
-            <template x-if="step < totalSteps">
-                {% #button type="button" variant="default" attrs='@click="nextStep()"' %}
-                    {% trans "Next" %}
-                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                {% /button %}
-            </template>
-
-            <template x-if="step === totalSteps">
-                {% #button type="submit" variant="default" %}
-                    {% trans "Create Event" %}
-                    <i data-lucide="check" class="w-4 h-4"></i>
-                {% /button %}
-            </template>
-        </div>
     </form>
+
+    <div class="flex items-center justify-between gap-4 mt-6 mb-8">
+        <div>
+            <button x-show="step > 1" type="button" @click="prevStep()" class="btn btn-outline">
+                <i data-lucide="chevron-left" class="w-4 h-4 mr-1"></i>
+                <span>{% trans "Back" %}</span>
+            </button>
+        </div>
+
+        <div class="ml-auto">
+            <button x-show="step < totalSteps" type="button" @click="nextStep()" class="btn btn-default">
+                <span>{% trans "Next" %}</span>
+                <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
+            </button>
+
+            <button x-show="step === totalSteps" type="button" @click="$el.closest('[x-data]').querySelector('form').submit()" class="btn btn-default">
+                <span>{% trans "Create Event" %}</span>
+                <i data-lucide="check" class="w-4 h-4 ml-1"></i>
+            </button>
+        </div>
+    </div>
 </div>
 {% endblock %}
 

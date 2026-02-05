@@ -1,7 +1,14 @@
 {% load static %}
 
+<script>
+// Prevent Alpine from auto-starting
+document.addEventListener('alpine:init', () => {
+    console.log('Alpine init event fired');
+});
+</script>
 <script src="https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js"></script>
-<script src="{% static 'js/alpine-components.js' %}"></script>
+<script src="{% static 'js/alpine-components.js' %}?v=20260205"></script>
+<script src="{% static 'js/event-form-alpine.js' %}?v=20260205"></script>
 <script src="{% static 'js/chatbot.js' %}"></script>
 <script src="{% static 'js/event_checkout.js' %}"></script>
 <script defer src="https://unpkg.com/@alpinejs/collapse@3.14.8/dist/cdn.min.js"></script>
@@ -32,33 +39,51 @@
 
         setupAlpineRegistry() {
             window.registerAlpineComponent = (name, componentFactory) => {
+                console.log(`Registering Alpine component: ${name}`);
+
                 if (this.alpineComponents[name]) {
+                    console.log(`Component ${name} already registered`);
                     return;
                 }
 
                 this.alpineComponents[name] = componentFactory;
 
-                if (typeof Alpine !== 'undefined') {
+                // Use alpine:init event for registration
+                if (typeof Alpine !== 'undefined' && Alpine.version) {
                     try {
                         Alpine.data(name, componentFactory);
+                        console.log(`Component ${name} registered with Alpine`);
                     } catch (error) {
                         console.error(`Failed to register Alpine component: ${name}`, error);
                     }
                 } else {
-                    setTimeout(() => this.registerPendingComponents(), 50);
+                    console.log(`Alpine not ready, queuing ${name} for registration`);
+                    document.addEventListener('alpine:init', () => {
+                        if (typeof Alpine !== 'undefined') {
+                            try {
+                                Alpine.data(name, componentFactory);
+                                console.log(`Component ${name} registered via alpine:init`);
+                            } catch (error) {
+                                console.error(`Failed to register ${name} via alpine:init:`, error);
+                            }
+                        }
+                    });
                 }
             };
         },
 
         registerPendingComponents() {
             if (typeof Alpine === 'undefined') {
+                console.log('Alpine not loaded yet, retrying...');
                 setTimeout(() => this.registerPendingComponents(), 50);
                 return;
             }
 
+            console.log(`Registering ${Object.keys(this.alpineComponents).length} pending components`);
             Object.entries(this.alpineComponents).forEach(([name, factory]) => {
                 try {
                     Alpine.data(name, factory);
+                    console.log(`Registered component: ${name}`);
                 } catch (error) {
                     console.error(`Failed to register Alpine component: ${name}`, error);
                 }
