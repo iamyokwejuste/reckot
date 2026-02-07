@@ -1,34 +1,34 @@
 import { Controller } from "https://unpkg.com/@hotwired/stimulus@3.2.2/dist/stimulus.js"
 
 export default class extends Controller {
-    static targets = ["exportModal", "withdrawModal"];
-    static values = {
-        availableBalance: Number
-    };
+    static targets = ["container"];
 
     connect() {
         this.escapeHandler = this.handleEscape.bind(this);
     }
 
     open(event) {
-        const modalName = event.currentTarget.dataset.modalName;
-        const targetName = `${modalName}ModalTarget`;
-
-        if (this[targetName]) {
-            this[targetName].classList.remove("hidden");
+        event?.preventDefault();
+        if (this.hasContainerTarget) {
+            this.containerTarget.classList.remove("hidden");
             document.addEventListener("keydown", this.escapeHandler);
+            document.body.style.overflow = "hidden";
+        } else {
+            this.element.classList.remove("hidden");
+            document.addEventListener("keydown", this.escapeHandler);
+            document.body.style.overflow = "hidden";
         }
     }
 
-    close() {
-        // Close all modals
-        if (this.hasExportModalTarget) {
-            this.exportModalTarget.classList.add("hidden");
-        }
-        if (this.hasWithdrawModalTarget) {
-            this.withdrawModalTarget.classList.add("hidden");
+    close(event) {
+        event?.preventDefault();
+        if (this.hasContainerTarget) {
+            this.containerTarget.classList.add("hidden");
+        } else {
+            this.element.classList.add("hidden");
         }
         document.removeEventListener("keydown", this.escapeHandler);
+        document.body.style.overflow = "";
     }
 
     handleEscape(event) {
@@ -39,5 +39,6 @@ export default class extends Controller {
 
     disconnect() {
         document.removeEventListener("keydown", this.escapeHandler);
+        document.body.style.overflow = "";
     }
 }

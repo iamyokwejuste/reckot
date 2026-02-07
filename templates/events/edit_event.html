@@ -285,15 +285,64 @@
                            value="{{ event.website|default:'' }}">
                 </div>
 
-                <div class="flex items-center gap-3 p-3 rounded-lg bg-muted/50 border border-border/50">
-                    <input type="checkbox" id="id_is_free_display" class="h-4 w-4 rounded border-border opacity-50 cursor-not-allowed"
-                           {% if event.is_free %}checked{% endif %} disabled>
-                    <input type="hidden" name="is_free" value="{% if event.is_free %}on{% endif %}">
-                    <label for="id_is_free_display" class="text-sm font-medium opacity-70 cursor-not-allowed">
-                        {% trans "This is a free event" %}
-                        <span class="text-xs text-muted-foreground ml-2">({% trans "Cannot be changed after creation" %})</span>
-                    </label>
+                <div class="flex items-center justify-between gap-3 p-3 rounded-lg bg-muted/50 border border-border/50">
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" id="id_is_free_display" class="h-4 w-4 rounded border-border opacity-50 cursor-not-allowed"
+                               {% if event.is_free %}checked{% endif %} disabled>
+                        <input type="hidden" name="is_free" value="{% if event.is_free %}on{% endif %}">
+                        <label for="id_is_free_display" class="text-sm font-medium opacity-70 cursor-not-allowed">
+                            {% trans "This is a free event" %}
+                            <span class="text-xs text-muted-foreground ml-2">({% trans "Cannot be changed after creation" %})</span>
+                        </label>
+                    </div>
+                    <button type="button"
+                            data-action="click->modal#open"
+                            class="text-xs px-3 py-1.5 rounded-lg border border-primary text-primary hover:bg-primary/10 transition-colors font-medium">
+                        {% trans "Request Upgrade" %}
+                    </button>
                 </div>
+
+                {% #modal id="upgrade-modal" title="Request Plan Upgrade" description="Upgrade your plan to unlock more features" %}
+                    <div class="space-y-4">
+                        <p class="text-sm text-muted-foreground">
+                            {% trans "To unlock advanced features and create more events, please request a plan upgrade. Our team will review your request and contact you shortly." %}
+                        </p>
+
+                        <div class="rounded-lg border border-border bg-muted/50 p-4">
+                            <h4 class="font-medium mb-2">{% trans "Upgrade Benefits:" %}</h4>
+                            <ul class="space-y-2 text-sm">
+                                <li class="flex items-center gap-2">
+                                    <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                                    <span>{% trans "Unlimited events per month" %}</span>
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                                    <span>{% trans "Lower platform fees" %}</span>
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                                    <span>{% trans "Advanced analytics" %}</span>
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                                    <span>{% trans "Priority support" %}</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="flex items-center justify-end gap-3">
+                            <button type="button"
+                                    data-action="click->modal#close"
+                                    class="px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors">
+                                {% trans "Cancel" %}
+                            </button>
+                            <a href="mailto:support@reckot.com?subject=Plan Upgrade Request"
+                               class="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity">
+                                {% trans "Contact Support" %}
+                            </a>
+                        </div>
+                    </div>
+                {% /modal %}
 
                 <div>
                     <label class="block text-sm font-medium mb-2">{% trans "Contact Information" %} <span class="text-red-500">*</span></label>

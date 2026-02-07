@@ -1,5 +1,5 @@
 {% extends "layouts/dashboard.html" %}
-{% load slippers %}
+{% load slippers  humanize %}
 
 {% block title %}{{ link.name }} - Affiliate Link - Reckot{% endblock %}
 
@@ -120,12 +120,12 @@
                 <div>
                     <p class="font-medium text-sm">{{ conversion.booking.event.title }}</p>
                     <p class="text-xs text-muted-foreground mt-0.5">
-                        Order: {{ conversion.order_amount|floatformat:0 }} XAF
+                        Order: {{ conversion.order_amount|floatformat:0|intcomma }} XAF
                     </p>
                 </div>
                 <div class="flex items-center gap-4">
                     <div class="text-right">
-                        <p class="font-semibold text-emerald-600">+{{ conversion.commission_amount|floatformat:0 }} XAF</p>
+                        <p class="font-semibold text-emerald-600">+{{ conversion.commission_amount|floatformat:0|intcomma }} XAF</p>
                         <p class="text-xs text-muted-foreground">{{ conversion.created_at|date:"M d, Y" }}</p>
                     </div>
                     {% if conversion.status == 'PENDING' %}

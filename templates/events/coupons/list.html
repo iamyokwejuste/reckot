@@ -1,5 +1,5 @@
 {% extends "layouts/dashboard.html" %}
-{% load slippers %}
+{% load slippers  humanize %}
 {% load i18n %}
 
 {% block title %}{% trans "Coupons" %} - Reckot{% endblock %}
@@ -81,9 +81,9 @@
                         </td>
                         <td class="p-4">
                             {% if coupon.discount_type == 'PERCENTAGE' %}
-                            <span class="text-sm font-medium">{{ coupon.discount_value|floatformat:0 }}%</span>
+                            <span class="text-sm font-medium">{{ coupon.discount_value|floatformat:0|intcomma }}%</span>
                             {% else %}
-                            <span class="text-sm font-medium">{{ coupon.discount_value|floatformat:0 }} XAF</span>
+                            <span class="text-sm font-medium">{{ coupon.discount_value|floatformat:0|intcomma }} XAF</span>
                             {% endif %}
                         </td>
                         <td class="p-4">

@@ -99,8 +99,10 @@ class AnalyticsView(LoginRequiredMixin, View):
         if user_org:
             balance_data = calculate_organization_balance(user_org)
             available_balance = balance_data["available_balance"]
+            currency = user_org.currency
         else:
             available_balance = 0
+            currency = "XAF"
 
         # Convert to list to get accurate count after slicing
         upcoming_events_list = list(upcoming_events)
@@ -122,7 +124,7 @@ class AnalyticsView(LoginRequiredMixin, View):
             "reports/analytics.html",
             {
                 "total_revenue": f"{total_revenue:,.0f}",
-                "available_balance": f"{available_balance:,.0f}",
+                "available_balance": f"{available_balance:,.0f} {currency}",
                 "tickets_sold": f"{tickets_sold:,}",
                 "checkin_rate": f"{checkin_rate:.1f}",
                 "active_events": active_events,

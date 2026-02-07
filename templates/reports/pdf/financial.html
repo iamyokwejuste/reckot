@@ -1,12 +1,12 @@
 {% extends "reports/pdf/base.html" %}
-{% load i18n %}
+{% load i18n  humanize %}
 
 {% block content %}
 <h1>{% trans "Financial Summary Report" %}</h1>
 
 <div class="summary-section">
     <div class="stat-card">
-        <div class="stat-value">{{ total_revenue|floatformat:0 }} XAF</div>
+        <div class="stat-value">{{ total_revenue|floatformat:0|intcomma }} XAF</div>
         <div class="stat-label">{% trans "Total Revenue" %}</div>
     </div>
     <div class="stat-card">
@@ -33,9 +33,9 @@
         {% for item in ticket_breakdown %}
         <tr>
             <td>{{ item.ticket_type__name }}</td>
-            <td class="text-right">{{ item.ticket_type__price|floatformat:0 }}</td>
+            <td class="text-right">{{ item.ticket_type__price|floatformat:0|intcomma }}</td>
             <td class="text-right">{{ item.count }}</td>
-            <td class="text-right">{{ item.revenue|floatformat:0 }}</td>
+            <td class="text-right">{{ item.revenue|floatformat:0|intcomma }}</td>
         </tr>
         {% empty %}
         <tr>
@@ -46,7 +46,7 @@
     <tfoot>
         <tr>
             <td colspan="3" class="font-bold">{% trans "Total" %}</td>
-            <td class="text-right font-bold">{{ total_revenue|floatformat:0 }} XAF</td>
+            <td class="text-right font-bold">{{ total_revenue|floatformat:0|intcomma }} XAF</td>
         </tr>
     </tfoot>
 </table>
@@ -66,7 +66,7 @@
         <tr>
             <td>{{ method.provider|default:_("Unknown") }}</td>
             <td class="text-right">{{ method.count }}</td>
-            <td class="text-right">{{ method.total|floatformat:0 }}</td>
+            <td class="text-right">{{ method.total|floatformat:0|intcomma }}</td>
         </tr>
         {% endfor %}
     </tbody>

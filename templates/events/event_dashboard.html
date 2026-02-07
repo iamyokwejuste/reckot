@@ -1,5 +1,5 @@
 {% extends 'layouts/dashboard.html' %}
-{% load slippers %}
+{% load slippers  humanize %}
 {% load i18n %}
 
 {% block title %}{{ event.title }} - {% trans "Dashboard" %} - Reckot{% endblock %}
@@ -90,7 +90,7 @@
                     <i data-lucide="wallet" class="h-5 w-5 text-emerald-500"></i>
                 </div>
                 <div>
-                    <p class="text-2xl font-bold">{{ stats.revenue|floatformat:0 }} XAF</p>
+                    <p class="text-2xl font-bold">{{ stats.revenue|floatformat:0|intcomma }} XAF</p>
                     <p class="text-xs text-muted-foreground">{% trans "Revenue" %}</p>
                 </div>
             </div>
@@ -112,7 +112,7 @@
                     <i data-lucide="percent" class="h-5 w-5 text-amber-500"></i>
                 </div>
                 <div>
-                    <p class="text-2xl font-bold">{{ stats.checkin_rate|floatformat:0 }}%</p>
+                    <p class="text-2xl font-bold">{{ stats.checkin_rate|floatformat:0|intcomma }}%</p>
                     <p class="text-xs text-muted-foreground">{% trans "Check-in Rate" %}</p>
                 </div>
             </div>

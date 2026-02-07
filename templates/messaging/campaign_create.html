@@ -1,5 +1,5 @@
 {% extends "layouts/dashboard.html" %}
-{% load slippers i18n %}
+{% load slippers i18n  humanize %}
 
 {% block title %}{% trans "New Campaign" %} - {{ event.title }} - Reckot{% endblock %}
 
@@ -68,7 +68,7 @@
                 <label class="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 cursor-pointer">
                     <input type="checkbox" name="ticket_types" value="{{ tt.id }}" class="h-4 w-4 rounded border-border">
                     <span class="font-medium text-sm">{{ tt.name }}</span>
-                    <span class="text-xs text-muted-foreground ml-auto">{{ tt.price|floatformat:0 }} XAF</span>
+                    <span class="text-xs text-muted-foreground ml-auto">{{ tt.price|floatformat:0|intcomma }} XAF</span>
                 </label>
                 {% endfor %}
             </div>

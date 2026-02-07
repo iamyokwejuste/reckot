@@ -1,5 +1,5 @@
 {% extends "reports/pdf/base.html" %}
-{% load i18n %}
+{% load i18n  humanize %}
 
 {% block content %}
 <h1>{% trans "Ticket Sales Report" %}</h1>
@@ -53,7 +53,7 @@
             <td>{{ ticket.booking.user.get_full_name|default:ticket.booking.user.email }}</td>
             <td>{{ ticket.ticket_type.name }}</td>
             <td>{{ ticket.booking.created_at|date:"M j, Y" }}</td>
-            <td class="text-right">{{ ticket.ticket_type.price|floatformat:0 }}</td>
+            <td class="text-right">{{ ticket.ticket_type.price|floatformat:0|intcomma }}</td>
         </tr>
         {% empty %}
         <tr>

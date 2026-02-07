@@ -1,0 +1,5 @@
+{% load static %}
+<div data-controller="logo" class="flex items-center">
+    <img class="{{ class|default:'h-8 w-auto' }}" data-logo-target="dark" src="{% static 'images/logo/logo_light_mode.png' %}" alt="Reckot" {{ attrs|safe }}>
+    <img class="{{ class|default:'h-8 w-auto' }}" data-logo-target="light" src="{% static 'images/logo/logo_dark_mode.png' %}" alt="Reckot" {{ attrs|safe }} style="display: none;">
+</div>

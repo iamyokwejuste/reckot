@@ -1,5 +1,5 @@
 {% extends "layouts/dashboard.html" %}
-{% load slippers %}
+{% load slippers  humanize %}
 {% load i18n %}
 
 {% block title %}{% trans "Refunds" %} - Reckot{% endblock %}
@@ -67,7 +67,7 @@
                         {% endif %}
                     </div>
                     <p class="text-sm text-muted-foreground">
-                        {{ refund.payment.booking.event.title }} - {{ refund.amount|floatformat:0 }} {{ refund.payment.currency }}
+                        {{ refund.payment.booking.event.title }} - {{ refund.amount|floatformat:0|intcomma }} {{ refund.payment.currency }}
                     </p>
                     <p class="text-xs text-muted-foreground mt-1">{{ refund.created_at|date:"M d, Y H:i" }}</p>
                 </div>

@@ -1,5 +1,5 @@
 {% extends "emails/base.html" %}
-{% load i18n %}
+{% load i18n  humanize %}
 
 {% block title %}{% trans "New Sale Notification" %} - {{ event.title }}{% endblock %}
 
@@ -49,14 +49,14 @@
             <tr>
                 <td style="padding: 8px 0; color: #09090b;">{{ ticket_type }}</td>
                 <td style="padding: 8px 0; text-align: center; color: #52525b;">x{{ data.count }}</td>
-                <td style="padding: 8px 0; text-align: right; font-weight: 500;">{{ data.price|floatformat:0 }} XAF</td>
+                <td style="padding: 8px 0; text-align: right; font-weight: 500;">{{ data.price|floatformat:0|intcomma }} XAF</td>
             </tr>
             {% endfor %}
             <tr style="border-top: 2px solid #e4e4e7;">
                 <td style="padding: 12px 0; font-weight: 600; color: #09090b;">{% trans "Total" %}</td>
                 <td style="padding: 12px 0;"></td>
                 <td style="padding: 12px 0; text-align: right; font-weight: 700; font-size: 18px; color: #09090b;">
-                    {% if payment %}{{ payment.amount|floatformat:0 }}{% else %}{{ booking.total_amount|floatformat:0 }}{% endif %} XAF
+                    {% if payment %}{{ payment.amount|floatformat:0|intcomma }}{% else %}{{ booking.total_amount|floatformat:0|intcomma }}{% endif %} XAF
                 </td>
             </tr>
         </table>

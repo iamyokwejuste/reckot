@@ -1,5 +1,5 @@
 {% extends "layouts/dashboard.html" %}
-{% load slippers %}
+{% load slippers  humanize %}
 {% load i18n %}
 
 {% block title %}{% trans "Process Refund" %} - Reckot{% endblock %}
@@ -53,7 +53,7 @@
                 </div>
                 <div>
                     <p class="text-sm text-muted-foreground">{% trans "Refund Amount" %}</p>
-                    <p class="text-lg font-semibold">{{ refund.amount|floatformat:0 }} {{ refund.payment.currency }}</p>
+                    <p class="text-lg font-semibold">{{ refund.amount|floatformat:0|intcomma }} {{ refund.payment.currency }}</p>
                 </div>
             </div>
 
@@ -64,7 +64,7 @@
                 </div>
                 <div>
                     <p class="text-sm text-muted-foreground">{% trans "Original Payment" %}</p>
-                    <p>{{ refund.payment.amount|floatformat:0 }} {{ refund.payment.currency }}</p>
+                    <p>{{ refund.payment.amount|floatformat:0|intcomma }} {{ refund.payment.currency }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-muted-foreground">{% trans "Payment Date" %}</p>

@@ -1,5 +1,5 @@
 {% extends "layouts/dashboard.html" %}
-{% load i18n slippers %}
+{% load i18n slippers humanize %}
 
 {% block title %}{% trans "Transaction History" %} - Reckot{% endblock %}
 
@@ -18,7 +18,7 @@
                 <i data-lucide="trending-up" class="h-4 w-4 text-green-600"></i>
                 <p class="text-sm font-medium text-muted-foreground">{% trans "Total Revenue" %}</p>
             </div>
-            <p class="text-2xl font-bold mt-2">{{ balance_data.total_revenue|floatformat:0 }} <span class="text-sm font-normal text-muted-foreground">XAF</span></p>
+            <p class="text-2xl font-bold mt-2">{{ balance_data.total_revenue|floatformat:0|intcomma }} <span class="text-sm font-normal text-muted-foreground">XAF</span></p>
         </div>
 
         <div class="rounded-lg border border-border bg-card p-4">
@@ -26,7 +26,7 @@
                 <i data-lucide="trending-down" class="h-4 w-4 text-red-600"></i>
                 <p class="text-sm font-medium text-muted-foreground">{% trans "Total Withdrawn" %}</p>
             </div>
-            <p class="text-2xl font-bold mt-2">{{ balance_data.total_withdrawn|floatformat:0 }} <span class="text-sm font-normal text-muted-foreground">XAF</span></p>
+            <p class="text-2xl font-bold mt-2">{{ balance_data.total_withdrawn|floatformat:0|intcomma }} <span class="text-sm font-normal text-muted-foreground">XAF</span></p>
         </div>
 
         <div class="rounded-lg border border-border bg-card p-4">
@@ -34,7 +34,7 @@
                 <i data-lucide="undo-2" class="h-4 w-4 text-yellow-600"></i>
                 <p class="text-sm font-medium text-muted-foreground">{% trans "Total Refunded" %}</p>
             </div>
-            <p class="text-2xl font-bold mt-2">{{ balance_data.total_refunded|floatformat:0 }} <span class="text-sm font-normal text-muted-foreground">XAF</span></p>
+            <p class="text-2xl font-bold mt-2">{{ balance_data.total_refunded|floatformat:0|intcomma }} <span class="text-sm font-normal text-muted-foreground">XAF</span></p>
         </div>
 
         <div class="rounded-lg border border-border bg-card p-4">
@@ -42,7 +42,7 @@
                 <i data-lucide="wallet" class="h-4 w-4 text-primary"></i>
                 <p class="text-sm font-medium text-muted-foreground">{% trans "Available Balance" %}</p>
             </div>
-            <p class="text-2xl font-bold mt-2">{{ balance_data.available_balance|floatformat:0 }} <span class="text-sm font-normal text-muted-foreground">XAF</span></p>
+            <p class="text-2xl font-bold mt-2">{{ balance_data.available_balance|floatformat:0|intcomma }} <span class="text-sm font-normal text-muted-foreground">XAF</span></p>
         </div>
     </div>
 
@@ -77,9 +77,9 @@
 
                     <div class="text-right">
                         {% if transaction.type == "credit" %}
-                        <p class="text-lg font-bold text-green-600">+{{ transaction.amount|floatformat:0 }} XAF</p>
+                        <p class="text-lg font-bold text-green-600">+{{ transaction.amount|floatformat:0|intcomma }} XAF</p>
                         {% else %}
-                        <p class="text-lg font-bold text-red-600">-{{ transaction.amount|floatformat:0 }} XAF</p>
+                        <p class="text-lg font-bold text-red-600">-{{ transaction.amount|floatformat:0|intcomma }} XAF</p>
                         {% endif %}
                         <p class="text-xs text-muted-foreground mt-1">
                             {% if transaction.type == "credit" %}

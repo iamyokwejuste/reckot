@@ -20,7 +20,7 @@ async function registerController(name, path) {
 
 waitForStimulus(async () => {
     const baseUrl = '/static/js/controllers/';
-    const version = '1770489490';
+    const version = '1770493020';
 
     const controllers = [
         { name: 'event-form', path: 'event-form_controller.js' },

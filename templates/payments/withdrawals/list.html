@@ -1,5 +1,5 @@
 {% extends "layouts/dashboard.html" %}
-{% load slippers i18n %}
+{% load slippers i18n  humanize %}
 
 {% block title %}{% trans "Withdrawals" %} - Reckot{% endblock %}
 
@@ -98,13 +98,13 @@
                                 </div>
                             </td>
                             <td class="px-4 py-3">
-                                <span class="font-medium">{{ withdrawal.amount|floatformat:0 }} XAF</span>
+                                <span class="font-medium">{{ withdrawal.amount|floatformat:0|intcomma }} XAF</span>
                             </td>
                             <td class="px-4 py-3">
-                                <span class="font-medium text-green-600">{{ withdrawal.net_amount|floatformat:0 }} XAF</span>
+                                <span class="font-medium text-green-600">{{ withdrawal.net_amount|floatformat:0|intcomma }} XAF</span>
                                 <p class="text-xs text-muted-foreground">
-                                    Fee: {{ withdrawal.gateway_fee|floatformat:0 }} XAF |
-                                    Commission: {{ withdrawal.platform_commission|floatformat:0 }} XAF
+                                    Fee: {{ withdrawal.gateway_fee|floatformat:0|intcomma }} XAF |
+                                    Commission: {{ withdrawal.platform_commission|floatformat:0|intcomma }} XAF
                                 </p>
                             </td>
                             <td class="px-4 py-3">

@@ -40,4 +40,6 @@ components:
   featured_event_card: "components/featured_event_card.html"
   pricing_card: "components/pricing_card.html"
   pricing_feature: "components/pricing_feature.html"
+  feature_list_item: "components/feature_list_item.html"
+  feature_card: "components/feature_card.html"
   datepicker: "components/datepicker.html"

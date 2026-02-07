@@ -1,5 +1,5 @@
 {% extends "layouts/dashboard.html" %}
-{% load slippers %}
+{% load slippers  humanize %}
 {% load i18n %}
 
 {% block title %}{{ coupon.code }} - {% trans "Coupons" %} - Reckot{% endblock %}
@@ -70,9 +70,9 @@
             </div>
             <p class="text-2xl font-bold mt-2">
                 {% if coupon.discount_type == 'PERCENTAGE' %}
-                {{ coupon.discount_value|floatformat:0 }}%
+                {{ coupon.discount_value|floatformat:0|intcomma }}%
                 {% else %}
-                {{ coupon.discount_value|floatformat:0 }} XAF
+                {{ coupon.discount_value|floatformat:0|intcomma }} XAF
                 {% endif %}
             </p>
         </div>
@@ -203,7 +203,7 @@
                             <code class="text-xs bg-muted px-2 py-1 rounded">{{ usage.booking.reference|slice:":8" }}...</code>
                         </td>
                         <td class="p-4">
-                            <p class="text-sm font-medium text-emerald-500">-{{ usage.discount_amount|floatformat:0 }} XAF</p>
+                            <p class="text-sm font-medium text-emerald-500">-{{ usage.discount_amount|floatformat:0|intcomma }} XAF</p>
                         </td>
                         <td class="p-4">
                             <p class="text-sm text-muted-foreground">{{ usage.used_at|date:"M d, Y H:i" }}</p>

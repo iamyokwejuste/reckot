@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n  humanize %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -70,8 +70,8 @@
             <tr>
                 <td>{{ item.description }}</td>
                 <td class="text-right">{{ item.quantity }}</td>
-                <td class="text-right">{{ item.unit_price|floatformat:0 }} {{ invoice.currency }}</td>
-                <td class="text-right">{{ item.total|floatformat:0 }} {{ invoice.currency }}</td>
+                <td class="text-right">{{ item.unit_price|floatformat:0|intcomma }} {{ invoice.currency }}</td>
+                <td class="text-right">{{ item.total|floatformat:0|intcomma }} {{ invoice.currency }}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -80,23 +80,23 @@
     <div class="totals">
         <div class="totals-row">
             <div class="totals-label">{% trans "Subtotal:" %}</div>
-            <div class="totals-value">{{ invoice.subtotal|floatformat:0 }} {{ invoice.currency }}</div>
+            <div class="totals-value">{{ invoice.subtotal|floatformat:0|intcomma }} {{ invoice.currency }}</div>
         </div>
         {% if invoice.service_fee %}
         <div class="totals-row">
             <div class="totals-label">{% trans "Service Fee:" %}</div>
-            <div class="totals-value">{{ invoice.service_fee|floatformat:0 }} {{ invoice.currency }}</div>
+            <div class="totals-value">{{ invoice.service_fee|floatformat:0|intcomma }} {{ invoice.currency }}</div>
         </div>
         {% endif %}
         {% if invoice.tax_amount %}
         <div class="totals-row">
             <div class="totals-label">{% trans "Tax:" %}</div>
-            <div class="totals-value">{{ invoice.tax_amount|floatformat:0 }} {{ invoice.currency }}</div>
+            <div class="totals-value">{{ invoice.tax_amount|floatformat:0|intcomma }} {{ invoice.currency }}</div>
         </div>
         {% endif %}
         <div class="totals-row total-final">
             <div class="totals-label">{% trans "Total Paid:" %}</div>
-            <div class="totals-value">{{ invoice.total_amount|floatformat:0 }} {{ invoice.currency }}</div>
+            <div class="totals-value">{{ invoice.total_amount|floatformat:0|intcomma }} {{ invoice.currency }}</div>
         </div>
     </div>
 

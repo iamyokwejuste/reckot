@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load slippers %}
+{% load slippers  humanize %}
 {% load i18n %}
 
 {% block title %}{{ organization.name }} - {% trans "Events on Reckot" %}{% endblock %}
@@ -71,7 +71,7 @@
                             </div>
                             {% with min_price=event.ticket_types.first.price %}
                             {% if min_price %}
-                            <p class="mt-3 font-medium text-primary">{% blocktrans with price=min_price|floatformat:0 %}From {{ price }} XAF{% endblocktrans %}</p>
+                            <p class="mt-3 font-medium text-primary">{% blocktrans with price=min_price|floatformat:0|intcomma %}From {{ price }} XAF{% endblocktrans %}</p>
                             {% else %}
                             <p class="mt-3 font-medium text-emerald-600">{% trans "Free" %}</p>
                             {% endif %}

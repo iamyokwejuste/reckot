@@ -102,7 +102,9 @@ class PublicEventListView(View):
             request,
             "events/discover.html",
             {
+                "events": events_data,
                 "events_json": json.dumps(events_data),
+                "categories": categories,
                 "categories_json": json.dumps(categories_data),
             },
         )

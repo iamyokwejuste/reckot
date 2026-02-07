@@ -1,5 +1,5 @@
 {% extends "layouts/dashboard.html" %}
-{% load slippers i18n %}
+{% load slippers i18n  humanize %}
 
 {% block title %}{% trans "Analytics" %} - Reckot{% endblock %}
 
@@ -180,33 +180,13 @@
     {% trans "Published events" as desc_events %}
 
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {% #stat_card
-            label=label_balance
-            value=available_balance
-            description=desc_balance
-            icon="banknote" %}
-        {% /stat_card %}
+        {% #stat_card label=label_balance value=available_balance description=desc_balance icon="banknote" %}{% /stat_card %}
 
-        {% #stat_card
-            label=label_tickets
-            value=tickets_sold
-            description=desc_tickets
-            icon="ticket" %}
-        {% /stat_card %}
+        {% #stat_card label=label_tickets value=tickets_sold description=desc_tickets icon="ticket" %}{% /stat_card %}
 
-        {% #stat_card
-            label=label_checkin
-            value=checkin_rate
-            description=desc_checkin
-            icon="scan-line" %}
-        {% /stat_card %}
+        {% #stat_card label=label_checkin value=checkin_rate description=desc_checkin icon="scan-line" %}{% /stat_card %}
 
-        {% #stat_card
-            label=label_events
-            value=active_events
-            description=desc_events
-            icon="calendar" %}
-        {% /stat_card %}
+        {% #stat_card label=label_events value=active_events description=desc_events icon="calendar" %}{% /stat_card %}
     </div>
 
     {% if analytics_metrics %}
@@ -320,7 +300,7 @@
                             </td>
                             <td class="py-3 pr-4 text-sm text-muted-foreground">{{ event.start_at|date:"M d, Y" }}</td>
                             <td class="py-3 pr-4 text-sm">{{ event.ticket_count|default:0 }}</td>
-                            <td class="py-3 pr-4 text-sm font-medium">{{ event.revenue|default:0|floatformat:0 }} XAF</td>
+                            <td class="py-3 pr-4 text-sm font-medium">{{ event.revenue|default:0|floatformat:0|intcomma }} XAF</td>
                             <td class="py-3 pr-4">
                                 {% with rate=event.checkin_count|default:0 total=event.ticket_count|default:1 %}
                                 <div class="flex items-center gap-2">

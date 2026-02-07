@@ -1,5 +1,6 @@
 {% load i18n static %}
 
+{% if user.is_authenticated and user.ai_features_enabled %}
 <div id="floating-chatbot" data-controller="chatbot">
     <button data-action="click->chatbot#toggle"
             data-chatbot-trigger
@@ -73,3 +74,4 @@
         </div>
     </div>
 </div>
+{% endif %}

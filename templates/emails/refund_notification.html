@@ -1,3 +1,4 @@
+{% load humanize %}
 {% extends "emails/base.html" %}
 
 {% block title %}Refund {% if refund.status == 'APPROVED' %}Approved{% elif refund.status == 'PROCESSED' %}Processed{% elif refund.status == 'REJECTED' %}Update{% else %}Request Received{% endif %} - Reckot{% endblock %}
@@ -33,11 +34,11 @@
         </tr>
         <tr>
             <td class="detail-label email-muted">Original Amount</td>
-            <td class="detail-value">{{ original_amount|floatformat:0 }} XAF</td>
+            <td class="detail-value">{{ original_amount|floatformat:0|intcomma }} XAF</td>
         </tr>
         <tr>
             <td class="detail-label email-muted">Refund Amount</td>
-            <td class="detail-value amount" style="font-size: 20px;">{{ refund.amount|floatformat:0 }} XAF</td>
+            <td class="detail-value amount" style="font-size: 20px;">{{ refund.amount|floatformat:0|intcomma }} XAF</td>
         </tr>
         <tr>
             <td class="detail-label email-muted">Status</td>

@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n  humanize %}
 <!-- Live Stats Grid - Updated via HTMX polling -->
 <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
     <div class="stat-card group hover:border-primary/50 transition-colors">
@@ -26,7 +26,7 @@
             <div class="flex items-center gap-2 mt-1">
                 <div class="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
                     <div class="h-full bg-emerald-500 rounded-full transition-all duration-500"
-                         style="width: {{ check_in_rate|floatformat:0 }}%"></div>
+                         style="width: {{ check_in_rate|floatformat:0|intcomma }}%"></div>
                 </div>
                 <span class="text-xs text-muted-foreground">{{ check_in_rate|floatformat:1 }}%</span>
             </div>
@@ -41,7 +41,7 @@
             </div>
         </div>
         <div class="mt-3">
-            <p class="text-3xl font-bold text-blue-600">{{ total_revenue|floatformat:0 }}</p>
+            <p class="text-3xl font-bold text-blue-600">{{ total_revenue|floatformat:0|intcomma }}</p>
             <p class="text-xs text-muted-foreground mt-1">{% trans "XAF confirmed" %}</p>
         </div>
     </div>
