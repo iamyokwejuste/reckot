@@ -1,0 +1,23 @@
+{% load slippers %}
+
+<div class="card p-5 {% if col_span %}{{ col_span }}{% endif %}"{{ attrs }}>
+    {% if title %}
+    <h3 class="font-semibold flex items-center gap-2 mb-4">
+        {% if icon %}
+        <i data-lucide="{{ icon }}" class="w-4 h-4"></i>
+        {% endif %}
+        {{ title }}
+    </h3>
+    {% endif %}
+
+    <div class="overflow-x-auto">
+        {{ children }}
+    </div>
+
+    {% if empty_message and not children %}
+    <div class="text-center py-8 text-muted-foreground">
+        <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+        <p class="text-sm">{{ empty_message }}</p>
+    </div>
+    {% endif %}
+</div>

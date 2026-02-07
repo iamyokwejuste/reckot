@@ -20,4 +20,7 @@ def environment_callback(request):
 
 
 def get_logo_path(request):
-    return static("images/logo/reckto_logo_light_mode.png")
+    return {
+        'light': static("images/logo/reckto_logo_dark_mode.png"),
+        'dark': static("images/logo/reckto_logo_light_mode.png"),
+    }

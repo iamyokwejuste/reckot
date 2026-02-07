@@ -27,19 +27,18 @@
 {% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto pb-24" x-data="createEvent()">
+<div class="max-w-2xl mx-auto pb-24" data-controller="event-form" data-event-form-mode-value="create">
     <div class="mb-8">
         <div class="flex items-center justify-between mb-2">
-            <span class="text-sm font-medium">Step <span x-text="step"></span> of <span x-text="totalSteps"></span></span>
-            <span class="text-sm text-muted-foreground" x-text="['{% trans "Basic Info" %}', '{% trans "Date & Time" %}', '{% trans "Location" %}', '{% trans "Details" %}'][step-1]"></span>
+            <span class="text-sm font-medium">Step <span data-step-number>1</span> of 4</span>
+            <span class="text-sm text-muted-foreground" data-step-label>{% trans "Basic Info" %}</span>
         </div>
         <div class="h-2 bg-muted rounded-full overflow-hidden">
-            <div class="h-full bg-primary transition-all duration-300 rounded-full"
-                 :style="'width: ' + (step / totalSteps * 100) + '%'"></div>
+            <div data-event-form-target="progressBar" class="h-full bg-primary transition-all duration-300 rounded-full" style="width: 25%"></div>
         </div>
     </div>
 
-    <form id="create-event-form" method="post" enctype="multipart/form-data" hx-boost="false" @submit="submitForm($event)">
+    <form id="create-event-form" method="post" enctype="multipart/form-data" hx-boost="false" data-action="submit->event-form#submitForm">
         {% csrf_token %}
 
         {% if errors %}
@@ -56,50 +55,37 @@
         </div>
         {% endif %}
 
-        <div x-show="step === 1" x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
+        <div data-event-form-target="step1">
             <div class="card p-6 space-y-4">
                 <h2 class="text-lg font-semibold">{% trans "Basic Information" %}</h2>
 
                 <div>
                     <label class="block text-sm font-medium mb-2">{% trans "Organization" %} <span class="text-red-500">*</span></label>
-                        <div class="custom-select-wrapper" x-data="{
-                            open: false,
-                            label: '',
-                            search: '',
-                            options: [{% for org in organizations %}{ id: '{{ org.id }}', name: '{{ org.name|escapejs }}' }{% if not forloop.last %},{% endif %}{% endfor %}],
-                            get filteredOptions() {
-                                if (!this.search) return this.options;
-                                return this.options.filter(o => o.name.toLowerCase().includes(this.search.toLowerCase()));
-                            }
-                        }">
-                            <input type="hidden" name="organization" :value="$root.organization" required>
-                            <button type="button" @click="open = !open" @click.outside="open = false"
-                                    class="custom-select-trigger" :class="{ 'custom-select-trigger-active': open, 'border-red-500': $root.errors.organization }">
-                                <span class="custom-select-value" :class="{ 'custom-select-placeholder': !label }" x-text="label || '{% trans "Select organization" %}'"></span>
-                                <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4" :class="{ 'rotate-180': open }"></i>
-                            </button>
-                            <div x-show="open" x-transition @click.outside="open = false" class="custom-select-dropdown" x-cloak>
-                                <div class="custom-select-search">
-                                    <i data-lucide="search" class="custom-select-search-icon w-3.5 h-3.5"></i>
-                                    <input type="text" x-model="search" placeholder="{% trans "Search organizations..." %}" class="custom-select-search-input" @click.stop>
-                                </div>
-                                <div class="custom-select-options">
-                                    <template x-for="org in filteredOptions" :key="org.id">
-                                        <button type="button" @click="$root.organization = org.id; label = org.name; open = false; search = ''; $root.clearError('organization')"
-                                                class="custom-select-option" :class="{ 'custom-select-option-selected': $root.organization === org.id }">
-                                            <span x-text="org.name"></span>
-                                            <i x-show="$root.organization === org.id" data-lucide="check" class="custom-select-check w-4 h-4"></i>
-                                        </button>
-                                    </template>
-                                    <div x-show="filteredOptions.length === 0" class="custom-select-empty">
-                                        <span x-text="search ? '{% trans "No organizations match" %} \"' + search + '\"' : '{% trans "No organizations available" %}'"></span>
-                                    </div>
-                                </div>
+                    <div class="custom-select-wrapper" data-controller="dropdown" data-action="click@window->dropdown#clickOutside">
+                        <input type="hidden" name="organization" required data-dropdown-target="hiddenInput">
+                        <button type="button" data-dropdown-target="trigger" data-action="click->dropdown#toggle" class="custom-select-trigger">
+                            <span class="custom-select-value custom-select-placeholder">{% trans "Select organization" %}</span>
+                            <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4"></i>
+                        </button>
+                        <div data-dropdown-target="dropdown" class="custom-select-dropdown hidden">
+                            <div class="custom-select-search">
+                                <i data-lucide="search" class="custom-select-search-icon w-3.5 h-3.5"></i>
+                                <input type="text" data-dropdown-target="search" data-action="input->dropdown#updateSearch click->dropdown#stopPropagation" placeholder="{% trans 'Search organizations...' %}" class="custom-select-search-input">
+                            </div>
+                            <div class="custom-select-options">
+                                {% for org in organizations %}
+                                    <button type="button" data-dropdown-target="option" data-value="{{ org.id }}" data-label="{{ org.name }}" data-action="click->dropdown#selectOption" class="custom-select-option">
+                                        <span>{{ org.name }}</span>
+                                        <i data-lucide="check" class="custom-select-check w-4 h-4 hidden"></i>
+                                    </button>
+                                {% empty %}
+                                    <div class="custom-select-empty">{% trans "No organizations available" %}</div>
+                                {% endfor %}
                             </div>
                         </div>
-                        <p x-show="$root.errors.organization" x-cloak class="text-sm text-red-500 mt-1" x-text="$root.errors.organization"></p>
-                    <p x-show="!$root.errors.organization" class="text-xs text-muted-foreground mt-1">
+                    </div>
+                    <p data-error="organization" class="hidden text-sm text-red-500 mt-1"></p>
+                    <p class="text-xs text-muted-foreground mt-1">
                         <a href="{% url 'orgs:create' %}" class="text-primary hover:underline">{% trans "Create a new organization" %}</a>
                     </p>
                 </div>
@@ -107,9 +93,9 @@
                 <div>
                     <label for="id_title" class="block text-sm font-medium mb-2">{% trans "Event Title" %} <span class="text-red-500">*</span></label>
                     <input type="text" name="title" id="id_title" required placeholder="{% trans "e.g., Tech Conference 2026" %}"
-                           class="input" :class="{ 'border-red-500': errors.title }"
-                           x-model="title" @input="clearError('title')">
-                    <p x-show="errors.title" x-cloak class="text-sm text-red-500 mt-1" x-text="errors.title"></p>
+                           class="input"
+                           data-action="input->event-form#clearError">
+                    <p data-error="title" class="hidden text-sm text-red-500 mt-1"></p>
                 </div>
 
                 <div>
@@ -122,42 +108,29 @@
                     <label for="id_description" class="block text-sm font-medium mb-2">{% trans "Full Description" %} <span class="text-red-500">*</span></label>
                     <textarea name="description" id="id_description" rows="4" required
                               placeholder="{% trans "Tell attendees what to expect..." %}"
-                              x-model="description"
-                              @input="clearError('description')"
+                              data-action="input->event-form#clearError"
                               data-richtext></textarea>
-                    <p x-show="errors.description" x-cloak class="text-sm text-red-500 mt-1" x-text="errors.description"></p>
+                    <p data-error="description" class="hidden text-sm text-red-500 mt-1"></p>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium mb-2">{% trans "Cover Image" %}</label>
                     <div class="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-muted-foreground/50 transition-colors cursor-pointer"
-                         @click="$refs.coverInput.click()">
-                        <template x-if="!coverPreview">
-                            <div>
-                                <i data-lucide="image-plus" class="h-10 w-10 mx-auto text-muted-foreground mb-2"></i>
-                                <p class="text-sm font-medium">{% trans "Click to upload or generate with AI" %}</p>
-                                <p class="text-xs text-muted-foreground mt-1">{% trans "PNG, JPG. Recommended: 1200x630px (16:9)" %}</p>
-                            </div>
-                        </template>
-                        <template x-if="coverPreview">
-                            <div class="relative inline-block">
-                                <img :src="coverPreview" class="max-h-40 rounded-lg object-cover">
-                                <button type="button" @click.stop="coverPreview = null; $refs.coverInput.value = ''"
-                                        class="absolute -top-2 -right-2 w-6 h-6 flex items-center justify-center bg-red-500 rounded-full text-white hover:bg-red-600 shadow-lg transition-colors"
-                                        title="Remove image">
-                                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                                </button>
-                            </div>
-                        </template>
+                         data-action="click->event-form#triggerFileInput">
+                        <div data-cover-placeholder>
+                            <i data-lucide="image-plus" class="h-10 w-10 mx-auto text-muted-foreground mb-2"></i>
+                            <p class="text-sm font-medium">{% trans "Click to upload or generate with AI" %}</p>
+                            <p class="text-xs text-muted-foreground mt-1">{% trans "PNG, JPG. Recommended: 1200x630px (16:9)" %}</p>
+                        </div>
+                        <img data-event-form-target="coverPreview" class="hidden max-h-40 rounded-lg object-cover mx-auto">
                     </div>
-                    <input type="file" name="cover_image" accept="image/*" x-ref="coverInput"
-                           @change="handleCoverUpload($event)" class="hidden">
+                    <input type="file" name="cover_image" accept="image/*" data-cover-input
+                           data-action="change->event-form#handleCoverUpload" class="hidden">
                 </div>
             </div>
         </div>
 
-        <div x-show="step === 2" x-cloak x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
+        <div data-event-form-target="step2" class="hidden">
             <div class="card p-6 space-y-4 card-overflow-visible">
                 <h2 class="text-lg font-semibold">{% trans "Date & Time" %}</h2>
 
@@ -167,59 +140,58 @@
                         <div class="relative">
                             <input type="text" name="start_at" id="id_start_at" required
                                    placeholder="{% trans "Select date and time" %}"
-                                   class="input pl-10 flatpickr-datetime cursor-pointer" :class="{ 'border-red-500': errors.startAt }"
-                                   x-model="startAt" @change="clearError('startAt')">
+                                   class="input pl-10 flatpickr-datetime cursor-pointer"
+                                   data-action="input->event-form#clearError">
                             <div class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
                                 <i data-lucide="calendar-clock" class="w-4 h-4"></i>
                             </div>
                         </div>
-                        <p x-show="errors.startAt" x-cloak class="text-sm text-red-500 mt-1" x-text="errors.startAt"></p>
+                        <p data-error="start_at" class="hidden text-sm text-red-500 mt-1"></p>
                     </div>
                     <div class="relative">
                         <label for="id_end_at" class="block text-sm font-medium mb-2">{% trans "End" %} <span class="text-red-500">*</span></label>
                         <div class="relative">
                             <input type="text" name="end_at" id="id_end_at" required
                                    placeholder="{% trans "Select date and time" %}"
-                                   class="input pl-10 flatpickr-datetime cursor-pointer" :class="{ 'border-red-500': errors.endAt }"
-                                   x-model="endAt" @change="clearError('endAt')">
+                                   class="input pl-10 flatpickr-datetime cursor-pointer"
+                                   data-action="input->event-form#clearError">
                             <div class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
                                 <i data-lucide="calendar-clock" class="w-4 h-4"></i>
                             </div>
                         </div>
-                        <p x-show="errors.endAt" x-cloak class="text-sm text-red-500 mt-1" x-text="errors.endAt"></p>
+                        <p data-error="end_at" class="hidden text-sm text-red-500 mt-1"></p>
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium mb-2">{% trans "Timezone" %}</label>
-                    <div class="custom-select-wrapper" x-data="{ open: false, value: 'Africa/Douala', label: 'Africa/Douala (WAT)' }">
-                        <input type="hidden" name="timezone" :value="value">
-                        <button type="button" @click="open = !open" @click.outside="open = false"
-                                class="custom-select-trigger" :class="{ 'custom-select-trigger-active': open }">
-                            <span class="custom-select-value" x-text="label"></span>
-                            <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4" :class="{ 'rotate-180': open }"></i>
+                    <div class="custom-select-wrapper" data-controller="dropdown" data-dropdown-value-value="Africa/Douala" data-dropdown-label-value="Africa/Douala (WAT)" data-action="click@window->dropdown#clickOutside">
+                        <input type="hidden" name="timezone" value="Africa/Douala" data-dropdown-target="hiddenInput">
+                        <button type="button" data-dropdown-target="trigger" data-action="click->dropdown#toggle" class="custom-select-trigger">
+                            <span class="custom-select-value">Africa/Douala (WAT)</span>
+                            <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4"></i>
                         </button>
-                        <div x-show="open" x-transition @click.outside="open = false" class="custom-select-dropdown" x-cloak>
+                        <div data-dropdown-target="dropdown" class="custom-select-dropdown hidden">
                             <div class="custom-select-options">
-                                <button type="button" @click="value = 'Africa/Douala'; label = 'Africa/Douala (WAT)'; open = false" class="custom-select-option" :class="{ 'custom-select-option-selected': value === 'Africa/Douala' }">
+                                <button type="button" data-dropdown-target="option" data-value="Africa/Douala" data-label="Africa/Douala (WAT)" data-action="click->dropdown#selectOption" class="custom-select-option custom-select-option-selected">
                                     <span>Africa/Douala (WAT)</span>
-                                    <i x-show="value === 'Africa/Douala'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                                    <i data-lucide="check" class="custom-select-check w-4 h-4"></i>
                                 </button>
-                                <button type="button" @click="value = 'Africa/Lagos'; label = 'Africa/Lagos (WAT)'; open = false" class="custom-select-option" :class="{ 'custom-select-option-selected': value === 'Africa/Lagos' }">
+                                <button type="button" data-dropdown-target="option" data-value="Africa/Lagos" data-label="Africa/Lagos (WAT)" data-action="click->dropdown#selectOption" class="custom-select-option">
                                     <span>Africa/Lagos (WAT)</span>
-                                    <i x-show="value === 'Africa/Lagos'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                                    <i data-lucide="check" class="custom-select-check w-4 h-4 hidden"></i>
                                 </button>
-                                <button type="button" @click="value = 'Europe/London'; label = 'Europe/London (GMT)'; open = false" class="custom-select-option" :class="{ 'custom-select-option-selected': value === 'Europe/London' }">
+                                <button type="button" data-dropdown-target="option" data-value="Europe/London" data-label="Europe/London (GMT)" data-action="click->dropdown#selectOption" class="custom-select-option">
                                     <span>Europe/London (GMT)</span>
-                                    <i x-show="value === 'Europe/London'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                                    <i data-lucide="check" class="custom-select-check w-4 h-4 hidden"></i>
                                 </button>
-                                <button type="button" @click="value = 'America/New_York'; label = 'America/New_York (EST)'; open = false" class="custom-select-option" :class="{ 'custom-select-option-selected': value === 'America/New_York' }">
+                                <button type="button" data-dropdown-target="option" data-value="America/New_York" data-label="America/New_York (EST)" data-action="click->dropdown#selectOption" class="custom-select-option">
                                     <span>America/New_York (EST)</span>
-                                    <i x-show="value === 'America/New_York'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                                    <i data-lucide="check" class="custom-select-check w-4 h-4 hidden"></i>
                                 </button>
-                                <button type="button" @click="value = 'UTC'; label = 'UTC'; open = false" class="custom-select-option" :class="{ 'custom-select-option-selected': value === 'UTC' }">
+                                <button type="button" data-dropdown-target="option" data-value="UTC" data-label="UTC" data-action="click->dropdown#selectOption" class="custom-select-option">
                                     <span>UTC</span>
-                                    <i x-show="value === 'UTC'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                                    <i data-lucide="check" class="custom-select-check w-4 h-4 hidden"></i>
                                 </button>
                             </div>
                         </div>
@@ -228,50 +200,38 @@
             </div>
         </div>
 
-        <div x-show="step === 3" x-cloak x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
+        <div data-event-form-target="step3" class="hidden">
             <div class="card p-6 space-y-4">
                 <h2 class="text-lg font-semibold">{% trans "Location" %}</h2>
 
                 <div>
                     <label class="block text-sm font-medium mb-2">{% trans "Event Type" %}</label>
-                    <div x-data="{
-                        open: false,
-                        value: 'IN_PERSON',
-                        label: '{% trans "In Person" %}',
-                        selectOption(val, lbl) {
-                            this.value = val;
-                            this.label = lbl;
-                            this.open = false;
-                            $root.eventType = val;
-                        }
-                    }">
-                        <input type="hidden" name="event_type" x-model="value">
-                        <button type="button" @click="open = !open" @click.outside="open = false" class="custom-select-trigger" :class="{ 'custom-select-trigger-active': open }">
-                            <span class="custom-select-value" x-text="label"></span>
-                            <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4" :class="{ 'rotate-180': open }"></i>
+                    <div class="custom-select-wrapper" data-controller="dropdown" data-dropdown-value-value="IN_PERSON" data-dropdown-label-value="{% trans 'In Person' %}" data-action="click@window->dropdown#clickOutside">
+                        <input type="hidden" name="event_type" value="IN_PERSON" data-dropdown-target="hiddenInput" data-action="change->event-form#updateEventType">
+                        <button type="button" data-dropdown-target="trigger" data-action="click->dropdown#toggle" class="custom-select-trigger">
+                            <span class="custom-select-value">{% trans "In Person" %}</span>
+                            <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4"></i>
                         </button>
-                        <div x-show="open" x-transition @click.outside="open = false" class="custom-select-dropdown" x-cloak>
+                        <div data-dropdown-target="dropdown" class="custom-select-dropdown hidden">
                             <div class="custom-select-options">
-                                <button type="button" @click="selectOption('IN_PERSON', '{% trans "In Person" %}')" class="custom-select-option" :class="{ 'custom-select-option-selected': value === 'IN_PERSON' }">
+                                <button type="button" data-dropdown-target="option" data-value="IN_PERSON" data-label="{% trans 'In Person' %}" data-action="click->dropdown#selectOption" class="custom-select-option custom-select-option-selected">
                                     <span>{% trans "In Person" %}</span>
-                                    <i x-show="value === 'IN_PERSON'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                                    <i data-lucide="check" class="custom-select-check w-4 h-4"></i>
                                 </button>
-                                <button type="button" @click="selectOption('ONLINE', '{% trans "Online" %}')" class="custom-select-option" :class="{ 'custom-select-option-selected': value === 'ONLINE' }">
+                                <button type="button" data-dropdown-target="option" data-value="ONLINE" data-label="{% trans 'Online' %}" data-action="click->dropdown#selectOption" class="custom-select-option">
                                     <span>{% trans "Online" %}</span>
-                                    <i x-show="value === 'ONLINE'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                                    <i data-lucide="check" class="custom-select-check w-4 h-4 hidden"></i>
                                 </button>
-                                <button type="button" @click="selectOption('HYBRID', '{% trans "Hybrid" %}')" class="custom-select-option" :class="{ 'custom-select-option-selected': value === 'HYBRID' }">
+                                <button type="button" data-dropdown-target="option" data-value="HYBRID" data-label="{% trans 'Hybrid' %}" data-action="click->dropdown#selectOption" class="custom-select-option">
                                     <span>{% trans "Hybrid" %}</span>
-                                    <i x-show="value === 'HYBRID'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                                    <i data-lucide="check" class="custom-select-check w-4 h-4 hidden"></i>
                                 </button>
                             </div>
-                        </div>
                         </div>
                     </div>
                 </div>
 
-                <div x-show="eventType !== 'ONLINE'" class="space-y-4">
+                <div data-location-fields class="space-y-4">
                     <div>
                         <label for="id_venue_name" class="block text-sm font-medium mb-2">{% trans "Venue Name" %}</label>
                         <input type="text" name="venue_name" id="id_venue_name" placeholder="{% trans "e.g., Convention Center" %}" class="input">
@@ -280,10 +240,9 @@
                     <div>
                         <label for="id_location" class="block text-sm font-medium mb-2">{% trans "Address" %} <span class="text-red-500">*</span></label>
                         <input type="text" name="location" id="id_location" placeholder="{% trans "Street address" %}"
-                               class="input" :class="{ 'border-red-500': errors.location }"
-                               :required="eventType !== 'ONLINE'"
-                               x-model="location" @input="clearError('location')">
-                        <p x-show="errors.location" x-cloak class="text-sm text-red-500 mt-1" x-text="errors.location"></p>
+                               class="input"
+                               data-action="input->event-form#clearError">
+                        <p data-error="location" class="hidden text-sm text-red-500 mt-1"></p>
                     </div>
 
                     <div class="grid gap-4 sm:grid-cols-2">
@@ -298,7 +257,7 @@
                     </div>
                 </div>
 
-                <div x-show="eventType !== 'IN_PERSON'" class="space-y-4">
+                <div data-online-fields class="hidden space-y-4">
                     <div>
                         <label for="id_online_url" class="block text-sm font-medium mb-2">{% trans "Meeting Link" %}</label>
                         <input type="url" name="online_url" id="id_online_url" placeholder="https://zoom.us/j/..." class="input">
@@ -308,8 +267,7 @@
             </div>
         </div>
 
-        <div x-show="step === 4" x-cloak x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
+        <div data-event-form-target="step4" class="hidden">
             <div class="card p-6 space-y-4">
                 <h2 class="text-lg font-semibold">{% trans "Additional Details" %}</h2>
 
@@ -336,17 +294,15 @@
                         <div>
                             <label for="id_contact_email" class="block text-xs text-muted-foreground mb-1">{% trans "Email" %}</label>
                             <input type="email" name="contact_email" id="id_contact_email" placeholder="contact@event.com"
-                                   class="input" x-model="contactEmail" @input="clearError('contact')"
-                                   :class="{ 'border-red-500': errors.contact }">
+                                   class="input" data-action="input->event-form#clearError">
                         </div>
                         <div>
                             <label for="id_contact_phone" class="block text-xs text-muted-foreground mb-1">{% trans "Phone" %}</label>
                             <input type="tel" name="contact_phone" id="id_contact_phone" placeholder="6XX XXX XXX"
-                                   class="input" x-model="contactPhone" @input="clearError('contact')"
-                                   :class="{ 'border-red-500': errors.contact }">
+                                   class="input" data-action="input->event-form#clearError">
                         </div>
                     </div>
-                    <p x-show="errors.contact" x-cloak class="text-sm text-red-500 mt-2" x-text="errors.contact"></p>
+                    <p data-error="contact" class="hidden text-sm text-red-500 mt-2"></p>
                 </div>
             </div>
         </div>
@@ -355,19 +311,19 @@
 
     <div class="flex items-center justify-between gap-4 mt-6 mb-8">
         <div>
-            <button x-show="step > 1" type="button" @click="prevStep()" class="btn btn-outline">
+            <button data-prev-button type="button" data-action="click->event-form#prevStep" class="btn btn-outline hidden">
                 <i data-lucide="chevron-left" class="w-4 h-4 mr-1"></i>
                 <span>{% trans "Back" %}</span>
             </button>
         </div>
 
         <div class="ml-auto">
-            <button x-show="step < totalSteps" type="button" @click="nextStep()" class="btn btn-default">
+            <button data-next-button type="button" data-action="click->event-form#nextStep" class="btn btn-default">
                 <span>{% trans "Next" %}</span>
                 <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
             </button>
 
-            <button x-show="step === totalSteps" type="button" @click="$el.closest('[x-data]').querySelector('form').submit()" class="btn btn-default">
+            <button data-submit-button type="button" data-action="click->event-form#submitFormButton" class="btn btn-default hidden">
                 <span>{% trans "Create Event" %}</span>
                 <i data-lucide="check" class="w-4 h-4 ml-1"></i>
             </button>

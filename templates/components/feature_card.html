@@ -1,0 +1,17 @@
+{% load slippers %}
+
+<div class="card p-6 {% if animation_class %}data-controller="animate" data-animate-classes-value="{{ animation_class }}" data-animate-once-value="{{ animation_once|default:'true' }}"{% endif %}"{{ attrs }}>
+    <div class="h-10 w-10 rounded-xl bg-{{ icon_bg_color|default:'foreground' }} flex items-center justify-center mb-4">
+        <i data-lucide="{{ icon }}" class="w-5 h-5 text-{{ icon_text_color|default:'background' }}"></i>
+    </div>
+
+    {% if title %}
+    <h3 class="font-semibold">{{ title }}</h3>
+    {% endif %}
+
+    {% if description %}
+    <p class="text-muted-foreground text-sm mt-2">{{ description }}</p>
+    {% endif %}
+
+    {{ children }}
+</div>

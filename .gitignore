@@ -57,5 +57,7 @@ node_modules/
 *.tmp
 
 # Tailwind binary
-tailwindcss
+tailwindcss*
 *technical*.md
+.history/
+.claude/

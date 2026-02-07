@@ -120,78 +120,35 @@
                     <div class="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">{{ event.description|safe }}</div>
                 </div>
 
-                <div class="card p-6"
-                     x-data="{
-                         eventStartDate: new Date('{{ event.start_at|date:'Y-m-d' }}T{{ event.start_at|date:'H:i:s' }}'),
-                         eventEndDate: new Date('{{ event.end_at|date:'Y-m-d' }}T{{ event.end_at|date:'H:i:s' }}'),
-                         isBeforeEvent: true,
-                         isEventOngoing: false,
-                         isEventEnded: false,
-                         init() {
-                             this.updateEventStatus();
-                             setInterval(() => this.updateEventStatus(), 60000);
-                         },
-                         updateEventStatus() {
-                             const now = new Date();
-                             const diffToStart = this.eventStartDate - now;
-                             const diffToEnd = this.eventEndDate - now;
-
-                             if (diffToEnd <= 0) {
-                                 this.isEventEnded = true;
-                                 this.isEventOngoing = false;
-                                 this.isBeforeEvent = false;
-                             } else if (diffToStart <= 0 && diffToEnd > 0) {
-                                 this.isEventOngoing = true;
-                                 this.isEventEnded = false;
-                                 this.isBeforeEvent = false;
-                             } else {
-                                 this.isBeforeEvent = true;
-                                 this.isEventOngoing = false;
-                                 this.isEventEnded = false;
-                             }
-                         },
-                         getShareMessage() {
-                             const eventDetails = '{{ event.title|escapejs }} - {{ event.start_at|date:"F j, Y" }} at {{ event.location|escapejs }}';
-                             if (this.isEventEnded) {
-                                 return `I attended ${eventDetails}`;
-                             } else if (this.isEventOngoing) {
-                                 return `I am attending ${eventDetails}`;
-                             } else {
-                                 return `I will be attending ${eventDetails}`;
-                             }
-                         },
-                         getEncodedShareMessage() {
-                             return encodeURIComponent(this.getShareMessage());
-                         }
-                     }">
+                <div class="card p-6">
                     <h3 class="font-semibold mb-4">{% trans "Share this event" %}</h3>
                     <div class="flex flex-wrap gap-2">
-                        <a :href="'https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri|urlencode }}&quote=' + getEncodedShareMessage()" target="_blank">
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri|urlencode }}" target="_blank" rel="noopener noreferrer">
                             {% #button variant="outline" size="sm" %}
                                 <i data-lucide="facebook" class="w-4 h-4"></i>
                             {% /button %}
                         </a>
-                        <a :href="'https://twitter.com/intent/tweet?text=' + getEncodedShareMessage() + '&url={{ request.build_absolute_uri|urlencode }}'" target="_blank">
+                        <a href="https://twitter.com/intent/tweet?text={{ event.title|urlencode }}%20-%20{{ event.start_at|date:'F j, Y'|urlencode }}&url={{ request.build_absolute_uri|urlencode }}" target="_blank" rel="noopener noreferrer">
                             {% #button variant="outline" size="sm" %}
                                 <i data-lucide="twitter" class="w-4 h-4"></i>
                             {% /button %}
                         </a>
-                        <a :href="'https://wa.me/?text=' + getEncodedShareMessage() + '%20{{ request.build_absolute_uri|urlencode }}'" target="_blank">
+                        <a href="https://wa.me/?text={{ event.title|urlencode }}%20-%20{{ event.start_at|date:'F j, Y'|urlencode }}%20{{ request.build_absolute_uri|urlencode }}" target="_blank" rel="noopener noreferrer">
                             {% #button variant="outline" size="sm" %}
                                 <i data-lucide="message-circle" class="w-4 h-4"></i>
                             {% /button %}
                         </a>
-                        <a :href="'https://www.linkedin.com/sharing/share-offsite/?url={{ request.build_absolute_uri|urlencode }}&summary=' + getEncodedShareMessage()" target="_blank">
+                        <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.build_absolute_uri|urlencode }}" target="_blank" rel="noopener noreferrer">
                             {% #button variant="outline" size="sm" %}
                                 <i data-lucide="linkedin" class="w-4 h-4"></i>
                             {% /button %}
                         </a>
-                        {% #button type="button" variant="outline" size="sm" attrs="@click=\"navigator.clipboard.writeText(getShareMessage() + ' - {{ request.build_absolute_uri }}'); $dispatch('notice', {type: 'success', text: 'Link copied!'})\"" %}
+                        <button type="button" onclick="navigator.clipboard.writeText('{{ request.build_absolute_uri }}').then(() => alert('Link copied!'))" class="btn btn-outline btn-sm">
                             <i data-lucide="link" class="w-4 h-4"></i>
-                        {% /button %}
+                        </button>
                     </div>
                     <div class="mt-3 p-3 rounded-lg bg-muted/30 border border-border">
-                        <p class="text-xs text-muted-foreground text-center" x-text="getShareMessage()"></p>
+                        <p class="text-xs text-muted-foreground text-center">{{ event.title }} - {{ event.start_at|date:"F j, Y" }}</p>
                     </div>
                     {% if flyer_enabled %}
                     <div class="mt-4 pt-4 border-t border-border">
@@ -216,106 +173,30 @@
             </div>
 
             <div class="lg:col-span-1 self-start">
-                <div class="card p-6 sticky top-24"
-                     x-data="{
-                         eventStartDate: new Date('{{ event.start_at|date:'Y-m-d' }}T{{ event.start_at|date:'H:i:s' }}'),
-                         eventEndDate: new Date('{{ event.end_at|date:'Y-m-d' }}T{{ event.end_at|date:'H:i:s' }}'),
-                         years: 0,
-                         days: 0,
-                         hours: 0,
-                         minutes: 0,
-                         seconds: 0,
-                         isBeforeEvent: true,
-                         isEventOngoing: false,
-                         isEventEnded: false,
-                         showYears: false,
-                         init() {
-                             this.updateCountdown();
-                             setInterval(() => this.updateCountdown(), 1000);
-                         },
-                         updateCountdown() {
-                             const now = new Date();
-                             const diffToStart = this.eventStartDate - now;
-                             const diffToEnd = this.eventEndDate - now;
-
-                             if (diffToEnd <= 0) {
-                                 this.isBeforeEvent = false;
-                                 this.isEventOngoing = false;
-                                 this.isEventEnded = true;
-                                 this.years = 0;
-                                 this.days = 0;
-                                 this.hours = 0;
-                                 this.minutes = 0;
-                                 this.seconds = 0;
-                                 this.showYears = false;
-                             } else if (diffToStart <= 0 && diffToEnd > 0) {
-                                 this.isBeforeEvent = false;
-                                 this.isEventOngoing = true;
-                                 this.isEventEnded = false;
-                                 this.years = 0;
-                                 this.days = 0;
-                                 this.hours = 0;
-                                 this.minutes = 0;
-                                 this.seconds = 0;
-                                 this.showYears = false;
-                             } else {
-                                 this.isBeforeEvent = true;
-                                 this.isEventOngoing = false;
-                                 this.isEventEnded = false;
-                                 const totalDays = Math.floor(diffToStart / (1000 * 60 * 60 * 24));
-                                 if (totalDays >= 365) {
-                                     this.showYears = true;
-                                     this.years = Math.floor(totalDays / 365);
-                                     this.days = totalDays % 365;
-                                 } else {
-                                     this.showYears = false;
-                                     this.years = 0;
-                                     this.days = totalDays;
-                                 }
-                                 this.hours = Math.floor((diffToStart % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                                 this.minutes = Math.floor((diffToStart % (1000 * 60 * 60)) / (1000 * 60));
-                                 this.seconds = Math.floor((diffToStart % (1000 * 60)) / 1000);
-                             }
-                         }
-                     }">
+                <div class="card p-6 sticky top-24">
                     <h3 class="font-semibold mb-4">{% trans "Tickets" %}</h3>
 
-                    <div class="mb-4 p-3 rounded-lg bg-muted/50 border border-border" x-show="isBeforeEvent">
-                        <div class="text-xs text-muted-foreground text-center mb-1">{% trans "Event starts in" %}</div>
-                        <div class="flex justify-center gap-2 text-center">
-                            <template x-if="showYears">
-                                <div class="min-w-[32px]">
-                                    <div class="text-base font-bold" x-text="years">0</div>
-                                    <div class="text-[10px] text-muted-foreground">yrs</div>
-                                </div>
-                            </template>
-                            <div class="min-w-[32px]">
-                                <div class="text-base font-bold" x-text="days">0</div>
-                                <div class="text-[10px] text-muted-foreground">days</div>
-                            </div>
-                            <div class="min-w-[32px]">
-                                <div class="text-base font-bold" x-text="hours">0</div>
-                                <div class="text-[10px] text-muted-foreground">hrs</div>
-                            </div>
-                            <div class="min-w-[32px]">
-                                <div class="text-base font-bold" x-text="minutes">0</div>
-                                <div class="text-[10px] text-muted-foreground">min</div>
-                            </div>
-                            <div class="min-w-[32px]">
-                                <div class="text-base font-bold" x-text="seconds">0</div>
-                                <div class="text-[10px] text-muted-foreground">sec</div>
-                            </div>
+                    {% if event.start_at > now and event.end_at > now %}
+                    <div class="mb-4 p-3 rounded-lg bg-muted/50 border border-border">
+                        <div class="text-xs text-muted-foreground text-center mb-1">{% trans "Event starts" %}</div>
+                        <div class="text-center">
+                            <div class="text-base font-bold">{{ event.start_at|date:"M d, Y" }}</div>
+                            <div class="text-sm text-muted-foreground">{{ event.start_at|time:"g:i A" }}</div>
                         </div>
                     </div>
-
-                    <div class="mb-4 p-3 rounded-lg bg-success/10 border border-success/20 text-center" x-show="isEventOngoing" x-cloak>
+                    {% elif event.start_at <= now and event.end_at > now %}
+                    <div class="mb-4 p-3 rounded-lg bg-success/10 border border-success/20 text-center">
                         <div class="text-sm font-medium text-success">{% trans "Event is ongoing!" %}</div>
                     </div>
+                    {% endif %}
 
                     {% if ticket_types and has_available_tickets %}
                     <form method="post" action="{% url 'payments:checkout' %}" class="space-y-4" hx-boost="false"
-                          @submit="if (!validateDeliveryEmails($event)) return false;"
-                          x-data="eventCheckout('{{ csrf_token }}', {{ event.id }}, '{% url 'events:validate_coupon' %}')">
+                          data-controller="event-checkout"
+                          data-event-checkout-csrf-token-value="{{ csrf_token }}"
+                          data-event-checkout-event-id-value="{{ event.id }}"
+                          data-event-checkout-validate-coupon-url-value="{% url 'events:validate_coupon' %}"
+                          data-action="submit->event-checkout#validateDeliveryEmails">
                         {% csrf_token %}
                         <input type="hidden" name="event_id" value="{{ event.id }}">
                         {% if affiliate_code %}
@@ -323,19 +204,19 @@
                         {% endif %}
 
                         {% if not user.is_authenticated %}
-                        <div class="mb-4" x-data="{ expanded: false }">
-                            <button type="button" @click="expanded = !expanded"
+                        <div class="mb-4" data-controller="toggle">
+                            <button type="button" data-action="click->toggle#toggle"
                                     class="w-full flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted/70 transition-colors">
                                 <div class="flex items-center gap-2">
                                     <div class="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
                                         <i data-lucide="user" class="w-3.5 h-3.5 text-primary"></i>
                                     </div>
                                     <span class="text-sm font-medium">{% trans "Contact Info" %}</span>
-                                    <span class="text-xs text-muted-foreground" x-show="!expanded">({% trans "required" %})</span>
+                                    <span class="text-xs text-muted-foreground">({% trans "required" %})</span>
                                 </div>
-                                <i data-lucide="chevron-down" class="w-4 h-4 text-muted-foreground transition-transform duration-200" :class="expanded ? 'rotate-180' : ''"></i>
+                                <i data-lucide="chevron-down" class="w-4 h-4 text-muted-foreground transition-transform duration-200"></i>
                             </button>
-                            <div x-show="expanded" x-collapse x-cloak class="mt-3 space-y-2">
+                            <div data-toggle-target="content" class="hidden mt-3 space-y-2">
                                 <div class="grid gap-2">
                                     <input type="text" name="guest_name" class="input w-full text-sm" required placeholder="{% trans "Full name" %} *">
                                     <input type="email" name="guest_email" class="input w-full text-sm" required placeholder="{% trans "Email address" %} *">
@@ -348,7 +229,7 @@
 
                         {% for ticket_type in ticket_types %}
                         <div class="border border-border rounded-lg p-4 {% if not ticket_type.is_available %}opacity-60{% endif %}"
-                             x-data="{ quantity: 0, showAttendees: false }">
+                             data-controller="toggle">
                             <div class="flex justify-between items-start mb-2">
                                 <div>
                                     <div class="font-medium">{{ ticket_type.name }}</div>
@@ -393,51 +274,35 @@
                             </div>
 
                             {% if ticket_type.is_available %}
-                            <div class="space-y-3">
+                            <div class="space-y-3" data-controller="toggle">
                                 <div class="flex items-center gap-3">
                                     <label class="text-sm font-medium">{% trans "Qty:" %}</label>
                                     <input type="number"
                                            name="ticket_{{ ticket_type.id }}"
-                                           x-model.number="quantity"
+                                           data-toggle-target="input"
+                                           data-action="input->toggle#toggle"
                                            min="0"
                                            max="{{ ticket_type.max_per_order }}"
                                            value="0"
-                                           @input="if (quantity > {{ ticket_type.max_per_order }}) quantity = {{ ticket_type.max_per_order }}; if (quantity < 0) quantity = 0; showAttendees = quantity > 1"
-                                           @change="if (quantity > {{ ticket_type.max_per_order }}) quantity = {{ ticket_type.max_per_order }}; if (quantity < 0) quantity = 0"
                                            class="h-10 w-20 rounded-md border border-input bg-background px-3 py-2 text-sm text-center ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                            placeholder="0">
-                                    <span class="text-xs text-muted-foreground" x-show="quantity > 0" x-cloak>
-                                        <span x-text="quantity"></span> <span x-text="quantity === 1 ? '{% trans "ticket" %}' : '{% trans "tickets" %}'"></span>
+                                    <span class="text-xs text-muted-foreground hidden" data-toggle-target="label">
+                                        <span data-toggle-target="quantity"></span> <span data-toggle-target="text"></span>
                                     </span>
                                     {% if ticket_type.available_quantity < 10 and ticket_type.available_quantity > 0 %}
                                     <span class="text-sm text-destructive">{% blocktrans with qty=ticket_type.available_quantity %}Only {{ qty }} left!{% endblocktrans %}</span>
                                     {% endif %}
                                 </div>
 
-                                <div x-show="showAttendees && quantity > 1" x-collapse x-cloak class="space-y-3 pt-3 border-t border-border">
+                                <div data-toggle-target="content" class="hidden space-y-3 pt-3 border-t border-border">
                                     <div class="flex items-center justify-between">
                                         <div class="flex items-center gap-2 text-sm font-medium">
                                             <i data-lucide="users" class="w-4 h-4"></i>
-                                            <span x-text="quantity + ' {% trans "Attendees" %}'"></span>
+                                            <span data-toggle-target="attendeeCount">{% trans "Attendees" %}</span>
                                         </div>
                                         <span class="text-xs text-muted-foreground">{% trans "Optional" %}</span>
                                     </div>
-                                    <div class="space-y-2 max-h-80 overflow-y-auto pr-1">
-                                        <template x-for="i in quantity" :key="i">
-                                            <div class="bg-muted/30 rounded-lg p-3 space-y-2 border border-border">
-                                                <div class="text-xs font-medium text-muted-foreground" x-text="'{% trans "Person" %} ' + i"></div>
-                                                <div class="grid grid-cols-1 gap-2">
-                                                    <input type="text"
-                                                           :name="'attendee_name_{{ ticket_type.id }}_' + (i-1)"
-                                                           class="input w-full text-sm h-9"
-                                                           :placeholder="'{% trans "Full name" %}'">
-                                                    <input type="email"
-                                                           :name="'attendee_email_{{ ticket_type.id }}_' + (i-1)"
-                                                           class="input w-full text-sm h-9"
-                                                           :placeholder="'{% trans "Email address" %}'">
-                                                </div>
-                                            </div>
-                                        </template>
+                                    <div class="space-y-2 max-h-80 overflow-y-auto pr-1" data-toggle-target="attendeeList">
                                     </div>
                                 </div>
                             </div>
@@ -450,11 +315,10 @@
                             <p class="text-xs text-muted-foreground mb-3">{% trans "Choose your preferred delivery method for this group purchase" %}</p>
 
                             <div class="space-y-2">
-                                <label class="flex items-center gap-3 p-3 rounded-lg border border-border cursor-pointer hover:bg-muted/50 transition-colors"
-                                       :class="deliveryMethod === 'EMAIL_ALL' ? 'bg-primary/5 border-primary' : ''">
+                                <label class="flex items-center gap-3 p-3 rounded-lg border border-border cursor-pointer hover:bg-muted/50 transition-colors">
                                     <input type="radio" name="delivery_method" value="EMAIL_ALL"
-                                           x-model="deliveryMethod"
-                                           @change="deliveryError = ''"
+                                           checked
+                                           data-action="change->event-checkout#updateDeliveryMethod"
                                            class="w-4 h-4 text-primary border-border focus:ring-2 focus:ring-primary focus:ring-offset-2">
                                     <div class="flex-1">
                                         <div class="flex items-center gap-2">
@@ -465,11 +329,9 @@
                                     </div>
                                 </label>
 
-                                <label class="flex items-center gap-3 p-3 rounded-lg border border-border cursor-pointer hover:bg-muted/50 transition-colors"
-                                       :class="deliveryMethod === 'EMAIL_INDIVIDUALLY' ? 'bg-primary/5 border-primary' : ''">
+                                <label class="flex items-center gap-3 p-3 rounded-lg border border-border cursor-pointer hover:bg-muted/50 transition-colors">
                                     <input type="radio" name="delivery_method" value="EMAIL_INDIVIDUALLY"
-                                           x-model="deliveryMethod"
-                                           @change="deliveryError = ''"
+                                           data-action="change->event-checkout#updateDeliveryMethod"
                                            class="w-4 h-4 text-primary border-border focus:ring-2 focus:ring-primary focus:ring-offset-2">
                                     <div class="flex-1">
                                         <div class="flex items-center gap-2">
@@ -481,8 +343,7 @@
                                 </label>
                             </div>
 
-                            <div x-show="deliveryMethod === 'EMAIL_INDIVIDUALLY'" x-collapse x-cloak
-                                 class="mt-3 p-3 rounded-lg bg-muted/30 border border-border">
+                            <div data-event-checkout-target="individualDeliveryInfo" class="hidden mt-3 p-3 rounded-lg bg-muted/30 border border-border">
                                 <div class="flex items-start gap-2">
                                     <i data-lucide="info" class="w-4 h-4 text-primary flex-shrink-0 mt-0.5"></i>
                                     <p class="text-xs text-muted-foreground">
@@ -491,11 +352,10 @@
                                 </div>
                             </div>
 
-                            <div x-show="deliveryError" x-collapse x-cloak
-                                 class="mt-3 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                            <div class="hidden mt-3 p-3 rounded-lg bg-destructive/10 border border-destructive/20" data-event-checkout-target="deliveryErrorContainer">
                                 <div class="flex items-start gap-2">
                                     <i data-lucide="alert-circle" class="w-4 h-4 text-destructive flex-shrink-0 mt-0.5"></i>
-                                    <p class="text-xs text-destructive" x-text="deliveryError"></p>
+                                    <p class="text-xs text-destructive" data-event-checkout-target="deliveryError"></p>
                                 </div>
                             </div>
                         </div>
@@ -503,20 +363,21 @@
                         <div class="border-t border-border pt-4 mt-4">
                             <label class="block text-sm font-medium mb-2">{% trans "Have a coupon code?" %}</label>
                             <div class="flex gap-2 items-center">
-                                <input type="text" name="coupon_code" x-model="couponCode"
-                                       placeholder="{% trans "Enter code" %}" class="input flex-1 uppercase font-mono text-sm h-9"
-                                       @input.debounce.500ms="validateCoupon()">
-                                {% #button type="button" variant="outline" size="sm" attrs='@click="validateCoupon()"' %}
+                                <input type="text" name="coupon_code"
+                                       data-event-checkout-target="couponInput"
+                                       data-action="input->event-checkout#validateCoupon"
+                                       placeholder="{% trans "Enter code" %}" class="input flex-1 uppercase font-mono text-sm h-9">
+                                {% #button type="button" variant="outline" size="sm" attrs='data-action="click->event-checkout#validateCoupon"' %}
                                     {% trans "Apply" %}
                                 {% /button %}
                             </div>
-                            <div x-show="couponValid === true" class="mt-2 text-sm text-success flex items-center gap-1" x-cloak>
+                            <div class="hidden mt-2 text-sm text-success flex items-center gap-1" data-event-checkout-target="couponDiscountContainer">
                                 <i data-lucide="check-circle" class="w-4 h-4"></i>
-                                <span x-text="couponDiscount"></span> applied!
+                                <span data-event-checkout-target="couponDiscount"></span> applied!
                             </div>
-                            <div x-show="couponValid === false" class="mt-2 text-sm text-destructive flex items-center gap-1" x-cloak>
+                            <div class="hidden mt-2 text-sm text-destructive flex items-center gap-1" data-event-checkout-target="couponErrorContainer">
                                 <i data-lucide="x-circle" class="w-4 h-4"></i>
-                                <span x-text="couponError"></span>
+                                <span data-event-checkout-target="couponError"></span>
                             </div>
                         </div>
 

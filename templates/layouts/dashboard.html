@@ -2,9 +2,16 @@
 {% load slippers %}
 {% load i18n %}
 <!DOCTYPE html>
-<html lang="en" class="h-full" x-data="themeHandler()" :class="{ 'dark': isDark }">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
+    <script>
+        (function() {
+            var mode = localStorage.getItem('theme') || 'system';
+            var isDark = mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (isDark) document.documentElement.classList.add('dark');
+        })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% trans "Dashboard" %} - Reckot{% endblock %}</title>
 
@@ -14,155 +21,122 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="{% static 'css/output.css' %}" rel="stylesheet">
-    <script>
-        function themeHandler() {
-            const mode = localStorage.getItem('theme') || 'system';
-            const initialIsDark = mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    <script src="https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js"></script>
+    <script defer src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
 
-            return {
-                isDark: initialIsDark,
-                mode: mode,
-                init() {
-                    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-                        if (this.mode === 'system') this.updateTheme();
-                    });
-                },
-                updateTheme() {
-                    if (this.mode === 'system') {
-                        this.isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                    } else {
-                        this.isDark = this.mode === 'dark';
-                    }
-                },
-                setMode(m) {
-                    this.mode = m;
-                    localStorage.setItem('theme', m);
-                    this.updateTheme();
-                }
-            }
+    <script type="module">
+        import { Application } from "https://unpkg.com/@hotwired/stimulus@3.2.2/dist/stimulus.js"
+
+        if (!window.Stimulus) {
+            window.Stimulus = Application.start();
+            window.Stimulus.debug = false;
         }
     </script>
-    <style>
-        body { font-family: 'Inter', system-ui, sans-serif; }
-        [x-cloak] { display: none !important; }
-    </style>
+
+    <script src="{% static 'js/stimulus-app.js' %}?v=1770458333"></script>
     {% block extra_head %}{% endblock %}
 </head>
-<body class="min-h-screen bg-background text-foreground antialiased" hx-boost="true" data-ai-enabled="{% if user.is_authenticated and user.ai_features_enabled %}true{% else %}false{% endif %}">
+<body class="min-h-screen bg-background text-foreground antialiased" hx-boost="true" data-controller="theme" data-ai-enabled="{% if user.is_authenticated and user.ai_features_enabled %}true{% else %}false{% endif %}">
     {% include "partials/page_loader.html" %}
     {% include "partials/messages.html" %}
-    <div x-data="{ sidebarOpen: false, collapsed: localStorage.getItem('sidebarCollapsed') === 'true' }"
-         x-init="$watch('collapsed', val => localStorage.setItem('sidebarCollapsed', val))"
+    <div data-controller="sidebar"
          class="flex min-h-screen overflow-x-hidden">
 
-        <div x-show="sidebarOpen"
-             x-transition:enter="transition-opacity ease-out duration-200"
-             x-transition:enter-start="opacity-0"
-             x-transition:enter-end="opacity-100"
-             x-transition:leave="transition-opacity ease-in duration-150"
-             x-transition:leave-start="opacity-100"
-             x-transition:leave-end="opacity-0"
-             @click="sidebarOpen = false"
-             class="fixed inset-0 z-40 bg-black/50 lg:hidden"
-             x-cloak>
+        <div data-sidebar-target="overlay"
+             data-action="click->sidebar#close"
+             class="fixed inset-0 z-40 bg-black/50 lg:hidden hidden transition-opacity duration-200">
         </div>
 
-        <aside :class="[
-                   sidebarOpen ? 'translate-x-0' : '-translate-x-full',
-                   collapsed ? 'lg:w-[68px]' : 'lg:w-64',
-                   'lg:translate-x-0'
-               ]"
-               class="fixed inset-y-0 left-0 z-40 w-64 bg-card border-r border-border flex flex-col transition-all duration-200 ease-in-out">
+        <aside data-sidebar-target="sidebar"
+               class="fixed inset-y-0 left-0 z-40 w-64 -translate-x-full lg:translate-x-0 lg:w-64 bg-card border-r border-border flex flex-col transition-all duration-200 ease-in-out">
 
             <div class="flex h-14 items-center border-b border-border px-4 gap-2">
-                <a href="{% url 'home' %}" hx-boost="false" class="flex items-center flex-1 min-w-0" :class="collapsed && 'justify-center'">
-                    <template x-if="!collapsed">
-                        <div>
-                            {% include "partials/logo_full.html" %}
-                        </div>
-                    </template>
-                    <template x-if="collapsed">
+                <a href="{% url 'home' %}" hx-boost="false" class="flex items-center flex-1 min-w-0">
+                    <div class="sidebar-logo-full">
+                        {% include "partials/logo_full.html" %}
+                    </div>
+                    <div class="sidebar-logo-icon hidden">
                         <div class="flex h-8 w-8 items-center justify-center">
                             {% include "partials/logo_icon.html" %}
                         </div>
-                    </template>
+                    </div>
                 </a>
-                <button @click="collapsed = !collapsed"
+                <button data-action="click->sidebar#toggleCollapse"
                         class="hidden lg:flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted transition-colors shrink-0"
-                        :title="collapsed ? '{% trans "Expand sidebar" %}' : '{% trans "Collapse sidebar" %}'">
-                    <i x-show="!collapsed" data-lucide="panel-left-close" class="h-4 w-4"></i>
-                    <i x-show="collapsed" x-cloak data-lucide="panel-left-open" class="h-4 w-4"></i>
+                        title="{% trans 'Toggle sidebar' %}">
+                    <i data-sidebar-target="collapseIcon" data-lucide="panel-left-close" class="h-4 w-4"></i>
+                    <i data-sidebar-target="expandIcon" data-lucide="panel-left-open" class="h-4 w-4 hidden"></i>
                 </button>
             </div>
 
             <nav class="flex-1 overflow-y-auto p-3 space-y-1">
                 {% block sidebar_nav %}
                 <div class="space-y-1">
-                    <p class="px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider" x-show="!collapsed">{% trans "Overview" %}</p>
+                    <p class="sidebar-section-title px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">{% trans "Overview" %}</p>
 
                     <a href="{% url 'reports:analytics' %}"
                        class="sidebar-item {% if request.resolver_match.url_name == 'analytics' %}sidebar-item-active{% endif %}">
                         <i data-lucide="bar-chart-3" class="h-5 w-5 shrink-0"></i>
-                        <span x-show="!collapsed" x-transition class="truncate">{% trans "Analytics" %}</span>
+                        <span class="sidebar-text truncate">{% trans "Analytics" %}</span>
                     </a>
 
                     <a href="{% url 'events:list' %}"
                        class="sidebar-item {% if 'events' in request.path %}sidebar-item-active{% endif %}">
                         <i data-lucide="calendar" class="h-5 w-5 shrink-0"></i>
-                        <span x-show="!collapsed" x-transition class="truncate">{% trans "Events" %}</span>
+                        <span class="sidebar-text truncate">{% trans "Events" %}</span>
                     </a>
 
                     <a href="{% url 'orgs:list' %}"
                        class="sidebar-item {% if 'orgs' in request.path %}sidebar-item-active{% endif %}">
                         <i data-lucide="building-2" class="h-5 w-5 shrink-0"></i>
-                        <span x-show="!collapsed" x-transition class="truncate">{% trans "Organizations" %}</span>
+                        <span class="sidebar-text truncate">{% trans "Organizations" %}</span>
                     </a>
                 </div>
 
                 <div class="pt-4 space-y-1">
-                    <p class="px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider" x-show="!collapsed">{% trans "Operations" %}</p>
+                    <p class="sidebar-section-title px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">{% trans "Operations" %}</p>
 
                     <a href="{% url 'tickets:list' %}"
                        class="sidebar-item {% if request.resolver_match.url_name == 'list' and 'tickets' in request.path %}sidebar-item-active{% endif %}">
                         <i data-lucide="ticket" class="h-5 w-5 shrink-0"></i>
-                        <span x-show="!collapsed" x-transition class="truncate">{% trans "RSVP" %}</span>
+                        <span class="sidebar-text truncate">{% trans "RSVP" %}</span>
                     </a>
 
                     <a href="{% url 'checkin:list' %}"
                        class="sidebar-item {% if request.resolver_match.url_name == 'list' and 'checkin' in request.path %}sidebar-item-active{% endif %}">
                         <i data-lucide="scan-line" class="h-5 w-5 shrink-0"></i>
-                        <span x-show="!collapsed" x-transition class="truncate">{% trans "Check-in" %}</span>
+                        <span class="sidebar-text truncate">{% trans "Check-in" %}</span>
                     </a>
 
                     <a href="{% url 'payments:list' %}"
                        class="sidebar-item {% if request.resolver_match.url_name == 'list' and 'payments' in request.path %}sidebar-item-active{% endif %}">
                         <i data-lucide="credit-card" class="h-5 w-5 shrink-0"></i>
-                        <span x-show="!collapsed" x-transition class="truncate">{% trans "Payments" %}</span>
+                        <span class="sidebar-text truncate">{% trans "Payments" %}</span>
                     </a>
 
                     <a href="{% url 'payments:refunds' %}"
                        class="sidebar-item {% if 'refunds' in request.path %}sidebar-item-active{% endif %}">
                         <i data-lucide="rotate-ccw" class="h-5 w-5 shrink-0"></i>
-                        <span x-show="!collapsed" x-transition class="truncate">{% trans "Refunds" %}</span>
+                        <span class="sidebar-text truncate">{% trans "Refunds" %}</span>
                     </a>
 
                     <a href="{% url 'payments:transactions' %}"
                        class="sidebar-item {% if 'transactions' in request.path %}sidebar-item-active{% endif %}">
                         <i data-lucide="receipt" class="h-5 w-5 shrink-0"></i>
-                        <span x-show="!collapsed" x-transition class="truncate">{% trans "Transactions" %}</span>
+                        <span class="sidebar-text truncate">{% trans "Transactions" %}</span>
                     </a>
 
                     <a href="{% url 'events:coupons' %}"
                        class="sidebar-item {% if 'coupons' in request.path %}sidebar-item-active{% endif %}">
                         <i data-lucide="tag" class="h-5 w-5 shrink-0"></i>
-                        <span x-show="!collapsed" x-transition class="truncate">{% trans "Coupons" %}</span>
+                        <span class="sidebar-text truncate">{% trans "Coupons" %}</span>
                     </a>
 
                     {% if user_orgs.first %}
                     <a href="{% url 'messaging:campaign_list' org_slug=user_orgs.first.organization.slug %}"
                        class="sidebar-item {% if 'messaging' in request.path %}sidebar-item-active{% endif %}">
                         <i data-lucide="mail" class="h-5 w-5 shrink-0"></i>
-                        <span x-show="!collapsed" x-transition class="truncate">{% trans "Messaging" %}</span>
+                        <span class="sidebar-text truncate">{% trans "Messaging" %}</span>
                     </a>
                     {% endif %}
                 </div>
@@ -170,25 +144,26 @@
             </nav>
 
             <div class="border-t border-border p-3">
-                <div x-show="!collapsed" x-transition class="space-y-1">
-                    <button @click="setMode(isDark ? 'light' : 'dark')"
-                            class="sidebar-item w-full text-left">
-                        <i x-show="!isDark" data-lucide="moon" class="h-5 w-5 shrink-0"></i>
-                        <i x-show="isDark" data-lucide="sun" class="h-5 w-5 shrink-0"></i>
-                        <span class="truncate" x-text="isDark ? '{% trans "Light mode" %}' : '{% trans "Dark mode" %}'"></span>
+                <div class="sidebar-footer space-y-1">
+                    <button data-action="click->theme#toggleMode" class="sidebar-item w-full text-left">
+                        <i data-lucide="moon" class="h-5 w-5 shrink-0 dark:hidden"></i>
+                        <i data-lucide="sun" class="h-5 w-5 shrink-0 hidden dark:inline-block"></i>
+                        <span class="theme-text truncate dark:hidden">{% trans "Dark mode" %}</span>
+                        <span class="theme-text truncate hidden dark:inline">{% trans "Light mode" %}</span>
                     </button>
 
                     <a href="{% url 'account_logout' %}?next={{ request.path }}" hx-boost="false" class="sidebar-item text-red-500 hover:text-red-600 hover:bg-red-500/10">
                         <i data-lucide="log-out" class="h-5 w-5 shrink-0"></i>
-                        <span class="truncate">{% trans "Sign out" %}</span>
+                        <span class="sidebar-text truncate">{% trans "Sign out" %}</span>
                     </a>
                 </div>
             </div>
         </aside>
 
-        <div class="flex-1 flex flex-col w-full max-w-full overflow-x-hidden" :class="collapsed ? 'lg:pl-[68px]' : 'lg:pl-64'" style="transition: padding-left 0.2s ease-in-out">
+        <div class="main-content flex-1 flex flex-col w-full max-w-full overflow-x-hidden lg:pl-64" style="transition: padding-left 0.2s ease-in-out"
+             data-action="sidebar:collapsed@window->sidebar#updateMainPadding">
             <header class="sticky top-0 z-30 flex h-14 items-center gap-2 sm:gap-4 border-b border-border bg-card backdrop-blur-sm supports-[backdrop-filter]:bg-card/95 px-3 sm:px-4 lg:px-6 w-full max-w-full">
-                <button @click="sidebarOpen = true" class="lg:hidden -ml-2 p-2 rounded-md hover:bg-muted shrink-0">
+                <button data-action="click->sidebar#toggleOpen" class="lg:hidden -ml-2 p-2 rounded-md hover:bg-muted shrink-0">
                     <i data-lucide="menu" class="h-5 w-5"></i>
                 </button>
 
@@ -205,8 +180,8 @@
                         {% include "partials/language_switcher.html" %}
                     </div>
 
-                    <div x-data="{ open: false }" class="relative">
-                        <button @click="open = !open" class="flex items-center gap-2 rounded-full p-1 hover:bg-muted transition-colors shrink-0">
+                    <div data-controller="toggle" class="relative">
+                        <button data-action="click->toggle#toggle" class="flex items-center gap-2 rounded-full p-1 hover:bg-muted transition-colors shrink-0">
                             {% if user.get_profile_image_url %}
                             <img src="{{ user.get_profile_image_url }}" alt="{{ user.get_full_name|default:user.email }}" class="h-8 w-8 rounded-full object-cover">
                             {% else %}
@@ -216,16 +191,9 @@
                             {% endif %}
                         </button>
 
-                        <div x-show="open"
-                             @click.away="open = false"
-                             x-transition:enter="transition ease-out duration-100"
-                             x-transition:enter-start="opacity-0 scale-95"
-                             x-transition:enter-end="opacity-100 scale-100"
-                             x-transition:leave="transition ease-in duration-75"
-                             x-transition:leave-start="opacity-100 scale-100"
-                             x-transition:leave-end="opacity-0 scale-95"
-                             class="absolute right-0 mt-2 w-56 origin-top-right rounded-lg border border-border bg-card shadow-lg"
-                             x-cloak>
+                        <div data-toggle-target="content"
+                             data-action="click@window->toggle#clickOutside"
+                             class="absolute right-0 mt-2 w-56 origin-top-right rounded-lg border border-border bg-card shadow-lg hidden transition-all duration-100">
                             <div class="p-2">
                                 <div class="px-2 py-1.5">
                                     <p class="text-sm font-medium">{{ user.email }}</p>

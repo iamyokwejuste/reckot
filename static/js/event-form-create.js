@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
+(function() {
     const form = document.querySelector('form');
     if (form && window.FormPersistence) {
         const formId = 'event_create';
@@ -52,4 +52,4 @@ document.addEventListener('DOMContentLoaded', function () {
             }, 100);
         }, 500);
     }
-});
+})();

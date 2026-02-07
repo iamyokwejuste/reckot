@@ -1,21 +1,5 @@
 {% load static %}
 
-<script>
-// Prevent Alpine from auto-starting
-document.addEventListener('alpine:init', () => {
-    console.log('Alpine init event fired');
-});
-</script>
-<script src="https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js"></script>
-<script src="{% static 'js/alpine-components.js' %}?v=1738718837"></script>
-<script src="{% static 'js/event-form-alpine.js' %}?v=1738718837"></script>
-<script src="{% static 'js/chatbot.js' %}"></script>
-<script src="{% static 'js/event_checkout.js' %}"></script>
-<script defer src="https://unpkg.com/@alpinejs/collapse@3.14.8/dist/cdn.min.js"></script>
-<script defer src="https://unpkg.com/@alpinejs/intersect@3.14.8/dist/cdn.min.js"></script>
-<script defer src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js"></script>
-<script defer src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
-
 {% if use_motion %}
 <script src="https://unpkg.com/motion@10.18.0/dist/motion.min.js"></script>
 {% endif %}
@@ -29,72 +13,22 @@ document.addEventListener('alpine:init', () => {
 (function() {
     'use strict';
 
+    if (window._ReckotApp) return;
+
     const ReckotApp = {
-        alpineComponents: {},
-
         init() {
-            this.setupAlpineRegistry();
             this.setupEventListeners();
-        },
-
-        setupAlpineRegistry() {
-            window.registerAlpineComponent = (name, componentFactory) => {
-                console.log(`Registering Alpine component: ${name}`);
-
-                if (this.alpineComponents[name]) {
-                    console.log(`Component ${name} already registered`);
-                    return;
-                }
-
-                this.alpineComponents[name] = componentFactory;
-
-                // Use alpine:init event for registration
-                if (typeof Alpine !== 'undefined' && Alpine.version) {
-                    try {
-                        Alpine.data(name, componentFactory);
-                        console.log(`Component ${name} registered with Alpine`);
-                    } catch (error) {
-                        console.error(`Failed to register Alpine component: ${name}`, error);
-                    }
-                } else {
-                    console.log(`Alpine not ready, queuing ${name} for registration`);
-                    document.addEventListener('alpine:init', () => {
-                        if (typeof Alpine !== 'undefined') {
-                            try {
-                                Alpine.data(name, componentFactory);
-                                console.log(`Component ${name} registered via alpine:init`);
-                            } catch (error) {
-                                console.error(`Failed to register ${name} via alpine:init:`, error);
-                            }
-                        }
-                    });
-                }
-            };
-        },
-
-        registerPendingComponents() {
-            if (typeof Alpine === 'undefined') {
-                console.log('Alpine not loaded yet, retrying...');
-                setTimeout(() => this.registerPendingComponents(), 50);
-                return;
-            }
-
-            console.log(`Registering ${Object.keys(this.alpineComponents).length} pending components`);
-            Object.entries(this.alpineComponents).forEach(([name, factory]) => {
-                try {
-                    Alpine.data(name, factory);
-                    console.log(`Registered component: ${name}`);
-                } catch (error) {
-                    console.error(`Failed to register Alpine component: ${name}`, error);
-                }
-            });
         },
 
         setupEventListeners() {
             document.addEventListener('DOMContentLoaded', () => this.onDOMReady());
             document.addEventListener('htmx:beforeRequest', () => this.onHTMXBeforeRequest());
-            document.addEventListener('htmx:afterSwap', (evt) => this.onHTMXSwap(evt));
-            document.addEventListener('htmx:afterSettle', (evt) => this.onHTMXAfterSettle(evt));
+            document.addEventListener('htmx:afterSettle', () => this.onHTMXAfterSettle());
+        },
+
+        onDOMReady() {
+            this.initializeLucide();
+            document.dispatchEvent(new CustomEvent('app:ready'));
         },
 
         onHTMXBeforeRequest() {
@@ -105,31 +39,7 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-        onDOMReady() {
-            this.initializeLucide();
-            this.notifyReady();
-        },
-
-        notifyReady() {
-            if (typeof Alpine !== 'undefined' && Alpine.version) {
-                document.dispatchEvent(new CustomEvent('app:ready'));
-            } else {
-                setTimeout(() => this.notifyReady(), 50);
-            }
-        },
-
-        onHTMXSwap(evt) {
-            const target = evt.detail.target;
-
-            this.executeInlineScripts(target);
-
-            requestAnimationFrame(() => {
-                this.initializeAlpine(target);
-                this.initializeLucide();
-            });
-        },
-
-        onHTMXAfterSettle(evt) {
+        onHTMXAfterSettle() {
             requestAnimationFrame(() => {
                 this.initializeLucide();
                 this.hideLoader();
@@ -146,49 +56,17 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-        executeInlineScripts(container) {
-            const scripts = container.querySelectorAll('script');
-            scripts.forEach(oldScript => {
-                if (oldScript.src) return;
-
-                const newScript = document.createElement('script');
-                newScript.textContent = oldScript.textContent;
-
-                Array.from(oldScript.attributes).forEach(attr => {
-                    newScript.setAttribute(attr.name, attr.value);
-                });
-
-                oldScript.parentNode.replaceChild(newScript, oldScript);
-            });
-        },
-
-        initializeAlpine(container) {
-            if (typeof Alpine === 'undefined') return;
-
-            const elements = container.querySelectorAll('[x-data]');
-            elements.forEach(el => {
-                if (!el._x_dataStack) {
-                    try {
-                        Alpine.initTree(el);
-                    } catch (error) {
-                        console.error('Alpine initialization error:', error);
-                    }
-                }
-            });
-        },
-
         initializeLucide() {
             if (typeof lucide !== 'undefined') {
                 try {
                     lucide.createIcons();
-                } catch (error) {
-                    console.error('Lucide initialization error:', error);
-                }
+                } catch (error) {}
             }
         }
     };
 
     ReckotApp.init();
+    window._ReckotApp = ReckotApp;
 
     document.addEventListener('showToast', (e) => {
         const { type, message } = e.detail;

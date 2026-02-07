@@ -9,17 +9,17 @@
     <div class="container">
         <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <div>
-                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-card text-sm font-medium mb-8" x-data x-intersect.once="$el.classList.add('animate-in')">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-card text-sm font-medium mb-8" data-controller="animate" data-animate-classes-value="animate-in" data-animate-once-value="true">
                     <span class="flex h-2 w-2 rounded-full bg-emerald-500"></span>
                     {% trans "MTN MoMo & Orange Money ready" %}
                 </div>
-                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.1] text-balance" x-data x-intersect.once="$el.classList.add('animate-in', 'delay-1')">
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.1] text-balance" data-controller="animate" data-animate-classes-value="animate-in delay-1" data-animate-once-value="true">
                     {% trans "Event management made simple for Africa" %}
                 </h1>
-                <p class="mt-6 text-lg text-muted-foreground max-w-xl text-pretty leading-relaxed" x-data x-intersect.once="$el.classList.add('animate-in', 'delay-2')">
+                <p class="mt-6 text-lg text-muted-foreground max-w-xl text-pretty leading-relaxed" data-controller="animate" data-animate-classes-value="animate-in delay-2" data-animate-once-value="true">
                     {% trans "Create events, sell tickets with mobile money, and check in attendees with QR codes. Everything you need, nothing you don't." %}
                 </p>
-                <div class="flex flex-col sm:flex-row gap-3 mt-10" x-data x-intersect.once="$el.classList.add('animate-in', 'delay-3')">
+                <div class="flex flex-col sm:flex-row gap-3 mt-10" data-controller="animate" data-animate-classes-value="animate-in delay-3" data-animate-once-value="true">
                     <a href="{% url 'account_signup' %}">
                         {% #button variant="default" size="lg" %}
                             {% trans "Start free" %}
@@ -31,7 +31,7 @@
                     </a>
                 </div>
             </div>
-            <div class="relative" x-data x-intersect.once="$el.classList.add('animate-scale')">
+            <div class="relative" data-controller="animate" data-animate-classes-value="animate-scale" data-animate-once-value="true">
                 <div class="aspect-[4/3] rounded-2xl border border-border bg-card p-6 lg:p-8">
                     <div class="flex items-center gap-3 mb-6">
                         <div class="h-3 w-3 rounded-full bg-red-400"></div>
@@ -51,7 +51,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="absolute -bottom-4 -right-4 lg:-bottom-6 lg:-right-6 p-4 rounded-xl border border-border bg-card shadow-lg" x-data x-intersect.once="$el.classList.add('animate-in', 'delay-4')">
+                <div class="absolute -bottom-4 -right-4 lg:-bottom-6 lg:-right-6 p-4 rounded-xl border border-border bg-card shadow-lg" data-controller="animate" data-animate-classes-value="animate-in delay-4" data-animate-once-value="true">
                     <div class="flex items-center gap-3">
                         <div class="h-10 w-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
                             <i data-lucide="check" class="w-5 h-5 text-emerald-600"></i>
@@ -64,7 +64,7 @@
                 </div>
             </div>
         </div>
-        <div class="mt-20 lg:mt-28 grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12" x-data x-intersect.once="$el.classList.add('animate-in', 'delay-5')">
+        <div class="mt-20 lg:mt-28 grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12" data-controller="animate" data-animate-classes-value="animate-in delay-5" data-animate-once-value="true">
             <div class="text-center md:text-left">
                 <p class="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight">500+</p>
                 <p class="text-muted-foreground text-sm mt-1">{% trans "Events hosted" %}</p>
@@ -126,7 +126,7 @@
 {% if featured_events %}
 <section id="featured" class="py-20 md:py-28">
     <div class="container">
-        <div class="flex items-center justify-between mb-10" x-data x-intersect.once="$el.classList.add('animate-in')">
+        <div class="flex items-center justify-between mb-10" data-controller="animate" data-animate-classes-value="animate-in" data-animate-once-value="true">
             <div>
                 <h2 class="text-2xl md:text-3xl font-semibold tracking-tight">{% trans "Featured Events" %}</h2>
                 <p class="text-muted-foreground mt-2">{% trans "Discover upcoming events handpicked by our team" %}</p>
@@ -139,7 +139,7 @@
             </a>
         </div>
 
-        <div class="relative" x-data x-intersect.once="$el.classList.add('animate-in', 'delay-1')">
+        <div class="relative" data-controller="animate" data-animate-classes-value="animate-in delay-1" data-animate-once-value="true">
             <div class="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0 lg:grid lg:grid-cols-5 lg:overflow-visible lg:gap-0">
                 {% for event in featured_events %}
                 <div class="snap-start shrink-0 w-72 lg:w-auto featured-card-{{ forloop.counter }}">
@@ -196,26 +196,16 @@
         </a>
     </div>
 </section>
-
-<style>
-@media (min-width: 1024px) {
-    .featured-card-1 { margin-right: -1rem; z-index: 50; }
-    .featured-card-2 { margin-left: -0.5rem; margin-right: -0.5rem; z-index: 40; transform: scale(0.95); }
-    .featured-card-3 { z-index: 30; transform: scale(0.9); }
-    .featured-card-4 { margin-left: -0.5rem; margin-right: -0.5rem; z-index: 20; transform: scale(0.95); }
-    .featured-card-5 { margin-left: -1rem; z-index: 10; }
-}
-</style>
 {% endif %}
 
 <section id="features" class="py-20 md:py-28">
     <div class="container">
-        <div class="text-center max-w-2xl mx-auto mb-16" x-data x-intersect.once="$el.classList.add('animate-in')">
+        <div class="text-center max-w-2xl mx-auto mb-16" data-controller="animate" data-animate-classes-value="animate-in" data-animate-once-value="true">
             <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">{% trans "Everything you need to run events" %}</h2>
             <p class="text-muted-foreground mt-4 text-lg">{% trans "From ticket sales to check-in, we handle the logistics so you can focus on your event." %}</p>
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-            <div class="card p-6 lg:p-8 sm:col-span-2 lg:col-span-2 lg:row-span-2" x-data x-intersect.once="$el.classList.add('animate-scale')">
+            <div class="card p-6 lg:p-8 sm:col-span-2 lg:col-span-2 lg:row-span-2" data-controller="animate" data-animate-classes-value="animate-scale" data-animate-once-value="true">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="h-10 w-10 rounded-xl bg-foreground flex items-center justify-center">
                         <i data-lucide="smartphone" class="w-5 h-5 text-background"></i>
@@ -245,40 +235,40 @@
                     </div>
                 </div>
             </div>
-            <div class="card p-6 lg:p-8 bg-foreground text-background" x-data x-intersect.once="$el.classList.add('animate-scale', 'delay-1')">
+            <div class="card p-6 lg:p-8 bg-foreground text-background" data-controller="animate" data-animate-classes-value="animate-scale delay-1" data-animate-once-value="true">
                 <div class="text-4xl lg:text-5xl font-semibold">{{ PLATFORM_FEE_PERCENTAGE }}%</div>
                 <p class="mt-2 text-background/70">{% trans "per paid ticket" %}</p>
                 <p class="text-sm text-background/50 mt-4">{% trans "Choose your plan, pay only when you sell" %}</p>
             </div>
-            <div class="card p-6 lg:p-8" x-data x-intersect.once="$el.classList.add('animate-scale', 'delay-2')">
+            <div class="card p-6 lg:p-8" data-controller="animate" data-animate-classes-value="animate-scale delay-2" data-animate-once-value="true">
                 <div class="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4">
                     <i data-lucide="scan-line" class="w-5 h-5 text-emerald-600"></i>
                 </div>
                 <h3 class="font-semibold">{% trans "QR Check-in" %}</h3>
                 <p class="text-muted-foreground text-sm mt-2">{% trans "Scan tickets in under 2 seconds. Works offline." %}</p>
             </div>
-            <div class="card p-6 lg:p-8" x-data x-intersect.once="$el.classList.add('animate-scale', 'delay-3')">
+            <div class="card p-6 lg:p-8" data-controller="animate" data-animate-classes-value="animate-scale delay-3" data-animate-once-value="true">
                 <div class="h-10 w-10 rounded-xl bg-foreground flex items-center justify-center mb-4">
                     <i data-lucide="bar-chart-3" class="w-5 h-5 text-background"></i>
                 </div>
                 <h3 class="font-semibold">{% trans "Real-time analytics" %}</h3>
                 <p class="text-muted-foreground text-sm mt-2">{% trans "Track sales, revenue, and attendance live." %}</p>
             </div>
-            <div class="card p-6 lg:p-8" x-data x-intersect.once="$el.classList.add('animate-scale', 'delay-4')">
+            <div class="card p-6 lg:p-8" data-controller="animate" data-animate-classes-value="animate-scale delay-4" data-animate-once-value="true">
                 <div class="h-10 w-10 rounded-xl bg-foreground flex items-center justify-center mb-4">
                     <i data-lucide="users" class="w-5 h-5 text-background"></i>
                 </div>
                 <h3 class="font-semibold">{% trans "Team access" %}</h3>
                 <p class="text-muted-foreground text-sm mt-2">{% trans "Add collaborators with custom permissions." %}</p>
             </div>
-            <div class="card p-6 lg:p-8" x-data x-intersect.once="$el.classList.add('animate-scale', 'delay-5')">
+            <div class="card p-6 lg:p-8" data-controller="animate" data-animate-classes-value="animate-scale delay-5" data-animate-once-value="true">
                 <div class="h-10 w-10 rounded-xl bg-foreground flex items-center justify-center mb-4">
                     <i data-lucide="gift" class="w-5 h-5 text-background"></i>
                 </div>
                 <h3 class="font-semibold">{% trans "Swag tracking" %}</h3>
                 <p class="text-muted-foreground text-sm mt-2">{% trans "Manage giveaways at check-in." %}</p>
             </div>
-            <div class="card p-6 lg:p-8 border-2 border-primary/20 bg-primary/5" x-data x-intersect.once="$el.classList.add('animate-scale', 'delay-6')">
+            <div class="card p-6 lg:p-8 border-2 border-primary/20 bg-primary/5" data-controller="animate" data-animate-classes-value="animate-scale delay-6" data-animate-once-value="true">
                 <div class="flex items-center gap-2 mb-4">
                     <div class="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
                         <i data-lucide="sparkles" class="w-5 h-5 text-primary"></i>
@@ -295,25 +285,25 @@
 <section id="how" class="py-20 md:py-28">
     <div class="container">
         <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            <div x-data x-intersect.once="$el.classList.add('animate-in')">
+            <div data-controller="animate" data-animate-classes-value="animate-in" data-animate-once-value="true">
                 <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">{% trans "Three steps to your event" %}</h2>
                 <p class="text-muted-foreground mt-4 text-lg max-w-md">{% trans "From idea to sold-out in minutes, not days." %}</p>
                 <div class="mt-10 space-y-6">
-                    <div class="flex gap-4" x-data x-intersect.once="$el.classList.add('animate-in', 'delay-1')">
+                    <div class="flex gap-4" data-controller="animate" data-animate-classes-value="animate-in delay-1" data-animate-once-value="true">
                         <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-foreground font-semibold">1</div>
                         <div>
                             <h3 class="font-semibold">{% trans "Create your event" %}</h3>
                             <p class="text-muted-foreground mt-1">{% trans "Add details, set ticket types and prices. Takes about 2 minutes." %}</p>
                         </div>
                     </div>
-                    <div class="flex gap-4" x-data x-intersect.once="$el.classList.add('animate-in', 'delay-2')">
+                    <div class="flex gap-4" data-controller="animate" data-animate-classes-value="animate-in delay-2" data-animate-once-value="true">
                         <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-foreground font-semibold">2</div>
                         <div>
                             <h3 class="font-semibold">{% trans "Share your link" %}</h3>
                             <p class="text-muted-foreground mt-1">{% trans "Share on WhatsApp, social media, or email. Tickets sell themselves." %}</p>
                         </div>
                     </div>
-                    <div class="flex gap-4" x-data x-intersect.once="$el.classList.add('animate-in', 'delay-3')">
+                    <div class="flex gap-4" data-controller="animate" data-animate-classes-value="animate-in delay-3" data-animate-once-value="true">
                         <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-foreground font-semibold">3</div>
                         <div>
                             <h3 class="font-semibold">{% trans "Check in attendees" %}</h3>
@@ -328,7 +318,7 @@
                     {% /button %}
                 </a>
             </div>
-            <div class="relative" x-data x-intersect.once="$el.classList.add('animate-scale')">
+            <div class="relative" data-controller="animate" data-animate-classes-value="animate-scale" data-animate-once-value="true">
                 <div class="aspect-square rounded-2xl border border-border bg-card p-6 lg:p-8">
                     <div class="space-y-4">
                         <div class="flex items-center gap-3">
@@ -373,7 +363,7 @@
 
 <section id="pricing" class="py-20 md:py-28">
     <div class="container">
-        <div class="text-center max-w-2xl mx-auto mb-16" x-data x-intersect.once="$el.classList.add('animate-in')">
+        <div class="text-center max-w-2xl mx-auto mb-16" data-controller="animate" data-animate-classes-value="animate-in" data-animate-once-value="true">
             <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">{% trans "Simple, transparent pricing" %}</h2>
             <p class="text-muted-foreground mt-4 text-lg">{% trans "No monthly fees." %} <a href="{% url 'why_us' %}#pricing-calculator" class="underline hover:text-foreground">{% trans "No hidden costs." %}</a> {% trans "Pay only when you sell." %}</p>
         </div>
@@ -412,122 +402,26 @@
 
 <section id="faq" class="py-20 md:py-28 bg-muted/30">
     <div class="container">
-        <div class="text-center max-w-2xl mx-auto mb-16" x-data x-intersect.once="$el.classList.add('animate-in')">
+        <div class="text-center max-w-2xl mx-auto mb-16" data-controller="animate" data-animate-classes-value="animate-in" data-animate-once-value="true">
             <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">{% trans "Frequently asked questions" %}</h2>
             <p class="text-muted-foreground mt-4 text-lg">{% trans "Everything you need to know about Reckot" %}</p>
         </div>
 
-        <div class="max-w-3xl mx-auto space-y-3" x-data="{ openItem: null }" x-intersect.once="$el.classList.add('animate-in', 'delay-1')">
-            <div class="border border-border rounded-xl bg-card overflow-hidden transition-all shadow-sm hover:shadow-md">
-                <button
-                    @click="openItem = openItem === 1 ? null : 1"
-                    class="w-full px-6 py-6 text-left flex items-center justify-between hover:bg-accent/50 transition-colors"
-                    :aria-expanded="openItem === 1"
-                >
-                    <span class="font-semibold text-base pr-6">{% trans "How does mobile money payment work?" %}</span>
-                    <i data-lucide="chevron-down" class="w-5 h-5 text-muted-foreground transition-transform duration-200 flex-shrink-0" :class="openItem === 1 && 'rotate-180'"></i>
-                </button>
-                <div
-                    x-show="openItem === 1"
-                    x-collapse
-                    class="px-6 pb-6 pt-2 text-muted-foreground leading-relaxed"
-                >
-                    <p>{% trans "When a customer buys a ticket, they receive a payment prompt on their phone. They authorize the payment using their MTN MoMo or Orange Money PIN. Confirmation is instant, and the ticket is sent to their email immediately." %}</p>
-                </div>
-            </div>
+        <div data-controller="accordion" class="max-w-3xl mx-auto space-y-3">
+            {% include "partials/accordion_item.html" with index="1" question=_("How does mobile money payment work?") answer=_("When a customer buys a ticket, they receive a payment prompt on their phone. They authorize the payment using their MTN MoMo or Orange Money PIN. Confirmation is instant, and the ticket is sent to their email immediately.") %}
 
-            <div class="border border-border rounded-xl bg-card overflow-hidden transition-all shadow-sm hover:shadow-md">
-                <button
-                    @click="openItem = openItem === 2 ? null : 2"
-                    class="w-full px-6 py-6 text-left flex items-center justify-between hover:bg-accent/50 transition-colors"
-                    :aria-expanded="openItem === 2"
-                >
-                    <span class="font-semibold text-base pr-6">{% trans "When do I receive my money?" %}</span>
-                    <i data-lucide="chevron-down" class="w-5 h-5 text-muted-foreground transition-transform duration-200 flex-shrink-0" :class="openItem === 2 && 'rotate-180'"></i>
-                </button>
-                <div
-                    x-show="openItem === 2"
-                    x-collapse
-                    class="px-6 pb-6 pt-2 text-muted-foreground leading-relaxed"
-                >
-                    <p>{% trans "You can request a withdrawal 24 hours after your event ends. Funds are transferred directly to your mobile money account within 24 hours of approval. There's no minimum withdrawal amount." %}</p>
-                </div>
-            </div>
+            {% include "partials/accordion_item.html" with index="2" question=_("When do I receive my money?") answer=_("You can request a withdrawal 24 hours after your event ends. Funds are transferred directly to your mobile money account within 24 hours of approval. There's no minimum withdrawal amount.") %}
 
-            <div class="border border-border rounded-xl bg-card overflow-hidden transition-all shadow-sm hover:shadow-md">
-                <button
-                    @click="openItem = openItem === 3 ? null : 3"
-                    class="w-full px-6 py-6 text-left flex items-center justify-between hover:bg-accent/50 transition-colors"
-                    :aria-expanded="openItem === 3"
-                >
-                    <span class="font-semibold text-base pr-6">{% trans "Can I sell tickets for free events?" %}</span>
-                    <i data-lucide="chevron-down" class="w-5 h-5 text-muted-foreground transition-transform duration-200 flex-shrink-0" :class="openItem === 3 && 'rotate-180'"></i>
-                </button>
-                <div
-                    x-show="openItem === 3"
-                    x-collapse
-                    class="px-6 pb-6 pt-2 text-muted-foreground leading-relaxed"
-                >
-                    <p>{% trans "Yes! Free tickets have no platform fees. You can use Reckot to manage registrations, send tickets, and check in attendees at zero cost. Perfect for community events and meetups." %}</p>
-                </div>
-            </div>
+            {% include "partials/accordion_item.html" with index="3" question=_("Can I sell tickets for free events?") answer=_("Yes! Free tickets have no platform fees. You can use Reckot to manage registrations, send tickets, and check in attendees at zero cost. Perfect for community events and meetups.") %}
 
-            <div class="border border-border rounded-xl bg-card overflow-hidden transition-all shadow-sm hover:shadow-md">
-                <button
-                    @click="openItem = openItem === 4 ? null : 4"
-                    class="w-full px-6 py-6 text-left flex items-center justify-between hover:bg-accent/50 transition-colors"
-                    :aria-expanded="openItem === 4"
-                >
-                    <span class="font-semibold text-base pr-6">{% trans "Does QR check-in work offline?" %}</span>
-                    <i data-lucide="chevron-down" class="w-5 h-5 text-muted-foreground transition-transform duration-200 flex-shrink-0" :class="openItem === 4 && 'rotate-180'"></i>
-                </button>
-                <div
-                    x-show="openItem === 4"
-                    x-collapse
-                    class="px-6 pb-6 pt-2 text-muted-foreground leading-relaxed"
-                >
-                    <p>{% trans "Yes. Our QR check-in system works completely offline. Download your attendee list before the event, and you can scan tickets without internet. Data syncs automatically when you're back online." %}</p>
-                </div>
-            </div>
+            {% include "partials/accordion_item.html" with index="4" question=_("Does QR check-in work offline?") answer=_("Yes. Our QR check-in system works completely offline. Download your attendee list before the event, and you can scan tickets without internet. Data syncs automatically when you're back online.") %}
 
-            <div class="border border-border rounded-xl bg-card overflow-hidden transition-all shadow-sm hover:shadow-md">
-                <button
-                    @click="openItem = openItem === 5 ? null : 5"
-                    class="w-full px-6 py-6 text-left flex items-center justify-between hover:bg-accent/50 transition-colors"
-                    :aria-expanded="openItem === 5"
-                >
-                    <span class="font-semibold text-base pr-6">{% trans "What happens if someone wants a refund?" %}</span>
-                    <i data-lucide="chevron-down" class="w-5 h-5 text-muted-foreground transition-transform duration-200 flex-shrink-0" :class="openItem === 5 && 'rotate-180'"></i>
-                </button>
-                <div
-                    x-show="openItem === 5"
-                    x-collapse
-                    class="px-6 pb-6 pt-2 text-muted-foreground leading-relaxed"
-                >
-                    <p>{% trans "Attendees can request refunds through their ticket lookup page. You'll receive the request in your dashboard and can approve or deny it. Approved refunds are processed within 3-5 business days back to the original payment method." %}</p>
-                </div>
-            </div>
+            {% include "partials/accordion_item.html" with index="5" question=_("What happens if someone wants a refund?") answer=_("Attendees can request refunds through their ticket lookup page. You'll receive the request in your dashboard and can approve or deny it. Approved refunds are processed within 3-5 business days back to the original payment method.") %}
 
-            <div class="border border-border rounded-xl bg-card overflow-hidden transition-all shadow-sm hover:shadow-md">
-                <button
-                    @click="openItem = openItem === 6 ? null : 6"
-                    class="w-full px-6 py-6 text-left flex items-center justify-between hover:bg-accent/50 transition-colors"
-                    :aria-expanded="openItem === 6"
-                >
-                    <span class="font-semibold text-base pr-6">{% trans "Can I customize my event page?" %}</span>
-                    <i data-lucide="chevron-down" class="w-5 h-5 text-muted-foreground transition-transform duration-200 flex-shrink-0" :class="openItem === 6 && 'rotate-180'"></i>
-                </button>
-                <div
-                    x-show="openItem === 6"
-                    x-collapse
-                    class="px-6 pb-6 pt-2 text-muted-foreground leading-relaxed"
-                >
-                    <p>{% trans "Yes. You can add your event cover image, description, location, and custom checkout questions. Your organization branding appears on all event pages and tickets. Enterprise plans include full white-label options." %}</p>
-                </div>
-            </div>
+            {% include "partials/accordion_item.html" with index="6" question=_("Can I customize my event page?") answer=_("Yes. You can add your event cover image, description, location, and custom checkout questions. Your organization branding appears on all event pages and tickets. Enterprise plans include full white-label options.") %}
         </div>
 
-        <div class="text-center mt-16" x-data x-intersect.once="$el.classList.add('animate-in', 'delay-2')">
+        <div class="text-center mt-16" data-controller="animate" data-animate-classes-value="animate-in delay-2" data-animate-once-value="true">
             <p class="text-muted-foreground mb-6 text-lg">{% trans "Still have questions?" %}</p>
             <a href="mailto:reckot@yokwejuste.me">
                 {% #button variant="outline" %}
@@ -542,7 +436,7 @@
 {% if not user_has_events %}
 <section class="py-20 md:py-28">
     <div class="container">
-        <div class="rounded-2xl border border-border bg-card p-8 md:p-12 lg:p-16 text-center" x-data x-intersect.once="$el.classList.add('animate-in')">
+        <div class="rounded-2xl border border-border bg-card p-8 md:p-12 lg:p-16 text-center" data-controller="animate" data-animate-classes-value="animate-in" data-animate-once-value="true">
             <h2 class="text-2xl md:text-3xl lg:text-4xl font-semibold tracking-tight max-w-xl mx-auto">{% trans "Ready to host your next event?" %}</h2>
             <p class="mt-4 text-muted-foreground text-lg">{% trans "Join 500+ organizers already using Reckot" %}</p>
             <a href="{% url 'account_signup' %}" class="mt-8 inline-flex">

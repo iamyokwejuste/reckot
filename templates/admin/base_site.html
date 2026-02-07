@@ -5,12 +5,24 @@
 
 {% block extrahead %}
 {{ block.super }}
-<script defer src="https://unpkg.com/@alpinejs/collapse@3.14.8/dist/cdn.min.js"></script>
-<script defer src="https://unpkg.com/@alpinejs/intersect@3.14.8/dist/cdn.min.js"></script>
-<script src="{% static 'js/chatbot.js' %}"></script>
-<script defer src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js"></script>
+<script>
+    (function() {
+        var mode = localStorage.getItem('theme') || 'system';
+        var isDark = mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (isDark) document.documentElement.classList.add('dark');
+    })();
+</script>
+<script type="module">
+    import { Application } from "https://unpkg.com/@hotwired/stimulus@3.2.2/dist/stimulus.js"
+    window.Stimulus = Application.start()
+</script>
+<script src="{% static 'js/stimulus-app.js' %}?v=1770458333"></script>
 <script defer src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js" onload="lucide.createIcons()"></script>
 <script>
+document.addEventListener('stimulus:ready', function() {
+    document.body.setAttribute('data-controller', 'theme');
+});
+
 document.addEventListener('DOMContentLoaded', function() {
     const logoLightUrl = '{% static "images/logo/reckto_logo_light_mode.png" %}';
     const logoDarkUrl = '{% static "images/logo/reckto_logo_dark_mode.png" %}';
@@ -19,12 +31,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const isDark = mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
     const logoUrl = isDark ? logoDarkUrl : logoLightUrl;
     const spinnerColor = isDark ? '#fafafa' : '#09090b';
-
-    if (isDark) {
-        document.documentElement.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-    }
 
     const loader = document.createElement('div');
     loader.id = 'page-loader';
@@ -58,10 +64,28 @@ document.addEventListener('DOMContentLoaded', function() {
 {% endblock %}
 
 {% block branding %}
-<h1 id="site-name"><a href="{% url 'admin:index' %}">{{ site_header|default:_('Django administration') }}</a></h1>
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}" class="flex items-center gap-2">
+        <img src="{% static 'images/logo/reckto_logo_dark_mode.png' %}"
+             alt="Reckot"
+             class="h-8 w-auto dark:hidden"
+             data-theme-target="logo">
+        <img src="{% static 'images/logo/reckto_logo_light_mode.png' %}"
+             alt="Reckot"
+             class="h-8 w-auto hidden dark:block"
+             data-theme-target="logo">
+    </a>
+</h1>
 {% endblock %}
 
-{% block nav-global %}{% endblock %}
+{% block nav-global %}
+<div class="flex items-center gap-2">
+    <button data-action="click->theme#toggleMode" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" aria-label="Toggle theme">
+        <i data-lucide="moon" class="h-5 w-5 dark:hidden"></i>
+        <i data-lucide="sun" class="h-5 w-5 hidden dark:block"></i>
+    </button>
+</div>
+{% endblock %}
 
 {% block footer %}
 {{ block.super }}

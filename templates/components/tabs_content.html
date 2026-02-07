@@ -1,11 +1,10 @@
 <div
-    x-show="activeTab === '{{ value }}'"
-    x-transition:enter="transition ease-out duration-200"
-    x-transition:enter-start="opacity-0"
-    x-transition:enter-end="opacity-100"
+    data-tabs-target="panel"
+    data-tab-panel="{{ value }}"
     role="tabpanel"
+    aria-hidden="true"
     class="
-        mt-2 ring-offset-background
+        mt-2 ring-offset-background hidden transition-opacity duration-200
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
         {{ class }}
     "

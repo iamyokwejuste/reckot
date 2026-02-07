@@ -1,4 +1,6 @@
 components:
+  accordion: components/accordion.html
+  accordion_item: components/accordion_item.html
   button: components/button.html
   input: components/input.html
   textarea: components/textarea.html

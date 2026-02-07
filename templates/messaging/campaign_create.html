@@ -12,12 +12,7 @@
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
-    <form method="post" class="space-y-6" x-data="{
-        messageType: 'EMAIL',
-        recipientFilter: 'ALL',
-        showPreview: false,
-        previewContent: ''
-    }">
+    <form method="post" class="space-y-6" data-controller="tabs">
         {% csrf_token %}
 
         <div class="card p-6 space-y-5">
@@ -35,21 +30,19 @@
 
             <div>
                 <label class="block text-sm font-medium mb-2">{% trans "Message Type" %}</label>
-                <div class="flex p-1 bg-muted rounded-lg">
-                    <button type="button" @click="messageType = 'EMAIL'"
-                            class="flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm font-medium rounded-md transition-all"
-                            :class="messageType === 'EMAIL' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground'">
+                <div class="flex p-1 bg-muted rounded-lg" data-tabs-target="messageTypeToggle">
+                    <button type="button" data-action="click->tabs#switch" data-type="EMAIL"
+                            class="flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm font-medium rounded-md transition-all bg-background text-foreground shadow-sm">
                         <i data-lucide="mail" class="w-4 h-4"></i>
                         {% trans "Email" %}
                     </button>
-                    <button type="button" @click="messageType = 'SMS'"
-                            class="flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm font-medium rounded-md transition-all"
-                            :class="messageType === 'SMS' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground'">
+                    <button type="button" data-action="click->tabs#switch" data-type="SMS"
+                            class="flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm font-medium rounded-md transition-all text-muted-foreground">
                         <i data-lucide="message-square" class="w-4 h-4"></i>
                         {% trans "SMS" %}
                     </button>
                 </div>
-                <input type="hidden" name="message_type" :value="messageType">
+                <input type="hidden" name="message_type" data-tabs-target="messageType" value="EMAIL">
             </div>
         </div>
 
@@ -61,7 +54,7 @@
 
             <div>
                 <label class="block text-sm font-medium mb-2">{% trans "Who should receive this message?" %}</label>
-                <select name="recipient_filter" class="input" x-model="recipientFilter">
+                <select name="recipient_filter" class="input" data-tabs-target="recipientFilter" data-action="change->tabs#switch">
                     <option value="ALL">{% trans "All Attendees" %}</option>
                     <option value="TICKET_TYPE">{% trans "Specific Ticket Types" %}</option>
                     <option value="CHECKED_IN">{% trans "Checked In Only" %}</option>
@@ -69,7 +62,7 @@
                 </select>
             </div>
 
-            <div x-show="recipientFilter === 'TICKET_TYPE'" x-cloak class="space-y-3">
+            <div data-tabs-target="ticketTypeOptions" class="hidden space-y-3">
                 <label class="block text-sm font-medium">{% trans "Select Ticket Types" %}</label>
                 {% for tt in ticket_types %}
                 <label class="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 cursor-pointer">
@@ -90,14 +83,10 @@
             {% if templates %}
             <div>
                 <label class="block text-sm font-medium mb-2">{% trans "Use Template (optional)" %}</label>
-                <select class="input" @change="if($event.target.value) {
-                    const tpl = JSON.parse($event.target.selectedOptions[0].dataset.template || '{}');
-                    document.getElementById('subject').value = tpl.subject || '';
-                    document.getElementById('body').value = tpl.body || '';
-                }">
+                <select class="input" data-action="change->tabs#switch">
                     <option value="">{% trans "Choose a template..." %}</option>
                     {% for tpl in templates %}
-                    <option value="{{ tpl.id }}" data-template='{"subject":"{{ tpl.subject|escapejs }}","body":"{{ tpl.body|escapejs }}"}'>
+                    <option value="{{ tpl.id }}" data-subject="{{ tpl.subject|escapejs }}" data-body="{{ tpl.body|escapejs }}">
                         {{ tpl.name }}
                     </option>
                     {% endfor %}
@@ -105,7 +94,7 @@
             </div>
             {% endif %}
 
-            <div x-show="messageType === 'EMAIL'">
+            <div data-tabs-target="subjectField">
                 <label for="subject" class="block text-sm font-medium mb-2">{% trans "Subject" %}</label>
                 <input type="text" name="subject" id="subject" placeholder="{% trans "Your message subject" %}"
                        class="input">

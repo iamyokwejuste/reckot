@@ -1,0 +1,28 @@
+{% load slippers %}
+
+{% if is_form %}
+<button type="submit"
+        {% if form_action %}formaction="{{ form_action }}"{% endif %}
+        class="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors w-full text-left"{{ attrs }}>
+{% else %}
+<a href="{{ href }}"
+   class="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors w-full"{{ attrs }}>
+{% endif %}
+
+    <div class="h-9 w-9 rounded-lg bg-{{ color_variant|default:'primary' }}-500/10 flex items-center justify-center">
+        <i data-lucide="{{ icon }}" class="w-4 h-4 text-{{ color_variant|default:'primary' }}-500"></i>
+    </div>
+
+    <div>
+        <p class="text-sm font-medium">{{ title }}</p>
+        {% if description %}
+        <p class="text-xs text-muted-foreground">{{ description }}</p>
+        {% endif %}
+    </div>
+
+{% if is_form %}
+    {% if form_fields %}{{ form_fields }}{% endif %}
+</button>
+{% else %}
+</a>
+{% endif %}

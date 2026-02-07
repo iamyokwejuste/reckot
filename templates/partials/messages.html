@@ -1,67 +1,34 @@
 {% if messages %}
 <div id="toast-container"
      class="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 max-w-sm w-full pointer-events-none"
-     x-data="{
-        toasts: [
-            {% for message in messages %}
-            {
-                id: {{ forloop.counter }},
-                type: '{{ message.tags }}',
-                text: '{{ message|escapejs }}',
-                show: true
-            }{% if not forloop.last %},{% endif %}
-            {% endfor %}
-        ],
-        removeToast(id) {
-            const index = this.toasts.findIndex(t => t.id === id);
-            if (index > -1) {
-                this.toasts[index].show = false;
-                setTimeout(() => {
-                    this.toasts = this.toasts.filter(t => t.id !== id);
-                }, 300);
-            }
-        },
-        init() {
-            this.toasts.forEach(toast => {
-                setTimeout(() => this.removeToast(toast.id), 5000);
-            });
-        }
-     }">
-    <template x-for="toast in toasts" :key="toast.id">
-        <div x-show="toast.show"
-             x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0 translate-x-4"
-             x-transition:enter-end="opacity-100 translate-x-0"
-             x-transition:leave="transition ease-in duration-200"
-             x-transition:leave-start="opacity-100 translate-x-0"
-             x-transition:leave-end="opacity-0 translate-x-4"
-             class="pointer-events-auto rounded-lg border shadow-lg p-4 flex items-start gap-3"
-             :class="{
-                'bg-card border-border': toast.type === 'info' || toast.type === 'debug',
-                'bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400': toast.type === 'success',
-                'bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-400': toast.type === 'warning',
-                'bg-red-500/10 border-red-500/20 text-red-700 dark:text-red-400': toast.type === 'error'
-             }">
-            <div class="shrink-0 mt-0.5">
-                <template x-if="toast.type === 'success'">
-                    <i data-lucide="check-circle" class="h-5 w-5"></i>
-                </template>
-                <template x-if="toast.type === 'warning'">
-                    <i data-lucide="alert-triangle" class="h-5 w-5"></i>
-                </template>
-                <template x-if="toast.type === 'error'">
-                    <i data-lucide="x-circle" class="h-5 w-5"></i>
-                </template>
-                <template x-if="toast.type === 'info' || toast.type === 'debug'">
-                    <i data-lucide="info" class="h-5 w-5 text-primary"></i>
-                </template>
-            </div>
-            <p class="text-sm flex-1" x-text="toast.text"></p>
-            <button @click="removeToast(toast.id)"
-                    class="shrink-0 -mr-1 -mt-1 p-1 rounded hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
-                <i data-lucide="x" class="h-4 w-4"></i>
-            </button>
+     data-controller="animate"
+     data-animate-mode-value="toast">
+    {% for message in messages %}
+    <div data-animate-target="item"
+         data-animate-type="{{ message.tags }}"
+         data-animate-id="{{ forloop.counter }}"
+         class="hidden pointer-events-auto rounded-lg border shadow-lg p-4 flex items-start gap-3
+                {% if message.tags == 'success' %}bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400
+                {% elif message.tags == 'warning' %}bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-400
+                {% elif message.tags == 'error' %}bg-red-500/10 border-red-500/20 text-red-700 dark:text-red-400
+                {% else %}bg-card border-border{% endif %}">
+        <div class="shrink-0 mt-0.5">
+            {% if message.tags == 'success' %}
+                <i data-lucide="check-circle" class="h-5 w-5"></i>
+            {% elif message.tags == 'warning' %}
+                <i data-lucide="alert-triangle" class="h-5 w-5"></i>
+            {% elif message.tags == 'error' %}
+                <i data-lucide="x-circle" class="h-5 w-5"></i>
+            {% else %}
+                <i data-lucide="info" class="h-5 w-5 text-primary"></i>
+            {% endif %}
         </div>
-    </template>
+        <p class="text-sm flex-1">{{ message }}</p>
+        <button data-action="click->animate#dismiss"
+                class="shrink-0 -mr-1 -mt-1 p-1 rounded hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+            <i data-lucide="x" class="h-4 w-4"></i>
+        </button>
+    </div>
+    {% endfor %}
 </div>
 {% endif %}

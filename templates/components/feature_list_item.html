@@ -1,0 +1,16 @@
+{% load slippers %}
+
+<li class="flex items-start gap-3"{{ attrs }}>
+    <div class="h-6 w-6 rounded-full bg-{{ icon_color|default:'emerald' }}-500/10 flex items-center justify-center mt-0.5">
+        <i data-lucide="{{ icon|default:'check' }}" class="w-4 h-4 text-{{ icon_color|default:'emerald' }}-600"></i>
+    </div>
+    <div class="flex-1">
+        {% if title %}
+        <span class="font-medium">{{ title }}</span>
+        {% endif %}
+        {% if description %}
+        <p class="text-sm text-muted-foreground">{{ description }}</p>
+        {% endif %}
+        {{ children }}
+    </div>
+</li>

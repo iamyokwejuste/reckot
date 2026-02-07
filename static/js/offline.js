@@ -1,3 +1,5 @@
+if (window.ReckotOffline) { /* already loaded */ } else {
+
 const ReckotOffline = {
     DB_NAME: 'reckot_offline',
     DB_VERSION: 1,
@@ -399,3 +401,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 window.ReckotOffline = ReckotOffline;
 window.FormPersistence = FormPersistence;
 window.OfflineIndicator = OfflineIndicator;
+
+}

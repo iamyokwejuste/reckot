@@ -12,7 +12,7 @@
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
-    <form method="post" class="space-y-6" x-data="{ templateType: 'EMAIL' }">
+    <form method="post" class="space-y-6" data-controller="tabs">
         {% csrf_token %}
 
         <div class="card p-6 space-y-5">
@@ -30,21 +30,19 @@
 
             <div>
                 <label class="block text-sm font-medium mb-2">{% trans "Template Type" %}</label>
-                <div class="flex p-1 bg-muted rounded-lg">
-                    <button type="button" @click="templateType = 'EMAIL'"
-                            class="flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm font-medium rounded-md transition-all"
-                            :class="templateType === 'EMAIL' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground'">
+                <div class="flex p-1 bg-muted rounded-lg" data-tabs-target="typeToggle">
+                    <button type="button" data-action="click->tabs#switch" data-type="EMAIL"
+                            class="flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm font-medium rounded-md transition-all bg-background text-foreground shadow-sm">
                         <i data-lucide="mail" class="w-4 h-4"></i>
                         {% trans "Email" %}
                     </button>
-                    <button type="button" @click="templateType = 'SMS'"
-                            class="flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm font-medium rounded-md transition-all"
-                            :class="templateType === 'SMS' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground'">
+                    <button type="button" data-action="click->tabs#switch" data-type="SMS"
+                            class="flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm font-medium rounded-md transition-all text-muted-foreground">
                         <i data-lucide="message-square" class="w-4 h-4"></i>
                         {% trans "SMS" %}
                     </button>
                 </div>
-                <input type="hidden" name="template_type" :value="templateType">
+                <input type="hidden" name="template_type" data-tabs-target="type" value="EMAIL">
             </div>
         </div>
 
@@ -54,7 +52,7 @@
                 {% trans "Content" %}
             </h2>
 
-            <div x-show="templateType === 'EMAIL'">
+            <div data-tabs-target="subjectField">
                 <label for="subject" class="block text-sm font-medium mb-2">{% trans "Subject Line" %}</label>
                 <input type="text" name="subject" id="subject" placeholder="{% trans "Your email subject" %}"
                        class="input">

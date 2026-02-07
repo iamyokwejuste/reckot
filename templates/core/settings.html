@@ -125,7 +125,7 @@
                 </div>
             </div>
 
-            <div class="card p-6 border-red-500/20" x-data="{ deleteModalOpen: false }">
+            <div class="card p-6 border-red-500/20" data-controller="modal">
                 <h2 class="text-lg font-semibold mb-4 text-red-500">{% trans "Danger Zone" %}</h2>
                 <div class="space-y-4">
                     <div class="rounded-lg bg-red-500/10 border border-red-500/20 p-4">
@@ -136,8 +136,7 @@
                                 <p class="text-sm text-red-600 dark:text-red-400 mb-3">
                                     {% trans "Permanently delete your account and all associated data. This action cannot be undone." %}
                                 </p>
-                                <button type="button"
-                                        @click="deleteModalOpen = true"
+                                <button type="button" data-action="click->modal#open"
                                         class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-medium">
                                     {% trans "Delete My Account" %}
                                 </button>
@@ -146,14 +145,9 @@
                     </div>
                 </div>
 
-                <!-- Delete Account Modal -->
-                <div x-show="deleteModalOpen"
-                     x-cloak
-                     class="fixed inset-0 z-50 overflow-y-auto"
-                     @keydown.escape.window="deleteModalOpen = false">
+                <div data-modal-target="container" class="fixed inset-0 z-50 overflow-y-auto hidden">
                     <div class="flex min-h-screen items-center justify-center p-4">
-                        <div class="fixed inset-0 bg-black/50 transition-opacity"
-                             @click="deleteModalOpen = false"></div>
+                        <div class="fixed inset-0 bg-black/50 transition-opacity" data-action="click->modal#close"></div>
                         <div class="relative bg-card rounded-lg shadow-xl max-w-md w-full p-6 border border-border">
                             <div class="flex items-start gap-4 mb-4">
                                 <div class="h-12 w-12 rounded-full bg-red-500/10 flex items-center justify-center shrink-0">
@@ -172,16 +166,11 @@
                                     <label for="delete_password" class="block text-sm font-medium mb-2">
                                         {% trans "Enter your password to confirm" %}
                                     </label>
-                                    <input type="password"
-                                           name="password"
-                                           id="delete_password"
-                                           required
-                                           class="input"
-                                           placeholder="{% trans 'Your password' %}">
+                                    <input type="password" name="password" id="delete_password" required
+                                           class="input" placeholder="{% trans 'Your password' %}">
                                 </div>
                                 <div class="flex gap-3 justify-end">
-                                    <button type="button"
-                                            @click="deleteModalOpen = false"
+                                    <button type="button" data-action="click->modal#close"
                                             class="px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors">
                                         {% trans "Cancel" %}
                                     </button>
@@ -199,7 +188,7 @@
 
         <!-- Right Column: Preferences & Features -->
         <div class="space-y-6">
-            <div class="card p-6" x-data="{ langDropdownOpen: false }">
+            <div class="card p-6" data-controller="dropdown">
                 <h2 class="text-lg font-semibold mb-4">{% trans "Language Preferences" %}</h2>
                 <div class="space-y-4">
                     <div class="flex items-center justify-between py-3 border-b border-border">
@@ -208,25 +197,17 @@
                             <p class="text-sm text-muted-foreground">{% trans "Choose your preferred language for the platform" %}</p>
                         </div>
                         <div class="relative">
-                            <button @click="langDropdownOpen = !langDropdownOpen"
-                                    @click.outside="langDropdownOpen = false"
+                            <button data-action="click->dropdown#toggle" data-dropdown-target="trigger"
                                     class="flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-card hover:bg-muted transition-colors text-sm min-w-[140px] justify-between"
                                     type="button">
                                 <span class="flex items-center gap-2">
                                     <i data-lucide="globe" class="h-4 w-4" aria-hidden="true"></i>
                                     {% if LANGUAGE_CODE == 'fr' %}Français{% else %}English{% endif %}
                                 </span>
-                                <i data-lucide="chevron-down" class="h-4 w-4 text-muted-foreground transition-transform" :class="langDropdownOpen && 'rotate-180'" aria-hidden="true"></i>
+                                <i data-lucide="chevron-down" class="h-4 w-4 text-muted-foreground" aria-hidden="true"></i>
                             </button>
-                            <div x-show="langDropdownOpen"
-                                 x-transition:enter="transition ease-out duration-100"
-                                 x-transition:enter-start="opacity-0 scale-95"
-                                 x-transition:enter-end="opacity-100 scale-100"
-                                 x-transition:leave="transition ease-in duration-75"
-                                 x-transition:leave-start="opacity-100 scale-100"
-                                 x-transition:leave-end="opacity-0 scale-95"
-                                 class="absolute right-0 mt-2 w-48 origin-top-right rounded-lg border border-border bg-card shadow-lg z-50"
-                                 x-cloak>
+                            <div data-dropdown-target="dropdown"
+                                 class="absolute right-0 mt-2 w-48 origin-top-right rounded-lg border border-border bg-card shadow-lg z-50 hidden">
                                 <div class="p-1">
                                     <form action="{% url 'set_language' %}" method="post" class="m-0">
                                         {% csrf_token %}
@@ -270,33 +251,7 @@
                 </div>
             </div>
 
-            <div class="card p-6" x-data="{
-                offlineMode: false,
-                syncing: false,
-                pendingCount: 0,
-                async init() {
-                    if (window.ReckotOffline) {
-                        this.offlineMode = await ReckotOffline.isOfflineModeEnabled();
-                        const queue = await ReckotOffline.getSyncQueue();
-                        this.pendingCount = queue.length;
-                    }
-                },
-                async toggleOffline() {
-                    if (window.ReckotOffline) {
-                        await ReckotOffline.setOfflineMode(this.offlineMode);
-                        if (this.offlineMode) {
-                            window.OfflineIndicator?.init();
-                        }
-                    }
-                },
-                async syncNow() {
-                    if (!window.ReckotOffline) return;
-                    this.syncing = true;
-                    const result = await ReckotOffline.syncPendingChanges();
-                    this.syncing = false;
-                    this.pendingCount = (await ReckotOffline.getSyncQueue()).length;
-                }
-            }">
+            <div class="card p-6">
                 <h2 class="text-lg font-semibold mb-4">{% trans "Offline Mode" %}</h2>
                 <div class="space-y-4">
                     <div class="flex items-center justify-between py-3 border-b border-border">
@@ -305,34 +260,21 @@
                             <p class="text-sm text-muted-foreground">{% trans "Work without internet, sync when reconnected" %}</p>
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" x-model="offlineMode" @change="toggleOffline()" class="sr-only peer">
+                            <input type="checkbox" class="sr-only peer">
                             <div class="w-11 h-6 bg-border peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer transition-colors duration-200 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-background after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-md peer-checked:bg-primary"></div>
                         </label>
                     </div>
-                    <div x-show="offlineMode" x-cloak class="space-y-3">
-                        <div class="flex items-center justify-between py-3 border-b border-border">
+                    <div class="rounded-lg bg-blue-500/10 border border-blue-500/20 p-4 text-sm text-blue-600 dark:text-blue-400">
+                        <div class="flex gap-3">
+                            <i data-lucide="info" class="w-5 h-5 shrink-0 mt-0.5"></i>
                             <div>
-                                <p class="font-medium">{% trans "Pending changes" %}</p>
-                                <p class="text-sm text-muted-foreground" x-text="pendingCount + ' {% trans "item" %}' + (pendingCount !== 1 ? 's' : '') + ' {% trans "waiting to sync" %}'"></p>
-                            </div>
-                            {% #button type="button" variant="outline" size="sm" attrs='@click="syncNow()" :disabled="syncing || pendingCount === 0" :class="syncing && \'opacity-50 cursor-not-allowed\'"' %}
-                                <i x-show="!syncing" data-lucide="refresh-cw" class="w-4 h-4"></i>
-                                <i x-show="syncing" x-cloak data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
-                                <span x-text="syncing ? 'Syncing...' : 'Sync now'"></span>
-                            {% /button %}
-                        </div>
-                        <div class="rounded-lg bg-blue-500/10 border border-blue-500/20 p-4 text-sm text-blue-600 dark:text-blue-400">
-                            <div class="flex gap-3">
-                                <i data-lucide="info" class="w-5 h-5 shrink-0 mt-0.5"></i>
-                                <div>
-                                    <p class="font-medium mb-1">{% trans "How offline mode works" %}</p>
-                                    <ul class="text-xs space-y-1 text-blue-500 dark:text-blue-300">
-                                        <li>{% trans "Forms auto-save to your device as you type" %}</li>
-                                        <li>{% trans "Changes are queued when you're offline" %}</li>
-                                        <li>{% trans "Data syncs automatically when you reconnect" %}</li>
-                                        <li>{% trans "Cached pages remain accessible offline" %}</li>
-                                    </ul>
-                                </div>
+                                <p class="font-medium mb-1">{% trans "How offline mode works" %}</p>
+                                <ul class="text-xs space-y-1 text-blue-500 dark:text-blue-300">
+                                    <li>{% trans "Forms auto-save to your device as you type" %}</li>
+                                    <li>{% trans "Changes are queued when you're offline" %}</li>
+                                    <li>{% trans "Data syncs automatically when you reconnect" %}</li>
+                                    <li>{% trans "Cached pages remain accessible offline" %}</li>
+                                </ul>
                             </div>
                         </div>
                     </div>

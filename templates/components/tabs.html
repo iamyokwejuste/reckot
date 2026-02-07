@@ -1,5 +1,6 @@
 <div
-    x-data="{ activeTab: '{{ default|default:'' }}' }"
+    data-controller="tabs"
+    data-tabs-active-value="{{ default|default:'' }}"
     class="{{ class }}"
     {{ attrs }}
 >

@@ -45,26 +45,7 @@
         </div>
     </div>
 
-    <div class="card p-4" x-data="{
-        showFilters: false,
-        exportOpen: false,
-        downloadExport(url) {
-            fetch(url)
-                .then(response => response.blob())
-                .then(blob => {
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.style.display = 'none';
-                    a.href = url;
-                    a.download = '';
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    document.body.removeChild(a);
-                    this.exportOpen = false;
-                });
-        }
-    }">
+    <div class="card p-4" data-controller="toggle dropdown">
         <div class="space-y-4">
             <div class="flex flex-col sm:flex-row gap-3">
                 <div class="flex-1">
@@ -78,41 +59,41 @@
                         {% #button type="submit" variant="default" %}
                             <i data-lucide="search" class="h-4 w-4"></i>
                         {% /button %}
-                        {% #button type="button" variant="outline" attrs='@click="showFilters = !showFilters"' %}
+                        {% #button type="button" variant="outline" attrs='data-action="click->toggle#toggle"' %}
                             <i data-lucide="filter" class="h-4 w-4 mr-2"></i>
                             {% trans "Filters" %}
                         {% /button %}
                     </form>
                 </div>
                 <div class="relative">
-                    {% #button type="button" variant="default" attrs='@click="exportOpen = !exportOpen"' %}
+                    {% #button type="button" variant="default" attrs='data-action="click->dropdown#toggle" data-dropdown-target="trigger"' %}
                         <i data-lucide="download" class="h-4 w-4 mr-2"></i>
                         {% trans "Export" %}
                         <i data-lucide="chevron-down" class="h-4 w-4 ml-2"></i>
                     {% /button %}
-                    <div x-show="exportOpen" @click.away="exportOpen = false" x-transition
-                         class="absolute right-0 mt-2 w-48 bg-popover border border-border rounded-md shadow-lg z-10">
-                        <button @click="downloadExport('?export=pdf&{{ request.GET.urlencode }}')" type="button" class="w-full text-left block px-4 py-2 text-sm hover:bg-muted transition-colors">
+                    <div data-dropdown-target="dropdown"
+                         class="absolute right-0 mt-2 w-48 bg-popover border border-border rounded-md shadow-lg z-10 hidden">
+                        <a href="?export=pdf&{{ request.GET.urlencode }}" class="block px-4 py-2 text-sm hover:bg-muted transition-colors">
                             <i data-lucide="file-text" class="h-4 w-4 inline mr-2"></i>
                             {% trans "Export as PDF" %}
-                        </button>
-                        <button @click="downloadExport('?export=excel&{{ request.GET.urlencode }}')" type="button" class="w-full text-left block px-4 py-2 text-sm hover:bg-muted transition-colors">
+                        </a>
+                        <a href="?export=excel&{{ request.GET.urlencode }}" class="block px-4 py-2 text-sm hover:bg-muted transition-colors">
                             <i data-lucide="file-spreadsheet" class="h-4 w-4 inline mr-2"></i>
                             {% trans "Export as Excel" %}
-                        </button>
-                        <button @click="downloadExport('?export=csv&{{ request.GET.urlencode }}')" type="button" class="w-full text-left block px-4 py-2 text-sm hover:bg-muted transition-colors">
+                        </a>
+                        <a href="?export=csv&{{ request.GET.urlencode }}" class="block px-4 py-2 text-sm hover:bg-muted transition-colors">
                             <i data-lucide="file-text" class="h-4 w-4 inline mr-2"></i>
                             {% trans "Export as CSV" %}
-                        </button>
-                        <button @click="downloadExport('?export=json&{{ request.GET.urlencode }}')" type="button" class="w-full text-left block px-4 py-2 text-sm hover:bg-muted transition-colors">
+                        </a>
+                        <a href="?export=json&{{ request.GET.urlencode }}" class="block px-4 py-2 text-sm hover:bg-muted transition-colors">
                             <i data-lucide="braces" class="h-4 w-4 inline mr-2"></i>
                             {% trans "Export as JSON" %}
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>
 
-            <div x-show="showFilters" x-collapse class="border-t border-border pt-4">
+            <div data-toggle-target="content" class="border-t border-border pt-4 hidden">
                 <form method="get" class="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
                     <input type="hidden" name="search" value="{{ request.GET.search }}">
                     <div>
@@ -172,7 +153,7 @@
                 </thead>
                 <tbody class="divide-y divide-border">
                     {% for ticket in tickets %}
-                    <tr class="hover:bg-muted/50 transition-colors" x-data="{ refundOpen: false, ticketCode: '{{ ticket.code }}', ticketAmount: {{ ticket.ticket_type.price }}, ticketType: '{{ ticket.ticket_type.name }}' }">
+                    <tr class="hover:bg-muted/50 transition-colors" data-controller="modal">
                         <td class="p-4">
                             <code class="text-xs bg-muted px-2 py-1 rounded">{{ ticket.code }}</code>
                         </td>
@@ -214,36 +195,36 @@
                         <td class="p-4">
                             <div class="flex items-center gap-2">
                                 {% if ticket.booking.status == 'CONFIRMED' and ticket.ticket_type.price >= 100 %}
-                                <button @click="refundOpen = true" type="button" class="text-sm text-red-500 hover:text-red-700 flex items-center gap-1">
+                                <button data-action="click->modal#open" type="button" class="text-sm text-red-500 hover:text-red-700 flex items-center gap-1">
                                     <i data-lucide="rotate-ccw" class="h-4 w-4"></i>
                                     <span>{% trans "Refund" %}</span>
                                 </button>
                                 {% endif %}
                             </div>
 
-                            <div x-show="refundOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" @click.self="refundOpen = false">
-                                <div class="bg-card border border-border rounded-lg p-6 max-w-md w-full mx-4" @click.stop>
+                            <div data-modal-target="container" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 hidden">
+                                <div class="bg-card border border-border rounded-lg p-6 max-w-md w-full mx-4">
                                     <div class="flex items-center justify-between mb-4">
                                         <h3 class="text-lg font-semibold">{% trans "Refund Ticket" %}</h3>
-                                        <button @click="refundOpen = false" class="text-muted-foreground hover:text-foreground">
+                                        <button data-action="click->modal#close" class="text-muted-foreground hover:text-foreground">
                                             <i data-lucide="x" class="h-5 w-5"></i>
                                         </button>
                                     </div>
 
                                     <form method="post" action="{% url 'tickets:refund_ticket' %}" hx-boost="false">
                                         {% csrf_token %}
-                                        <input type="hidden" name="ticket_code" :value="ticketCode">
+                                        <input type="hidden" name="ticket_code" value="{{ ticket.code }}">
 
                                         <div class="space-y-4">
                                             <div class="bg-muted/50 p-4 rounded-lg">
-                                                <p class="text-sm"><strong>{% trans "Ticket:" %}</strong> <span x-text="ticketCode"></span></p>
-                                                <p class="text-sm"><strong>{% trans "Type:" %}</strong> <span x-text="ticketType"></span></p>
-                                                <p class="text-sm"><strong>{% trans "Amount:" %}</strong> <span x-text="ticketAmount"></span> XAF</p>
+                                                <p class="text-sm"><strong>{% trans "Ticket:" %}</strong> {{ ticket.code }}</p>
+                                                <p class="text-sm"><strong>{% trans "Type:" %}</strong> {{ ticket.ticket_type.name }}</p>
+                                                <p class="text-sm"><strong>{% trans "Amount:" %}</strong> {{ ticket.ticket_type.price }} XAF</p>
                                             </div>
 
                                             <div>
                                                 <label class="block text-sm font-medium mb-2">{% trans "Refund Amount (XAF)" %} <span class="text-red-500">*</span></label>
-                                                <input type="number" name="refund_amount" :value="ticketAmount" min="100" step="0.01" required class="input" placeholder="100">
+                                                <input type="number" name="refund_amount" value="{{ ticket.ticket_type.price }}" min="100" step="0.01" required class="input" placeholder="100">
                                                 <p class="text-xs text-muted-foreground mt-1">{% trans "Minimum: 100 XAF" %}</p>
                                             </div>
 
@@ -261,7 +242,7 @@
                                         </div>
 
                                         <div class="flex gap-3 mt-6">
-                                            <button type="button" @click="refundOpen = false" class="btn btn-outline flex-1">
+                                            <button type="button" data-action="click->modal#close" class="btn btn-outline flex-1">
                                                 {% trans "Cancel" %}
                                             </button>
                                             <button type="submit" class="btn btn-primary flex-1">

@@ -51,15 +51,6 @@ if (typeof window.initDatePickers === 'undefined') {
         position: "below"
     };
 
-    const formContainer = document.querySelector('.max-w-2xl');
-    const getAlpineData = () => {
-        try {
-            return Alpine.$data(formContainer);
-        } catch(e) {
-            return null;
-        }
-    };
-
     const isEditMode = startEl.value && startEl.value.trim() !== '';
 
     try {
@@ -68,11 +59,9 @@ if (typeof window.initDatePickers === 'undefined') {
             minDate: isEditMode ? null : "today",
             defaultDate: startEl.value || null,
             onChange: function(selectedDates, dateStr) {
-                const data = getAlpineData();
-                if (data) {
-                    data.startAt = dateStr;
-                    data.clearError('startAt');
-                }
+                startEl.value = dateStr;
+                startEl.dispatchEvent(new Event('input', { bubbles: true }));
+
                 if (selectedDates[0] && endPicker) {
                     endPicker.set('minDate', selectedDates[0]);
                     if (!isEditMode && !endPicker.selectedDates.length) {
@@ -89,11 +78,8 @@ if (typeof window.initDatePickers === 'undefined') {
             minDate: isEditMode ? null : "today",
             defaultDate: endEl.value || null,
             onChange: function(selectedDates, dateStr) {
-                const data = getAlpineData();
-                if (data) {
-                    data.endAt = dateStr;
-                    data.clearError('endAt');
-                }
+                endEl.value = dateStr;
+                endEl.dispatchEvent(new Event('input', { bubbles: true }));
             }
         });
 

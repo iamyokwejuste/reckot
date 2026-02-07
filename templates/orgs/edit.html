@@ -14,29 +14,10 @@
 {% endblock %}
 
 {% block content %}
-<div class="max-w-xl mx-auto" x-data="{
-    logoPreview: {% if organization.logo %}'{{ organization.logo.url }}'{% else %}null{% endif %},
-    removeExistingLogo: false,
-    async handleLogoUpload(e) {
-        const file = e.target.files[0];
-        if (file && window.ImageCompressor) {
-            const compressed = await ImageCompressor.processFileInput(e.target);
-            this.logoPreview = URL.createObjectURL(compressed);
-            this.removeExistingLogo = false;
-        } else if (file) {
-            this.logoPreview = URL.createObjectURL(file);
-            this.removeExistingLogo = false;
-        }
-    },
-    removeLogo() {
-        this.logoPreview = null;
-        this.removeExistingLogo = true;
-        this.$refs.logoInput.value = '';
-    }
-}">
+<div class="max-w-xl mx-auto" data-controller="toggle">
     <form method="post" enctype="multipart/form-data" class="space-y-6">
         {% csrf_token %}
-        <input type="hidden" name="remove_logo" :value="removeExistingLogo">
+        <input type="hidden" name="remove_logo" data-toggle-target="removeLogo" value="false">
 
         {% if error %}
         <div class="rounded-lg bg-red-500/10 border border-red-500/20 p-4 text-sm text-red-500">
@@ -49,32 +30,33 @@
                 <label class="block text-sm font-medium mb-2">{% trans "Organization Logo" %}</label>
                 <div class="flex items-center gap-4">
                     <div class="relative h-16 w-16 rounded-lg bg-muted flex items-center justify-center overflow-hidden cursor-pointer group"
-                         @click="$refs.logoInput.click()">
-                        <template x-if="!logoPreview">
+                         data-action="click->toggle#openFileInput">
+                        <div data-toggle-target="noLogo" class="{% if organization.logo %}hidden{% endif %}">
                             <i data-lucide="building-2" class="h-8 w-8 text-muted-foreground"></i>
-                        </template>
-                        <template x-if="logoPreview">
-                            <img :src="logoPreview" class="h-full w-full object-cover">
-                        </template>
-                        <div x-show="logoPreview" x-cloak
-                             class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        </div>
+                        <img data-toggle-target="logoPreview" src="{% if organization.logo %}{{ organization.logo.url }}{% endif %}"
+                             class="h-full w-full object-cover {% if not organization.logo %}hidden{% endif %}">
+                        <div data-toggle-target="logoOverlay"
+                             class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity {% if not organization.logo %}hidden{% endif %}">
                             <i data-lucide="pencil" class="h-4 w-4 text-white"></i>
                         </div>
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
-                            {% #button type="button" variant="outline" size="sm" attrs='@click="$refs.logoInput.click()"' %}
-                                <span x-text="logoPreview ? '{% trans "Change" %}' : '{% trans "Upload" %}'"></span>
-                            {% /button %}
-                            {% #button type="button" variant="outline" size="sm" class="text-red-500 hover:bg-red-500/10" attrs='x-show="logoPreview" x-cloak @click.stop="removeLogo()"' %}
+                            <button type="button" data-action="click->toggle#openFileInput"
+                                    class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring border border-border bg-background hover:bg-muted h-8 px-3">
+                                <span data-toggle-target="uploadButtonText">{% if organization.logo %}{% trans "Change" %}{% else %}{% trans "Upload" %}{% endif %}</span>
+                            </button>
+                            <button type="button" data-action="click->toggle#removeLogo"
+                                    data-toggle-target="removeButton"
+                                    class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring border border-border bg-background hover:bg-red-500/10 h-8 px-3 text-red-500 {% if not organization.logo %}hidden{% endif %}">
                                 {% trans "Remove" %}
-                            {% /button %}
+                            </button>
                         </div>
                         <p class="text-xs text-muted-foreground mt-1">{% trans "PNG, JPG up to 2MB" %}</p>
                     </div>
                 </div>
-                <input type="file" name="logo" accept="image/*" x-ref="logoInput"
-                       @change="handleLogoUpload($event)" class="hidden">
+                <input type="file" name="logo" accept="image/*" data-toggle-target="logoInput" data-action="change->toggle#handleLogoChange" class="hidden">
             </div>
 
             <div>
@@ -107,7 +89,7 @@
     </form>
 
     {% if is_owner %}
-    <div class="card p-6 border-red-500/20" x-data="{ deleteModalOpen: false }">
+    <div class="card p-6 border-red-500/20" data-controller="modal">
         <h2 class="text-lg font-semibold mb-4 text-red-500">{% trans "Danger Zone" %}</h2>
         <div class="rounded-lg bg-red-500/10 border border-red-500/20 p-4">
             <div class="flex items-start gap-3">
@@ -117,8 +99,7 @@
                     <p class="text-sm text-red-600 dark:text-red-400 mb-3">
                         {% trans "Permanently delete this organization and all its events and data. This action cannot be undone." %}
                     </p>
-                    <button type="button"
-                            @click="deleteModalOpen = true"
+                    <button type="button" data-action="click->modal#open"
                             class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-medium">
                         {% trans "Delete Organization" %}
                     </button>
@@ -126,14 +107,9 @@
             </div>
         </div>
 
-        <!-- Delete Modal -->
-        <div x-show="deleteModalOpen"
-             x-cloak
-             class="fixed inset-0 z-50 overflow-y-auto"
-             @keydown.escape.window="deleteModalOpen = false">
+        <div data-modal-target="container" class="fixed inset-0 z-50 overflow-y-auto hidden">
             <div class="flex min-h-screen items-center justify-center p-4">
-                <div class="fixed inset-0 bg-black/50 transition-opacity"
-                     @click="deleteModalOpen = false"></div>
+                <div class="fixed inset-0 bg-black/50 transition-opacity" data-action="click->modal#close"></div>
                 <div class="relative bg-card rounded-lg shadow-xl max-w-md w-full p-6 border border-border">
                     <div class="flex items-start gap-4 mb-4">
                         <div class="h-12 w-12 rounded-full bg-red-500/10 flex items-center justify-center shrink-0">
@@ -149,8 +125,7 @@
                     <form method="post" action="{% url 'orgs:delete' slug=organization.slug %}" class="space-y-4">
                         {% csrf_token %}
                         <div class="flex gap-3 justify-end">
-                            <button type="button"
-                                    @click="deleteModalOpen = false"
+                            <button type="button" data-action="click->modal#close"
                                     class="px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors">
                                 {% trans "Cancel" %}
                             </button>

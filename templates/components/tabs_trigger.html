@@ -1,9 +1,10 @@
 <button
     type="button"
     role="tab"
-    @click="activeTab = '{{ value }}'"
-    :class="activeTab === '{{ value }}' ? 'bg-background text-foreground shadow-sm' : ''"
-    :aria-selected="activeTab === '{{ value }}'"
+    data-tabs-target="tab"
+    data-tab="{{ value }}"
+    data-action="click->tabs#selectTab"
+    aria-selected="false"
     class="
         inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium
         ring-offset-background transition-all

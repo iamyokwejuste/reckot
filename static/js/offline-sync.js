@@ -287,14 +287,12 @@ class OfflineSyncManager {
 
     setupNetworkListeners() {
         window.addEventListener('online', () => {
-            console.log('[OfflineSync] Network online');
             this.isOnline = true;
             this.emit('online');
             this.syncNow();
         });
 
         window.addEventListener('offline', () => {
-            console.log('[OfflineSync] Network offline');
             this.isOnline = false;
             this.emit('offline');
         });
@@ -332,7 +330,6 @@ class OfflineSyncManager {
 
     async syncEventData(eventSlug) {
         if (!this.isOnline) {
-            console.log('[OfflineSync] Cannot sync event data while offline');
             return false;
         }
 
@@ -353,11 +350,9 @@ class OfflineSyncManager {
             await this.db.saveTickets(data.tickets);
             await this.db.saveSwagItems(data.swagItems || []);
 
-            console.log(`[OfflineSync] Synced event data: ${data.tickets.length} tickets`);
             this.emit('syncCompleted', { type: 'eventData', count: data.tickets.length });
             return true;
         } catch (error) {
-            console.error('[OfflineSync] Error syncing event data:', error);
             this.emit('syncError', { type: 'eventData', error });
             return false;
         }
@@ -372,8 +367,6 @@ class OfflineSyncManager {
         try {
             const unsyncedCheckins = await this.db.getUnsyncedCheckins();
             const unsyncedSwag = await this.db.getUnsyncedSwagCollections();
-
-            console.log(`[OfflineSync] Syncing ${unsyncedCheckins.length} check-ins, ${unsyncedSwag.length} swag collections`);
 
             for (const checkin of unsyncedCheckins) {
                 await this.syncCheckin(checkin);
@@ -390,7 +383,6 @@ class OfflineSyncManager {
             });
 
         } catch (error) {
-            console.error('[OfflineSync] Sync error:', error);
             this.emit('syncError', { type: 'full', error });
         } finally {
             this.isSyncing = false;
@@ -419,11 +411,9 @@ class OfflineSyncManager {
 
             const result = await response.json();
             await this.db.markCheckinSynced(checkin.localId, result.reference);
-            console.log(`[OfflineSync] Synced check-in: ${checkin.ticketCode}`);
             this.emit('checkinSynced', checkin);
 
         } catch (error) {
-            console.error(`[OfflineSync] Failed to sync check-in ${checkin.ticketCode}:`, error);
             this.emit('checkinSyncError', { checkin, error });
         }
     }
@@ -446,10 +436,9 @@ class OfflineSyncManager {
             if (!response.ok) throw new Error('Swag sync failed');
 
             await this.db.markSwagCollectionSynced(swagCollection.localId);
-            console.log(`[OfflineSync] Synced swag collection`);
 
         } catch (error) {
-            console.error('[OfflineSync] Failed to sync swag collection:', error);
+            // Swag sync failed
         }
     }
 
@@ -487,5 +476,4 @@ window.offlineSync = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
     window.offlineSync = await new OfflineSyncManager().init();
-    console.log('[OfflineSync] Manager initialized');
 });

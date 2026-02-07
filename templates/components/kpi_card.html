@@ -1,0 +1,20 @@
+{% load slippers %}
+
+<div class="kpi-card"{{ attrs }}>
+    {% if icon %}
+    <div class="flex items-center gap-2 mb-2">
+        <i data-lucide="{{ icon }}" class="w-4 h-4 text-muted-foreground"></i>
+        <div class="kpi-title">{{ title }}</div>
+    </div>
+    {% else %}
+    <div class="kpi-title">{{ title }}</div>
+    {% endif %}
+
+    <div class="kpi-value"{% if color %} style="color: {{ color }};"{% endif %}>
+        {{ value }}
+    </div>
+
+    {% if trend_text %}
+    <div class="kpi-trend">{{ trend_text }}</div>
+    {% endif %}
+</div>

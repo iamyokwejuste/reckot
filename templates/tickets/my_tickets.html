@@ -18,7 +18,7 @@
         <div class="grid gap-4">
             {% regroup tickets by booking.event as events %}
             {% for event in events %}
-            <div class="card overflow-hidden" x-data="{ cancelModalOpen: false }">
+            <div class="card overflow-hidden" data-controller="modal">
                 <div class="p-5 border-b border-border bg-muted/30">
                     <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                         <div class="flex-1 min-w-0">
@@ -46,7 +46,7 @@
                                 {% /button %}
                             </a>
                             {% if event.list.0.booking.status == 'CONFIRMED' %}
-                            <button type="button" @click="cancelModalOpen = true">
+                            <button type="button" data-action="click->modal#open">
                                 {% #button variant="outline" size="sm" class="text-red-500 hover:bg-red-500/10" %}
                                     <i data-lucide="x-circle" class="w-4 h-4"></i>
                                     {% trans "Cancel" %}
@@ -57,14 +57,9 @@
                     </div>
                 </div>
 
-                <!-- Cancel Booking Modal -->
-                <div x-show="cancelModalOpen"
-                     x-cloak
-                     class="fixed inset-0 z-50 overflow-y-auto"
-                     @keydown.escape.window="cancelModalOpen = false">
+                <div data-modal-target="container" class="fixed inset-0 z-50 overflow-y-auto hidden">
                     <div class="flex min-h-screen items-center justify-center p-4">
-                        <div class="fixed inset-0 bg-black/50 transition-opacity"
-                             @click="cancelModalOpen = false"></div>
+                        <div class="fixed inset-0 bg-black/50 transition-opacity" data-action="click->modal#close"></div>
                         <div class="relative bg-card rounded-lg shadow-xl max-w-md w-full p-6 border border-border">
                             <div class="flex items-start gap-4 mb-4">
                                 <div class="h-12 w-12 rounded-full bg-red-500/10 flex items-center justify-center shrink-0">
@@ -80,8 +75,7 @@
                             <form method="post" action="{% url 'tickets:cancel_booking' booking_ref=event.list.0.booking.reference %}">
                                 {% csrf_token %}
                                 <div class="flex gap-3 justify-end">
-                                    <button type="button"
-                                            @click="cancelModalOpen = false"
+                                    <button type="button" data-action="click->modal#close"
                                             class="px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors">
                                         {% trans "Keep Booking" %}
                                     </button>

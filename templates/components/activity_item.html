@@ -1,0 +1,38 @@
+{% load slippers %}
+
+{% with type=type|default:'info' %}
+<div class="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"{{ attrs }}>
+    <div class="h-8 w-8 rounded-full flex items-center justify-center shrink-0
+        {% if type == 'sale' %}bg-emerald-500/10 text-emerald-500
+        {% elif type == 'checkin' %}bg-blue-500/10 text-blue-500
+        {% elif type == 'refund' %}bg-red-500/10 text-red-500
+        {% elif type == 'warning' %}bg-amber-500/10 text-amber-500
+        {% else %}bg-muted text-muted-foreground{% endif %}">
+
+        {% if icon %}
+        <i data-lucide="{{ icon }}" class="w-4 h-4"></i>
+        {% elif type == 'sale' %}
+        <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+        {% elif type == 'checkin' %}
+        <i data-lucide="scan-line" class="w-4 h-4"></i>
+        {% elif type == 'refund' %}
+        <i data-lucide="undo-2" class="w-4 h-4"></i>
+        {% elif type == 'warning' %}
+        <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+        {% else %}
+        <i data-lucide="info" class="w-4 h-4"></i>
+        {% endif %}
+    </div>
+
+    <div class="flex-1 min-w-0">
+        <p class="text-sm font-medium">{{ title }}</p>
+        {% if description %}
+        <p class="text-xs text-muted-foreground truncate">{{ description }}</p>
+        {% endif %}
+    </div>
+
+    {% if time %}
+    <span class="text-xs text-muted-foreground whitespace-nowrap">{{ time }}</span>
+    {% endif %}
+</div>
+{% endwith %}

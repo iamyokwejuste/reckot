@@ -1,26 +1,17 @@
 {% load i18n %}
 {% get_current_language as current_language %}
-<div x-data="{ langOpen: false }" class="relative">
-    <button @click="langOpen = !langOpen"
-            @click.outside="langOpen = false"
+<div data-controller="dropdown" class="relative">
+    <button data-action="click->dropdown#toggle" data-dropdown-target="trigger"
             class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted transition-colors text-sm"
             aria-label="{% trans 'Change language' %}"
-            aria-haspopup="true"
-            :aria-expanded="langOpen.toString()">
+            aria-haspopup="true">
         <i data-lucide="globe" class="h-4 w-4" aria-hidden="true"></i>
         <span class="hidden md:inline">{{ current_language|upper }}</span>
-        <i data-lucide="chevron-down" class="h-3 w-3 text-muted-foreground transition-transform" :class="langOpen && 'rotate-180'" aria-hidden="true"></i>
+        <i data-lucide="chevron-down" class="h-3 w-3 text-muted-foreground transition-transform" data-dropdown-target="chevron" aria-hidden="true"></i>
     </button>
 
-    <div x-show="langOpen"
-         x-transition:enter="transition ease-out duration-100"
-         x-transition:enter-start="opacity-0 scale-95"
-         x-transition:enter-end="opacity-100 scale-100"
-         x-transition:leave="transition ease-in duration-75"
-         x-transition:leave-start="opacity-100 scale-100"
-         x-transition:leave-end="opacity-0 scale-95"
-         class="absolute right-0 mt-2 w-40 origin-top-right rounded-lg border border-border bg-card shadow-lg z-50"
-         x-cloak
+    <div data-dropdown-target="menu"
+         class="hidden absolute right-0 mt-2 w-40 origin-top-right rounded-lg border border-border bg-card shadow-lg z-50"
          role="menu">
         <div class="p-1">
             <form action="{% url 'set_language' %}" method="post" class="m-0">

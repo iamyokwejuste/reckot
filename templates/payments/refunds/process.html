@@ -107,12 +107,12 @@
                 {% /button %}
             </form>
 
-            <div x-data="{ showReject: false }">
-                {% #button type="button" variant="outline" class="w-full text-red-500 hover:bg-red-500/10" attrs='@click="showReject = !showReject"' %}
+            <div data-controller="toggle">
+                {% #button type="button" variant="outline" class="w-full text-red-500 hover:bg-red-500/10" attrs='data-action="click->toggle#toggle"' %}
                     <i data-lucide="x" class="w-4 h-4"></i>
                     {% trans "Reject Refund" %}
                 {% /button %}
-                <form method="post" x-show="showReject" x-cloak class="mt-4" hx-boost="false">
+                <form method="post" data-toggle-target="content" class="hidden mt-4" hx-boost="false">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="reject">
                     <textarea name="rejection_reason" rows="2" required

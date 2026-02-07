@@ -20,41 +20,41 @@
 
 {% block header_actions %}
 <div class="flex items-center gap-1 sm:gap-2">
-    <div class="custom-select-wrapper max-w-[120px] md:max-w-none md:w-fit" x-data="{ open: false, value: '30d', label: '{% trans "Last 30 days" %}' }">
-        <input type="hidden" name="date_range" :value="value">
-        <button type="button" @click="open = !open" @click.outside="open = false"
-                class="custom-select-trigger w-full" :class="{ 'custom-select-trigger-active': open }">
-            <span class="custom-select-value truncate md:whitespace-nowrap" x-text="label"></span>
-            <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4 flex-shrink-0" :class="{ 'rotate-180': open }"></i>
+    <div class="custom-select-wrapper max-w-[120px] md:max-w-none md:w-fit" data-controller="dropdown">
+        <input type="hidden" name="date_range" value="30d" data-dropdown-target="value">
+        <button type="button" data-action="click->dropdown#toggle" data-dropdown-target="trigger"
+                class="custom-select-trigger w-full">
+            <span class="custom-select-value truncate md:whitespace-nowrap" data-dropdown-target="label">{% trans "Last 30 days" %}</span>
+            <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4 flex-shrink-0"></i>
         </button>
-        <div x-show="open" x-transition @click.outside="open = false" class="custom-select-dropdown" x-cloak>
+        <div data-dropdown-target="dropdown" class="custom-select-dropdown hidden">
             <div class="custom-select-options">
-                <button type="button" @click="value = '7d'; label = '{% trans "Last 7 days" %}'; open = false" class="custom-select-option" :class="{ 'custom-select-option-selected': value === '7d' }">
+                <button type="button" data-action="click->dropdown#select" data-value="7d" data-label="{% trans "Last 7 days" %}" class="custom-select-option">
                     <span>{% trans "Last 7 days" %}</span>
-                    <i x-show="value === '7d'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                    <i data-lucide="check" class="custom-select-check w-4 h-4 hidden"></i>
                 </button>
-                <button type="button" @click="value = '30d'; label = '{% trans "Last 30 days" %}'; open = false" class="custom-select-option" :class="{ 'custom-select-option-selected': value === '30d' }">
+                <button type="button" data-action="click->dropdown#select" data-value="30d" data-label="{% trans "Last 30 days" %}" class="custom-select-option custom-select-option-selected">
                     <span>{% trans "Last 30 days" %}</span>
-                    <i x-show="value === '30d'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                    <i data-lucide="check" class="custom-select-check w-4 h-4"></i>
                 </button>
-                <button type="button" @click="value = '90d'; label = '{% trans "Last 90 days" %}'; open = false" class="custom-select-option" :class="{ 'custom-select-option-selected': value === '90d' }">
+                <button type="button" data-action="click->dropdown#select" data-value="90d" data-label="{% trans "Last 90 days" %}" class="custom-select-option">
                     <span>{% trans "Last 90 days" %}</span>
-                    <i x-show="value === '90d'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                    <i data-lucide="check" class="custom-select-check w-4 h-4 hidden"></i>
                 </button>
-                <button type="button" @click="value = '1y'; label = '{% trans "Last year" %}'; open = false" class="custom-select-option" :class="{ 'custom-select-option-selected': value === '1y' }">
+                <button type="button" data-action="click->dropdown#select" data-value="1y" data-label="{% trans "Last year" %}" class="custom-select-option">
                     <span>{% trans "Last year" %}</span>
-                    <i x-show="value === '1y'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                    <i data-lucide="check" class="custom-select-check w-4 h-4 hidden"></i>
                 </button>
             </div>
         </div>
     </div>
-    <button type="button" @click="$dispatch('open-withdraw-modal')"
+    <button type="button" data-action="click->modal#open" data-modal-name="withdraw"
             class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-3"
             title="{% trans 'Withdraw' %}">
         <i data-lucide="banknote" class="h-4 w-4"></i>
         <span class="hidden sm:inline">{% trans "Withdraw" %}</span>
     </button>
-    <button type="button" @click="$dispatch('open-export-modal')"
+    <button type="button" data-action="click->modal#open" data-modal-name="export"
             class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-3"
             title="{% trans 'Export' %}">
         <i data-lucide="download" class="h-4 w-4"></i>
@@ -64,254 +64,149 @@
 {% endblock %}
 
 {% block content %}
-<div class="space-y-6"
-     x-data="{
-        showExportModal: false,
-        showWithdrawModal: false,
-        withdrawAmount: '',
-        phoneNumber: '',
-        description: '',
-        loading: false,
-        error: '',
-        success: false,
-        platformCommission: 7,
-        netAmount: 0,
-        availableBalance: {{ available_balance }}
-     }"
-     @open-export-modal.window="showExportModal = true"
-     @open-withdraw-modal.window="showWithdrawModal = true">
-    {% #modal trigger="showExportModal" title=_("Export Event Data") description=_("Select an event to export data from") size="md" %}
-        {% if all_events %}
-        <div class="space-y-2 max-h-80 overflow-y-auto">
-            {% for event in all_events %}
-            <a href="{% url 'reports:export_center' org_slug=event.organization.slug event_slug=event.slug %}"
-               class="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
-                <div class="h-10 w-10 rounded-lg bg-muted flex flex-col items-center justify-center shrink-0">
-                    <span class="text-xs text-muted-foreground">{{ event.start_at|date:"M"|upper }}</span>
-                    <span class="text-sm font-bold leading-none">{{ event.start_at|date:"d" }}</span>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium truncate">{{ event.title }}</p>
-                    <p class="text-xs text-muted-foreground">{{ event.organization.name }}</p>
-                </div>
-                <i data-lucide="chevron-right" class="h-4 w-4 text-muted-foreground"></i>
-            </a>
-            {% endfor %}
+<div class="space-y-6" data-controller="modal" data-modal-available-balance-value="{{ available_balance }}">
+    <div data-modal-target="exportModal" class="hidden">
+        <div class="bg-card border border-border rounded-lg p-6">
+            <h3 class="text-lg font-semibold mb-2">{% trans "Export Event Data" %}</h3>
+            <p class="text-sm text-muted-foreground mb-4">{% trans "Select an event to export data from" %}</p>
+            {% if all_events %}
+            <div class="space-y-2 max-h-80 overflow-y-auto">
+                {% for event in all_events %}
+                <a href="{% url 'reports:export_center' org_slug=event.organization.slug event_slug=event.slug %}"
+                   class="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                    <div class="h-10 w-10 rounded-lg bg-muted flex flex-col items-center justify-center shrink-0">
+                        <span class="text-xs text-muted-foreground">{{ event.start_at|date:"M"|upper }}</span>
+                        <span class="text-sm font-bold leading-none">{{ event.start_at|date:"d" }}</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium truncate">{{ event.title }}</p>
+                        <p class="text-xs text-muted-foreground">{{ event.organization.name }}</p>
+                    </div>
+                    <i data-lucide="chevron-right" class="h-4 w-4 text-muted-foreground"></i>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-8 text-muted-foreground">
+                <i data-lucide="inbox" class="h-8 w-8 mx-auto mb-2 opacity-50"></i>
+                <p class="text-sm">{% trans "No events available for export" %}</p>
+                <a href="{% url 'events:create' %}" class="text-sm text-primary hover:underline mt-2 inline-block">{% trans "Create an event" %}</a>
+            </div>
+            {% endif %}
         </div>
-        {% else %}
-        <div class="text-center py-8 text-muted-foreground">
-            <i data-lucide="inbox" class="h-8 w-8 mx-auto mb-2 opacity-50"></i>
-            <p class="text-sm">{% trans "No events available for export" %}</p>
-            <a href="{% url 'events:create' %}" class="text-sm text-primary hover:underline mt-2 inline-block">{% trans "Create an event" %}</a>
-        </div>
-        {% endif %}
-    {% /modal %}
+    </div>
 
-    {% #modal trigger="showWithdrawModal" title=_("Withdraw Funds") description=_("Enter withdrawal details") size="md" %}
-        <div x-show="!success">
-            <div class="space-y-4">
-                <div class="bg-muted/50 p-4 rounded-lg">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-sm text-muted-foreground">{% trans "Available Balance" %}</span>
-                        <span class="text-lg font-bold">{{ available_balance }} <span class="text-sm font-normal text-muted-foreground">XAF</span></span>
-                    </div>
-                    <p class="text-xs text-muted-foreground">{% trans "This is your available balance from confirmed payments, minus service fees and previous withdrawals" %}</p>
-                </div>
-
-                <div x-show="availableBalance < 200" class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg text-sm">
-                    <p class="font-medium">{% trans "Minimum withdrawal amount is 200 XAF" %}</p>
-                    <p class="text-xs mt-1">{% trans "You need at least 200 XAF in your balance to make a withdrawal" %}</p>
-                </div>
-
-                <div x-show="availableBalance >= 200">
-                    <label class="block text-sm font-medium mb-2">{% trans "Withdrawal Amount (XAF)" %}</label>
-                    <input
-                        type="number"
-                        x-model="withdrawAmount"
-                        @input="
-                            let amount = parseFloat(withdrawAmount) || 0;
-                            if (amount > availableBalance) {
-                                withdrawAmount = availableBalance;
-                                amount = availableBalance;
-                            }
-                            if (amount < 0) {
-                                withdrawAmount = 0;
-                                amount = 0;
-                            }
-                            const commission = Math.floor(amount * platformCommission / 100);
-                            netAmount = amount - commission;
-                        "
-                        @keydown="
-                            const currentValue = parseFloat(withdrawAmount) || 0;
-                            const key = $event.key;
-                            if (key === 'ArrowUp' && currentValue >= availableBalance) {
-                                $event.preventDefault();
-                            }
-                        "
-                        class="input w-full"
-                        placeholder="{% trans "Enter amount (min: 200 XAF)" %}"
-                        min="200"
-                        max="{{ available_balance }}"
-                        step="1"
-                        required
-                    >
-                    <p class="text-xs text-muted-foreground mt-1">{% trans "We take care of all withdrawal fees" %}</p>
-                </div>
-
-                <div x-show="availableBalance >= 200">
-                    <label class="block text-sm font-medium mb-2">{% trans "Phone Number (with country code)" %}</label>
-                    <input
-                        type="text"
-                        x-model="phoneNumber"
-                        class="input w-full"
-                        placeholder="{% trans "e.g., 237679587525" %}"
-                        required
-                    >
-                    <p class="text-xs text-muted-foreground mt-1">{% trans "Include country code (e.g., 237 for Cameroon)" %}</p>
-                </div>
-
-                <div class="bg-muted/50 p-4 rounded-lg space-y-2" x-show="withdrawAmount > 0 && availableBalance >= 200">
-                    <div class="flex justify-between text-sm">
-                        <span class="text-muted-foreground">{% trans "Withdrawal Amount" %}</span>
-                        <span class="font-medium" x-text="withdrawAmount + ' XAF'"></span>
-                    </div>
-                    <div class="flex justify-between text-sm">
-                        <span class="text-muted-foreground">{% trans "Platform Commission" %} (<span x-text="platformCommission"></span>%)</span>
-                        <span class="font-medium text-red-500" x-text="'- ' + Math.floor(withdrawAmount * platformCommission / 100) + ' XAF'"></span>
-                    </div>
-                    <div class="border-t border-border pt-2 mt-2">
-                        <div class="flex justify-between">
-                            <span class="font-semibold">{% trans "You will receive" %}</span>
-                            <span class="text-lg font-bold text-green-600" x-text="netAmount + ' XAF'"></span>
+    <div data-modal-target="withdrawModal" class="hidden" data-controller="toggle">
+        <div class="bg-card border border-border rounded-lg p-6">
+            <div data-toggle-target="content">
+                <h3 class="text-lg font-semibold mb-2">{% trans "Withdraw Funds" %}</h3>
+                <p class="text-sm text-muted-foreground mb-4">{% trans "Enter withdrawal details" %}</p>
+                <div class="space-y-4">
+                    <div class="bg-muted/50 p-4 rounded-lg">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm text-muted-foreground">{% trans "Available Balance" %}</span>
+                            <span class="text-lg font-bold">{{ available_balance }} <span class="text-sm font-normal text-muted-foreground">XAF</span></span>
                         </div>
+                        <p class="text-xs text-muted-foreground">{% trans "This is your available balance from confirmed payments, minus service fees and previous withdrawals" %}</p>
                     </div>
-                </div>
 
-                <div x-show="error" class="bg-destructive/10 text-destructive p-3 rounded-lg text-sm" x-text="error"></div>
+                    {% if available_balance < 200 %}
+                    <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg text-sm">
+                        <p class="font-medium">{% trans "Minimum withdrawal amount is 200 XAF" %}</p>
+                        <p class="text-xs mt-1">{% trans "You need at least 200 XAF in your balance to make a withdrawal" %}</p>
+                    </div>
+                    {% endif %}
 
-                <div class="flex items-center justify-end gap-3 pt-2">
-                    <button
-                        type="button"
-                        @click="showWithdrawModal = false; withdrawAmount = ''; phoneNumber = ''; description = ''; error = ''"
-                        class="btn btn-outline"
-                        :disabled="loading"
-                    >
-                        {% trans "Close" %}
-                    </button>
-                    <button
-                        type="button"
-                        x-show="availableBalance >= 200"
-                        @click="
-                            if (!withdrawAmount || parseFloat(withdrawAmount) < 200) {
-                                error = '{% trans "Minimum withdrawal amount is 200 XAF" %}';
-                                return;
-                            }
-                            if (parseFloat(withdrawAmount) > {{ available_balance }}) {
-                                error = '{% trans "Amount exceeds available balance" %}';
-                                return;
-                            }
-                            if (!phoneNumber) {
-                                error = '{% trans "Please enter your phone number" %}';
-                                return;
-                            }
-                            loading = true;
-                            error = '';
-                            fetch('{% url "payments:withdrawal_request" %}', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/x-www-form-urlencoded',
-                                    'X-CSRFToken': '{{ csrf_token }}'
-                                },
-                                body: new URLSearchParams({
-                                    amount: withdrawAmount,
-                                    phone_number: phoneNumber
-                                })
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                loading = false;
-                                if (data.success) {
-                                    success = true;
-                                    setTimeout(() => {
-                                        window.location.reload();
-                                    }, 2000);
-                                } else {
-                                    error = data.error || '{% trans "Failed to process withdrawal" %}';
-                                }
-                            })
-                            .catch(err => {
-                                loading = false;
-                                error = '{% trans "Network error. Please try again." %}';
-                            });
-                        "
-                        class="btn btn-primary"
-                        :disabled="loading || !withdrawAmount || !phoneNumber"
-                    >
-                        <i data-lucide="arrow-right" class="h-4 w-4" x-show="!loading"></i>
-                        <span x-show="!loading">{% trans "Request Withdrawal" %}</span>
-                        <span x-show="loading" class="flex items-center gap-2">
-                            <i data-lucide="loader-2" class="animate-spin h-4 w-4"></i>
-                            {% trans "Processing..." %}
-                        </span>
-                    </button>
+                    {% if available_balance >= 200 %}
+                    <form method="post" action="{% url 'payments:withdrawal_request' %}" data-controller="toggle">
+                        {% csrf_token %}
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">{% trans "Withdrawal Amount (XAF)" %}</label>
+                                <input type="number" name="amount" class="input w-full"
+                                       placeholder="{% trans "Enter amount (min: 200 XAF)" %}"
+                                       min="200" max="{{ available_balance }}" step="1" required>
+                                <p class="text-xs text-muted-foreground mt-1">{% trans "We take care of all withdrawal fees" %}</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium mb-2">{% trans "Phone Number (with country code)" %}</label>
+                                <input type="text" name="phone_number" class="input w-full"
+                                       placeholder="{% trans "e.g., 237679587525" %}" required>
+                                <p class="text-xs text-muted-foreground mt-1">{% trans "Include country code (e.g., 237 for Cameroon)" %}</p>
+                            </div>
+
+                            <div class="bg-muted/50 p-4 rounded-lg space-y-2">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-muted-foreground">{% trans "Platform Commission" %} (7%)</span>
+                                    <span class="font-medium text-red-500">{% trans "Deducted on withdrawal" %}</span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-end gap-3 pt-2">
+                                <button type="button" data-action="click->modal#close"
+                                        class="btn btn-outline">
+                                    {% trans "Close" %}
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i data-lucide="arrow-right" class="h-4 w-4"></i>
+                                    <span>{% trans "Request Withdrawal" %}</span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    {% endif %}
                 </div>
             </div>
-        </div>
 
-        <div x-show="success" class="text-center py-8">
-            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i data-lucide="check" class="w-8 h-8 text-green-600"></i>
+            <div data-toggle-target="success" class="hidden text-center py-8">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="check" class="w-8 h-8 text-green-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold mb-2">{% trans "Withdrawal Requested!" %}</h3>
+                <p class="text-sm text-muted-foreground mb-4">{% trans "Your withdrawal request has been submitted successfully. You will receive the funds shortly." %}</p>
+                <p class="text-xs text-muted-foreground">{% trans "Redirecting..." %}</p>
             </div>
-            <h3 class="text-lg font-semibold mb-2">{% trans "Withdrawal Requested!" %}</h3>
-            <p class="text-sm text-muted-foreground mb-4">{% trans "Your withdrawal request has been submitted successfully. You will receive the funds shortly." %}</p>
-            <p class="text-xs text-muted-foreground">{% trans "Redirecting..." %}</p>
         </div>
-    {% /modal %}
+    </div>
+
+    {% trans "Available Balance" as label_balance %}
+    {% trans "After fees & withdrawals" as desc_balance %}
+    {% trans "Tickets Sold" as label_tickets %}
+    {% trans "Total confirmed tickets" as desc_tickets %}
+    {% trans "Check-in Rate" as label_checkin %}
+    {% trans "Average attendance" as desc_checkin %}
+    {% trans "Active Events" as label_events %}
+    {% trans "Published events" as desc_events %}
 
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div class="stat-card">
-            <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-muted-foreground">{% trans "Available Balance" %}</p>
-                <i data-lucide="banknote" class="h-4 w-4 text-muted-foreground"></i>
-            </div>
-            <div class="mt-2">
-                <p class="text-2xl font-bold">{{ available_balance }} <span class="text-sm font-normal text-muted-foreground">XAF</span></p>
-                <p class="text-xs text-muted-foreground mt-1">{% trans "After fees & withdrawals" %}</p>
-            </div>
-        </div>
+        {% #stat_card
+            label=label_balance
+            value=available_balance
+            description=desc_balance
+            icon="banknote" %}
+        {% /stat_card %}
 
-        <div class="stat-card">
-            <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-muted-foreground">{% trans "Tickets Sold" %}</p>
-                <i data-lucide="ticket" class="h-4 w-4 text-muted-foreground"></i>
-            </div>
-            <div class="mt-2">
-                <p class="text-2xl font-bold">{{ tickets_sold }}</p>
-                <p class="text-xs text-muted-foreground mt-1">{% trans "Total confirmed tickets" %}</p>
-            </div>
-        </div>
+        {% #stat_card
+            label=label_tickets
+            value=tickets_sold
+            description=desc_tickets
+            icon="ticket" %}
+        {% /stat_card %}
 
-        <div class="stat-card">
-            <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-muted-foreground">{% trans "Check-in Rate" %}</p>
-                <i data-lucide="scan-line" class="h-4 w-4 text-muted-foreground"></i>
-            </div>
-            <div class="mt-2">
-                <p class="text-2xl font-bold">{{ checkin_rate }}%</p>
-                <p class="text-xs text-muted-foreground mt-1">{% trans "Average attendance" %}</p>
-            </div>
-        </div>
+        {% #stat_card
+            label=label_checkin
+            value=checkin_rate
+            description=desc_checkin
+            icon="scan-line" %}
+        {% /stat_card %}
 
-        <div class="stat-card">
-            <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-muted-foreground">{% trans "Active Events" %}</p>
-                <i data-lucide="calendar" class="h-4 w-4 text-muted-foreground"></i>
-            </div>
-            <div class="mt-2">
-                <p class="text-2xl font-bold">{{ active_events }}</p>
-                <p class="text-xs text-muted-foreground mt-1">{% trans "Published events" %}</p>
-            </div>
-        </div>
+        {% #stat_card
+            label=label_events
+            value=active_events
+            description=desc_events
+            icon="calendar" %}
+        {% /stat_card %}
     </div>
 
     {% if analytics_metrics %}

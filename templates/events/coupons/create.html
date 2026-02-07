@@ -37,16 +37,7 @@ window.couponPageData = {
 
 {% block content %}
 <div class="max-w-2xl mx-auto" hx-boost="false">
-    <form method="post" class="space-y-6" x-data="{
-        assignmentType: 'PUBLIC',
-        assignmentLabel: 'Anyone (Public)',
-        discountType: 'PERCENTAGE',
-        discountLabel: 'Percentage',
-        selectedOrg: '',
-        selectedOrgLabel: '',
-        selectedEvent: '',
-        selectedEventLabel: ''
-    }">
+    <form method="post" class="space-y-6" data-controller="coupon-form">
         {% csrf_token %}
 
         {% if error %}
@@ -60,22 +51,24 @@ window.couponPageData = {
 
             <div>
                 <label for="organization" class="block text-sm font-medium mb-2">{% trans "Organization" %}</label>
-                <div class="custom-select-wrapper" x-data="{ open: false }">
-                    <input type="hidden" id="organization" name="organization" :value="selectedOrg" required>
-                    <button type="button" @click="open = !open" @click.outside="open = false"
-                            class="custom-select-trigger" :class="{ 'custom-select-trigger-active': open }">
-                        <span class="custom-select-value" :class="{ 'custom-select-placeholder': !selectedOrgLabel }" x-text="selectedOrgLabel || '{% trans "Select organization" %}'"></span>
-                        <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4" :class="{ 'rotate-180': open }"></i>
+                <div class="custom-select-wrapper" data-controller="dropdown">
+                    <input type="hidden" id="organization" name="organization" data-dropdown-target="value" required>
+                    <button type="button" data-action="click->dropdown#toggle" data-dropdown-target="trigger"
+                            class="custom-select-trigger">
+                        <span class="custom-select-value custom-select-placeholder" data-dropdown-target="label">{% trans "Select organization" %}</span>
+                        <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4"></i>
                     </button>
-                    <div x-show="open" x-transition @click.outside="open = false" class="custom-select-dropdown" x-cloak>
-                        <div class="custom-select-options">
-                            <template x-for="org in window.couponPageData.organizations" :key="org.id">
-                                <button type="button" @click="selectedOrg = org.id; selectedOrgLabel = org.name; open = false"
-                                        class="custom-select-option" :class="{ 'custom-select-option-selected': selectedOrg === org.id }">
-                                    <span x-text="org.name"></span>
-                                    <svg x-show="selectedOrg === org.id" class="custom-select-check w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                </button>
-                            </template>
+                    <div data-dropdown-target="menu" class="custom-select-dropdown hidden">
+                        <div class="custom-select-options" data-dropdown-target="options">
+                            {% for org in organizations %}
+                            <button type="button" data-action="click->dropdown#select"
+                                    data-dropdown-value="{{ org.id }}"
+                                    data-dropdown-label="{{ org.name }}"
+                                    class="custom-select-option">
+                                <span>{{ org.name }}</span>
+                                <svg class="custom-select-check w-4 h-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </button>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
@@ -83,32 +76,36 @@ window.couponPageData = {
 
             <div>
                 <label for="event" class="block text-sm font-medium mb-2">{% trans "Event (optional)" %}</label>
-                <div class="custom-select-wrapper" x-data="{ open: false, search: '' }">
-                    <input type="hidden" id="event" name="event" :value="selectedEvent">
-                    <button type="button" @click="open = !open; if(open) $nextTick(() => $refs.searchInput?.focus())"
-                            class="custom-select-trigger" :class="{ 'custom-select-trigger-active': open }">
-                        <span class="custom-select-value" :class="{ 'custom-select-placeholder': !selectedEventLabel }" x-text="selectedEventLabel || '{% trans "All events in organization" %}'"></span>
-                        <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4" :class="{ 'rotate-180': open }"></i>
+                <div class="custom-select-wrapper" data-controller="dropdown">
+                    <input type="hidden" id="event" name="event" data-dropdown-target="value">
+                    <button type="button" data-action="click->dropdown#toggle" data-dropdown-target="trigger"
+                            class="custom-select-trigger">
+                        <span class="custom-select-value custom-select-placeholder" data-dropdown-target="label">{% trans "All events in organization" %}</span>
+                        <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4"></i>
                     </button>
-                    <div x-show="open" x-transition @click.outside="open = false; search = ''" class="custom-select-dropdown" x-cloak>
+                    <div data-dropdown-target="menu" class="custom-select-dropdown hidden">
                         <div class="custom-select-search">
                             <svg class="custom-select-search-icon w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                            <input type="text" x-model="search" x-ref="searchInput" placeholder="{% trans 'Search events...' %}" class="custom-select-search-input" @click.stop>
+                            <input type="text" data-dropdown-target="search" data-action="input->dropdown#filter" placeholder="{% trans 'Search events...' %}" class="custom-select-search-input">
                         </div>
-                        <div class="custom-select-options">
-                            <button type="button" @click="selectedEvent = ''; selectedEventLabel = ''; open = false; search = ''"
-                                    x-show="!search || '{% trans "All events in organization" %}'.toLowerCase().includes(search.toLowerCase())"
-                                    class="custom-select-option" :class="{ 'custom-select-option-selected': selectedEvent === '' }">
+                        <div class="custom-select-options" data-dropdown-target="options">
+                            <button type="button" data-action="click->dropdown#select"
+                                    data-dropdown-value=""
+                                    data-dropdown-label="{% trans 'All events in organization' %}"
+                                    class="custom-select-option">
                                 <span>{% trans "All events in organization" %}</span>
-                                <svg x-show="selectedEvent === ''" class="custom-select-check w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                <svg class="custom-select-check w-4 h-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                             </button>
-                            <template x-for="event in window.couponPageData.events.filter(e => !search || e.title.toLowerCase().includes(search.toLowerCase()) || e.org.toLowerCase().includes(search.toLowerCase())).slice(0, 50)" :key="event.id">
-                                <button type="button" @click="selectedEvent = event.id; selectedEventLabel = event.title + ' (' + event.org + ')'; open = false; search = ''"
-                                        class="custom-select-option" :class="{ 'custom-select-option-selected': selectedEvent === event.id }">
-                                    <span x-text="event.title + ' (' + event.org + ')'"></span>
-                                    <svg x-show="selectedEvent === event.id" class="custom-select-check w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                </button>
-                            </template>
+                            {% for event in events %}
+                            <button type="button" data-action="click->dropdown#select"
+                                    data-dropdown-value="{{ event.id }}"
+                                    data-dropdown-label="{{ event.title }} ({{ event.organization.name }})"
+                                    data-dropdown-searchable="{{ event.title }} {{ event.organization.name }}"
+                                    class="custom-select-option">
+                                <span>{{ event.title }} ({{ event.organization.name }})</span>
+                                <svg class="custom-select-check w-4 h-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </button>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
@@ -133,24 +130,28 @@ window.couponPageData = {
             <div class="grid gap-4 sm:grid-cols-2">
                 <div>
                     <label for="discount_type" class="block text-sm font-medium mb-2">{% trans "Discount Type" %}</label>
-                    <div class="custom-select-wrapper" x-data="{ open: false }">
-                        <input type="hidden" id="discount_type" name="discount_type" :value="discountType" required>
-                        <button type="button" @click="open = !open" @click.outside="open = false"
-                                class="custom-select-trigger" :class="{ 'custom-select-trigger-active': open }">
-                            <span class="custom-select-value" x-text="discountLabel"></span>
-                            <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4" :class="{ 'rotate-180': open }"></i>
+                    <div class="custom-select-wrapper" data-controller="dropdown">
+                        <input type="hidden" id="discount_type" name="discount_type" data-dropdown-target="value" value="PERCENTAGE" required>
+                        <button type="button" data-action="click->dropdown#toggle" data-dropdown-target="trigger"
+                                class="custom-select-trigger">
+                            <span class="custom-select-value" data-dropdown-target="label">{% trans "Percentage" %}</span>
+                            <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4"></i>
                         </button>
-                        <div x-show="open" x-transition @click.outside="open = false" class="custom-select-dropdown" x-cloak>
+                        <div data-dropdown-target="menu" class="custom-select-dropdown hidden">
                             <div class="custom-select-options">
-                                <button type="button" @click="discountType = 'PERCENTAGE'; discountLabel = '{% trans "Percentage" %}'; open = false"
-                                        class="custom-select-option" :class="{ 'custom-select-option-selected': discountType === 'PERCENTAGE' }">
+                                <button type="button" data-action="click->dropdown#select"
+                                        data-dropdown-value="PERCENTAGE"
+                                        data-dropdown-label="{% trans 'Percentage' %}"
+                                        class="custom-select-option custom-select-option-selected">
                                     <span>{% trans "Percentage" %}</span>
-                                    <svg x-show="discountType === 'PERCENTAGE'" class="custom-select-check w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                    <svg class="custom-select-check w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                 </button>
-                                <button type="button" @click="discountType = 'FIXED'; discountLabel = '{% trans "Fixed Amount" %}'; open = false"
-                                        class="custom-select-option" :class="{ 'custom-select-option-selected': discountType === 'FIXED' }">
+                                <button type="button" data-action="click->dropdown#select"
+                                        data-dropdown-value="FIXED"
+                                        data-dropdown-label="{% trans 'Fixed Amount' %}"
+                                        class="custom-select-option">
                                     <span>{% trans "Fixed Amount" %}</span>
-                                    <svg x-show="discountType === 'FIXED'" class="custom-select-check w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                    <svg class="custom-select-check w-4 h-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                 </button>
                             </div>
                         </div>
@@ -174,42 +175,52 @@ window.couponPageData = {
 
             <div>
                 <label for="assignment_type" class="block text-sm font-medium mb-2">{% trans "Who can use this coupon?" %}</label>
-                <div class="custom-select-wrapper" x-data="{ open: false }">
-                    <input type="hidden" id="assignment_type" name="assignment_type" :value="assignmentType" required>
-                    <button type="button" @click="open = !open" @click.outside="open = false"
-                            class="custom-select-trigger" :class="{ 'custom-select-trigger-active': open }">
-                        <span class="custom-select-value" x-text="assignmentLabel"></span>
-                        <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4" :class="{ 'rotate-180': open }"></i>
+                <div class="custom-select-wrapper" data-controller="dropdown">
+                    <input type="hidden" id="assignment_type" name="assignment_type" data-dropdown-target="value" value="PUBLIC" required>
+                    <button type="button" data-action="click->dropdown#toggle" data-dropdown-target="trigger"
+                            class="custom-select-trigger">
+                        <span class="custom-select-value" data-dropdown-target="label">{% trans "Anyone (Public)" %}</span>
+                        <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4"></i>
                     </button>
-                    <div x-show="open" x-transition @click.outside="open = false" class="custom-select-dropdown" x-cloak>
+                    <div data-dropdown-target="menu" class="custom-select-dropdown hidden">
                         <div class="custom-select-options">
-                            <button type="button" @click="assignmentType = 'PUBLIC'; assignmentLabel = '{% trans "Anyone (Public)" %}'; open = false"
-                                    class="custom-select-option" :class="{ 'custom-select-option-selected': assignmentType === 'PUBLIC' }">
+                            <button type="button" data-action="click->dropdown#select"
+                                    data-dropdown-value="PUBLIC"
+                                    data-dropdown-label="{% trans 'Anyone (Public)' %}"
+                                    data-coupon-form-target="assignmentType"
+                                    data-action="click->dropdown#select click->coupon-form#updateAssignment"
+                                    class="custom-select-option custom-select-option-selected">
                                 <span>{% trans "Anyone (Public)" %}</span>
-                                <svg x-show="assignmentType === 'PUBLIC'" class="custom-select-check w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                <svg class="custom-select-check w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                             </button>
-                            <button type="button" @click="assignmentType = 'INDIVIDUAL'; assignmentLabel = '{% trans "Specific person" %}'; open = false"
-                                    class="custom-select-option" :class="{ 'custom-select-option-selected': assignmentType === 'INDIVIDUAL' }">
+                            <button type="button" data-action="click->dropdown#select click->coupon-form#updateAssignment"
+                                    data-dropdown-value="INDIVIDUAL"
+                                    data-dropdown-label="{% trans 'Specific person' %}"
+                                    data-coupon-form-target="assignmentType"
+                                    class="custom-select-option">
                                 <span>{% trans "Specific person" %}</span>
-                                <svg x-show="assignmentType === 'INDIVIDUAL'" class="custom-select-check w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                <svg class="custom-select-check w-4 h-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                             </button>
-                            <button type="button" @click="assignmentType = 'GROUP'; assignmentLabel = '{% trans "Group of people" %}'; open = false"
-                                    class="custom-select-option" :class="{ 'custom-select-option-selected': assignmentType === 'GROUP' }">
+                            <button type="button" data-action="click->dropdown#select click->coupon-form#updateAssignment"
+                                    data-dropdown-value="GROUP"
+                                    data-dropdown-label="{% trans 'Group of people' %}"
+                                    data-coupon-form-target="assignmentType"
+                                    class="custom-select-option">
                                 <span>{% trans "Group of people" %}</span>
-                                <svg x-show="assignmentType === 'GROUP'" class="custom-select-check w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                <svg class="custom-select-check w-4 h-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div x-show="assignmentType === 'INDIVIDUAL'" x-cloak>
+            <div data-coupon-form-target="individualEmail" class="hidden">
                 <label for="assigned_email" class="block text-sm font-medium mb-2">{% trans "Assigned Email" %}</label>
                 <input type="email" name="assigned_email" id="assigned_email" placeholder="user@example.com" class="input">
                 <p class="text-xs text-muted-foreground mt-1">{% trans "Only this email address can use the coupon" %}</p>
             </div>
 
-            <div x-show="assignmentType === 'GROUP'" x-cloak>
+            <div data-coupon-form-target="groupEmails" class="hidden">
                 <label for="assigned_emails" class="block text-sm font-medium mb-2">{% trans "Assigned Emails" %}</label>
                 <textarea name="assigned_emails" id="assigned_emails" rows="3" placeholder="user1@example.com, user2@example.com, user3@example.com" class="input"></textarea>
                 <p class="text-xs text-muted-foreground mt-1">{% trans "Comma-separated list of email addresses" %}</p>
@@ -225,7 +236,7 @@ window.couponPageData = {
 
                 <div>
                     {% #datepicker name="valid_until" id="valid_until" label="Valid Until" placeholder="No end date" enable_time=True %}{% /datepicker %}
-                    <p class="text-xs text-muted-foreground mt-1" x-show="selectedEvent" x-cloak>{% trans "Cannot be after the event end date" %}</p>
+                    <p class="text-xs text-muted-foreground mt-1" data-coupon-form-target="eventWarning" class="hidden">{% trans "Cannot be after the event end date" %}</p>
                 </div>
             </div>
         </div>
@@ -239,6 +250,44 @@ window.couponPageData = {
         </div>
     </form>
 </div>
+
+<script>
+// Stimulus controller for coupon form
+import { Controller } from "@hotwired/stimulus"
+
+class CouponFormController extends Controller {
+    static targets = ["assignmentType", "individualEmail", "groupEmails", "eventWarning"]
+
+    connect() {
+        this.updateAssignment()
+    }
+
+    updateAssignment() {
+        const assignmentInput = document.getElementById('assignment_type')
+        const assignmentType = assignmentInput ? assignmentInput.value : 'PUBLIC'
+
+        // Hide all conditional fields
+        if (this.hasIndividualEmailTarget) {
+            this.individualEmailTarget.classList.add('hidden')
+        }
+        if (this.hasGroupEmailsTarget) {
+            this.groupEmailsTarget.classList.add('hidden')
+        }
+
+        // Show relevant field
+        if (assignmentType === 'INDIVIDUAL' && this.hasIndividualEmailTarget) {
+            this.individualEmailTarget.classList.remove('hidden')
+        } else if (assignmentType === 'GROUP' && this.hasGroupEmailsTarget) {
+            this.groupEmailsTarget.classList.remove('hidden')
+        }
+    }
+}
+
+// Register the controller if Stimulus is available
+if (window.Stimulus) {
+    window.Stimulus.register("coupon-form", CouponFormController)
+}
+</script>
 {% endblock %}
 
 {% block extra_scripts %}

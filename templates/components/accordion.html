@@ -1,0 +1,4 @@
+{% load slippers %}
+<div data-controller="accordion" data-accordion-allow-multiple-value="{{ allow_multiple|default:'false' }}" class="{{ class|default:'' }}">
+    {{ children }}
+</div>

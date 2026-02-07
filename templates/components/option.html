@@ -2,9 +2,8 @@
         data-option
         data-value="{{ value }}"
         data-label="{{ label|default:children }}"
-        @click="selectOption('{{ value }}', '{{ label|default:children|escapejs }}')"
-        class="custom-select-option"
-        :class="{ 'custom-select-option-selected': value === '{{ value }}' }">
+        data-action="click->dropdown#select"
+        class="custom-select-option">
     <span>{{ label|default:children }}</span>
-    <i x-show="value === '{{ value }}'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+    <i data-lucide="check" class="custom-select-check w-4 h-4 hidden"></i>
 </button>

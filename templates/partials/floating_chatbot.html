@@ -1,10 +1,10 @@
 {% load i18n static %}
 
-<div id="floating-chatbot" x-data="chatbot()">
-    <button @click="toggle()"
+<div id="floating-chatbot" data-controller="chatbot">
+    <button data-action="click->chatbot#toggle"
+            data-chatbot-trigger
             style="position: fixed !important; bottom: 1.5rem !important; right: 1.5rem !important;"
             class="z-[60] h-14 w-14 sm:h-16 sm:w-16 rounded-full shadow-2xl hover:scale-110 transition-all duration-300 flex items-center justify-center group bg-background border-2 border-border"
-            x-show="!isOpen"
             aria-label="{% trans 'Reckot Assistant - Powered by Gemini' %}">
         <i data-lucide="bot" class="h-6 w-6 sm:h-7 sm:w-7 text-foreground"></i>
         <span class="absolute -top-1 -right-1 flex h-4 w-4 sm:h-5 sm:w-5">
@@ -13,22 +13,11 @@
         </span>
     </button>
 
-    <div x-show="isOpen"
-         class="fixed top-[60px] left-0 right-0 bottom-0 z-[70] bg-card flex flex-col
+    <div id="floating-chatbot-container"
+         data-chatbot-target="container"
+         class="hidden fixed top-[60px] left-0 right-0 bottom-0 z-[70] bg-card flex flex-col
                 sm:inset-auto sm:bottom-6 sm:right-6 sm:w-[33vw] sm:rounded-2xl sm:border sm:border-border sm:shadow-2xl"
          style="overflow: hidden !important;">
-
-         <style>
-            #floating-chatbot > div[x-show] {
-                height: calc(100vh - 60px) !important;
-            }
-            @media (min-width: 640px) {
-                #floating-chatbot > div[x-show] {
-                    height: 60vh !important;
-                    max-height: 60vh !important;
-                }
-            }
-         </style>
 
         <div class="flex items-center justify-between py-2.5 px-3 sm:px-4 border-b border-border bg-primary sm:rounded-t-2xl flex-shrink-0">
             <div class="flex items-center gap-2 sm:gap-3">
@@ -41,87 +30,43 @@
                 </div>
             </div>
             <div class="flex items-center gap-1.5 sm:gap-2">
-                <button @click="clearChat()"
+                <button data-action="click->chatbot#clearChat"
                         class="h-9 w-9 sm:h-8 sm:w-8 rounded-lg hover:bg-primary-foreground/20 active:bg-primary-foreground/30 transition-colors flex items-center justify-center"
                         title="{% trans 'Clear chat' %}">
                     <i data-lucide="trash-2" class="h-4 w-4 sm:h-4 sm:w-4 text-primary-foreground"></i>
                 </button>
-                <button @click="close()"
+                <button data-action="click->chatbot#close"
                         class="h-9 w-9 sm:h-8 sm:w-8 rounded-lg hover:bg-primary-foreground/20 active:bg-primary-foreground/30 transition-colors flex items-center justify-center"
                         aria-label="{% trans 'Close' %}">
                     <i data-lucide="x" class="h-5 w-5 text-primary-foreground"></i>
                 </button>
             </div>
         </div>
-        <div x-ref="messages" class="flex-1 min-h-0 p-4 space-y-3 bg-muted/20" style="overflow-y: auto !important; max-height: 100% !important;">
-            <template x-for="msg in messages" :key="msg.id">
-                <div :class="msg.role === 'USER' ? 'flex justify-end' : 'flex justify-start'">
-                    <div :class="msg.role === 'USER'
-                        ? 'bg-primary text-primary-foreground rounded-2xl rounded-br-md px-4 py-2.5 max-w-[85%] shadow-md'
-                        : 'bg-card border border-border rounded-2xl rounded-bl-md px-4 py-2.5 max-w-[85%] shadow-sm'">
-                        <div class="text-sm break-words" x-html="formatMessage(msg.content)"></div>
-                    </div>
-                </div>
-            </template>
 
-            <template x-if="isLoading">
-                <div class="flex justify-start">
-                    <div class="bg-card border border-border rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
-                        <div class="flex items-center gap-2">
-                            <div class="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
-                            <div class="w-2 h-2 bg-primary rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                            <div class="w-2 h-2 bg-primary rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-                        </div>
-                    </div>
-                </div>
-            </template>
-
-            <template x-if="messages.length === 1">
-                <div class="space-y-2">
-                    <p class="text-xs text-muted-foreground text-center">{% trans "Quick actions:" %}</p>
-                    <div class="flex flex-wrap gap-2">
-                        <button @click="sendMessage('How do I create an event?')"
-                                class="text-xs px-3 py-1.5 rounded-full bg-background border hover:bg-accent transition-colors">
-                            {% trans "Create event" %}
-                        </button>
-                        <button @click="sendMessage('I have a payment issue')"
-                                class="text-xs px-3 py-1.5 rounded-full bg-background border hover:bg-accent transition-colors">
-                            {% trans "Payment help" %}
-                        </button>
-                        <button @click="sendMessage('How do I check in attendees?')"
-                                class="text-xs px-3 py-1.5 rounded-full bg-background border hover:bg-accent transition-colors">
-                            {% trans "Check-in" %}
-                        </button>
-                    </div>
-                </div>
-            </template>
+        <div data-chatbot-target="messages" class="flex-1 min-h-0 p-4 space-y-3 bg-muted/20" style="overflow-y: auto !important; max-height: 100% !important;">
         </div>
 
         <div class="p-3 sm:p-4 border-t border-border bg-background flex-shrink-0">
-            <div class="flex items-center gap-2">
+            <form data-action="submit->chatbot#sendMessage" class="flex items-center gap-2">
                 <input type="text"
-                       x-model="inputMessage"
+                       data-chatbot-target="input"
                        placeholder="{% trans 'Type your message...' %}"
                        class="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 text-sm rounded-xl border border-border bg-card focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                       :disabled="isLoading || isListening"
                        maxlength="500"
-                       @keydown.enter="sendMessage()"
-                       @keydown.escape="close()">
+                       data-action="keydown.escape->chatbot#close">
                 <button type="button"
-                        @click="toggleVoiceInput()"
-                        class="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:scale-105 active:scale-95"
-                        :class="isListening ? 'bg-red-500 text-white shadow-lg' : 'bg-muted hover:bg-muted/80 text-foreground'"
-                        :disabled="isLoading"
+                        data-chatbot-target="voiceButton"
+                        data-action="click->chatbot#toggleVoiceInput"
+                        class="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:scale-105 active:scale-95 bg-muted hover:bg-muted/80 text-foreground"
                         title="{% trans 'Voice input' %}">
-                    <i :data-lucide="isListening ? 'mic-off' : 'mic'" class="w-5 h-5"></i>
+                    <i data-lucide="mic" class="w-5 h-5"></i>
                 </button>
-                <button type="button"
-                        @click="sendMessage()"
-                        class="shrink-0 w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-md"
-                        :disabled="isLoading || isListening || !inputMessage.trim()">
+                <button type="submit"
+                        data-chatbot-target="sendButton"
+                        class="shrink-0 w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-md">
                     <i data-lucide="send" class="w-5 h-5"></i>
                 </button>
-            </div>
+            </form>
             <p class="text-[10px] text-muted-foreground mt-2 text-center opacity-60">
                 {% trans "Powered by Google Gemini" %}
             </p>

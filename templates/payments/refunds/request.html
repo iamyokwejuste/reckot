@@ -36,21 +36,21 @@
             </div>
         </div>
 
-        <form method="post" class="space-y-4" x-data="{ refundType: 'FULL' }">
+        <form method="post" class="space-y-4" data-controller="toggle">
             {% csrf_token %}
 
             <div>
                 <label class="block text-sm font-medium mb-2">{% trans "Refund Type" %}</label>
                 <div class="space-y-2">
                     <label class="flex items-center gap-3 p-3 rounded-lg border border-border cursor-pointer hover:bg-muted/50 has-[:checked]:border-primary has-[:checked]:bg-primary/5">
-                        <input type="radio" name="refund_type" value="FULL" x-model="refundType" class="h-4 w-4">
+                        <input type="radio" name="refund_type" value="FULL" checked data-action="change->toggle#toggle" data-toggle-target="typeInput" class="h-4 w-4">
                         <div>
                             <span class="font-medium">{% trans "Full Refund" %}</span>
                             <p class="text-sm text-muted-foreground">{% blocktrans with amount=payment.amount|floatformat:0 currency=payment.currency %}Get back the full amount: {{ amount }} {{ currency }}{% endblocktrans %}</p>
                         </div>
                     </label>
                     <label class="flex items-center gap-3 p-3 rounded-lg border border-border cursor-pointer hover:bg-muted/50 has-[:checked]:border-primary has-[:checked]:bg-primary/5">
-                        <input type="radio" name="refund_type" value="PARTIAL" x-model="refundType" class="h-4 w-4">
+                        <input type="radio" name="refund_type" value="PARTIAL" data-action="change->toggle#toggle" data-toggle-target="typeInput" class="h-4 w-4">
                         <div>
                             <span class="font-medium">{% trans "Partial Refund" %}</span>
                             <p class="text-sm text-muted-foreground">{% trans "Request a specific amount" %}</p>
@@ -59,11 +59,28 @@
                 </div>
             </div>
 
-            <div x-show="refundType === 'PARTIAL'" x-cloak>
+            <div data-toggle-target="content" class="hidden">
                 <label for="amount" class="block text-sm font-medium mb-2">{% blocktrans with currency=payment.currency %}Refund Amount ({{ currency }}){% endblocktrans %}</label>
                 <input type="number" name="amount" id="amount" min="1" max="{{ payment.amount }}"
                        placeholder="{% trans "Enter amount" %}" class="input">
             </div>
+
+            <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const radios = document.querySelectorAll('input[name="refund_type"]');
+                const amountField = document.querySelector('[data-toggle-target="content"]');
+
+                radios.forEach(radio => {
+                    radio.addEventListener('change', function() {
+                        if (this.value === 'PARTIAL') {
+                            amountField.classList.remove('hidden');
+                        } else {
+                            amountField.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+            </script>
 
             <div>
                 <label for="reason" class="block text-sm font-medium mb-2">{% trans "Reason for Refund" %}</label>

@@ -2,9 +2,12 @@
 {% load slippers %}
 {% load i18n %}
 <!DOCTYPE html>
-<html lang="en" class="h-full" x-data="themeHandler()" :class="{ 'dark': isDark }">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <script>
         (function() {
             var mode = localStorage.getItem('theme') || 'system';
@@ -26,7 +29,6 @@
 
     <link rel="canonical" href="{{ request.build_absolute_uri }}">
 
-    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="{% block og_type %}website{% endblock %}">
     <meta property="og:title" content="{% block og_title %}Reckot - Event Management Platform{% endblock %}">
     <meta property="og:description" content="{% block og_description %}Modern event management platform for Africa. Create, manage, and sell tickets for your events with ease.{% endblock %}">
@@ -38,7 +40,6 @@
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="Reckot - You got better things to do with your time!">{% endblock %}
 
-    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@raboreckot">
     <meta name="twitter:creator" content="@raboreckot">
@@ -59,36 +60,20 @@
 
     <link href="{% static 'css/output.css' %}" rel="stylesheet">
 
-    <script>
-        function themeHandler() {
-            return {
-                isDark: document.documentElement.classList.contains('dark'),
-                mode: localStorage.getItem('theme') || 'system',
-                init() {
-                    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-                        if (this.mode === 'system') this.updateTheme();
-                    });
-                },
-                updateTheme() {
-                    if (this.mode === 'system') {
-                        this.isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                    } else {
-                        this.isDark = this.mode === 'dark';
-                    }
-                },
-                setMode(m) {
-                    this.mode = m;
-                    localStorage.setItem('theme', m);
-                    this.updateTheme();
-                }
-            }
+    <script src="https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js"></script>
+
+    <script type="module">
+        import { Application } from "https://unpkg.com/@hotwired/stimulus@3.2.2/dist/stimulus.js"
+
+        if (!window.Stimulus) {
+            window.Stimulus = Application.start();
+            window.Stimulus.debug = false;
         }
     </script>
 
-    <style>
-        body { font-family: 'Inter', system-ui, sans-serif; }
-        [x-cloak] { display: none !important; }
-    </style>
+    <script src="{% static 'js/stimulus-app.js' %}?v=1770458333"></script>
+
+    <script defer src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
 
     <script type="application/ld+json">
     {
@@ -104,7 +89,7 @@
 
     {% block extra_head %}{% endblock %}
 </head>
-<body class="min-h-screen bg-background text-foreground antialiased flex flex-col transition-colors duration-300" hx-boost="true">
+<body class="min-h-screen bg-background text-foreground antialiased flex flex-col transition-colors duration-300" hx-boost="true" data-controller="theme">
     {% include "partials/page_loader.html" %}
     {% include "partials/messages.html" %}
     {% include "partials/navigation.html" %}

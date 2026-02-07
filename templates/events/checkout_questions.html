@@ -23,16 +23,16 @@
         <span class="text-sm text-muted-foreground">{% blocktrans count counter=questions.count %}{{ counter }} question{% plural %}{{ counter }} questions{% endblocktrans %}</span>
     </div>
 
-    <div class="card p-6" x-data="{ showForm: false }">
+    <div class="card p-6" data-controller="toggle">
         <div class="flex items-center justify-between mb-4">
             <h2 class="font-semibold">{% trans "Custom Questions" %}</h2>
-            {% #button type="button" variant="default" size="sm" attrs='@click="showForm = !showForm"' %}
+            {% #button type="button" variant="default" size="sm" attrs='data-action="click->toggle#toggle"' %}
                 <i data-lucide="plus" class="w-4 h-4"></i>
                 {% trans "Add Question" %}
             {% /button %}
         </div>
 
-        <form x-show="showForm" x-cloak method="post" class="mb-6 p-4 rounded-lg border border-border bg-muted/30 space-y-4">
+        <form data-toggle-target="content" class="hidden mb-6 p-4 rounded-lg border border-border bg-muted/30 space-y-4" method="post">
             {% csrf_token %}
             <input type="hidden" name="action" value="add">
 
@@ -44,7 +44,7 @@
             <div class="grid sm:grid-cols-2 gap-4">
                 <div>
                     <label for="field_type" class="block text-sm font-medium mb-2">{% trans "Field Type" %}</label>
-                    <select name="field_type" id="field_type" class="input" x-data x-ref="fieldType" @change="$refs.optionsGroup.style.display = ['SELECT', 'RADIO'].includes($refs.fieldType.value) ? 'block' : 'none'">
+                    <select name="field_type" id="field_type" class="input" data-controller="toggle" data-action="change->toggle#toggle" data-toggle-target="select">
                         <option value="TEXT">{% trans "Text" %}</option>
                         <option value="TEXTAREA">{% trans "Long Text" %}</option>
                         <option value="SELECT">{% trans "Dropdown" %}</option>
@@ -56,11 +56,27 @@
                         <option value="NUMBER">{% trans "Number" %}</option>
                     </select>
                 </div>
-                <div x-ref="optionsGroup" style="display: none;">
+                <div data-toggle-target="content" class="hidden">
                     <label for="options" class="block text-sm font-medium mb-2">{% trans "Options (one per line)" %}</label>
                     <textarea name="options" id="options" rows="3" placeholder="{% trans "Small" %}&#10;{% trans "Medium" %}&#10;{% trans "Large" %}&#10;{% trans "X-Large" %}" class="input resize-none text-sm"></textarea>
                 </div>
             </div>
+
+            <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const select = document.getElementById('field_type');
+                const optionsDiv = select.closest('.grid').querySelector('[data-toggle-target="content"]');
+
+                select.addEventListener('change', function() {
+                    const value = this.value;
+                    if (value === 'SELECT' || value === 'RADIO' || value === 'CHECKBOX') {
+                        optionsDiv.classList.remove('hidden');
+                    } else {
+                        optionsDiv.classList.add('hidden');
+                    }
+                });
+            });
+            </script>
 
             <div class="flex items-center gap-6">
                 <label class="flex items-center gap-2 cursor-pointer">
@@ -78,12 +94,12 @@
                     <i data-lucide="plus" class="w-4 h-4"></i>
                     {% trans "Add Question" %}
                 {% /button %}
-                {% #button type="button" variant="outline" size="sm" attrs='@click="showForm = false"' %}{% trans "Cancel" %}{% /button %}
+                {% #button type="button" variant="outline" size="sm" attrs='data-action="click->toggle#toggle"' %}{% trans "Cancel" %}{% /button %}
             </div>
         </form>
 
         {% if questions %}
-        <div class="space-y-3" x-data="{ dragging: null }">
+        <div class="space-y-3">
             {% for q in questions %}
             <div class="flex items-center gap-3 p-4 rounded-lg border border-border bg-background hover:shadow-sm transition-shadow">
                 <div class="cursor-grab text-muted-foreground hover:text-foreground">

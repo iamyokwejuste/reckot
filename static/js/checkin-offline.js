@@ -21,19 +21,16 @@ class CheckInOffline {
 
     setupListeners() {
         this.syncManager.on('online', () => {
-            console.log('[CheckIn] Online - sync available');
             this.updateStatusUI();
             this.showNotification('Back online - syncing data...', 'success');
         });
 
         this.syncManager.on('offline', () => {
-            console.log('[CheckIn] Offline - using cached data');
             this.updateStatusUI();
             this.showNotification('Offline mode - check-ins will sync later', 'warning');
         });
 
         this.syncManager.on('syncCompleted', (data) => {
-            console.log('[CheckIn] Sync completed:', data);
             this.updateStatusUI();
             if (data.checkins > 0 || data.swag > 0) {
                 this.showNotification(
@@ -173,7 +170,6 @@ class CheckInOffline {
             const html = await response.text();
             return { success: response.ok, html };
         } catch (error) {
-            console.error('[CheckIn] Online verification failed:', error);
             return this.verifyTicketOffline(code);
         }
     }
@@ -215,7 +211,6 @@ class CheckInOffline {
                 html: this.renderSuccess(ticket, swagItems, localId),
             };
         } catch (error) {
-            console.error('[CheckIn] Offline verification failed:', error);
             return {
                 success: false,
                 html: this.renderError('Check-in failed: ' + error.message),
@@ -246,7 +241,6 @@ class CheckInOffline {
             const html = await response.text();
             return { success: response.ok, html };
         } catch (error) {
-            console.error('[CheckIn] Online swag collection failed:', error);
             return {
                 success: false,
                 html: '<div class="alert alert-error">Failed to collect swag</div>',
@@ -268,7 +262,6 @@ class CheckInOffline {
                 html: '<div role="alert" class="relative w-full rounded-lg border p-4 border-success/50 text-success bg-success/10"><div class="text-sm leading-relaxed">Swag collected (will sync later)</div></div>',
             };
         } catch (error) {
-            console.error('[CheckIn] Offline swag collection failed:', error);
             return {
                 success: false,
                 html: '<div role="alert" class="relative w-full rounded-lg border p-4 border-destructive/50 text-destructive bg-destructive/10"><div class="text-sm leading-relaxed">Failed to collect swag</div></div>',

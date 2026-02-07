@@ -37,70 +37,13 @@
 {% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto space-y-6" x-data="{
-    selectedType: '',
-    selectedFormat: 'PDF',
-    generating: false,
-    error: '',
-    success: '',
-    async downloadExport(event) {
-        event.preventDefault();
-        this.generating = true;
-        this.error = '';
-        this.success = '';
-
-        const formData = new FormData(event.target);
-
-        try {
-            const response = await fetch(event.target.action, {
-                method: 'POST',
-                body: formData
-            });
-
-            if (!response.ok) {
-                throw new Error('Export failed');
-            }
-
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = '';
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-
-            this.success = 'Export downloaded successfully';
-        } catch (error) {
-            this.error = 'Failed to generate export. Please try again.';
-        } finally {
-            this.generating = false;
-        }
-    },
-    async downloadFile(url) {
-        try {
-            const response = await fetch(url);
-            const blob = await response.blob();
-            const downloadUrl = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = downloadUrl;
-            a.download = '';
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(downloadUrl);
-            document.body.removeChild(a);
-        } catch (error) {}
-    }
-}">
+<div class="max-w-4xl mx-auto space-y-6" data-controller="toggle">
     <div class="card p-6">
         <h2 class="text-lg font-semibold mb-4">{% trans "Select Report Type" %}</h2>
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <button type="button" @click="selectedType = 'FINANCIAL'"
-                    class="p-4 rounded-lg border-2 text-left transition-all"
-                    :class="selectedType === 'FINANCIAL' ? 'border-foreground bg-muted' : 'border-border hover:border-muted-foreground'">
+            <button type="button" data-action="click->toggle#select" data-value="FINANCIAL"
+                    class="p-4 rounded-lg border-2 text-left transition-all border-border hover:border-muted-foreground"
+                    data-toggle-target="option">
                 <div class="flex items-center gap-3 mb-2">
                     <div class="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
                         <i data-lucide="wallet" class="h-5 w-5 text-emerald-500"></i>
@@ -110,9 +53,9 @@
                 <p class="text-sm text-muted-foreground">{% trans "Revenue breakdown, payment methods, and ticket sales summary" %}</p>
             </button>
 
-            <button type="button" @click="selectedType = 'RSVP'"
-                    class="p-4 rounded-lg border-2 text-left transition-all"
-                    :class="selectedType === 'RSVP' ? 'border-foreground bg-muted' : 'border-border hover:border-muted-foreground'">
+            <button type="button" data-action="click->toggle#select" data-value="RSVP"
+                    class="p-4 rounded-lg border-2 text-left transition-all border-border hover:border-muted-foreground"
+                    data-toggle-target="option">
                 <div class="flex items-center gap-3 mb-2">
                     <div class="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
                         <i data-lucide="users" class="h-5 w-5 text-blue-500"></i>
@@ -122,9 +65,9 @@
                 <p class="text-sm text-muted-foreground">{% trans "List of all registered attendees with contact details" %}</p>
             </button>
 
-            <button type="button" @click="selectedType = 'TICKET_SALES'"
-                    class="p-4 rounded-lg border-2 text-left transition-all"
-                    :class="selectedType === 'TICKET_SALES' ? 'border-foreground bg-muted' : 'border-border hover:border-muted-foreground'">
+            <button type="button" data-action="click->toggle#select" data-value="TICKET_SALES"
+                    class="p-4 rounded-lg border-2 text-left transition-all border-border hover:border-muted-foreground"
+                    data-toggle-target="option">
                 <div class="flex items-center gap-3 mb-2">
                     <div class="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
                         <i data-lucide="ticket" class="h-5 w-5 text-primary"></i>
@@ -134,9 +77,9 @@
                 <p class="text-sm text-muted-foreground">{% trans "Detailed ticket sales with buyer information" %}</p>
             </button>
 
-            <button type="button" @click="selectedType = 'PAYMENTS'"
-                    class="p-4 rounded-lg border-2 text-left transition-all"
-                    :class="selectedType === 'PAYMENTS' ? 'border-foreground bg-muted' : 'border-border hover:border-muted-foreground'">
+            <button type="button" data-action="click->toggle#select" data-value="PAYMENTS"
+                    class="p-4 rounded-lg border-2 text-left transition-all border-border hover:border-muted-foreground"
+                    data-toggle-target="option">
                 <div class="flex items-center gap-3 mb-2">
                     <div class="h-10 w-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
                         <i data-lucide="credit-card" class="h-5 w-5 text-amber-500"></i>
@@ -146,9 +89,9 @@
                 <p class="text-sm text-muted-foreground">{% trans "All payment transactions and their status" %}</p>
             </button>
 
-            <button type="button" @click="selectedType = 'CHECKINS'"
-                    class="p-4 rounded-lg border-2 text-left transition-all"
-                    :class="selectedType === 'CHECKINS' ? 'border-foreground bg-muted' : 'border-border hover:border-muted-foreground'">
+            <button type="button" data-action="click->toggle#select" data-value="CHECKINS"
+                    class="p-4 rounded-lg border-2 text-left transition-all border-border hover:border-muted-foreground"
+                    data-toggle-target="option">
                 <div class="flex items-center gap-3 mb-2">
                     <div class="h-10 w-10 rounded-lg bg-cyan-500/10 flex items-center justify-center">
                         <i data-lucide="check-circle" class="h-5 w-5 text-cyan-500"></i>
@@ -160,36 +103,36 @@
         </div>
     </div>
 
-    <div class="card p-6" x-show="selectedType" x-cloak x-transition>
+    <div class="card p-6 hidden" data-toggle-target="content">
         <h2 class="text-lg font-semibold mb-4">{% trans "Export Format" %}</h2>
-        <div class="flex flex-wrap gap-3">
-            <button type="button" @click="selectedFormat = 'PDF'"
-                    class="px-4 py-2 rounded-lg border-2 font-medium transition-all flex items-center gap-2"
-                    :class="selectedFormat === 'PDF' ? 'border-foreground bg-muted' : 'border-border hover:border-muted-foreground'">
+        <div class="flex flex-wrap gap-3" data-controller="toggle" data-toggle-initial-value="PDF">
+            <button type="button" data-action="click->toggle#select" data-value="PDF"
+                    class="px-4 py-2 rounded-lg border-2 font-medium transition-all flex items-center gap-2 border-foreground bg-muted"
+                    data-toggle-target="formatOption">
                 <i data-lucide="file-text" class="w-4 h-4"></i>
                 {% trans "PDF Report" %}
             </button>
-            <button type="button" @click="selectedFormat = 'EXCEL'"
-                    class="px-4 py-2 rounded-lg border-2 font-medium transition-all flex items-center gap-2"
-                    :class="selectedFormat === 'EXCEL' ? 'border-foreground bg-muted' : 'border-border hover:border-muted-foreground'">
+            <button type="button" data-action="click->toggle#select" data-value="EXCEL"
+                    class="px-4 py-2 rounded-lg border-2 font-medium transition-all flex items-center gap-2 border-border hover:border-muted-foreground"
+                    data-toggle-target="formatOption">
                 <i data-lucide="table" class="w-4 h-4"></i>
                 {% trans "Excel Spreadsheet" %}
             </button>
-            <button type="button" @click="selectedFormat = 'CSV'"
-                    class="px-4 py-2 rounded-lg border-2 font-medium transition-all flex items-center gap-2"
-                    :class="selectedFormat === 'CSV' ? 'border-foreground bg-muted' : 'border-border hover:border-muted-foreground'">
+            <button type="button" data-action="click->toggle#select" data-value="CSV"
+                    class="px-4 py-2 rounded-lg border-2 font-medium transition-all flex items-center gap-2 border-border hover:border-muted-foreground"
+                    data-toggle-target="formatOption">
                 <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
                 {% trans "CSV File" %}
             </button>
-            <button type="button" @click="selectedFormat = 'JSON'"
-                    class="px-4 py-2 rounded-lg border-2 font-medium transition-all flex items-center gap-2"
-                    :class="selectedFormat === 'JSON' ? 'border-foreground bg-muted' : 'border-border hover:border-muted-foreground'">
+            <button type="button" data-action="click->toggle#select" data-value="JSON"
+                    class="px-4 py-2 rounded-lg border-2 font-medium transition-all flex items-center gap-2 border-border hover:border-muted-foreground"
+                    data-toggle-target="formatOption">
                 <i data-lucide="braces" class="w-4 h-4"></i>
                 {% trans "JSON Data" %}
             </button>
         </div>
 
-        <div class="mt-6 p-4 rounded-lg bg-muted" x-show="selectedFormat === 'PDF'">
+        <div class="mt-6 p-4 rounded-lg bg-muted" data-toggle-target="pdfInfo">
             <div class="flex items-start gap-3">
                 <i data-lucide="info" class="w-5 h-5 text-muted-foreground mt-0.5"></i>
                 <div>
@@ -205,27 +148,24 @@
         </div>
     </div>
 
-    <div x-show="error" x-cloak class="rounded-lg bg-red-500/10 border border-red-500/20 p-4 text-sm text-red-500">
-        <span x-text="error"></span>
+    <div data-toggle-target="error" class="rounded-lg bg-red-500/10 border border-red-500/20 p-4 text-sm text-red-500 hidden">
     </div>
 
-    <div x-show="success" x-cloak class="rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-4 text-sm text-emerald-500">
-        <span x-text="success"></span>
+    <div data-toggle-target="success" class="rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-4 text-sm text-emerald-500 hidden">
     </div>
 
     <form method="post" action="{% url 'reports:export_generate' event.organization.slug event.slug %}"
-          @submit="downloadExport($event)" x-show="selectedType" x-cloak>
+          data-toggle-target="form" class="hidden">
         {% csrf_token %}
-        <input type="hidden" name="report_type" :value="selectedType">
-        <input type="hidden" name="format" :value="selectedFormat">
+        <input type="hidden" name="report_type" data-toggle-target="reportTypeInput">
+        <input type="hidden" name="format" value="PDF" data-toggle-target="formatInput">
 
         <div class="flex items-center gap-4">
-            {% #button type="submit" variant="default" attrs=':disabled="generating"' %}
-                <i x-show="!generating" data-lucide="download" class="w-4 h-4"></i>
-                <i x-show="generating" x-cloak data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
-                <span x-text="generating ? 'Generating...' : 'Generate & Download'"></span>
+            {% #button type="submit" variant="default" %}
+                <i data-lucide="download" class="w-4 h-4"></i>
+                <span>{% trans "Generate & Download" %}</span>
             {% /button %}
-            {% #button type="button" variant="outline" attrs="@click=\"selectedType = ''; selectedFormat = 'PDF'\"" %}
+            {% #button type="button" variant="outline" attrs='data-action="click->toggle#reset"' %}
                 {% trans "Reset Selection" %}
             {% /button %}
         </div>
@@ -252,10 +192,12 @@
                         <p class="text-xs text-muted-foreground">{{ export.created_at|date:"M j, Y g:i A" }}</p>
                     </div>
                 </div>
-                {% #button type="button" variant="outline" size="sm" attrs="@click=\"downloadFile('{% url 'reports:download' export.reference %}')\"" %}
-                    <i data-lucide="download" class="w-4 h-4"></i>
-                    {% trans "Download" %}
-                {% /button %}
+                <a href="{% url 'reports:download' export.reference %}">
+                    {% #button type="button" variant="outline" size="sm" %}
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        {% trans "Download" %}
+                    {% /button %}
+                </a>
             </div>
             {% endfor %}
         </div>

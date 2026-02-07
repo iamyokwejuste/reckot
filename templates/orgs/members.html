@@ -41,7 +41,7 @@
         </div>
         <div class="divide-y divide-border">
             {% for membership in memberships %}
-            <div class="p-4 flex items-center justify-between gap-4" x-data="{ showRoleMenu: false }">
+            <div class="p-4 flex items-center justify-between gap-4" data-controller="dropdown">
                 <div class="flex items-center gap-3 min-w-0">
                     <div class="h-10 w-10 rounded-full bg-muted flex items-center justify-center shrink-0">
                         <span class="text-sm font-medium">{{ membership.user.email|slice:":1"|upper }}</span>
@@ -72,16 +72,13 @@
 
                     {% if membership.role != 'OWNER' and membership.user != request.user %}
                     <div class="relative">
-                        <button @click="showRoleMenu = !showRoleMenu"
-                                @click.outside="showRoleMenu = false"
+                        <button data-action="click->dropdown#toggle" data-dropdown-target="trigger"
                                 class="p-2 hover:bg-muted rounded-lg transition-colors">
                             <i data-lucide="more-vertical" class="w-4 h-4"></i>
                         </button>
 
-                        <div x-show="showRoleMenu"
-                             x-transition
-                             class="absolute right-0 mt-1 w-48 rounded-lg border border-border bg-card shadow-lg z-10"
-                             x-cloak>
+                        <div data-dropdown-target="menu"
+                             class="hidden absolute right-0 mt-1 w-48 rounded-lg border border-border bg-card shadow-lg z-10">
                             <div class="p-1">
                                 <p class="px-3 py-2 text-xs font-medium text-muted-foreground">{% trans "Change Role" %}</p>
                                 {% for role_value, role_label in roles %}

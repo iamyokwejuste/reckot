@@ -32,7 +32,8 @@
                     hx-target="#payment-panel"
                     hx-swap="innerHTML"
                     class="grid grid-cols-1 lg:grid-cols-2 gap-6"
-                    x-data="{ selectedMethod: 'CAMPAY' }"
+                    data-controller="toggle"
+                    data-toggle-initial-value="CAMPAY"
                 >
                     {% csrf_token %}
 
@@ -49,7 +50,7 @@
                                     class="h-4 w-4 border-2 border-input text-primary focus:ring-primary"
                                     required
                                     checked
-                                    x-model="selectedMethod"
+                                    data-action="change->toggle#select"
                                 />
                                 <div class="flex items-center gap-3 flex-1">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10">
@@ -69,7 +70,7 @@
                                     value="FLUTTERWAVE"
                                     data-payment-method="mobile_money"
                                     class="h-4 w-4 border-2 border-input text-primary focus:ring-primary"
-                                    x-model="selectedMethod"
+                                    data-action="change->toggle#select"
                                 />
                                 <div class="flex items-center gap-3 flex-1">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
@@ -88,7 +89,7 @@
                                     value="FLUTTERWAVE"
                                     data-payment-method="card"
                                     class="h-4 w-4 border-2 border-input text-primary focus:ring-primary"
-                                    x-model="selectedMethod"
+                                    data-action="change->toggle#select"
                                 />
                                 <div class="flex items-center gap-3 flex-1">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10">
@@ -107,7 +108,7 @@
                                     value="OFFLINE"
                                     data-payment-method=""
                                     class="h-4 w-4 border-2 border-input text-primary focus:ring-primary"
-                                    x-model="selectedMethod"
+                                    data-action="change->toggle#select"
                                 />
                                 <div class="flex items-center gap-3">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
@@ -123,28 +124,24 @@
                     </div>
                     <input type="hidden" name="payment_method" id="payment_method" value="mobile_money">
 
-                    <div class="space-y-2" x-data="phoneDetector()">
+                    <div class="space-y-2">
                         <label for="phone" class="block text-sm font-medium">{% trans "Phone Number" %}</label>
                         <div class="relative">
                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">+237</span>
                             <input type="tel" name="phone" id="phone"
                                    placeholder="6XX XXX XXX" required
-                                   class="input w-full pl-14 pr-20"
-                                   x-model="phone"
-                                   @input="detectCarrier()">
+                                   class="input w-full pl-14 pr-20">
                             <div class="absolute right-3 top-1/2 -translate-y-1/2">
-                                <span x-show="carrier === 'MTN'" class="text-xs font-medium px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-600">MTN</span>
-                                <span x-show="carrier === 'ORANGE'" class="text-xs font-medium px-2 py-1 rounded-full bg-orange-500/20 text-orange-600">Orange</span>
+                                <span class="carrier-badge hidden text-xs font-medium px-2 py-1 rounded-full" data-carrier="MTN"></span>
                             </div>
                         </div>
                         <p class="text-xs text-muted-foreground">{% trans "Enter without country code (e.g., 6XX XXX XXX)" %}</p>
-                        <p x-show="phone && carrier === 'UNKNOWN'" class="text-xs text-destructive">{% trans "Invalid Cameroon phone number" %}</p>
                     </div>
                     </div>
 
                     <div class="space-y-6">
                     <div class="rounded-xl bg-muted p-4 space-y-3 lg:sticky lg:top-24">
-                        <div class="text-xs text-info-foreground mb-2" x-show="selectedMethod === 'CAMPAY'" x-cloak>
+                        <div class="text-xs text-info-foreground mb-2" data-toggle-target="campayNote">
                             {% trans "Note: The agent name that will appear for withdrawal is" %} <strong>TAKWID GROUP</strong>.
                         </div>
                         <div class="text-sm text-muted-foreground mb-2">{% trans "Order Summary" %}</div>
@@ -187,31 +184,9 @@
 
 {% block extra_scripts %}
 <script>
-function phoneDetector() {
-    return {
-        phone: '',
-        carrier: '',
-        detectCarrier() {
-            let phone = this.phone.replace(/\D/g, '');
-            if (phone.startsWith('237')) phone = phone.substring(3);
-            if (phone.length < 2) { this.carrier = ''; return; }
-
-            const mtnPrefixes = ['67', '650', '651', '652', '653', '654', '680', '681', '682', '683'];
-            const orangePrefixes = ['640', '655', '656', '657', '658', '659', '686', '687', '688', '689', '69'];
-
-            for (const p of mtnPrefixes) {
-                if (phone.startsWith(p)) { this.carrier = 'MTN'; return; }
-            }
-            for (const p of orangePrefixes) {
-                if (phone.startsWith(p)) { this.carrier = 'ORANGE'; return; }
-            }
-
-            this.carrier = phone.length >= 9 ? 'UNKNOWN' : '';
-        }
-    }
-}
-
 document.addEventListener('DOMContentLoaded', function() {
+    const phoneInput = document.getElementById('phone');
+    const carrierBadge = document.querySelector('.carrier-badge');
     const methodRadios = document.querySelectorAll('input[name="method"]');
     const paymentMethodInput = document.getElementById('payment_method');
 
@@ -223,6 +198,40 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    if (phoneInput && carrierBadge) {
+        phoneInput.addEventListener('input', function() {
+            let phone = this.value.replace(/\D/g, '');
+            if (phone.startsWith('237')) phone = phone.substring(3);
+
+            if (phone.length < 2) {
+                carrierBadge.classList.add('hidden');
+                return;
+            }
+
+            const mtnPrefixes = ['67', '650', '651', '652', '653', '654', '680', '681', '682', '683'];
+            const orangePrefixes = ['640', '655', '656', '657', '658', '659', '686', '687', '688', '689', '69'];
+
+            let carrier = '';
+            for (const p of mtnPrefixes) {
+                if (phone.startsWith(p)) { carrier = 'MTN'; break; }
+            }
+            if (!carrier) {
+                for (const p of orangePrefixes) {
+                    if (phone.startsWith(p)) { carrier = 'ORANGE'; break; }
+                }
+            }
+
+            if (carrier) {
+                carrierBadge.textContent = carrier;
+                carrierBadge.className = 'carrier-badge text-xs font-medium px-2 py-1 rounded-full ';
+                carrierBadge.className += carrier === 'MTN' ? 'bg-yellow-500/20 text-yellow-600' : 'bg-orange-500/20 text-orange-600';
+                carrierBadge.classList.remove('hidden');
+            } else {
+                carrierBadge.classList.add('hidden');
+            }
+        });
+    }
 });
 </script>
 {% endblock %}

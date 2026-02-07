@@ -16,32 +16,31 @@
 <script id="events-data" type="application/json">{{ events_json|safe }}</script>
 <script id="categories-data" type="application/json">{{ categories_json|safe }}</script>
 
-<div class="container mx-auto px-4 py-8" x-data="discover()" @input.debounce.300ms="filterEvents()">
+<div class="container mx-auto px-4 py-8" data-controller="discover">
     <div class="text-center mb-6 sm:mb-8">
         <h1 class="text-2xl sm:text-3xl font-bold mb-2">{% trans "Discover Events" %}</h1>
         <p class="text-sm sm:text-base text-muted-foreground">{% trans "Find amazing events happening near you" %}</p>
     </div>
 
-    <div class="mb-6 sm:mb-8 space-y-3 sm:space-y-4" x-data="{ filtersOpen: false }">
+    <div class="mb-6 sm:mb-8 space-y-3 sm:space-y-4" data-controller="toggle">
         <div class="max-w-4xl mx-auto">
             <div class="flex gap-2">
                 <div class="flex-1">
-                    {% #input type="text" placeholder="Search events..." attrs='x-model="searchQuery"' %}{% /input %}
+                    {% #input type="text" placeholder="Search events..." attrs='data-discover-target="searchInput" data-action="input->discover#search"' %}{% /input %}
                 </div>
-                <button @click="filtersOpen = !filtersOpen"
-                        class="btn btn-ghost sm:hidden shrink-0 px-3"
-                        :class="filtersOpen ? 'bg-muted' : ''">
+                <button data-action="click->toggle#toggle"
+                        class="btn btn-ghost sm:hidden shrink-0 px-3">
                     <i data-lucide="filter" class="w-4 h-4"></i>
                 </button>
             </div>
 
-            <div :class="filtersOpen ? 'block' : 'hidden sm:block'" class="mt-3 sm:mt-0 space-y-3">
+            <div data-toggle-target="content" class="hidden sm:block mt-3 sm:mt-0 space-y-3">
                 <div class="flex flex-col sm:flex-row gap-3 sm:mt-3">
                     <div class="flex-1">
-                        {% #input type="text" placeholder="Location..." attrs='x-model="locationQuery"' %}{% /input %}
+                        {% #input type="text" placeholder="Location..." attrs='data-discover-target="locationInput" data-action="input->discover#searchLocation"' %}{% /input %}
                     </div>
                     <div class="flex-1">
-                        <select x-model="selectedDate" @change="filterEvents()" class="input w-full">
+                        <select data-discover-target="dateSelect" data-action="change->discover#selectDate" class="input w-full">
                             <option value="all">{% trans "All Dates" %}</option>
                             <option value="today">{% trans "Today" %}</option>
                             <option value="week">{% trans "This Week" %}</option>
@@ -50,72 +49,80 @@
                     </div>
                 </div>
 
-                <div class="flex flex-wrap gap-2" x-show="categories.length > 0">
+                {% if categories %}
+                <div class="flex flex-wrap gap-2">
                     <button type="button"
-                            @click="selectedCategory = ''; filterEvents()"
-                            :class="selectedCategory === '' ? 'bg-foreground text-background' : ''"
-                            class="btn btn-ghost btn-sm text-xs sm:text-sm">
+                            data-slug=""
+                            data-discover-target="categoryButton"
+                            data-action="click->discover#selectCategory"
+                            class="btn btn-ghost btn-sm text-xs sm:text-sm bg-foreground text-background">
                         {% trans "All" %}
                     </button>
-                    <template x-for="category in categories" :key="category.slug">
+                    {% for category in categories %}
                         <button type="button"
-                                @click="selectedCategory = category.slug; filterEvents()"
-                                :class="selectedCategory === category.slug ? 'bg-foreground text-background' : ''"
-                                class="btn btn-ghost btn-sm flex items-center gap-1.5 text-xs sm:text-sm">
-                            <i :data-lucide="category.icon || 'tag'" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
-                            <span x-text="category.name"></span>
+                                data-slug="{{ category.slug }}"
+                                data-discover-target="categoryButton"
+                                data-action="click->discover#selectCategory"
+                                class="btn btn-ghost btn-sm flex items-center gap-1.5 text-xs sm:text-sm bg-muted text-muted-foreground">
+                            <i data-lucide="{{ category.icon|default:'tag' }}" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+                            <span>{{ category.name }}</span>
                         </button>
-                    </template>
+                    {% endfor %}
                 </div>
+                {% endif %}
             </div>
         </div>
 
         <div class="text-center text-xs sm:text-sm text-muted-foreground">
-            <span x-text="filteredEvents.length"></span> {% trans "events found" %}
+            <span data-discover-count>{{ events|length }}</span> {% trans "events found" %}
         </div>
     </div>
 
-    <div x-show="filteredEvents.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <template x-for="event in filteredEvents" :key="event.id">
-            <a :href="event.url" class="card hover:shadow-lg transition-shadow no-underline">
-                <div x-show="event.cover_image" class="w-full h-48 overflow-hidden rounded-t-xl">
-                    <img :src="event.cover_image" :alt="event.title" class="w-full h-full object-cover">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-discover-target="eventsList">
+        {% for event in events %}
+            <a href="{{ event.url }}" class="card hover:shadow-lg transition-shadow no-underline" data-event-id="{{ event.id }}">
+                {% if event.cover_image %}
+                <div class="w-full h-48 overflow-hidden rounded-t-xl">
+                    <img src="{{ event.cover_image }}" alt="{{ event.title }}" class="w-full h-full object-cover">
                 </div>
+                {% endif %}
                 <div class="p-6">
                     <div class="flex items-start justify-between mb-3">
                         <div class="flex gap-2 flex-wrap">
-                            <div x-show="event.category_name" class="badge badge-default">
-                                <span x-text="event.category_name"></span>
+                            {% if event.category_name %}
+                            <div class="badge badge-default">
+                                <span>{{ event.category_name }}</span>
                             </div>
-                            <div :class="getEventStatus(event).class">
-                                <span x-text="getEventStatus(event).label"></span>
-                            </div>
+                            {% endif %}
                         </div>
-                        <span x-show="event.min_price > 0" class="text-sm font-semibold text-foreground">
-                            <span x-text="event.min_price"></span> XAF
+                        {% if event.min_price > 0 %}
+                        <span class="text-sm font-semibold text-foreground">
+                            {{ event.min_price }} XAF
                         </span>
-                        <span x-show="event.is_free" class="text-sm font-semibold text-success">
+                        {% elif event.is_free %}
+                        <span class="text-sm font-semibold text-success">
                             {% trans "Free" %}
                         </span>
+                        {% endif %}
                     </div>
-                    <h3 class="font-semibold text-lg mb-2 text-foreground" x-text="event.title"></h3>
-                    <div class="text-sm text-muted-foreground mb-4 line-clamp-2" x-text="event.short_description"></div>
+                    <h3 class="font-semibold text-lg mb-2 text-foreground">{{ event.title }}</h3>
+                    <div class="text-sm text-muted-foreground mb-4 line-clamp-2">{{ event.short_description }}</div>
                     <div class="flex items-center gap-4 text-sm text-muted-foreground">
                         <span class="flex items-center gap-1">
                             <i data-lucide="clock" class="w-4 h-4"></i>
-                            <span x-text="event.date_formatted"></span>
+                            <span>{{ event.date_formatted }}</span>
                         </span>
                         <span class="flex items-center gap-1">
                             <i data-lucide="map-pin" class="w-4 h-4"></i>
-                            <span x-text="event.location_short"></span>
+                            <span>{{ event.location_short }}</span>
                         </span>
                     </div>
                 </div>
             </a>
-        </template>
+        {% endfor %}
     </div>
 
-    <div x-show="filteredEvents.length === 0" class="text-center py-16">
+    <div class="text-center py-16 hidden" data-discover-target="emptyState">
         <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-foreground/5 mb-4">
             <i data-lucide="calendar-x" class="w-8 h-8 text-muted-foreground"></i>
         </div>

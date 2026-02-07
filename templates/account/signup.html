@@ -9,11 +9,11 @@
 {% block content %}
 <div class="min-h-[calc(100vh-4rem)] flex items-center justify-center py-12 px-4">
     <div class="w-full max-w-md">
-        <div class="card p-6 sm:p-8" x-data="{ signupMethod: 'email', otpSent: false, otpLoading: false }">
+        <div class="card p-6 sm:p-8" data-controller="toggle" data-toggle-method-value="email">
             <div class="text-center mb-8">
                 <div class="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-foreground mb-4">
-                    <img x-show="isDark" x-cloak src="{% static 'images/logo/reckto_logo_light_mode.png' %}" alt="" class="h-8 w-8">
-                    <img x-show="!isDark" src="{% static 'images/logo/reckto_logo_dark_mode.png' %}" alt="" class="h-8 w-8">
+                    <img class="h-8 w-8 hidden dark:inline" src="{% static 'images/logo/reckto_logo_light_mode.png' %}" alt="">
+                    <img class="h-8 w-8 dark:hidden" src="{% static 'images/logo/reckto_logo_dark_mode.png' %}" alt="">
                 </div>
                 <h1 class="text-2xl font-bold">{% trans "Create an organizer account" %}</h1>
                 <p class="text-muted-foreground mt-1">{% trans "Start creating and managing your events" %}</p>
@@ -48,22 +48,20 @@
             {% endfor %}
             {% endif %}
 
-            <div class="flex p-1 mb-6 bg-muted rounded-lg">
-                <button type="button" @click="signupMethod = 'email'; otpSent = false"
-                        class="flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm font-medium rounded-md transition-all"
-                        :class="signupMethod === 'email' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'">
+            <div class="flex p-1 mb-6 bg-muted rounded-lg" data-controller="toggle" data-toggle-method-value="email">
+                <button type="button" data-action="click->toggle#setMethod" data-method="email"
+                        class="flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm font-medium rounded-md transition-all bg-background text-foreground shadow-sm">
                     <i data-lucide="mail" class="w-4 h-4"></i>
                     {% trans "Email" %}
                 </button>
-                <button type="button" @click="signupMethod = 'phone'; otpSent = false"
-                        class="flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm font-medium rounded-md transition-all"
-                        :class="signupMethod === 'phone' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'">
+                <button type="button" data-action="click->toggle#setMethod" data-method="phone"
+                        class="flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm font-medium rounded-md transition-all text-muted-foreground hover:text-foreground">
                     <i data-lucide="smartphone" class="w-4 h-4"></i>
                     {% trans "Phone" %}
                 </button>
             </div>
 
-            <form x-show="signupMethod === 'email'" method="post" action="{% url 'account_signup' %}" class="space-y-4" hx-boost="false">
+            <form data-toggle-target="emailForm" method="post" action="{% url 'account_signup' %}" class="space-y-4" hx-boost="false">
                 {% csrf_token %}
                 <input type="hidden" name="signup_method" value="email">
 
@@ -102,11 +100,10 @@
                 {% /button %}
             </form>
 
-            <div x-show="signupMethod === 'phone'" x-cloak class="space-y-4">
-                <form x-show="!otpSent" method="post" action="{% url 'phone_signup_request' %}" hx-boost="false"
+            <div data-toggle-target="phoneForm" class="space-y-4 hidden">
+                <form data-toggle-target="phoneRequest" method="post" action="{% url 'phone_signup_request' %}" hx-boost="false"
                       hx-post="{% url 'phone_signup_request' %}" hx-target="#phone-signup-result" hx-swap="innerHTML"
-                      @htmx:after-request="otpLoading = false; if(event.detail.successful && !event.detail.xhr.responseText.includes('error')) otpSent = true"
-                      @submit="otpLoading = true">
+                      data-action="htmx:after-request->toggle#handleOtpResponse">
                     {% csrf_token %}
                     <div>
                         <label for="signup_phone" class="block text-sm font-medium mb-2">{% trans "Phone Number" %}</label>
@@ -114,25 +111,17 @@
                         <p class="text-xs text-muted-foreground mt-1">{% trans "We'll send you a verification code" %}</p>
                     </div>
                     <div id="phone-signup-result"></div>
-                    {% #button type="submit" variant="default" class="w-full mt-4" attrs=':disabled="otpLoading"' %}
-                        <template x-if="!otpLoading">
-                            <span class="flex items-center gap-2">
-                                {% trans "Send Code" %}
-                                <i data-lucide="send" class="w-4 h-4"></i>
-                            </span>
-                        </template>
-                        <template x-if="otpLoading">
-                            <span class="flex items-center gap-2">
-                                <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
-                                {% trans "Sending..." %}
-                            </span>
-                        </template>
+                    {% #button type="submit" variant="default" class="w-full mt-4" %}
+                        <span class="flex items-center gap-2">
+                            {% trans "Send Code" %}
+                            <i data-lucide="send" class="w-4 h-4"></i>
+                        </span>
                     {% /button %}
                 </form>
 
-                <form x-show="otpSent" x-cloak method="post" action="{% url 'phone_signup_verify' %}" class="space-y-4" hx-boost="false">
+                <form data-toggle-target="phoneVerify" class="space-y-4 hidden" method="post" action="{% url 'phone_signup_verify' %}" hx-boost="false">
                     {% csrf_token %}
-                    <input type="hidden" name="phone_number" :value="document.getElementById('signup_phone')?.value">
+                    <input type="hidden" name="phone_number" id="phone_number_hidden">
 
                     <div>
                         <label for="signup_otp" class="block text-sm font-medium mb-2">{% trans "Verification Code" %}</label>
@@ -154,7 +143,7 @@
                         {% trans "Create Account" %}
                         <i data-lucide="check" class="w-4 h-4"></i>
                     {% /button %}
-                    {% #button type="button" variant="outline" class="w-full" attrs='@click="otpSent = false"' %}
+                    {% #button type="button" variant="outline" class="w-full" attrs='data-action="click->toggle#backToPhone"' %}
                         <i data-lucide="arrow-left" class="w-4 h-4"></i>
                         {% trans "Change Phone Number" %}
                     {% /button %}

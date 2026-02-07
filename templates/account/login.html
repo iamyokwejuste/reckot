@@ -9,11 +9,11 @@
 {% block content %}
 <div class="min-h-[calc(100vh-4rem)] flex items-center justify-center py-12 px-4">
     <div class="w-full max-w-md">
-        <div class="card p-6 sm:p-8" x-data="{ loginMethod: 'email', otpSent: false, otpLoading: false }">
+        <div class="card p-6 sm:p-8" data-controller="login">
             <div class="text-center mb-8">
-                <div class="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-foreground mb-4">
-                    <img x-show="isDark" x-cloak src="{% static 'images/logo/reckto_logo_light_mode.png' %}" alt="" class="h-8 w-8">
-                    <img x-show="!isDark" src="{% static 'images/logo/reckto_logo_dark_mode.png' %}" alt="" class="h-8 w-8">
+                <div class="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-foreground mb-4" data-controller="theme">
+                    <img data-theme-target="darkLogo" class="hidden h-8 w-8" src="{% static 'images/logo/reckto_logo_light_mode.png' %}" alt="">
+                    <img data-theme-target="lightLogo" class="h-8 w-8" src="{% static 'images/logo/reckto_logo_dark_mode.png' %}" alt="">
                 </div>
                 <h1 class="text-2xl font-bold">{% trans "Welcome back" %}</h1>
                 <p class="text-muted-foreground mt-1">{% trans "Log in to manage your events" %}</p>
@@ -48,15 +48,13 @@
             {% endif %}
 
             <div class="flex p-1 mb-6 bg-muted rounded-lg">
-                <button type="button" @click="loginMethod = 'email'; otpSent = false"
-                        class="flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm font-medium rounded-md transition-all"
-                        :class="loginMethod === 'email' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'">
+                <button type="button" data-action="click->login#switchToEmail" data-method="email"
+                        class="flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm font-medium rounded-md transition-all bg-background text-foreground shadow-sm">
                     <i data-lucide="mail" class="w-4 h-4"></i>
                     {% trans "Email" %}
                 </button>
-                <button type="button" @click="loginMethod = 'phone'; otpSent = false"
-                        class="flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm font-medium rounded-md transition-all"
-                        :class="loginMethod === 'phone' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'">
+                <button type="button" data-action="click->login#switchToPhone" data-method="phone"
+                        class="flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm font-medium rounded-md transition-all text-muted-foreground hover:text-foreground">
                     <i data-lucide="smartphone" class="w-4 h-4"></i>
                     {% trans "Phone" %}
                 </button>
@@ -72,11 +70,11 @@
             </div>
             {% endif %}
 
-            <form x-show="loginMethod === 'email'" method="post" action="{% url 'account_login' %}" class="space-y-4" hx-boost="false">
+            <form data-login-target="emailForm" method="post" action="{% url 'account_login' %}" class="space-y-4" hx-boost="false">
                 {% csrf_token %}
                 <div>
                     <label for="id_login" class="block text-sm font-medium mb-2">{% trans "Email" %}</label>
-                    <input type="email" name="login" id="id_login" placeholder="you@you@email.com" required autocomplete="email" class="input {% if form.login.errors %}border-red-500{% endif %}" value="{{ form.login.value|default:'' }}">
+                    <input type="email" name="login" id="id_login" placeholder="you@email.com" required autocomplete="email" class="input {% if form.login.errors %}border-red-500{% endif %}" value="{{ form.login.value|default:'' }}">
                     {% if form.login.errors %}
                     <p class="text-sm text-red-500 mt-1">{% for error in form.login.errors %}{{ error }}{% endfor %}</p>
                     {% endif %}
@@ -112,37 +110,32 @@
                 {% /button %}
             </form>
 
-            <div x-show="loginMethod === 'phone'" x-cloak class="space-y-4">
-                <form x-show="!otpSent" @submit.prevent="otpLoading = true; $el.submit()"
+            <div class="space-y-4">
+                <form data-login-target="phoneForm" class="hidden" data-action="submit->login#sendCode htmx:after-request->login#handleOtpResponse"
                       method="post" action="{% url 'phone_login_request' %}" hx-boost="false"
-                      hx-post="{% url 'phone_login_request' %}" hx-target="#phone-otp-result" hx-swap="innerHTML"
-                      @htmx:after-request="otpLoading = false; if(event.detail.successful) otpSent = true">
+                      hx-post="{% url 'phone_login_request' %}" hx-target="#phone-otp-result" hx-swap="innerHTML">
                     {% csrf_token %}
                     <div>
                         <label for="phone_number" class="block text-sm font-medium mb-2">{% trans "Phone Number" %}</label>
-                        <input type="tel" name="phone_number" id="phone_number" placeholder="6XX XXX XXX" required class="input">
+                        <input type="tel" name="phone_number" id="phone_number" data-login-target="phoneInput" placeholder="6XX XXX XXX" required class="input">
                         <p class="text-xs text-muted-foreground mt-1">{% trans "We'll send you a verification code" %}</p>
                     </div>
                     <div id="phone-otp-result"></div>
-                    {% #button type="submit" variant="default" class="w-full mt-4" attrs=':disabled="otpLoading"' %}
-                        <template x-if="!otpLoading">
-                            <span class="flex items-center gap-2">
-                                {% trans "Send Code" %}
-                                <i data-lucide="send" class="w-4 h-4"></i>
-                            </span>
-                        </template>
-                        <template x-if="otpLoading">
-                            <span class="flex items-center gap-2">
-                                <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
-                                {% trans "Sending..." %}
-                            </span>
-                        </template>
-                    {% /button %}
+                    <button type="submit" data-login-target="sendCodeBtn" class="btn btn-default w-full mt-4">
+                        <span data-normal class="flex items-center gap-2">
+                            {% trans "Send Code" %}
+                            <i data-lucide="send" class="w-4 h-4"></i>
+                        </span>
+                        <span data-loading class="hidden flex items-center gap-2">
+                            <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
+                            {% trans "Sending..." %}
+                        </span>
+                    </button>
                 </form>
 
-                <form x-show="otpSent" x-cloak method="post" action="{% url 'phone_login_verify' %}" class="space-y-4" hx-boost="false">
+                <form data-login-target="otpForm" class="hidden space-y-4" method="post" action="{% url 'phone_login_verify' %}" hx-boost="false">
                     {% csrf_token %}
-                    <input type="hidden" name="phone_number" :value="document.getElementById('phone_number')?.value">
+                    <input type="hidden" name="phone_number" data-phone-number>
                     <div>
                         <label for="otp_code" class="block text-sm font-medium mb-2">{% trans "Verification Code" %}</label>
                         <input type="text" name="otp_code" id="otp_code" placeholder="{% trans "Enter 6-digit code" %}" required
@@ -153,10 +146,10 @@
                         {% trans "Verify & Log In" %}
                         <i data-lucide="check" class="w-4 h-4"></i>
                     {% /button %}
-                    {% #button type="button" variant="outline" class="w-full" attrs='@click="otpSent = false"' %}
+                    <button type="button" data-action="click->login#backToPhone" class="btn btn-outline w-full">
                         <i data-lucide="arrow-left" class="w-4 h-4"></i>
                         {% trans "Change Phone Number" %}
-                    {% /button %}
+                    </button>
                 </form>
             </div>
 

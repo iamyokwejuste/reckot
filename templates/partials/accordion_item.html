@@ -1,0 +1,9 @@
+<div class="border border-border rounded-xl bg-card overflow-hidden transition-all shadow-sm hover:shadow-md">
+    <button data-action="click->accordion#toggle" data-item-index="{{ index }}" class="w-full px-6 py-6 text-left flex items-center justify-between hover:bg-accent/50 transition-colors" aria-expanded="false">
+        <span class="font-semibold text-base pr-6">{{ question }}</span>
+        <i data-lucide="chevron-down" class="w-5 h-5 text-muted-foreground transition-transform duration-200 flex-shrink-0"></i>
+    </button>
+    <div data-accordion-target="content" class="hidden px-6 pb-6 pt-2 text-muted-foreground leading-relaxed">
+        <p>{{ answer }}</p>
+    </div>
+</div>

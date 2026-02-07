@@ -1,75 +1,50 @@
 {% load slippers %}
 
 <div class="custom-select-wrapper"
-     x-data="{
-        open: false,
-        value: '{{ value|default:''|escapejs }}',
-        label: '{{ label|default:''|escapejs }}',
-        search: '',
-        placeholder: '{{ placeholder|default:'Select an option'|escapejs }}',
-
-        toggle() { this.open = !this.open },
-        close() { this.open = false; this.search = ''; },
-
-        selectOption(val, lbl) {
-            this.value = val;
-            this.label = lbl;
-            this.open = false;
-            this.search = '';
-            if (this.$refs.hiddenInput) {
-                this.$refs.hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-        }
-     }"
-     @keydown.escape.window="if (open) close()">
+     data-controller="dropdown"
+     data-dropdown-value-value="{{ value|default:'' }}"
+     data-dropdown-label-value="{{ label|default:'' }}"
+     data-dropdown-placeholder-value="{{ placeholder|default:'Select an option' }}"
+     data-action="click@window->dropdown#clickOutside">
 
     <input type="hidden"
            name="{{ name }}"
-           x-ref="hiddenInput"
-           :value="value"
+           value="{{ value|default:'' }}"
+           data-dropdown-target="hiddenInput"
            {% if required %}required{% endif %}>
 
     <button type="button"
-            @click="toggle()"
-            class="custom-select-trigger"
-            :class="{ 'custom-select-trigger-active': open }">
-        <span class="custom-select-value"
-              :class="{ 'custom-select-placeholder': !label }"
-              x-text="label || placeholder"></span>
-        <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4" :class="{ 'rotate-180': open }"></i>
+            data-dropdown-target="trigger"
+            data-action="click->dropdown#toggle"
+            class="custom-select-trigger">
+        <span class="custom-select-value">{{ label|default:placeholder|default:'Select an option' }}</span>
+        <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4"></i>
     </button>
 
-    <div x-show="open"
-         x-transition:enter="transition ease-out duration-100"
-         x-transition:enter-start="opacity-0 -translate-y-1"
-         x-transition:enter-end="opacity-100 translate-y-0"
-         x-transition:leave="transition ease-in duration-75"
-         x-transition:leave-start="opacity-100 translate-y-0"
-         x-transition:leave-end="opacity-0 -translate-y-1"
-         @click.outside="close()"
-         class="custom-select-dropdown"
-         x-cloak>
+    <div data-dropdown-target="dropdown"
+         class="custom-select-dropdown hidden">
 
         {% if searchable %}
         <div class="custom-select-search">
             <i data-lucide="search" class="custom-select-search-icon w-3.5 h-3.5"></i>
             <input type="text"
-                   x-model="search"
+                   data-dropdown-target="search"
+                   data-action="input->dropdown#updateSearch click->dropdown#stopPropagation"
                    placeholder="Search..."
-                   class="custom-select-search-input"
-                   @click.stop>
+                   class="custom-select-search-input">
         </div>
         {% endif %}
 
         <div class="custom-select-options">
             {% for opt_value, opt_label in options %}
             <button type="button"
-                    @click="selectOption('{{ opt_value|escapejs }}', '{{ opt_label|escapejs }}')"
-                    x-show="!search || '{{ opt_label|lower|escapejs }}'.includes(search.toLowerCase())"
-                    class="custom-select-option"
-                    :class="{ 'custom-select-option-selected': value === '{{ opt_value|escapejs }}' }">
+                    data-dropdown-target="option"
+                    data-value="{{ opt_value }}"
+                    data-label="{{ opt_label }}"
+                    data-action="click->dropdown#selectOption"
+                    class="custom-select-option">
                 <span>{{ opt_label }}</span>
-                <i x-show="value === '{{ opt_value|escapejs }}'" data-lucide="check" class="custom-select-check w-4 h-4"></i>
+                <i data-lucide="check" class="custom-select-check w-4 h-4 {% if value != opt_value %}hidden{% endif %}"></i>
             </button>
             {% empty %}
             <div class="custom-select-empty">No options available</div>

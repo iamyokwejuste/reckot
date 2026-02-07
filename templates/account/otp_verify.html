@@ -8,11 +8,11 @@
 {% block content %}
 <div class="min-h-[calc(100vh-4rem)] flex items-center justify-center py-12 px-4">
     <div class="w-full max-w-md">
-        <div class="card p-6 sm:p-8" x-data="{ loading: false, resending: false }">
+        <div class="card p-6 sm:p-8" data-controller="toggle">
             <div class="text-center mb-8">
                 <div class="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-foreground mb-4">
-                    <img x-show="isDark" x-cloak src="{% static 'images/logo/reckto_logo_light_mode.png' %}" alt="" class="h-8 w-8">
-                    <img x-show="!isDark" src="{% static 'images/logo/reckto_logo_dark_mode.png' %}" alt="" class="h-8 w-8">
+                    <img class="h-8 w-8 hidden dark:inline" src="{% static 'images/logo/reckto_logo_light_mode.png' %}" alt="">
+                    <img class="h-8 w-8 dark:hidden" src="{% static 'images/logo/reckto_logo_dark_mode.png' %}" alt="">
                 </div>
                 <h1 class="text-2xl font-bold">{% trans "Verify your email" %}</h1>
                 <p class="text-muted-foreground mt-1">{% blocktrans with email=user.email %}Enter the 6-digit code sent to {{ email }}{% endblocktrans %}</p>
@@ -26,7 +26,7 @@
             {% endfor %}
             {% endif %}
 
-            <form method="post" hx-boost="false" class="space-y-6" @submit="loading = true">
+            <form method="post" hx-boost="false" class="space-y-6">
                 {% csrf_token %}
 
                 <div>
@@ -45,43 +45,21 @@
                     >
                 </div>
 
-                {% #button variant="default" type="submit" class="w-full" :disabled="loading" %}
-                    <span x-show="!loading">{% trans "Verify Email" %}</span>
-                    <span x-show="loading" class="flex items-center gap-2">
-                        <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
-                        {% trans "Verifying..." %}
-                    </span>
+                {% #button variant="default" type="submit" class="w-full" %}
+                    {% trans "Verify Email" %}
                 {% /button %}
             </form>
 
-            <div class="text-center mt-6">
+            <div class="text-center mt-6" data-controller="toggle">
                 <p class="text-sm text-muted-foreground mb-2">{% trans "Didn't receive the code?" %}</p>
                 <button
                     type="button"
                     class="text-sm text-foreground font-medium hover:underline"
-                    :disabled="resending"
-                    @click="
-                        resending = true;
-                        fetch('{% url 'resend_otp' %}', {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRFToken': '{{ csrf_token }}',
-                                'Content-Type': 'application/json'
-                            }
-                        })
-                        .then(r => r.json())
-                        .then(data => {
-                            alert(data.message);
-                            setTimeout(() => resending = false, 30000);
-                        })
-                        .catch(() => {
-                            alert("{% trans 'Failed to resend. Please try again.' %}");
-                            resending = false;
-                        });
-                    "
+                    data-action="click->toggle#resendOtp"
+                    data-url="{% url 'resend_otp' %}"
+                    data-csrf="{{ csrf_token }}"
                 >
-                    <span x-show="!resending">{% trans "Resend code" %}</span>
-                    <span x-show="resending">{% trans "Code sent! Wait 30s..." %}</span>
+                    <span data-toggle-target="resendText">{% trans "Resend code" %}</span>
                 </button>
             </div>
         </div>
