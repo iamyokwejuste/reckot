@@ -31,16 +31,26 @@
                             </div>
                             {% endif %}
                         </div>
-                        <div class="flex-1">
+                        <div class="flex-1" data-controller="file-preview">
                             <label for="profile_image" class="block text-sm font-medium mb-2">{% trans "Profile Picture" %}</label>
                             <div class="flex flex-col gap-2">
-                                <div class="relative">
-                                    <input type="file" name="profile_image" id="profile_image" accept="image/*" class="hidden" onchange="document.getElementById('file-name').textContent = this.files[0]?.name || 'No file chosen'">
-                                    <label for="profile_image" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-card hover:bg-muted transition-colors cursor-pointer text-sm font-medium">
-                                        <i data-lucide="upload" class="w-4 h-4"></i>
-                                        {% trans "Choose Image" %}
+                                <div class="flex items-center gap-3">
+                                    <input type="file"
+                                           name="profile_image"
+                                           id="profile_image"
+                                           accept="image/*"
+                                           class="hidden"
+                                           data-file-preview-target="input"
+                                           data-action="change->file-preview#updateFileName">
+                                    <label for="profile_image" class="cursor-pointer">
+                                        {% #button variant="outline" size="sm" attrs='type="button"' %}
+                                            <i data-lucide="upload" class="w-4 h-4"></i>
+                                            {% trans "Choose Image" %}
+                                        {% /button %}
                                     </label>
-                                    <span id="file-name" class="text-xs text-muted-foreground ml-3">{% trans "No file chosen" %}</span>
+                                    <span data-file-preview-target="fileName"
+                                          data-empty-text="{% trans 'No file chosen' %}"
+                                          class="text-xs text-muted-foreground">{% trans "No file chosen" %}</span>
                                 </div>
                                 <p class="text-xs text-muted-foreground">{% trans "Recommended: Square image, at least 200x200px" %}</p>
                             </div>

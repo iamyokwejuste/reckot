@@ -42,6 +42,7 @@
 {% endblock %}
 
 {% block content %}
+<div data-controller="checkin-offline" data-checkin-offline-event-slug-value="{{ event.slug }}" data-checkin-offline-org-slug-value="{{ event.organization.slug }}"></div>
 <div id="notification-container" class="fixed top-4 right-4 z-50 space-y-2 w-80"></div>
 
 <div class="space-y-6">
@@ -137,17 +138,5 @@
 {% block extra_js %}
 <script src="{% static 'js/offline-sync.js' %}"></script>
 <script src="{% static 'js/checkin-offline.js' %}"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        window.checkinOffline = new CheckInOffline('{{ event.slug }}', '{{ event.organization.slug }}');
 
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/static/sw.js').then((registration) => {
-                console.log('[ServiceWorker] Registered:', registration);
-            }).catch((error) => {
-                console.error('[ServiceWorker] Registration failed:', error);
-            });
-        }
-    });
-</script>
 {% endblock %}

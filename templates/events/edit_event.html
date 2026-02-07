@@ -285,24 +285,38 @@
                            value="{{ event.website|default:'' }}">
                 </div>
 
-                <div class="flex items-center justify-between gap-3 p-3 rounded-lg bg-muted/50 border border-border/50">
-                    <div class="flex items-center gap-3">
-                        <input type="checkbox" id="id_is_free_display" class="h-4 w-4 rounded border-border opacity-50 cursor-not-allowed"
-                               {% if event.is_free %}checked{% endif %} disabled>
-                        <input type="hidden" name="is_free" value="{% if event.is_free %}on{% endif %}">
-                        <label for="id_is_free_display" class="text-sm font-medium opacity-70 cursor-not-allowed">
-                            {% trans "This is a free event" %}
-                            <span class="text-xs text-muted-foreground ml-2">({% trans "Cannot be changed after creation" %})</span>
-                        </label>
+                <div data-controller="modal">
+                    <div class="flex items-center justify-between gap-3 p-3 rounded-lg bg-muted/50 border border-border/50">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" id="id_is_free_display" class="h-4 w-4 rounded border-border opacity-50 cursor-not-allowed"
+                                   {% if event.is_free %}checked{% endif %} disabled>
+                            <input type="hidden" name="is_free" value="{% if event.is_free %}on{% endif %}">
+                            <label for="id_is_free_display" class="text-sm font-medium opacity-70 cursor-not-allowed">
+                                {% trans "This is a free event" %}
+                                <span class="text-xs text-muted-foreground ml-2">({% trans "Cannot be changed after creation" %})</span>
+                            </label>
+                        </div>
+                        <button type="button"
+                                data-action="click->modal#open"
+                                class="text-xs px-3 py-1.5 rounded-lg border border-primary text-primary hover:bg-primary/10 transition-colors font-medium">
+                            {% trans "Request Upgrade" %}
+                        </button>
                     </div>
-                    <button type="button"
-                            data-action="click->modal#open"
-                            class="text-xs px-3 py-1.5 rounded-lg border border-primary text-primary hover:bg-primary/10 transition-colors font-medium">
-                        {% trans "Request Upgrade" %}
-                    </button>
-                </div>
 
-                {% #modal id="upgrade-modal" title="Request Plan Upgrade" description="Upgrade your plan to unlock more features" %}
+                    <div data-modal-target="container" class="fixed inset-0 z-50 overflow-y-auto hidden" role="dialog" aria-modal="true">
+                        <div data-action="click->modal#close" class="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-200"></div>
+                        <div class="fixed inset-0 flex items-center justify-center p-4">
+                            <div class="relative w-full max-w-md bg-card border border-border rounded-xl shadow-xl transition-all duration-200">
+                                <div class="flex items-start justify-between p-4 border-b border-border">
+                                    <div class="flex-1 pr-4">
+                                        <h3 class="text-lg font-semibold">{% trans "Request Plan Upgrade" %}</h3>
+                                        <p class="text-sm text-muted-foreground mt-0.5">{% trans "Upgrade your plan to unlock more features" %}</p>
+                                    </div>
+                                    <button type="button" data-action="click->modal#close" class="shrink-0 p-2 -mr-2 -mt-1 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground" aria-label="Close">
+                                        <i data-lucide="x" class="w-5 h-5"></i>
+                                    </button>
+                                </div>
+                                <div class="p-4">
                     <div class="space-y-4">
                         <p class="text-sm text-muted-foreground">
                             {% trans "To unlock advanced features and create more events, please request a plan upgrade. Our team will review your request and contact you shortly." %}
@@ -341,8 +355,12 @@
                                 {% trans "Contact Support" %}
                             </a>
                         </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                {% /modal %}
+                </div>
+                </div>
 
                 <div>
                     <label class="block text-sm font-medium mb-2">{% trans "Contact Information" %} <span class="text-red-500">*</span></label>

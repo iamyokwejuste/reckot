@@ -20,7 +20,7 @@ async function registerController(name, path) {
 
 waitForStimulus(async () => {
     const baseUrl = '/static/js/controllers/';
-    const version = '1770493020';
+    const version = '1770504500';
 
     const controllers = [
         { name: 'event-form', path: 'event-form_controller.js' },
@@ -45,6 +45,15 @@ waitForStimulus(async () => {
         { name: 'confirmation', path: 'confirmation_controller.js' },
         { name: 'logout', path: 'logout_controller.js' },
         { name: 'pricing-calculator', path: 'pricing-calculator_controller.js' },
+        { name: 'ai-insights', path: 'ai-insights_controller.js' },
+        { name: 'payment-select', path: 'payment-select_controller.js' },
+        { name: 'datepicker', path: 'datepicker_controller.js' },
+        { name: 'file-upload', path: 'file-upload_controller.js' },
+        { name: 'file-preview', path: 'file-preview_controller.js' },
+        { name: 'form-persistence', path: 'form-persistence_controller.js' },
+        { name: 'motion', path: 'motion_controller.js' },
+        { name: 'coupon-form', path: 'coupon-form_controller.js' },
+        { name: 'checkin-offline', path: 'checkin-offline_controller.js' },
     ];
 
     await Promise.all(

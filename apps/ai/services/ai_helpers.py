@@ -7,10 +7,9 @@ from pathlib import Path
 from typing import Optional
 from google import genai
 from django.conf import settings
-
 from django.utils.html import strip_tags
-
 from django.contrib.auth import get_user_model
+from apps.ai.services.ai_query_service import AIQueryService
 
 User = get_user_model()
 
@@ -20,9 +19,11 @@ _ai_query_service = None
 def _get_ai_query_service():
     global _ai_query_service
     if _ai_query_service is None:
-        from apps.ai.services.ai_query_service import AIQueryService
-
-        _ai_query_service = AIQueryService()
+        try:
+            _ai_query_service = AIQueryService()
+        except RuntimeError as e:
+            logger.warning(f"AI Query Service not available: {e}")
+            return None
     return _ai_query_service
 
 
@@ -258,7 +259,7 @@ def chat_with_assistant(
             ]
         )
 
-        if '{"action": "execute_query"' in response or is_data_question:
+        if ('{"action": "execute_query"' in response or is_data_question) and ai_service:
             query_response = ai_service.answer_question(user_message, user)
 
             if not query_response["success"]:

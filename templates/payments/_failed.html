@@ -1,6 +1,6 @@
 {% load slippers %}
 {% load i18n %}
-<div class="space-y-6" data-motion>
+<div class="space-y-6" data-controller="motion">
     <div class="flex flex-col items-center justify-center py-8">
         <div class="flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
             <i data-lucide="x-circle" class="h-8 w-8 text-destructive"></i>
@@ -40,12 +40,3 @@
     </div>
 </div>
 
-<script>
-    if (typeof motion !== 'undefined') {
-        motion.animate(
-            "[data-motion]",
-            { opacity: [0, 1], y: [6, 0] },
-            { duration: 0.2 }
-        );
-    }
-</script>

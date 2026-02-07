@@ -124,7 +124,8 @@ class AnalyticsView(LoginRequiredMixin, View):
             "reports/analytics.html",
             {
                 "total_revenue": f"{total_revenue:,.0f}",
-                "available_balance": f"{available_balance:,.0f} {currency}",
+                "available_balance": available_balance,
+                "available_balance_display": f"{available_balance:,.0f} {currency}",
                 "tickets_sold": f"{tickets_sold:,}",
                 "checkin_rate": f"{checkin_rate:.1f}",
                 "active_events": active_events,
@@ -230,6 +231,7 @@ class ReportsDashboardView(LoginRequiredMixin, View):
                 "summary": summary,
                 "sales_timeline": sales_timeline_filled,
                 "max_daily_sales": max_daily_sales,
+                "days": 7,
                 "recent_activity": recent_activity,
                 "event_metrics": event_metrics,
             },
@@ -387,7 +389,7 @@ class SalesTimelineView(LoginRequiredMixin, View):
         if period == "30d":
             days = 30
         elif period == "all":
-            days = 365
+            days = 90
         else:
             days = 7
 
@@ -422,6 +424,7 @@ class SalesTimelineView(LoginRequiredMixin, View):
             {
                 "sales_timeline": sales_timeline_filled,
                 "max_daily_sales": max_daily_sales,
+                "days": days,
             },
         )
 

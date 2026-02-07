@@ -250,72 +250,8 @@ window.couponPageData = {
         </div>
     </form>
 </div>
-
-<script>
-// Stimulus controller for coupon form
-import { Controller } from "@hotwired/stimulus"
-
-class CouponFormController extends Controller {
-    static targets = ["assignmentType", "individualEmail", "groupEmails", "eventWarning"]
-
-    connect() {
-        this.updateAssignment()
-    }
-
-    updateAssignment() {
-        const assignmentInput = document.getElementById('assignment_type')
-        const assignmentType = assignmentInput ? assignmentInput.value : 'PUBLIC'
-
-        // Hide all conditional fields
-        if (this.hasIndividualEmailTarget) {
-            this.individualEmailTarget.classList.add('hidden')
-        }
-        if (this.hasGroupEmailsTarget) {
-            this.groupEmailsTarget.classList.add('hidden')
-        }
-
-        // Show relevant field
-        if (assignmentType === 'INDIVIDUAL' && this.hasIndividualEmailTarget) {
-            this.individualEmailTarget.classList.remove('hidden')
-        } else if (assignmentType === 'GROUP' && this.hasGroupEmailsTarget) {
-            this.groupEmailsTarget.classList.remove('hidden')
-        }
-    }
-}
-
-// Register the controller if Stimulus is available
-if (window.Stimulus) {
-    window.Stimulus.register("coupon-form", CouponFormController)
-}
-</script>
 {% endblock %}
 
 {% block extra_scripts %}
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const validFromEl = document.getElementById('valid_from');
-    const validUntilEl = document.getElementById('valid_until');
-
-    if (validFromEl && validUntilEl) {
-        flatpickr(validFromEl, {
-            enableTime: true,
-            dateFormat: "Y-m-d H:i",
-            altInput: true,
-            altFormat: "F j, Y at h:i K",
-            time_24hr: false,
-            minuteIncrement: 15
-        });
-
-        flatpickr(validUntilEl, {
-            enableTime: true,
-            dateFormat: "Y-m-d H:i",
-            altInput: true,
-            altFormat: "F j, Y at h:i K",
-            time_24hr: false,
-            minuteIncrement: 15
-        });
-    }
-});
-</script>
 {% endblock %}

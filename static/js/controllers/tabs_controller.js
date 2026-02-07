@@ -3,41 +3,38 @@ import { Controller } from "https://unpkg.com/@hotwired/stimulus@3.2.2/dist/stim
 export default class extends Controller {
     static targets = ["tab", "panel"]
     static values = {
-        active: String
+        initial: String
     }
 
     connect() {
-        if (!this.activeValue && this.hasTabTarget) {
-            const firstTab = this.tabTargets[0];
-            if (firstTab) {
-                this.activeValue = firstTab.dataset.tab;
-            }
-        }
-        this.updateUI();
-    }
-
-    activeValueChanged() {
-        this.updateUI();
-    }
-
-    selectTab(event) {
-        const tabName = event.currentTarget.dataset.tab;
-        if (tabName) {
-            this.activeValue = tabName;
+        const initialValue = this.initialValue || this.tabTargets[0]?.dataset.tabsTabValue;
+        if (initialValue) {
+            this.select({ currentTarget: this.tabTargets.find(t => t.dataset.tabsTabValue === initialValue) });
         }
     }
 
-    updateUI() {
+    select(event) {
+        const button = event.currentTarget;
+        const tabValue = button.dataset.tabsTabValue;
+
         this.tabTargets.forEach(tab => {
-            const isActive = tab.dataset.tab === this.activeValue;
-            tab.classList.toggle('active', isActive);
+            const isActive = tab.dataset.tabsTabValue === tabValue;
+            if (isActive) {
+                tab.classList.remove('text-muted-foreground', 'hover:text-foreground');
+                tab.classList.add('bg-background', 'shadow-sm', 'text-foreground');
+            } else {
+                tab.classList.remove('bg-background', 'shadow-sm', 'text-foreground');
+                tab.classList.add('text-muted-foreground', 'hover:text-foreground');
+            }
             tab.setAttribute('aria-selected', isActive);
         });
 
-        this.panelTargets.forEach(panel => {
-            const isActive = panel.dataset.tabPanel === this.activeValue;
-            panel.classList.toggle('hidden', !isActive);
-            panel.setAttribute('aria-hidden', !isActive);
-        });
+        if (this.hasPanelTarget) {
+            this.panelTargets.forEach(panel => {
+                const isActive = panel.dataset.tabPanel === tabValue;
+                panel.classList.toggle('hidden', !isActive);
+                panel.setAttribute('aria-hidden', !isActive);
+            });
+        }
     }
 }

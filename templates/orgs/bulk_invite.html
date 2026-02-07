@@ -16,26 +16,24 @@
         {% csrf_token %}
 
         <div class="card p-6 space-y-4">
-            <div>
+            <div data-controller="file-upload">
                 <label class="block text-sm font-medium mb-2">{% trans "Upload CSV File" %}</label>
-                <div class="border-2 border-dashed border-border rounded-lg p-6 text-center"
-                     ondragover="event.preventDefault(); this.classList.add('border-primary', 'bg-primary/5');"
-                     ondragleave="this.classList.remove('border-primary', 'bg-primary/5');"
-                     ondrop="event.preventDefault(); this.classList.remove('border-primary', 'bg-primary/5'); const files = event.dataTransfer.files; if (files.length > 0) { document.getElementById('csv-file-input').files = files; updateFileName(files[0].name); }">
-                    <input type="file" name="csv_file" accept=".csv" id="csv-file-input"
-                           onchange="updateFileName(this.files[0]?.name)"
+                <div class="border-2 border-dashed border-border rounded-lg p-6 text-center">
+                    <input type="file" name="csv_file" accept=".csv"
+                           data-file-upload-target="input"
+                           data-action="change->file-upload#updateFileName"
                            class="hidden">
-                    <div id="csv-placeholder">
+                    <div data-file-upload-target="placeholder">
                         <i data-lucide="upload" class="h-8 w-8 mx-auto text-muted-foreground"></i>
                         <p class="mt-2 text-sm text-muted-foreground">
                             {% trans "Drag & drop a CSV file or" %}
-                            <button type="button" onclick="document.getElementById('csv-file-input').click()" class="text-primary hover:underline">{% trans "browse" %}</button>
+                            <button type="button" data-action="click->file-upload#input.click()" class="text-primary hover:underline">{% trans "browse" %}</button>
                         </p>
                     </div>
-                    <div id="csv-file-info" class="hidden flex items-center justify-center gap-2">
+                    <div data-file-upload-target="fileInfo" class="hidden flex items-center justify-center gap-2">
                         <i data-lucide="file-text" class="h-5 w-5 text-primary"></i>
-                        <span class="text-sm font-medium" id="csv-file-name"></span>
-                        <button type="button" onclick="clearFile()"
+                        <span class="text-sm font-medium" data-file-upload-target="fileName"></span>
+                        <button type="button" data-action="click->file-upload#clearFile"
                                 class="text-muted-foreground hover:text-red-500">
                             <i data-lucide="x" class="h-4 w-4"></i>
                         </button>
@@ -48,23 +46,6 @@
                     </a>
                 </div>
             </div>
-
-            <script>
-            function updateFileName(name) {
-                if (name) {
-                    document.getElementById('csv-file-name').textContent = name;
-                    document.getElementById('csv-placeholder').classList.add('hidden');
-                    document.getElementById('csv-file-info').classList.remove('hidden');
-                    if (window.lucide) lucide.createIcons();
-                }
-            }
-
-            function clearFile() {
-                document.getElementById('csv-file-input').value = '';
-                document.getElementById('csv-placeholder').classList.remove('hidden');
-                document.getElementById('csv-file-info').classList.add('hidden');
-            }
-            </script>
 
             <div class="relative">
                 <div class="absolute inset-0 flex items-center">

@@ -64,14 +64,7 @@
         {% trans "Awaiting payment" as desc_pending %}
 
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {% #stat_card
-                label=label_tickets
-                value=summary.total_tickets
-                description=desc_tickets
-                icon="ticket"
-                color_variant="primary"
-                hover_color="primary/50" %}
-            {% /stat_card %}
+            {% #stat_card label=label_tickets value=summary.total_tickets description=desc_tickets icon="ticket" color_variant="primary" hover_color="primary/50" %}{% /stat_card %}
 
             <div class="stat-card group hover:border-emerald-500/50 transition-colors">
                 <div class="flex items-center justify-between">
@@ -92,23 +85,9 @@
                 </div>
             </div>
 
-            {% #stat_card
-                label=label_revenue
-                value=summary.total_revenue|floatformat:0|intcomma
-                description=desc_revenue
-                icon="banknote"
-                color_variant="blue"
-                hover_color="blue-500/50" %}
-            {% /stat_card %}
+            {% #stat_card label=label_revenue value=summary.total_revenue|floatformat:0|intcomma description=desc_revenue icon="banknote" color_variant="blue" hover_color="blue-500/50" %}{% /stat_card %}
 
-            {% #stat_card
-                label=label_pending
-                value=summary.pending_count|default:0
-                description=desc_pending
-                icon="clock"
-                color_variant="amber"
-                hover_color="amber-500/50" %}
-            {% /stat_card %}
+            {% #stat_card label=label_pending value=summary.pending_count|default:0 description=desc_pending icon="clock" color_variant="amber" hover_color="amber-500/50" %}{% /stat_card %}
         </div>
 
         {% if summary.ticket_breakdown %}

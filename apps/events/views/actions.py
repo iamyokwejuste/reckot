@@ -1271,12 +1271,24 @@ class CheckoutQuestionsView(LoginRequiredMixin, View):
             organization__members=request.user,
         )
         questions = event.checkout_questions.all()
+        field_type_options = [
+            ("TEXT", "Text"),
+            ("TEXTAREA", "Long Text"),
+            ("SELECT", "Dropdown"),
+            ("RADIO", "Radio Buttons"),
+            ("CHECKBOX", "Checkbox"),
+            ("EMAIL", "Email"),
+            ("PHONE", "Phone Number"),
+            ("DATE", "Date"),
+            ("NUMBER", "Number"),
+        ]
         return render(
             request,
             "events/checkout_questions.html",
             {
                 "event": event,
                 "questions": questions,
+                "field_type_options": field_type_options,
             },
         )
 

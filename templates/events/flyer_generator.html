@@ -145,62 +145,6 @@
     </div>
 </div>
 
-<script>
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
-function previewPhoto(file) {
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('photo-image').src = e.target.result;
-            document.getElementById('photo-placeholder').classList.add('hidden');
-            document.getElementById('photo-preview').classList.remove('hidden');
-        };
-        reader.readAsDataURL(file);
-    }
-}
-
-function showGenerationError(message) {
-    const errorDiv = document.getElementById('generation-error');
-    errorDiv.textContent = message;
-    errorDiv.classList.remove('hidden');
-    errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-}
-
-function hideGenerationError() {
-    const errorDiv = document.getElementById('generation-error');
-    errorDiv.classList.add('hidden');
-}
-
-async function shareFlyer() {
-    const img = document.getElementById('flyer-result');
-    if (navigator.share) {
-        try {
-            const response = await fetch(img.src);
-            const blob = await response.blob();
-            const file = new File([blob], '{{ event.slug }}-flyer.jpg', { type: 'image/jpeg' });
-            await navigator.share({
-                files: [file],
-                title: '{% trans "My Event Flyer" %}',
-                text: '{% blocktrans with title=event.title %}Check out my flyer for {{ title }}!{% endblocktrans %}'
-            });
-        } catch (error) {}
-    } else {
-        alert('{% trans "Sharing is not supported on your device. Please use the download button." %}');
-    }
-}
-</script>
+{% load static %}
+<script src="{% static 'js/flyer-generator-utils.js' %}"></script>
 {% endblock %}

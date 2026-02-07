@@ -37,6 +37,15 @@ export default class extends Controller {
         }
     }
 
+    stopPropagation(event) {
+        event.stopPropagation();
+    }
+
+    print(event) {
+        event?.preventDefault();
+        window.print();
+    }
+
     disconnect() {
         document.removeEventListener("keydown", this.escapeHandler);
         document.body.style.overflow = "";

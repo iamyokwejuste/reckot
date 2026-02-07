@@ -1,5 +1,5 @@
 {% load slippers i18n %}
-<div data-motion>
+<div data-controller="motion">
     {% #alert variant="destructive" icon="x-circle" title=_("Check-in Failed") %}
         <p class="text-sm">{{ error }}</p>
         {% if ticket %}
@@ -13,8 +13,3 @@
     {% /alert %}
 </div>
 
-<script>
-    if (typeof motion !== 'undefined') {
-        motion.animate("[data-motion]", { opacity: [0, 1], y: [8, 0] }, { duration: 0.25 });
-    }
-</script>

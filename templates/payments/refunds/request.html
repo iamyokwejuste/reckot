@@ -65,23 +65,6 @@
                        placeholder="{% trans "Enter amount" %}" class="input">
             </div>
 
-            <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const radios = document.querySelectorAll('input[name="refund_type"]');
-                const amountField = document.querySelector('[data-toggle-target="content"]');
-
-                radios.forEach(radio => {
-                    radio.addEventListener('change', function() {
-                        if (this.value === 'PARTIAL') {
-                            amountField.classList.remove('hidden');
-                        } else {
-                            amountField.classList.add('hidden');
-                        }
-                    });
-                });
-            });
-            </script>
-
             <div>
                 <label for="reason" class="block text-sm font-medium mb-2">{% trans "Reason for Refund" %}</label>
                 <textarea name="reason" id="reason" rows="3" required

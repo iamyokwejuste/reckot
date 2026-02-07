@@ -1,5 +1,5 @@
 {% load slippers i18n %}
-<div class="flex items-center justify-between rounded-lg border border-success/20 bg-success/5 p-3" data-motion>
+<div class="flex items-center justify-between rounded-lg border border-success/20 bg-success/5 p-3" data-controller="motion">
     <div class="flex items-center gap-3">
         {% #avatar initials=ticket.booking.user.email|slice:":2"|upper size="sm" %}{% /avatar %}
         <div>
@@ -13,8 +13,3 @@
     </div>
 </div>
 
-<script>
-    if (typeof motion !== 'undefined') {
-        motion.animate("[data-motion]", { opacity: [0, 1], scale: [0.98, 1] }, { duration: 0.2 });
-    }
-</script>

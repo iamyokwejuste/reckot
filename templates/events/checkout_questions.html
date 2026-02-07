@@ -32,7 +32,7 @@
             {% /button %}
         </div>
 
-        <form data-toggle-target="content" class="hidden mb-6 p-4 rounded-lg border border-border bg-muted/30 space-y-4" method="post">
+        <form data-toggle-target="content" class="hidden mb-6 p-4 rounded-lg border border-border bg-muted/30 space-y-4" method="post" data-action="change->toggle#handleFieldTypeChange">
             {% csrf_token %}
             <input type="hidden" name="action" value="add">
 
@@ -43,40 +43,14 @@
 
             <div class="grid sm:grid-cols-2 gap-4">
                 <div>
-                    <label for="field_type" class="block text-sm font-medium mb-2">{% trans "Field Type" %}</label>
-                    <select name="field_type" id="field_type" class="input" data-controller="toggle" data-action="change->toggle#toggle" data-toggle-target="select">
-                        <option value="TEXT">{% trans "Text" %}</option>
-                        <option value="TEXTAREA">{% trans "Long Text" %}</option>
-                        <option value="SELECT">{% trans "Dropdown" %}</option>
-                        <option value="RADIO">{% trans "Radio Buttons" %}</option>
-                        <option value="CHECKBOX">{% trans "Checkbox" %}</option>
-                        <option value="EMAIL">{% trans "Email" %}</option>
-                        <option value="PHONE">{% trans "Phone Number" %}</option>
-                        <option value="DATE">{% trans "Date" %}</option>
-                        <option value="NUMBER">{% trans "Number" %}</option>
-                    </select>
+                    <label class="block text-sm font-medium mb-2">{% trans "Field Type" %}</label>
+                    {% #select name="field_type" placeholder="Select field type" value="TEXT" label="Text" options=field_type_options %}{% /select %}
                 </div>
-                <div data-toggle-target="content" class="hidden">
+                <div id="options-field" class="hidden" data-toggle-target="optionsField">
                     <label for="options" class="block text-sm font-medium mb-2">{% trans "Options (one per line)" %}</label>
                     <textarea name="options" id="options" rows="3" placeholder="{% trans "Small" %}&#10;{% trans "Medium" %}&#10;{% trans "Large" %}&#10;{% trans "X-Large" %}" class="input resize-none text-sm"></textarea>
                 </div>
             </div>
-
-            <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const select = document.getElementById('field_type');
-                const optionsDiv = select.closest('.grid').querySelector('[data-toggle-target="content"]');
-
-                select.addEventListener('change', function() {
-                    const value = this.value;
-                    if (value === 'SELECT' || value === 'RADIO' || value === 'CHECKBOX') {
-                        optionsDiv.classList.remove('hidden');
-                    } else {
-                        optionsDiv.classList.add('hidden');
-                    }
-                });
-            });
-            </script>
 
             <div class="flex items-center gap-6">
                 <label class="flex items-center gap-2 cursor-pointer">

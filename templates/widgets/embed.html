@@ -68,13 +68,6 @@
         </a>
     </div>
 
-    <script>
-        function sendHeight() {
-            var height = document.body.scrollHeight;
-            parent.postMessage({ type: 'reckot-resize', height: height }, '*');
-        }
-        window.addEventListener('load', sendHeight);
-        window.addEventListener('resize', sendHeight);
-    </script>
+    <script defer src="/static/js/widget-resize.js"></script>
 </body>
 </html>

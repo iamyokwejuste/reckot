@@ -18,6 +18,14 @@ export default class extends Controller {
 
         this.loadFromStorage();
         this.initLucide();
+        this.updateSendButton();
+    }
+
+    updateSendButton() {
+        if (this.hasInputTarget && this.hasSendButtonTarget) {
+            const hasText = this.inputTarget.value.trim().length > 0;
+            this.sendButtonTarget.disabled = !hasText || this.isLoadingValue || this.isListeningValue;
+        }
     }
 
     disconnect() {
@@ -48,15 +56,13 @@ export default class extends Controller {
     }
 
     isLoadingValueChanged(isLoading) {
-        if (this.hasSendButtonTarget) {
-            this.sendButtonTarget.disabled = isLoading;
-        }
         if (this.hasInputTarget) {
             this.inputTarget.disabled = isLoading || this.isListeningValue;
         }
         if (this.hasVoiceButtonTarget) {
             this.voiceButtonTarget.disabled = isLoading;
         }
+        this.updateSendButton();
     }
 
     isListeningValueChanged(isListening) {
@@ -82,9 +88,7 @@ export default class extends Controller {
             this.inputTarget.disabled = this.isLoadingValue || isListening;
         }
 
-        if (this.hasSendButtonTarget) {
-            this.sendButtonTarget.disabled = !this.inputTarget?.value.trim() || isListening;
-        }
+        this.updateSendButton();
     }
 
     toggle() {
@@ -99,8 +103,19 @@ export default class extends Controller {
         this.isOpenValue = false;
     }
 
+    handleEnter(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            event.stopPropagation();
+            this.sendMessage();
+        }
+    }
+
     async sendMessage(event) {
-        event?.preventDefault();
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
 
         if (!this.hasInputTarget) return;
         const message = this.inputTarget.value.trim();
@@ -108,7 +123,10 @@ export default class extends Controller {
 
         this.addMessage('USER', message);
         this.inputTarget.value = '';
+        this.updateSendButton();
         this.isLoadingValue = true;
+
+        this.showTypingIndicator();
 
         try {
             const response = await fetch('/ai/assistant/chat/', {
@@ -125,19 +143,91 @@ export default class extends Controller {
 
             const data = await response.json();
 
+            this.hideTypingIndicator();
+
             if (response.ok) {
-                this.addMessage('ASSISTANT', data.message);
+                await this.typeMessage('ASSISTANT', data.message);
                 if (data.session_id && !this.sessionId) {
                     this.sessionId = data.session_id;
                 }
             } else {
-                this.addMessage('ASSISTANT', data.error || 'Sorry, I encountered an error.');
+                await this.typeMessage('ASSISTANT', data.error || 'Sorry, I encountered an error.');
             }
         } catch (error) {
-            this.addMessage('ASSISTANT', 'Sorry, something went wrong. Please try again.');
+            this.hideTypingIndicator();
+            await this.typeMessage('ASSISTANT', 'Sorry, something went wrong. Please try again.');
         } finally {
             this.isLoadingValue = false;
             this.saveToStorage();
+        }
+    }
+
+    showTypingIndicator() {
+        if (!this.hasMessagesTarget) return;
+
+        const typingHtml = `
+            <div class="message message-assistant typing-indicator flex justify-start mb-3">
+                <div class="flex items-start gap-2 max-w-[85%]">
+                    <div class="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 flex-shrink-0">
+                        <i data-lucide="bot" class="w-4 h-4 text-primary"></i>
+                    </div>
+                    <div class="bg-card border border-border rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
+                        <div class="flex gap-1 items-center">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        this.messagesTarget.insertAdjacentHTML('beforeend', typingHtml);
+        this.scrollToBottom();
+        this.initLucide();
+    }
+
+    hideTypingIndicator() {
+        if (!this.hasMessagesTarget) return;
+        const typingIndicator = this.messagesTarget.querySelector('.typing-indicator');
+        if (typingIndicator) {
+            typingIndicator.remove();
+        }
+    }
+
+    async typeMessage(role, content) {
+        const messageId = ++this.messageCounter;
+        const message = {
+            id: messageId,
+            role: role,
+            content: '',
+            timestamp: Date.now()
+        };
+
+        this.messages.push(message);
+        this.renderMessages();
+
+        const words = content.split(' ');
+        for (let i = 0; i < words.length; i++) {
+            message.content += (i > 0 ? ' ' : '') + words[i];
+            this.updateMessageContent(messageId, message.content);
+            await new Promise(resolve => setTimeout(resolve, 30));
+        }
+
+        this.saveToStorage();
+    }
+
+    updateMessageContent(messageId, content) {
+        const messageElements = this.messagesTarget.querySelectorAll('.message');
+        const messageElement = Array.from(messageElements).find(el => {
+            return el.dataset.messageId == messageId;
+        });
+
+        if (messageElement) {
+            const contentElement = messageElement.querySelector('.message-content');
+            if (contentElement) {
+                contentElement.innerHTML = this.formatMessage(content);
+            }
         }
     }
 
@@ -262,13 +352,35 @@ export default class extends Controller {
     renderMessages() {
         if (!this.hasMessagesTarget) return;
 
-        this.messagesTarget.innerHTML = this.messages.map(msg => `
-            <div class="message message-${msg.role.toLowerCase()}">
-                <div class="message-content">
-                    ${this.formatMessage(msg.content)}
-                </div>
-            </div>
-        `).join('');
+        this.messagesTarget.innerHTML = this.messages.map(msg => {
+            if (msg.role === 'USER') {
+                return `
+                    <div class="message message-user flex justify-end mb-3" data-message-id="${msg.id}">
+                        <div class="flex items-start gap-2 max-w-[85%]">
+                            <div class="message-content bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-4 py-2.5 shadow-sm">
+                                ${this.formatMessage(msg.content)}
+                            </div>
+                            <div class="flex items-center justify-center w-8 h-8 rounded-full bg-primary flex-shrink-0">
+                                <i data-lucide="user" class="w-4 h-4 text-primary-foreground"></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="message message-assistant flex justify-start mb-3" data-message-id="${msg.id}">
+                        <div class="flex items-start gap-2 max-w-[85%]">
+                            <div class="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 flex-shrink-0">
+                                <i data-lucide="bot" class="w-4 h-4 text-primary"></i>
+                            </div>
+                            <div class="message-content bg-card border border-border rounded-2xl rounded-tl-sm px-4 py-2.5 shadow-sm">
+                                ${this.formatMessage(msg.content)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }).join('');
 
         this.scrollToBottom();
         this.initLucide();

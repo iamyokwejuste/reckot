@@ -1,5 +1,5 @@
 {% load slippers i18n %}
-<div class="space-y-4" data-motion>
+<div class="space-y-4" data-controller="motion">
     {% #alert variant="success" icon="check-circle" title=_("Check-in Successful") %}
         <div class="space-y-1 text-sm">
             <p><strong>{{ ticket.booking.user.email }}</strong></p>
@@ -31,8 +31,3 @@
     {% endif %}
 </div>
 
-<script>
-    if (typeof motion !== 'undefined') {
-        motion.animate("[data-motion]", { opacity: [0, 1], y: [8, 0] }, { duration: 0.25 });
-    }
-</script>

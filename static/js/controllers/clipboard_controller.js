@@ -1,6 +1,7 @@
 import { Controller } from "https://unpkg.com/@hotwired/stimulus@3.2.2/dist/stimulus.js"
 
 export default class extends Controller {
+    static targets = ["copyIcon", "checkIcon"]
     static values = {
         text: String,
         successMessage: { type: String, default: "Copied!" },
@@ -26,22 +27,32 @@ export default class extends Controller {
     }
 
     showSuccess(button) {
-        const originalHTML = button.innerHTML
-        const originalClasses = button.className
+        if (this.hasCopyIconTarget && this.hasCheckIconTarget) {
+            this.copyIconTarget.classList.add('hidden');
+            this.checkIconTarget.classList.remove('hidden');
 
-        button.innerHTML = this.successMessageValue
-        button.classList.add('bg-success', 'text-success-foreground')
+            setTimeout(() => {
+                this.copyIconTarget.classList.remove('hidden');
+                this.checkIconTarget.classList.add('hidden');
+            }, this.successDurationValue);
+        } else {
+            const originalHTML = button.innerHTML
+            const originalClasses = button.className
 
-        setTimeout(() => {
-            button.innerHTML = originalHTML
-            button.className = originalClasses
+            button.innerHTML = this.successMessageValue
+            button.classList.add('bg-success', 'text-success-foreground')
 
-            requestAnimationFrame(() => {
-                if (typeof lucide !== 'undefined') {
-                    lucide.createIcons()
-                }
-            })
-        }, this.successDurationValue)
+            setTimeout(() => {
+                button.innerHTML = originalHTML
+                button.className = originalClasses
+
+                requestAnimationFrame(() => {
+                    if (typeof lucide !== 'undefined') {
+                        lucide.createIcons()
+                    }
+                })
+            }, this.successDurationValue)
+        }
     }
 
     showError(button) {

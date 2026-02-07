@@ -1,12 +1,7 @@
 {% load slippers i18n %}
-<div data-motion>
+<div data-controller="motion">
     {% #alert variant="destructive" icon="alert-circle" title=_("Export Failed") %}
         <p class="text-sm">{{ error }}</p>
     {% /alert %}
 </div>
 
-<script>
-    if (typeof motion !== 'undefined') {
-        motion.animate("[data-motion]", { opacity: [0, 1], y: [8, 0] }, { duration: 0.25 });
-    }
-</script>

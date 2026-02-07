@@ -32,7 +32,7 @@
                     hx-target="#payment-panel"
                     hx-swap="innerHTML"
                     class="grid grid-cols-1 lg:grid-cols-2 gap-6"
-                    data-controller="toggle"
+                    data-controller="toggle payment-select"
                     data-toggle-initial-value="CAMPAY"
                 >
                     {% csrf_token %}
@@ -50,7 +50,8 @@
                                     class="h-4 w-4 border-2 border-input text-primary focus:ring-primary"
                                     required
                                     checked
-                                    data-action="change->toggle#select"
+                                    data-action="change->toggle#select change->payment-select#updateMethod"
+                                    data-payment-select-target="methodRadio"
                                 />
                                 <div class="flex items-center gap-3 flex-1">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10">
@@ -70,7 +71,8 @@
                                     value="FLUTTERWAVE"
                                     data-payment-method="mobile_money"
                                     class="h-4 w-4 border-2 border-input text-primary focus:ring-primary"
-                                    data-action="change->toggle#select"
+                                    data-action="change->toggle#select change->payment-select#updateMethod"
+                                    data-payment-select-target="methodRadio"
                                 />
                                 <div class="flex items-center gap-3 flex-1">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
@@ -89,7 +91,8 @@
                                     value="FLUTTERWAVE"
                                     data-payment-method="card"
                                     class="h-4 w-4 border-2 border-input text-primary focus:ring-primary"
-                                    data-action="change->toggle#select"
+                                    data-action="change->toggle#select change->payment-select#updateMethod"
+                                    data-payment-select-target="methodRadio"
                                 />
                                 <div class="flex items-center gap-3 flex-1">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10">
@@ -108,7 +111,8 @@
                                     value="OFFLINE"
                                     data-payment-method=""
                                     class="h-4 w-4 border-2 border-input text-primary focus:ring-primary"
-                                    data-action="change->toggle#select"
+                                    data-action="change->toggle#select change->payment-select#updateMethod"
+                                    data-payment-select-target="methodRadio"
                                 />
                                 <div class="flex items-center gap-3">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
@@ -122,7 +126,7 @@
                             </label>
                         </div>
                     </div>
-                    <input type="hidden" name="payment_method" id="payment_method" value="mobile_money">
+                    <input type="hidden" name="payment_method" id="payment_method" value="mobile_money" data-payment-select-target="paymentMethodInput">
 
                     <div class="space-y-2">
                         <label for="phone" class="block text-sm font-medium">{% trans "Phone Number" %}</label>
@@ -130,9 +134,11 @@
                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">+237</span>
                             <input type="tel" name="phone" id="phone"
                                    placeholder="6XX XXX XXX" required
-                                   class="input w-full pl-14 pr-20">
+                                   class="input w-full pl-14 pr-20"
+                                   data-payment-select-target="phoneInput"
+                                   data-action="input->payment-select#updateCarrier">
                             <div class="absolute right-3 top-1/2 -translate-y-1/2">
-                                <span class="carrier-badge hidden text-xs font-medium px-2 py-1 rounded-full" data-carrier="MTN"></span>
+                                <span class="carrier-badge hidden text-xs font-medium px-2 py-1 rounded-full" data-payment-select-target="carrierBadge"></span>
                             </div>
                         </div>
                         <p class="text-xs text-muted-foreground">{% trans "Enter without country code (e.g., 6XX XXX XXX)" %}</p>
@@ -180,58 +186,4 @@
         {% /card %}
     </div>
 </div>
-{% endblock %}
-
-{% block extra_scripts %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const phoneInput = document.getElementById('phone');
-    const carrierBadge = document.querySelector('.carrier-badge');
-    const methodRadios = document.querySelectorAll('input[name="method"]');
-    const paymentMethodInput = document.getElementById('payment_method');
-
-    methodRadios.forEach(radio => {
-        radio.addEventListener('change', function() {
-            const paymentMethod = this.getAttribute('data-payment-method');
-            if (paymentMethod) {
-                paymentMethodInput.value = paymentMethod;
-            }
-        });
-    });
-
-    if (phoneInput && carrierBadge) {
-        phoneInput.addEventListener('input', function() {
-            let phone = this.value.replace(/\D/g, '');
-            if (phone.startsWith('237')) phone = phone.substring(3);
-
-            if (phone.length < 2) {
-                carrierBadge.classList.add('hidden');
-                return;
-            }
-
-            const mtnPrefixes = ['67', '650', '651', '652', '653', '654', '680', '681', '682', '683'];
-            const orangePrefixes = ['640', '655', '656', '657', '658', '659', '686', '687', '688', '689', '69'];
-
-            let carrier = '';
-            for (const p of mtnPrefixes) {
-                if (phone.startsWith(p)) { carrier = 'MTN'; break; }
-            }
-            if (!carrier) {
-                for (const p of orangePrefixes) {
-                    if (phone.startsWith(p)) { carrier = 'ORANGE'; break; }
-                }
-            }
-
-            if (carrier) {
-                carrierBadge.textContent = carrier;
-                carrierBadge.className = 'carrier-badge text-xs font-medium px-2 py-1 rounded-full ';
-                carrierBadge.className += carrier === 'MTN' ? 'bg-yellow-500/20 text-yellow-600' : 'bg-orange-500/20 text-orange-600';
-                carrierBadge.classList.remove('hidden');
-            } else {
-                carrierBadge.classList.add('hidden');
-            }
-        });
-    }
-});
-</script>
 {% endblock %}

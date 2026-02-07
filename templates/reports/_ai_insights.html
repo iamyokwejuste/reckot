@@ -1,20 +1,26 @@
 {% load slippers i18n %}
 
-<div class="card p-5" id="ai-insights-card" data-metrics="{{ metrics_json }}">
+<div class="card p-5"
+     data-controller="ai-insights"
+     data-ai-insights-metrics-value="{{ metrics_json|escapejs }}"
+     data-ai-insights-analyzing-text-value="{% trans 'Analyzing...' %}"
+     data-ai-insights-generate-text-value="{% trans 'Generate Insight' %}"
+     data-ai-insights-regenerate-text-value="{% trans 'Regenerate' %}">
     <div class="flex items-center justify-between mb-4">
         <h3 class="font-semibold flex items-center gap-2">
             <i data-lucide="sparkles" class="w-4 h-4 text-primary"></i>
             {% trans "AI Insights" %}
         </h3>
         <button type="button"
-                id="ai-insights-btn"
+                data-ai-insights-target="btn"
+                data-action="click->ai-insights#generateInsight"
                 class="btn btn-primary">
             <i data-lucide="wand-2" class="w-4 h-4"></i>
-            <span id="ai-insights-btn-text">{% trans "Generate Insight" %}</span>
+            <span data-ai-insights-target="btnText">{% trans "Generate Insight" %}</span>
         </button>
     </div>
 
-    <div id="ai-insights-empty" class="text-center py-8">
+    <div data-ai-insights-target="emptyState" class="text-center py-8">
         <div class="h-16 w-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
             <i data-lucide="brain" class="w-8 h-8 text-primary"></i>
         </div>
@@ -22,7 +28,7 @@
         <p class="text-xs text-muted-foreground">{% trans "Click \"Generate Insight\" to analyze trends and get actionable recommendations" %}</p>
     </div>
 
-    <div id="ai-insights-loading" class="text-center py-8 hidden">
+    <div data-ai-insights-target="loadingState" class="text-center py-8 hidden">
         <div class="h-16 w-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
             <i data-lucide="loader-2" class="w-8 h-8 text-primary animate-spin"></i>
         </div>
@@ -30,24 +36,26 @@
         <p class="text-xs text-muted-foreground mt-1">{% trans "This may take a few seconds" %}</p>
     </div>
 
-    <div id="ai-insights-error" class="text-center py-6 hidden">
+    <div data-ai-insights-target="errorState" class="text-center py-6 hidden">
         <div class="h-12 w-12 mx-auto mb-3 rounded-full bg-red-500/10 flex items-center justify-center">
             <i data-lucide="alert-circle" class="w-6 h-6 text-red-500"></i>
         </div>
-        <p id="ai-insights-error-text" class="text-sm text-red-500 mb-2"></p>
-        <button type="button" id="ai-insights-retry" class="text-sm text-primary hover:underline">
+        <p data-ai-insights-target="errorText" class="text-sm text-red-500 mb-2"></p>
+        <button type="button"
+                data-action="click->ai-insights#retry"
+                class="text-sm text-primary hover:underline">
             {% trans "Try again" %}
         </button>
     </div>
 
-    <div id="ai-insights-result" class="space-y-4 hidden">
+    <div data-ai-insights-target="resultState" class="space-y-4 hidden">
         <div class="p-4 rounded-lg bg-primary/5 border border-primary/10">
             <div class="flex items-start gap-3">
                 <div class="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
                     <i data-lucide="lightbulb" class="w-4 h-4 text-primary"></i>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p id="ai-insights-text" class="text-sm leading-relaxed whitespace-pre-wrap break-words"></p>
+                    <p data-ai-insights-target="insightText" class="text-sm leading-relaxed whitespace-pre-wrap break-words"></p>
                 </div>
             </div>
         </div>
@@ -56,93 +64,3 @@
         </p>
     </div>
 </div>
-
-<script>
-(function() {
-    var card = document.getElementById('ai-insights-card');
-    var metricsStr = card.getAttribute('data-metrics');
-    var metrics = {};
-    try {
-        metrics = JSON.parse(metricsStr);
-    } catch (e) {}
-
-    var btn = document.getElementById('ai-insights-btn');
-    var btnText = document.getElementById('ai-insights-btn-text');
-    var emptyState = document.getElementById('ai-insights-empty');
-    var loadingState = document.getElementById('ai-insights-loading');
-    var errorState = document.getElementById('ai-insights-error');
-    var errorText = document.getElementById('ai-insights-error-text');
-    var resultState = document.getElementById('ai-insights-result');
-    var insightText = document.getElementById('ai-insights-text');
-    var retryBtn = document.getElementById('ai-insights-retry');
-
-    var analyzingText = "{% trans 'Analyzing...' %}";
-    var generateText = "{% trans 'Generate Insight' %}";
-    var regenerateText = "{% trans 'Regenerate' %}";
-
-    function showState(state) {
-        emptyState.classList.add('hidden');
-        loadingState.classList.add('hidden');
-        errorState.classList.add('hidden');
-        resultState.classList.add('hidden');
-        state.classList.remove('hidden');
-    }
-
-    function generateInsight() {
-        btn.disabled = true;
-        btnText.textContent = analyzingText;
-        showState(loadingState);
-
-        var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
-        csrfToken = csrfToken ? csrfToken.value : '';
-        if (!csrfToken) {
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-                var c = cookies[i].trim();
-                if (c.startsWith('csrftoken=')) {
-                    csrfToken = c.split('=')[1];
-                    break;
-                }
-            }
-        }
-
-        fetch('/app/api/ai/insight/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify({ metrics: metrics })
-        })
-        .then(function(response) {
-            return response.json().then(function(data) {
-                if (!response.ok) {
-                    throw new Error(data.error || 'Failed to generate insight');
-                }
-                return data;
-            });
-        })
-        .then(function(data) {
-            if (data.insight) {
-                insightText.textContent = data.insight;
-                showState(resultState);
-                btnText.textContent = regenerateText;
-            } else {
-                throw new Error('No insight generated');
-            }
-        })
-        .catch(function(err) {
-            errorText.textContent = err.message || 'Failed to generate insight';
-            showState(errorState);
-            btnText.textContent = generateText;
-        })
-        .finally(function() {
-            btn.disabled = false;
-            if (typeof lucide !== 'undefined') lucide.createIcons();
-        });
-    }
-
-    btn.addEventListener('click', generateInsight);
-    retryBtn.addEventListener('click', generateInsight);
-})();
-</script>

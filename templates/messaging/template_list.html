@@ -52,10 +52,10 @@
             <p class="text-sm text-muted-foreground mt-2 line-clamp-2">{{ template.body|truncatechars:100 }}</p>
             <div class="flex items-center justify-between mt-4 pt-4 border-t border-border">
                 <span class="text-xs text-muted-foreground">{{ template.created_at|date:"M d, Y" }}</span>
-                <div class="flex items-center gap-2">
-                    {% #button variant="outline" size="sm" type="button" attrs='onclick="copyToClipboard(this, \'{{ template.body|escapejs }}\')"' %}
-                        <i data-lucide="copy" class="w-3 h-3 copy-icon"></i>
-                        <i data-lucide="check" class="w-3 h-3 hidden check-icon"></i>
+                <div class="flex items-center gap-2" data-controller="clipboard" data-clipboard-text-value="{{ template.body|escapejs }}">
+                    {% #button variant="outline" size="sm" type="button" attrs='data-action="click->clipboard#copy"' %}
+                        <i data-lucide="copy" class="w-3 h-3" data-clipboard-target="copyIcon"></i>
+                        <i data-lucide="check" class="w-3 h-3 hidden" data-clipboard-target="checkIcon"></i>
                     {% /button %}
                 </div>
             </div>
@@ -78,23 +78,4 @@
     </div>
     {% endif %}
 </div>
-
-<script>
-function copyToClipboard(button, text) {
-    navigator.clipboard.writeText(text).then(() => {
-        const copyIcon = button.querySelector('.copy-icon');
-        const checkIcon = button.querySelector('.check-icon');
-
-        copyIcon.classList.add('hidden');
-        checkIcon.classList.remove('hidden');
-
-        setTimeout(() => {
-            copyIcon.classList.remove('hidden');
-            checkIcon.classList.add('hidden');
-        }, 2000);
-    }).catch(err => {
-        console.error('Failed to copy:', err);
-    });
-}
-</script>
 {% endblock %}
