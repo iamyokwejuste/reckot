@@ -2,7 +2,8 @@
 {% load static %}
 {% load i18n %}
 
-<header class="sticky top-0 z-50 w-full bg-background border-b border-border backdrop-blur-sm bg-background/95 supports-[backdrop-filter]:bg-background/80" data-controller="mobile-menu">
+<div data-controller="navbar">
+<header class="sticky top-0 z-50 w-full bg-background border-b border-border backdrop-blur-sm bg-background/95 supports-[backdrop-filter]:bg-background/80">
     <div class="container">
         <nav class="flex h-16 items-center justify-between" aria-label="Main navigation">
             <a href="/" class="flex items-center gap-2" aria-label="Reckot Home">
@@ -115,21 +116,21 @@
                     <i data-lucide="sun" class="h-5 w-5 hidden dark:inline-block" aria-hidden="true"></i>
                 </button>
                 {% if user.is_authenticated %}
-                <button data-action="click->mobile-menu#openNotifications" class="relative p-2 rounded-lg hover:bg-muted transition-colors touch-manipulation" aria-label="Notifications">
+                <button data-action="click->navbar#openNotifications" class="relative p-2 rounded-lg hover:bg-muted transition-colors touch-manipulation" aria-label="Notifications">
                     <i data-lucide="bell" class="h-5 w-5"></i>
                     {% if unread_notifications_count > 0 %}
                     <span class="absolute -top-1 -right-1 h-5 min-w-5 px-1 flex items-center justify-center bg-destructive text-background text-xs font-bold rounded-full">{{ unread_notifications_count|truncatechars:4 }}</span>
                     {% endif %}
                 </button>
                 {% endif %}
-                <button data-mobile-menu-target="toggle"
-                        data-action="click->mobile-menu#toggle"
+                <button data-navbar-target="toggle"
+                        data-action="click->navbar#toggle"
                         class="p-2 rounded-lg hover:bg-muted transition-colors touch-manipulation active:scale-95"
                         aria-label="Open menu"
                         aria-expanded="false"
                         aria-controls="mobile-menu">
-                    <i data-mobile-menu-target="hamburger" data-lucide="menu" class="h-6 w-6" aria-hidden="true"></i>
-                    <i data-mobile-menu-target="close" data-lucide="x" class="h-6 w-6" aria-hidden="true" style="display: none;"></i>
+                    <i data-navbar-target="hamburger" data-lucide="menu" class="h-6 w-6" aria-hidden="true"></i>
+                    <i data-navbar-target="close" data-lucide="x" class="h-6 w-6" aria-hidden="true" style="display: none;"></i>
                 </button>
             </div>
         </nav>
@@ -137,12 +138,12 @@
 </header>
 
 
-<div data-mobile-menu-target="menu" class="fixed inset-0 bg-background text-foreground flex-col" style="z-index: 60; display: none;">
+<div data-navbar-target="menu" class="fixed inset-0 bg-background text-foreground flex-col" style="z-index: 60; display: none;">
     <div class="flex items-center justify-between h-16 px-4 border-b border-border">
-        <a href="/" hx-boost="false" data-action="click->mobile-menu#close" aria-label="Reckot Home" class="touch-manipulation">
+        <a href="/" hx-boost="false" data-action="click->navbar#close" aria-label="Reckot Home" class="touch-manipulation">
             {% include "partials/logo_full.html" with class="h-9 w-auto" attrs='width="120" height="36"' %}
         </a>
-        <button data-action="click->mobile-menu#close" class="p-2 rounded-lg hover:bg-muted transition-colors touch-manipulation active:scale-95" aria-label="Close menu">
+        <button data-action="click->navbar#close" class="p-2 rounded-lg hover:bg-muted transition-colors touch-manipulation active:scale-95" aria-label="Close menu">
             <i data-lucide="x" class="h-6 w-6" aria-hidden="true"></i>
         </button>
     </div>
@@ -156,34 +157,34 @@
             <span class="font-medium truncate text-foreground">{{ user.email }}</span>
         </div>
         <div class="space-y-2">
-            <a href="{% url 'events:discover' %}" hx-boost="false" data-action="click->mobile-menu#close" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
+            <a href="{% url 'events:discover' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
                 <i data-lucide="compass" class="h-6 w-6" aria-hidden="true"></i>
                 {% trans "Discover Events" %}
             </a>
-            <a href="{% url 'events:list' %}" hx-boost="false" data-action="click->mobile-menu#close" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
+            <a href="{% url 'events:list' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
                 <i data-lucide="calendar" class="h-6 w-6" aria-hidden="true"></i>
                 {% trans "My Events" %}
             </a>
-            <a href="{% url 'reports:analytics' %}" hx-boost="false" data-action="click->mobile-menu#close" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
+            <a href="{% url 'reports:analytics' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
                 <i data-lucide="bar-chart-3" class="h-6 w-6" aria-hidden="true"></i>
                 {% trans "Analytics" %}
             </a>
         </div>
         {% else %}
         <div class="space-y-2">
-            <a href="{% url 'events:discover' %}" hx-boost="false" data-action="click->mobile-menu#close" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
+            <a href="{% url 'events:discover' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
                 <i data-lucide="compass" class="h-6 w-6" aria-hidden="true"></i>
                 {% trans "Discover Events" %}
             </a>
-            <a href="{% url 'features' %}" hx-boost="false" data-action="click->mobile-menu#close" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
+            <a href="{% url 'features' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
                 <i data-lucide="sparkles" class="h-6 w-6" aria-hidden="true"></i>
                 {% trans "Features" %}
             </a>
-            <a href="{% url 'home' %}#pricing" hx-boost="false" data-action="click->mobile-menu#close" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
+            <a href="{% url 'home' %}#pricing" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
                 <i data-lucide="tag" class="h-6 w-6" aria-hidden="true"></i>
                 {% trans "Pricing" %}
             </a>
-            <a href="{% url 'why_us' %}" hx-boost="false" data-action="click->mobile-menu#close" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
+            <a href="{% url 'why_us' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
                 <i data-lucide="heart" class="h-6 w-6" aria-hidden="true"></i>
                 {% trans "Why Us" %}
             </a>
@@ -209,7 +210,7 @@
 </div>
 
 {% if user.is_authenticated %}
-<div data-mobile-menu-target="notifications"
+<div data-navbar-target="notifications"
      class="fixed inset-0 bg-background text-foreground flex-col"
      style="z-index: 60; display: none;"
      data-controller="notifications"
@@ -217,7 +218,7 @@
      data-notifications-unread-count-value="{{ unread_notifications_count|default:0 }}">
     <div class="flex items-center justify-between h-16 px-4 border-b border-border">
         <h2 class="text-lg font-semibold">{% trans "Notifications" %}</h2>
-        <button data-action="click->mobile-menu#closeNotifications" class="p-2 rounded-lg hover:bg-muted transition-colors touch-manipulation active:scale-95" aria-label="Close notifications">
+        <button data-action="click->navbar#closeNotifications" class="p-2 rounded-lg hover:bg-muted transition-colors touch-manipulation active:scale-95" aria-label="Close notifications">
             <i data-lucide="x" class="h-6 w-6" aria-hidden="true"></i>
         </button>
     </div>
@@ -237,3 +238,4 @@
 </div>
 {% endif %}
 
+</div>

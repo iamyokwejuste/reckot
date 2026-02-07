@@ -120,7 +120,7 @@ def resend_otp_task(user_id: int, otp_type: str = "EMAIL"):
         otp = OTPVerification.create_for_user(
             user=user, otp_type=otp_type, expiry_minutes=10
         )
-        send_otp_verification_task.enqueue(user_id, otp.id)
+        send_otp_verification_task.delay(user_id, otp.id)
         logger.info(f"New OTP created and sent to user {user_id}")
     except User.DoesNotExist:
         logger.error(f"User {user_id} not found")

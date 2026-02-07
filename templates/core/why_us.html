@@ -126,23 +126,15 @@
                 <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">{% trans "Pricing Calculator" %}</h2>
                 <p class="text-muted-foreground mt-4 text-lg">{% trans "See exactly what you'll earn. No surprises, no hidden fees." %}</p>
 
-                <div class="mt-8 card p-6" x-data="{
-                    ticketPrice: 5000,
-                    ticketCount: 100,
-                    get grossRevenue() { return (this.ticketPrice || 0) * (this.ticketCount || 0) },
-                    get reckotFee() { return Math.round(this.grossRevenue * {{ PLATFORM_FEE_PERCENTAGE }} / 100) },
-                    get netRevenue() { return this.grossRevenue - this.reckotFee },
-                    formatCurrency(amount) { return new Intl.NumberFormat('fr-FR').format(amount) + ' XAF' },
-                    reset() { this.ticketPrice = 5000; this.ticketCount = 100; }
-                }" x-init="reset()">
+                <div class="mt-8 card p-6" data-controller="pricing-calculator" data-pricing-calculator-platform-fee-value="{{ PLATFORM_FEE_PERCENTAGE }}">
                     <div class="space-y-6">
                         <div>
                             <label class="block text-sm font-medium mb-2">{% trans "Ticket Price (XAF)" %}</label>
-                            <input type="number" x-model.number="ticketPrice" placeholder="5000" class="input" min="0">
+                            <input type="number" data-pricing-calculator-target="ticketPrice" data-action="input->pricing-calculator#updateCalculations" value="5000" placeholder="5000" class="input" min="0">
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-2">{% trans "Number of Tickets" %}</label>
-                            <input type="number" x-model.number="ticketCount" placeholder="100" class="input" min="0">
+                            <input type="number" data-pricing-calculator-target="ticketCount" data-action="input->pricing-calculator#updateCalculations" value="100" placeholder="100" class="input" min="0">
                         </div>
 
                         <div class="h-px bg-border"></div>
@@ -150,16 +142,16 @@
                         <div class="space-y-3">
                             <div class="flex justify-between text-sm">
                                 <span class="text-muted-foreground">{% trans "Gross Revenue" %}</span>
-                                <span class="font-medium" x-text="formatCurrency(grossRevenue)"></span>
+                                <span class="font-medium" data-pricing-calculator-target="grossRevenue">500,000 XAF</span>
                             </div>
                             <div class="flex justify-between text-sm">
                                 <span class="text-muted-foreground">{% blocktrans with fee=PLATFORM_FEE_PERCENTAGE %}Reckot Fee ({{ fee }}%){% endblocktrans %}</span>
-                                <span class="font-medium text-red-500" x-text="'-' + formatCurrency(reckotFee)"></span>
+                                <span class="font-medium text-red-500" data-pricing-calculator-target="reckotFee">-35,000 XAF</span>
                             </div>
                             <div class="h-px bg-border"></div>
                             <div class="flex justify-between">
                                 <span class="font-semibold">{% trans "You Receive" %}</span>
-                                <span class="text-2xl font-bold text-emerald-600" x-text="formatCurrency(netRevenue)"></span>
+                                <span class="text-2xl font-bold text-emerald-600" data-pricing-calculator-target="netRevenue">465,000 XAF</span>
                             </div>
                         </div>
                     </div>

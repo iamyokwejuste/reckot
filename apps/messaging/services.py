@@ -77,14 +77,14 @@ def send_campaign_message(delivery):
 
         if campaign.message_type == MessageTemplate.Type.EMAIL:
             subject = personalize_message(campaign.subject, ticket)
-            send_email_task.enqueue(
+            send_email_task.delay(
                 to_email=delivery.recipient_email,
                 subject=subject,
                 template_name="emails/campaign_message.html",
                 context={"body": body, "tracking_id": str(delivery.tracking_id)},
             )
         else:
-            send_sms_task.enqueue(
+            send_sms_task.delay(
                 phone_number=delivery.recipient_phone,
                 template_name="sms/campaign_message.txt",
                 context={"body": body},

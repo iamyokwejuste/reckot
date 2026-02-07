@@ -95,6 +95,7 @@ TEMPLATES = [
                 "apps.core.utils.context_processors.platform_settings",
                 "apps.core.utils.context_processors.unread_notifications",
                 "apps.core.utils.context_processors.user_currency",
+                "apps.core.context_processors.settings.cache_version",
             ],
             "builtins": [
                 "slippers.templatetags.slippers",
@@ -255,6 +256,8 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+CACHE_VERSION = "1770489490"
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"

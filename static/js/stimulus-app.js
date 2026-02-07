@@ -15,14 +15,12 @@ async function registerController(name, path) {
             return;
         }
         window.Stimulus.register(name, module.default);
-    } catch (err) {
-        // Controller registration failed
-    }
+    } catch (err) {}
 }
 
 waitForStimulus(async () => {
     const baseUrl = '/static/js/controllers/';
-    const version = '1770458333';
+    const version = '1770489490';
 
     const controllers = [
         { name: 'event-form', path: 'event-form_controller.js' },
@@ -37,13 +35,16 @@ waitForStimulus(async () => {
         { name: 'animate', path: 'animate_controller.js' },
         { name: 'accordion', path: 'accordion_controller.js' },
         { name: 'theme', path: 'theme_controller.js' },
+        { name: 'navbar', path: 'navbar_controller.js' },
+        { name: 'logo', path: 'logo_controller.js' },
         { name: 'login', path: 'login_controller.js' },
+        { name: 'signup', path: 'signup_controller.js' },
         { name: 'notifications', path: 'notifications_controller.js' },
-        { name: 'mobile-menu', path: 'mobile-menu_controller.js' },
         { name: 'loader', path: 'loader_controller.js' },
         { name: 'clipboard', path: 'clipboard_controller.js' },
         { name: 'confirmation', path: 'confirmation_controller.js' },
         { name: 'logout', path: 'logout_controller.js' },
+        { name: 'pricing-calculator', path: 'pricing-calculator_controller.js' },
     ];
 
     await Promise.all(
@@ -57,8 +58,6 @@ document.addEventListener('htmx:afterSwap', () => {
     if (typeof lucide !== 'undefined') {
         try {
             lucide.createIcons();
-        } catch (e) {
-            // Icon creation failed
-        }
+        } catch (e) {}
     }
 });

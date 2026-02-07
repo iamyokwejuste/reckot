@@ -66,7 +66,7 @@ class CampaignCreateView(LoginRequiredMixin, View):
 
         if request.POST.get("send_now"):
             prepare_campaign(campaign)
-            send_campaign_task.enqueue(campaign.id)
+            send_campaign_task.delay(campaign.id)
             messages.success(request, _("Campaign is being sent."))
         else:
             messages.success(request, _("Campaign saved as draft."))
@@ -106,7 +106,7 @@ class CampaignSendView(LoginRequiredMixin, View):
 
         if campaign.status == MessageCampaign.Status.DRAFT:
             prepare_campaign(campaign)
-            send_campaign_task.enqueue(campaign.id)
+            send_campaign_task.delay(campaign.id)
             messages.success(request, _("Campaign is being sent."))
         else:
             messages.error(request, _("Campaign cannot be sent."))

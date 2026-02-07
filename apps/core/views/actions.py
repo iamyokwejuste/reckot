@@ -206,7 +206,7 @@ class ResendOTPView(LoginRequiredMixin, View):
             )
 
         try:
-            resend_otp_task.enqueue(request.user.id, OTPVerification.Type.EMAIL)
+            resend_otp_task.delay(request.user.id, OTPVerification.Type.EMAIL)
         except Exception as e:
             import logging
 
@@ -288,10 +288,10 @@ class PhoneLoginRequestView(View):
         request.session["login_phone"] = phone
         try:
             if settings.TWILIO_VERIFY_SERVICE_SID:
-                send_otp_sms_task.enqueue(phone)
+                send_otp_sms_task.delay(phone)
             else:
                 otp = OTPVerification.create_for_user(user, OTPVerification.Type.PHONE)
-                send_otp_sms_task.enqueue(phone, otp.code)
+                send_otp_sms_task.delay(phone, otp.code)
         except Exception as e:
             import logging
 
@@ -393,10 +393,10 @@ class PhoneSignupRequestView(View):
         request.session["signup_phone"] = phone
         try:
             if settings.TWILIO_VERIFY_SERVICE_SID:
-                send_otp_sms_task.enqueue(phone)
+                send_otp_sms_task.delay(phone)
             else:
                 request.session["signup_otp"] = OTPVerification.generate_code()
-                send_otp_sms_task.enqueue(phone, request.session["signup_otp"])
+                send_otp_sms_task.delay(phone, request.session["signup_otp"])
         except Exception as e:
             import logging
 

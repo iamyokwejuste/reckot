@@ -16,7 +16,7 @@
     import { Application } from "https://unpkg.com/@hotwired/stimulus@3.2.2/dist/stimulus.js"
     window.Stimulus = Application.start()
 </script>
-<script src="{% static 'js/stimulus-app.js' %}?v=1770458333"></script>
+<script src="{% static 'js/stimulus-app.js' %}?v={{ CACHE_VERSION }}"></script>
 <script defer src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js" onload="lucide.createIcons()"></script>
 <script>
 document.addEventListener('stimulus:ready', function() {
@@ -65,15 +65,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
 {% block branding %}
 <h1 id="site-name">
-    <a href="{% url 'admin:index' %}" class="flex items-center gap-2">
-        <img src="{% static 'images/logo/reckto_logo_dark_mode.png' %}"
-             alt="Reckot"
-             class="h-8 w-auto dark:hidden"
-             data-theme-target="logo">
+    <a href="{% url 'admin:index' %}" class="flex items-center gap-2" data-controller="logo">
         <img src="{% static 'images/logo/reckto_logo_light_mode.png' %}"
              alt="Reckot"
-             class="h-8 w-auto hidden dark:block"
-             data-theme-target="logo">
+             class="h-8 w-auto"
+             data-logo-target="dark">
+        <img src="{% static 'images/logo/reckto_logo_dark_mode.png' %}"
+             alt="Reckot"
+             class="h-8 w-auto"
+             data-logo-target="light"
+             style="display: none;">
     </a>
 </h1>
 {% endblock %}
