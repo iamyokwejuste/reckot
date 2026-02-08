@@ -35,8 +35,8 @@ COPY docker/entrypoint.sh /app/entrypoint.sh
 COPY --chown=appuser:appuser . .
 
 RUN chmod +x /app/entrypoint.sh && \
-    mkdir -p /app/media/{org_logos,event_covers,event_heroes,event_logos,flyers} /app/staticfiles && \
-    chown -R appuser:appuser /app/media /app/staticfiles
+    mkdir -p /app/staticfiles && \
+    chown -R appuser:appuser /app/staticfiles
 
 ENV DJANGO_SETTINGS_MODULE=reckot.settings \
     SECRET_KEY=build-time-only \

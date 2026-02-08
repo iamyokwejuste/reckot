@@ -284,7 +284,7 @@ if not DEBUG:
             "BACKEND": "reckot.storage.NonStrictCompressedManifestStaticFilesStorage",
         },
     }
-    MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/"
+    MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/" if AWS_S3_ENDPOINT_URL else "/media/"
 else:
     STORAGES = {
         "default": {

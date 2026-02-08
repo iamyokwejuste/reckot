@@ -116,7 +116,7 @@ services:
   celery_worker:
     <<: *app-build
     stop_grace_period: 300s
-    command: uv run celery -A reckot worker --loglevel=info --concurrency=4 -Q default,emails,payments,exports
+    command: celery -A reckot worker --loglevel=info --concurrency=4 -Q default,emails,payments,exports
     environment:
       <<: [*core-env, *db-env, *redis-env, *storage-env, *email-env, *payment-env, *third-party-env]
       RUN_MIGRATIONS: "false"
@@ -124,7 +124,7 @@ services:
   celery_beat:
     <<: *app-build
     stop_grace_period: 60s
-    command: uv run celery -A reckot beat --loglevel=info --schedule=/tmp/celerybeat-schedule
+    command: celery -A reckot beat --loglevel=info --schedule=/tmp/celerybeat-schedule
     environment:
       <<: [*core-env, *db-env, *redis-env, *storage-env, *email-env, *payment-env, *third-party-env]
       RUN_MIGRATIONS: "false"
