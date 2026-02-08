@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+to_lower() { echo "$1" | tr '[:upper:]' '[:lower:]'; }
+
 DB_ENGINE_VALUE="${DB_ENGINE:-django.db.backends.sqlite3}"
 if [ "$DB_ENGINE_VALUE" = "django.db.backends.postgresql" ]; then
     echo "==> Waiting for database..."
@@ -16,7 +18,7 @@ if [ "$DB_ENGINE_VALUE" = "django.db.backends.postgresql" ]; then
     done
 fi
 
-if [ "$INIT_READONLY_USERS" = "true" ]; then
+if [ "$(to_lower "$INIT_READONLY_USERS")" = "true" ]; then
     echo "==> Initializing readonly database users..."
     PGPASSWORD="$DB_PASSWORD" psql \
         -h "${DB_HOST:-db}" -p "${DB_PORT:-5432}" \
@@ -30,14 +32,14 @@ if [ "$INIT_READONLY_USERS" = "true" ]; then
     || echo "WARNING: Readonly user init failed (continuing)"
 fi
 
-if [ "$RUN_MIGRATIONS" = "true" ]; then
+if [ "$(to_lower "$RUN_MIGRATIONS")" = "true" ]; then
     echo "==> Running migrations..."
     if ! su -s /bin/bash appuser -c "python manage.py migrate --noinput"; then
         echo "Migrations failed (continuing to start app)"
     fi
 fi
 
-if [ "$COLLECT_STATIC" = "true" ]; then
+if [ "$(to_lower "$COLLECT_STATIC")" = "true" ]; then
     echo "==> Collecting static files..."
     su -s /bin/bash appuser -c "python manage.py collectstatic --noinput"
 fi
