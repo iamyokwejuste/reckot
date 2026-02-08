@@ -1,15 +1,15 @@
 DO $$
 BEGIN
     IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'reckot_ai_public_readonly') THEN
-        CREATE USER reckot_ai_public_readonly WITH PASSWORD :'AI_PUBLIC_READONLY_PASSWORD';
+        EXECUTE 'CREATE USER reckot_ai_public_readonly WITH PASSWORD ' || quote_literal(:'AI_PUBLIC_READONLY_PASSWORD');
     END IF;
 
     IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'reckot_ai_auth_readonly') THEN
-        CREATE USER reckot_ai_auth_readonly WITH PASSWORD :'AI_AUTH_READONLY_PASSWORD';
+        EXECUTE 'CREATE USER reckot_ai_auth_readonly WITH PASSWORD ' || quote_literal(:'AI_AUTH_READONLY_PASSWORD');
     END IF;
 
     IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'reckot_ai_org_readonly') THEN
-        CREATE USER reckot_ai_org_readonly WITH PASSWORD :'AI_ORG_READONLY_PASSWORD';
+        EXECUTE 'CREATE USER reckot_ai_org_readonly WITH PASSWORD ' || quote_literal(:'AI_ORG_READONLY_PASSWORD');
     END IF;
 END
 $$;

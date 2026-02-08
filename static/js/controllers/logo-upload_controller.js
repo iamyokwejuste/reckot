@@ -32,14 +32,6 @@ export default class extends Controller {
       event.target.files = dataTransfer.files;
 
       this.showPreview(compressed);
-
-      if (this.hasInfoTarget) {
-        const reduction = ((1 - compressed.size / file.size) * 100).toFixed(0);
-        const originalMb = (file.size / 1024 / 1024).toFixed(2);
-        const compressedMb = (compressed.size / 1024 / 1024).toFixed(2);
-        this.infoTarget.textContent = `${originalMb}MB → ${compressedMb}MB (${reduction}% smaller)`;
-        this.infoTarget.classList.remove("hidden");
-      }
     } catch (error) {
       console.error("Image compression failed:", error);
     }

@@ -28,10 +28,6 @@ export default class extends Controller {
       if (this.hasPreviewTarget) {
         this.showPreview(compressed);
       }
-
-      if (this.hasInfoTarget) {
-        this.showInfo(file.size, compressed.size);
-      }
     } catch (error) {
       console.error("Image compression failed:", error);
     }
@@ -87,14 +83,5 @@ export default class extends Controller {
     const url = URL.createObjectURL(file);
     this.previewTarget.src = url;
     this.previewTarget.classList.remove("hidden");
-  }
-
-  showInfo(originalSize, compressedSize) {
-    const reduction = ((1 - compressedSize / originalSize) * 100).toFixed(0);
-    const originalMb = (originalSize / 1024 / 1024).toFixed(2);
-    const compressedMb = (compressedSize / 1024 / 1024).toFixed(2);
-
-    this.infoTarget.textContent = `Compressed: ${originalMb}MB → ${compressedMb}MB (${reduction}% smaller)`;
-    this.infoTarget.classList.remove("hidden");
   }
 }

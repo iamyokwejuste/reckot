@@ -57,12 +57,13 @@ export default class extends Controller {
     async fetchNotifications() {
         this.loadingValue = true;
         try {
-            const res = await fetch('/app/api/notifications/');
+            const res = await fetch('/api/notifications/');
             const data = await res.json();
             this.notifications = data.notifications || [];
             this.unreadCountValue = data.unread_count || 0;
             this.renderNotifications();
         } catch (e) {
+            console.error('[Notifications] Failed to fetch:', e);
         }
         this.loadingValue = false;
     }
@@ -70,7 +71,7 @@ export default class extends Controller {
     async markAsRead(event) {
         const id = event.params.id;
         try {
-            await fetch(`/app/api/notifications/${id}/read/`, {
+            await fetch(`/api/notifications/${id}/read/`, {
                 method: 'POST',
                 headers: { 'X-CSRFToken': this.csrfTokenValue }
             });
@@ -81,12 +82,13 @@ export default class extends Controller {
                 this.renderNotifications();
             }
         } catch (e) {
+            console.error('[Notifications] Failed to mark as read:', e);
         }
     }
 
     async markAllAsRead() {
         try {
-            await fetch('/app/api/notifications/read-all/', {
+            await fetch('/api/notifications/read-all/', {
                 method: 'POST',
                 headers: { 'X-CSRFToken': this.csrfTokenValue }
             });
@@ -94,6 +96,7 @@ export default class extends Controller {
             this.unreadCountValue = 0;
             this.renderNotifications();
         } catch (e) {
+            console.error('[Notifications] Failed to mark all as read:', e);
         }
     }
 

@@ -11,6 +11,11 @@ urlpatterns = [
         actions.AcceptInvitationView.as_view(),
         name="accept_invitation",
     ),
+    path(
+        "invite-template/",
+        actions.DownloadInviteTemplateView.as_view(),
+        name="invite_template",
+    ),
     path("<slug:slug>/", actions.OrganizationDetailView.as_view(), name="detail"),
     path("<slug:slug>/edit/", actions.OrganizationEditView.as_view(), name="edit"),
     path(
@@ -27,11 +32,6 @@ urlpatterns = [
         "<slug:slug>/members/bulk-invite/",
         actions.BulkInviteView.as_view(),
         name="bulk_invite",
-    ),
-    path(
-        "invite-template/",
-        actions.DownloadInviteTemplateView.as_view(),
-        name="invite_template",
     ),
     path(
         "<slug:slug>/members/<int:user_id>/role/",
