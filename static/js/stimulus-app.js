@@ -54,6 +54,7 @@ waitForStimulus(async () => {
         { name: 'motion', path: 'motion_controller.js' },
         { name: 'coupon-form', path: 'coupon-form_controller.js' },
         { name: 'checkin-offline', path: 'checkin-offline_controller.js' },
+        { name: 'withdrawal', path: 'withdrawal_controller.js' },
     ];
 
     await Promise.all(

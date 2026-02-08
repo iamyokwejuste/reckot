@@ -970,7 +970,7 @@ class WithdrawalRequestView(LoginRequiredMixin, View):
             gateway = CampayGateway(gateway_credentials)
             gateway_fee = Decimal("0")
 
-            platform_commission_percent = Decimal("7")
+            platform_commission_percent = getattr(settings, "RECKOT_PLATFORM_FEE_PERCENTAGE", Decimal("7"))
             platform_commission = (
                 amount * platform_commission_percent / Decimal("100")
             ).quantize(Decimal("1"))
@@ -1014,13 +1014,33 @@ class WithdrawalRequestView(LoginRequiredMixin, View):
                 )
             else:
                 withdrawal.mark_failed(result.message)
+                user_message = self._friendly_gateway_error(result.message)
                 return JsonResponse(
-                    {"success": False, "error": result.message}, status=400
+                    {"success": False, "error": user_message}, status=400
                 )
 
         except Exception as e:
             logger.error(f"Withdrawal request failed: {str(e)}")
-            return JsonResponse({"success": False, "error": str(e)}, status=500)
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": "An unexpected error occurred. Please try again later.",
+                },
+                status=500,
+            )
+
+    GATEWAY_ERROR_MAP = {
+        "insufficient balance": "Withdrawal is temporarily unavailable. Please try again later or contact support.",
+        "token error": "Payment service is temporarily unavailable. Please try again later.",
+        "disburse error": "Could not process your withdrawal. Please try again later.",
+    }
+
+    def _friendly_gateway_error(self, raw_message):
+        lower = (raw_message or "").lower().strip()
+        for key, friendly in self.GATEWAY_ERROR_MAP.items():
+            if key in lower:
+                return friendly
+        return "Could not process your withdrawal. Please try again later."
 
 
 class WithdrawalListView(LoginRequiredMixin, View):
