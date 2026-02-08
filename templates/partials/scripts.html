@@ -5,6 +5,6 @@
 {% endif %}
 
 {% if is_dashboard %}
-<script defer src="{% static 'js/offline.js' %}"></script>
+<div data-controller="offline" class="hidden"></div>
 {% endif %}
 <script defer src="{% static 'js/reckot-app.js' %}"></script>

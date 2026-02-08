@@ -122,9 +122,11 @@
                             <p class="text-sm font-medium">{% trans "Click to upload or generate with AI" %}</p>
                             <p class="text-xs text-muted-foreground mt-1">{% trans "PNG, JPG. Recommended: 1200x630px (16:9)" %}</p>
                         </div>
-                        <img data-event-form-target="coverPreview" class="hidden max-h-40 rounded-lg object-cover mx-auto">
+                        <img data-event-form-target="coverPreview"
+                             class="hidden max-h-40 rounded-lg object-cover mx-auto">
                     </div>
-                    <input type="file" name="cover_image" accept="image/*" data-cover-input
+                    <input type="file" name="cover_image" accept="image/*"
+                           data-cover-input
                            data-action="change->event-form#handleCoverUpload" class="hidden">
                 </div>
             </div>
@@ -403,7 +405,6 @@
 {% block extra_scripts %}
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="{% static 'js/richtext.js' %}"></script>
-<script src="{% static 'js/image-compress.js' %}"></script>
 <script src="{% static 'js/ai-assistant.js' %}"></script>
 <script src="{% static 'js/event-form-datepicker.js' %}"></script>
 <script src="{% static 'js/event-form-create.js' %}"></script>

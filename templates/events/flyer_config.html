@@ -171,7 +171,9 @@
             </div>
 
             <div class="space-y-4">
-                <div data-controller="toggle">
+                <div data-controller="logo-upload"
+                     data-logo-upload-max-width-value="1080"
+                     data-logo-upload-max-height-value="1080">
                     <label class="block text-sm font-medium mb-2">
                         {% trans "Template Image" %}
                         {% if not config or config and not config.template_image %}<span class="text-red-500">*</span> <span class="text-xs text-muted-foreground">({% trans "Required" %})</span>{% endif %}
@@ -185,12 +187,11 @@
                     {% if config and config.template_image %}
                     <input type="hidden" name="existing_template" value="1">
                     {% endif %}
-                    <div class="border-2 border-dashed border-border rounded-lg p-6 text-center transition-colors"
-                         data-toggle-target="dropzone">
-                        <input type="file" name="template_image" accept="image/*" data-toggle-target="fileInput"
-                               class="hidden"
-                               data-action="change->toggle#handleFileUpload">
-                        <div data-toggle-target="emptyState">
+                    <div class="border-2 border-dashed border-border rounded-lg p-6 text-center transition-colors">
+                        <input type="file" name="template_image" accept="image/*"
+                               data-logo-upload-target="input"
+                               class="hidden">
+                        <div class="{% if config and config.template_image %}hidden{% endif %}">
                             <div class="w-12 h-12 mx-auto rounded-full bg-muted flex items-center justify-center">
                                 <i data-lucide="image-plus" class="w-6 h-6 text-muted-foreground"></i>
                             </div>
@@ -198,17 +199,18 @@
                                 <p class="text-sm font-medium">{% trans "Drop your template image here" %}</p>
                                 <p class="text-xs text-muted-foreground mt-1">{% trans "or click to browse" %}</p>
                             </div>
-                            {% #button type="button" variant="outline" size="sm" attrs='data-action="click->toggle#triggerFileInput"' %}
+                            {% #button type="button" variant="outline" size="sm" attrs='data-action="click->logo-upload#openFileInput"' %}
                                 {% trans "Choose File" %}
                             {% /button %}
                             <p class="text-xs text-muted-foreground">{% trans "Recommended: 1080x1080 pixels" %}</p>
                         </div>
-                        <div data-toggle-target="previewState" class="hidden space-y-3">
-                            <img data-toggle-target="preview" class="w-24 h-24 mx-auto object-cover rounded-lg border border-border"
+                        <div class="{% if not config or not config.template_image %}hidden{% endif %} space-y-3">
+                            <img data-logo-upload-target="preview" class="w-24 h-24 mx-auto object-cover rounded-lg border border-border"
                                  {% if config and config.template_image %}src="{{ config.template_image.url }}"{% endif %}>
-                            {% #button type="button" variant="outline" size="sm" attrs='data-action="click->toggle#triggerFileInput"' %}
+                            {% #button type="button" variant="outline" size="sm" attrs='data-action="click->logo-upload#openFileInput"' %}
                                 {% trans "Change Image" %}
                             {% /button %}
+                            <p data-logo-upload-target="info" class="hidden text-xs text-success"></p>
                         </div>
                     </div>
                 </div>

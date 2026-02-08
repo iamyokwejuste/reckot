@@ -14,7 +14,7 @@ class RateLimitMiddleware:
         if not self.enabled:
             return self.get_response(request)
 
-        exempt_paths = ["/admin/", "/static/", "/health/"]
+        exempt_paths = ["/admin/", "/static/", "/health/", "/i18n/"]
         if any(request.path.startswith(path) for path in exempt_paths):
             return self.get_response(request)
 

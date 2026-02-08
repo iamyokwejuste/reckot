@@ -36,20 +36,73 @@ export default class extends Controller {
 
     async handleCoverUpload(event) {
         const file = event.target.files[0];
-        if (!file) return;
+        if (!file || !file.type.startsWith('image/')) return;
 
-        if (window.ImageCompressor) {
-            const compressed = await window.ImageCompressor.processFileInput(event.target);
+        try {
+            const compressed = await this.compressImage(file);
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(compressed);
+            event.target.files = dataTransfer.files;
+
             if (this.hasCoverPreviewTarget) {
                 this.coverPreviewTarget.src = URL.createObjectURL(compressed);
                 this.coverPreviewTarget.classList.remove('hidden');
             }
-        } else if (file) {
+        } catch (error) {
+            console.error('Image compression failed:', error);
             if (this.hasCoverPreviewTarget) {
                 this.coverPreviewTarget.src = URL.createObjectURL(file);
                 this.coverPreviewTarget.classList.remove('hidden');
             }
         }
+    }
+
+    async compressImage(file, maxWidth = 1200, maxHeight = 630, quality = 0.85) {
+        const img = await this.loadImage(file);
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        let { width, height } = img;
+        const aspectRatio = width / height;
+
+        if (width > maxWidth) {
+            width = maxWidth;
+            height = width / aspectRatio;
+        }
+
+        if (height > maxHeight) {
+            height = maxHeight;
+            width = height * aspectRatio;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const blob = await new Promise(resolve => {
+            canvas.toBlob(resolve, 'image/jpeg', quality);
+        });
+
+        return new File([blob], file.name.replace(/\.\w+$/, '.jpg'), {
+            type: 'image/jpeg'
+        });
+    }
+
+    loadImage(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = e.target.result;
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
     }
 
     updateEventType(event) {

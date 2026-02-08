@@ -28,9 +28,9 @@
 
 {% block header_actions %}
 <div class="flex items-center gap-2">
-    <div id="offline-mode-indicator" class="hidden flex items-center gap-2">
-        {% #badge id="offline-status-badge" variant="warning" %}Offline{% /badge %}
-        <span id="pending-sync-count" class="text-xs text-muted-foreground hidden"></span>
+    <div data-checkin-offline-sync-target="offlineModeIndicator" class="hidden flex items-center gap-2">
+        {% #badge data-checkin-offline-sync-target="statusBadge" variant="warning" %}Offline{% /badge %}
+        <span data-checkin-offline-sync-target="pendingCount" class="text-xs text-muted-foreground hidden"></span>
     </div>
     <a href="{% url 'checkin:dashboard' org_slug=event.organization.slug event_slug=event.slug %}">
         {% #button variant="outline" size="sm" %}
@@ -42,7 +42,9 @@
 {% endblock %}
 
 {% block content %}
-<div data-controller="checkin-offline" data-checkin-offline-event-slug-value="{{ event.slug }}" data-checkin-offline-org-slug-value="{{ event.organization.slug }}"></div>
+<div data-controller="checkin-offline-sync"
+     data-checkin-offline-sync-event-slug-value="{{ event.slug }}"
+     data-checkin-offline-sync-org-slug-value="{{ event.organization.slug }}"></div>
 <div id="notification-container" class="fixed top-4 right-4 z-50 space-y-2 w-80"></div>
 
 <div class="space-y-6">
@@ -55,10 +57,13 @@
                 </div>
                 <div class="flex items-center gap-4">
                     <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" id="offline-mode-toggle" class="toggle">
+                        <input type="checkbox"
+                               data-checkin-offline-sync-target="offlineModeToggle"
+                               data-action="change->checkin-offline-sync#toggleOfflineMode"
+                               class="toggle">
                         <span class="text-sm">{% trans "Enable" %}</span>
                     </label>
-                    {% #button id="sync-now-btn" variant="outline" size="sm" %}
+                    {% #button data-action="click->checkin-offline-sync#syncNow" variant="outline" size="sm" %}
                         <i data-lucide="refresh-cw" class="mr-2 h-4 w-4"></i>
                         {% trans "Sync Data" %}
                     {% /button %}
@@ -136,7 +141,4 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/offline-sync.js' %}"></script>
-<script src="{% static 'js/checkin-offline.js' %}"></script>
-
 {% endblock %}

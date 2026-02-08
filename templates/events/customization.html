@@ -158,32 +158,80 @@
                     {% trans "Images" %}
                 </h2>
 
-                <div>
+                <div data-controller="logo-upload"
+                     data-logo-upload-max-width-value="400"
+                     data-logo-upload-max-height-value="400">
+                    <input type="hidden" name="remove_logo" data-logo-upload-target="removeFlag" value="false">
                     <label class="block text-sm font-medium mb-2">{% trans "Event Logo" %}</label>
                     <div class="flex items-center gap-4">
-                        {% if customization.logo %}
-                        <img src="{{ customization.logo.url }}" alt="" class="h-16 w-16 rounded-lg object-cover border border-border">
-                        {% else %}
-                        <div class="h-16 w-16 rounded-lg bg-muted flex items-center justify-center">
-                            <i data-lucide="image" class="w-6 h-6 text-muted-foreground"></i>
+                        <div class="relative h-16 w-16 rounded-lg bg-muted flex items-center justify-center overflow-hidden cursor-pointer group"
+                             data-action="click->logo-upload#openFileInput">
+                            <div data-logo-upload-target="noLogo" class="{% if customization.logo %}hidden{% endif %}">
+                                <i data-lucide="image" class="w-6 h-6 text-muted-foreground"></i>
+                            </div>
+                            <img data-logo-upload-target="preview" src="{% if customization.logo %}{{ customization.logo.url }}{% endif %}"
+                                 class="h-full w-full object-cover {% if not customization.logo %}hidden{% endif %}">
+                            <div data-logo-upload-target="overlay"
+                                 class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity {% if not customization.logo %}hidden{% endif %}">
+                                <i data-lucide="pencil" class="h-4 w-4 text-white"></i>
+                            </div>
                         </div>
-                        {% endif %}
-                        <input type="file" name="logo" accept="image/*" class="text-sm">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <button type="button" data-action="click->logo-upload#openFileInput"
+                                        class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring border border-border bg-background hover:bg-muted h-8 px-3">
+                                    <span data-logo-upload-target="uploadButtonText">{% if customization.logo %}{% trans "Change" %}{% else %}{% trans "Upload" %}{% endif %}</span>
+                                </button>
+                                <button type="button" data-action="click->logo-upload#removeLogo"
+                                        data-logo-upload-target="removeButton"
+                                        class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring border border-border bg-background hover:bg-red-500/10 h-8 px-3 text-red-500 {% if not customization.logo %}hidden{% endif %}">
+                                    {% trans "Remove" %}
+                                </button>
+                            </div>
+                            <p class="text-xs text-muted-foreground mt-1">{% trans "PNG, JPG up to 2MB" %}</p>
+                            <p data-logo-upload-target="info" class="hidden text-xs text-success mt-1"></p>
+                        </div>
                     </div>
+                    <input type="file" name="logo" accept="image/*"
+                           data-logo-upload-target="input" class="hidden">
                 </div>
 
-                <div>
+                <div data-controller="logo-upload"
+                     data-logo-upload-max-width-value="1600"
+                     data-logo-upload-max-height-value="900">
+                    <input type="hidden" name="remove_hero_image" data-logo-upload-target="removeFlag" value="false">
                     <label class="block text-sm font-medium mb-2">{% trans "Hero Image" %}</label>
                     <div class="flex items-center gap-4">
-                        {% if customization.hero_image %}
-                        <img src="{{ customization.hero_image.url }}" alt="" class="h-16 w-24 rounded-lg object-cover border border-border">
-                        {% else %}
-                        <div class="h-16 w-24 rounded-lg bg-muted flex items-center justify-center">
-                            <i data-lucide="image" class="w-6 h-6 text-muted-foreground"></i>
+                        <div class="relative h-16 w-24 rounded-lg bg-muted flex items-center justify-center overflow-hidden cursor-pointer group"
+                             data-action="click->logo-upload#openFileInput">
+                            <div data-logo-upload-target="noLogo" class="{% if customization.hero_image %}hidden{% endif %}">
+                                <i data-lucide="image" class="w-6 h-6 text-muted-foreground"></i>
+                            </div>
+                            <img data-logo-upload-target="preview" src="{% if customization.hero_image %}{{ customization.hero_image.url }}{% endif %}"
+                                 class="h-full w-full object-cover {% if not customization.hero_image %}hidden{% endif %}">
+                            <div data-logo-upload-target="overlay"
+                                 class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity {% if not customization.hero_image %}hidden{% endif %}">
+                                <i data-lucide="pencil" class="h-4 w-4 text-white"></i>
+                            </div>
                         </div>
-                        {% endif %}
-                        <input type="file" name="hero_image" accept="image/*" class="text-sm">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <button type="button" data-action="click->logo-upload#openFileInput"
+                                        class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring border border-border bg-background hover:bg-muted h-8 px-3">
+                                    <span data-logo-upload-target="uploadButtonText">{% if customization.hero_image %}{% trans "Change" %}{% else %}{% trans "Upload" %}{% endif %}</span>
+                                </button>
+                                <button type="button" data-action="click->logo-upload#removeLogo"
+                                        data-logo-upload-target="removeButton"
+                                        class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring border border-border bg-background hover:bg-red-500/10 h-8 px-3 text-red-500 {% if not customization.hero_image %}hidden{% endif %}">
+                                    {% trans "Remove" %}
+                                </button>
+                            </div>
+                            <p class="text-xs text-muted-foreground mt-1">{% trans "PNG, JPG up to 2MB (16:9 ratio recommended)" %}</p>
+                            <p data-logo-upload-target="info" class="hidden text-xs text-success mt-1"></p>
+                        </div>
                     </div>
+                    <input type="file" name="hero_image" accept="image/*"
+                           data-logo-upload-target="input" class="hidden">
                 </div>
             </div>
         </div>

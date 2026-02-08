@@ -1,4 +1,4 @@
-if (window.ReckotOffline) { /* already loaded */ } else {
+if (window.ReckotOffline) {} else {
 
 const ReckotOffline = {
     DB_NAME: 'reckot_offline',
