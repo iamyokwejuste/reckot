@@ -1,23 +1,31 @@
-x-common-env: &common-env
-  SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+x-core-env: &core-env
+  SECRET_KEY: ${SECRET_KEY}
   DEBUG: ${DEBUG:-False}
-  TIME_ZONE: ${TIME_ZONE:-Africa/Douala}
-
-x-db-env: &db-env
-  DB_ENGINE: django.db.backends.postgresql
+  DB_ENGINE: ${DB_ENGINE:-django.db.backends.postgresql}
   DB_NAME: ${DB_NAME:-reckot}
   DB_USER: ${DB_USER:-reckot}
-  DB_PASSWORD: ${DB_PASSWORD:-changeme}
-  DB_HOST: db
-  DB_PORT: 5432
+  DB_PASSWORD: ${DB_PASSWORD}
+  DB_HOST: ${DB_HOST}
+  DB_PORT: ${DB_PORT:-5432}
+
+x-db-env: &db-env
   AI_PUBLIC_READONLY_PASSWORD: ${AI_PUBLIC_READONLY_PASSWORD:-readonly_public_pass}
   AI_AUTH_READONLY_PASSWORD: ${AI_AUTH_READONLY_PASSWORD:-readonly_auth_pass}
   AI_ORG_READONLY_PASSWORD: ${AI_ORG_READONLY_PASSWORD:-readonly_org_pass}
 
 x-redis-env: &redis-env
-  REDIS_URL: redis://redis:6379/0
-  CELERY_BROKER_URL: redis://redis:6379/0
-  CELERY_RESULT_BACKEND: redis://redis:6379/0
+  REDIS_URL: ${REDIS_URL}
+  CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+  CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+
+x-storage-env: &storage-env
+  AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+  AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+  AWS_STORAGE_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME:-}
+  AWS_S3_ENDPOINT_URL: ${AWS_S3_ENDPOINT_URL:-}
+  AWS_S3_REGION_NAME: ${AWS_S3_REGION_NAME:-}
+  AWS_S3_USE_SSL: ${AWS_S3_USE_SSL:-True}
+  AWS_S3_ADDRESSING_STYLE: ${AWS_S3_ADDRESSING_STYLE:-path}
 
 x-email-env: &email-env
   EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.smtp.EmailBackend}
@@ -69,20 +77,14 @@ services:
     expose:
       - "8000"
     environment:
-      <<: [*common-env, *db-env, *redis-env, *email-env, *payment-env, *third-party-env]
+      <<: [*core-env, *db-env, *redis-env, *storage-env, *email-env, *payment-env, *third-party-env]
       ALLOWED_HOSTS: ${ALLOWED_HOSTS:-*}
       CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-}
       SITE_ID: ${SITE_ID:-1}
       ACCOUNT_EMAIL_VERIFICATION: ${ACCOUNT_EMAIL_VERIFICATION:-none}
       RUN_MIGRATIONS: "false"
       COLLECT_STATIC: "false"
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    volumes:
-      - media_data:/app/media
+      INIT_READONLY_USERS: ${INIT_READONLY_USERS:-false}
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://127.0.0.1:$${PORT:-8000}/health/ || exit 1"]
       interval: 10s
@@ -96,7 +98,7 @@ services:
     expose:
       - "8001"
     environment:
-      <<: [*common-env, *db-env, *redis-env, *email-env, *payment-env, *third-party-env]
+      <<: [*core-env, *db-env, *redis-env, *storage-env, *email-env, *payment-env, *third-party-env]
       ALLOWED_HOSTS: ${ADMIN_ALLOWED_HOSTS:-*}
       CSRF_TRUSTED_ORIGINS: ${ADMIN_CSRF_TRUSTED_ORIGINS:-}
       SITE_ID: ${SITE_ID:-1}
@@ -104,13 +106,6 @@ services:
       RUN_MIGRATIONS: "false"
       COLLECT_STATIC: "false"
       ADMIN_ONLY_MODE: "true"
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    volumes:
-      - media_data:/app/media
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://127.0.0.1:8001/health/ || exit 1"]
       interval: 10s
@@ -123,91 +118,18 @@ services:
     stop_grace_period: 300s
     command: uv run celery -A reckot worker --loglevel=info --concurrency=4 -Q default,emails,payments,exports
     environment:
-      <<: [*common-env, *db-env, *redis-env, *email-env, *payment-env, *third-party-env]
+      <<: [*core-env, *db-env, *redis-env, *storage-env, *email-env, *payment-env, *third-party-env]
       RUN_MIGRATIONS: "false"
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    volumes:
-      - media_data:/app/media
 
   celery_beat:
     <<: *app-build
     stop_grace_period: 60s
     command: uv run celery -A reckot beat --loglevel=info --schedule=/tmp/celerybeat-schedule
     environment:
-      <<: [*common-env, *db-env, *redis-env]
+      <<: [*core-env, *db-env, *redis-env, *storage-env, *email-env, *payment-env, *third-party-env]
       RUN_MIGRATIONS: "false"
-    depends_on:
-      redis:
-        condition: service_healthy
     volumes:
-      - media_data:/app/media
       - celery_beat_data:/tmp
 
-  redis:
-    image: redis:7-alpine
-    restart: unless-stopped
-    command: redis-server --appendonly yes
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-
-  db:
-    image: postgres:16.6-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${DB_NAME:-reckot}
-      POSTGRES_USER: ${DB_USER:-reckot}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
-      AI_PUBLIC_READONLY_PASSWORD: ${AI_PUBLIC_READONLY_PASSWORD:-readonly_public_pass}
-      AI_AUTH_READONLY_PASSWORD: ${AI_AUTH_READONLY_PASSWORD:-readonly_auth_pass}
-      AI_ORG_READONLY_PASSWORD: ${AI_ORG_READONLY_PASSWORD:-readonly_org_pass}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./docker/postgres/init-readonly-users.sql:/docker-entrypoint-initdb.d/init-readonly-users.sql:ro
-      - ./docker/postgres/init-readonly-users.sh:/docker-entrypoint-initdb.d/init-readonly-users.sh:ro
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  db-backup:
-    image: prodrigestivill/postgres-backup-local:16
-    restart: unless-stopped
-    environment:
-      POSTGRES_HOST: db
-      POSTGRES_DB: ${DB_NAME:-reckot}
-      POSTGRES_USER: ${DB_USER:-reckot}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
-      SCHEDULE: ${BACKUP_SCHEDULE:-@daily}
-      BACKUP_ON_START: "TRUE"
-      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-15}
-      BACKUP_KEEP_WEEKS: ${BACKUP_KEEP_WEEKS:-0}
-      BACKUP_KEEP_MONTHS: ${BACKUP_KEEP_MONTHS:-0}
-      TZ: ${TIME_ZONE:-Africa/Douala}
-      HEALTHCHECK_PORT: 8080
-    depends_on:
-      db:
-        condition: service_healthy
-    volumes:
-      - backup_data:/backups
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
-      interval: 120s
-      timeout: 10s
-      retries: 3
-
 volumes:
-  postgres_data:
-  redis_data:
-  media_data:
-  backup_data:
   celery_beat_data:

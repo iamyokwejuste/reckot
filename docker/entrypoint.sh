@@ -16,6 +16,20 @@ if [ "$DB_ENGINE_VALUE" = "django.db.backends.postgresql" ]; then
     done
 fi
 
+if [ "$INIT_READONLY_USERS" = "true" ]; then
+    echo "==> Initializing readonly database users..."
+    PGPASSWORD="$DB_PASSWORD" psql \
+        -h "${DB_HOST:-db}" -p "${DB_PORT:-5432}" \
+        -U "${DB_USER:-reckot}" -d "${DB_NAME:-reckot}" \
+        -v ON_ERROR_STOP=1 \
+        -v AI_PUBLIC_READONLY_PASSWORD="'${AI_PUBLIC_READONLY_PASSWORD}'" \
+        -v AI_AUTH_READONLY_PASSWORD="'${AI_AUTH_READONLY_PASSWORD}'" \
+        -v AI_ORG_READONLY_PASSWORD="'${AI_ORG_READONLY_PASSWORD}'" \
+        -f /app/docker/postgres/init-readonly-users.sql \
+    && echo "Readonly users initialized successfully!" \
+    || echo "WARNING: Readonly user init failed (continuing)"
+fi
+
 if [ "$RUN_MIGRATIONS" = "true" ]; then
     echo "==> Running migrations..."
     if ! su -s /bin/bash appuser -c "python manage.py migrate --noinput"; then
