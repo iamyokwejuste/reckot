@@ -82,8 +82,8 @@ services:
       CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-}
       SITE_ID: ${SITE_ID:-1}
       ACCOUNT_EMAIL_VERIFICATION: ${ACCOUNT_EMAIL_VERIFICATION:-none}
-      RUN_MIGRATIONS: "false"
-      COLLECT_STATIC: "false"
+      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-false}
+      COLLECT_STATIC: ${COLLECT_STATIC:-false}
       INIT_READONLY_USERS: ${INIT_READONLY_USERS:-false}
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://127.0.0.1:$${PORT:-8000}/health/ || exit 1"]
