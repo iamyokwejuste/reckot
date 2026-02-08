@@ -14,9 +14,10 @@ def platform_settings(request):
 
 
 def unread_notifications(request):
-    if request.user.is_authenticated:
+    user = getattr(request, "user", None)
+    if user and user.is_authenticated:
         count = (
-            Notification.objects.filter(user=request.user, is_read=False)
+            Notification.objects.filter(user=user, is_read=False)
             .exclude(expires_at__lt=timezone.now())
             .count()
         )
@@ -31,8 +32,9 @@ def user_currency(request):
     """
     currency = "XAF"
 
-    if request.user.is_authenticated:
-        user_org = Organization.objects.filter(members=request.user).first()
+    user = getattr(request, "user", None)
+    if user and user.is_authenticated:
+        user_org = Organization.objects.filter(members=user).first()
         if user_org:
             currency = user_org.currency
 
