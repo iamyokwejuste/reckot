@@ -180,6 +180,35 @@
                         {% include "partials/language_switcher.html" %}
                     </div>
 
+                    <div class="relative"
+                         data-controller="notifications"
+                         data-notifications-csrf-token-value="{{ csrf_token }}"
+                         data-notifications-unread-count-value="{{ unread_notifications_count|default:0 }}"
+                         data-notifications-empty-message-value="{% trans 'No notifications' %}"
+                         data-action="click@window->notifications#clickOutside">
+                        <button data-action="click->notifications#toggle"
+                                class="relative p-2 rounded-lg hover:bg-muted transition-colors"
+                                aria-label="{% trans 'Notifications' %}">
+                            <i data-lucide="bell" class="h-5 w-5"></i>
+                            <span data-notifications-target="badge"
+                                  class="absolute -top-1 -right-1 h-5 min-w-5 px-1 flex items-center justify-center bg-destructive text-background text-xs font-bold rounded-full hidden"></span>
+                        </button>
+                        <div data-notifications-target="dropdown"
+                             class="hidden absolute right-0 mt-2 w-80 rounded-xl border border-border bg-card shadow-lg overflow-hidden z-50">
+                            <div class="flex items-center justify-between p-4 border-b border-border">
+                                <h3 class="font-semibold">{% trans "Notifications" %}</h3>
+                                <button data-action="click->notifications#markAllAsRead"
+                                        data-notifications-target="markAllBtn"
+                                        class="hidden text-xs text-primary hover:underline">{% trans "Mark all as read" %}</button>
+                            </div>
+                            <div class="max-h-96 overflow-y-auto" data-notifications-target="list">
+                                <div class="p-8 text-center text-muted-foreground">
+                                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-foreground"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div data-controller="toggle" class="relative">
                         <button data-action="click->toggle#toggle" class="flex items-center gap-2 rounded-full p-1 hover:bg-muted transition-colors shrink-0">
                             {% if user.get_profile_image_url %}

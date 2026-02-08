@@ -1,5 +1,6 @@
 import csv
 import io
+import logging
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -11,6 +12,8 @@ from apps.core.tasks import send_email_task
 from apps.orgs.models import Organization, Membership, Invitation, MemberRole
 from apps.payments.models import Payment
 from apps.core.models import User
+
+logger = logging.getLogger(__name__)
 
 
 class OrgPermissionMixin:
@@ -258,10 +261,14 @@ class InviteMemberView(LoginRequiredMixin, OrgPermissionMixin, View):
                     "inviter": request.user,
                 },
             )
-        except Exception:
-            pass
-
-        messages.success(request, _("Invitation sent to %(email)s.") % {"email": email})
+            messages.success(request, _("Invitation sent to %(email)s.") % {"email": email})
+        except Exception as e:
+            logger.error(f"Failed to queue invitation email to {email}: {e}", exc_info=True)
+            messages.warning(
+                request,
+                _("Invitation created for %(email)s, but email notification failed. They can still use the invite link.")
+                % {"email": email}
+            )
         return redirect("orgs:members", slug=slug)
 
 

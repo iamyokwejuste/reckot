@@ -57,7 +57,7 @@ export default class extends Controller {
     async fetchNotifications() {
         this.loadingValue = true;
         try {
-            const res = await fetch('/api/notifications/');
+            const res = await fetch('/app/api/notifications/');
             const data = await res.json();
             this.notifications = data.notifications || [];
             this.unreadCountValue = data.unread_count || 0;
@@ -71,7 +71,7 @@ export default class extends Controller {
     async markAsRead(event) {
         const id = event.params.id;
         try {
-            await fetch(`/api/notifications/${id}/read/`, {
+            await fetch(`/app/api/notifications/${id}/read/`, {
                 method: 'POST',
                 headers: { 'X-CSRFToken': this.csrfTokenValue }
             });
@@ -88,7 +88,7 @@ export default class extends Controller {
 
     async markAllAsRead() {
         try {
-            await fetch('/api/notifications/read-all/', {
+            await fetch('/app/api/notifications/read-all/', {
                 method: 'POST',
                 headers: { 'X-CSRFToken': this.csrfTokenValue }
             });
