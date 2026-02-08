@@ -57,7 +57,7 @@
 
             <div class="flex flex-col gap-3 mt-6">
                 {% if user.is_authenticated %}
-                <a href="{% url 'tickets:booking_pdf' booking_ref=payment.booking.reference %}" target="_blank">
+                <a href="{% url 'tickets:booking_pdf' booking_ref=payment.booking.reference %}" hx-boost="false" target="_blank">
                     {% #button class="w-full" variant="gradient" %}
                         <i data-lucide="download" class="mr-2 h-4 w-4"></i>
                         {% trans "Download Tickets (PDF)" %}
@@ -70,7 +70,7 @@
                     {% /button %}
                 </a>
                 {% elif payment.booking.guest_session %}
-                <a href="{% url 'tickets:public_booking_pdf' booking_ref=payment.booking.reference %}" target="_blank">
+                <a href="{% url 'tickets:public_booking_pdf' booking_ref=payment.booking.reference %}" hx-boost="false" target="_blank">
                     {% #button class="w-full" variant="gradient" %}
                         <i data-lucide="download" class="mr-2 h-4 w-4"></i>
                         {% trans "Download Tickets (PDF)" %}
@@ -88,7 +88,7 @@
                 </div>
                 {% endif %}
                 <div class="grid grid-cols-2 gap-3">
-                    <a href="{% url 'payments:invoice' payment_ref=payment.reference %}" target="_blank">
+                    <a href="{% url 'payments:invoice' payment_ref=payment.reference %}" hx-boost="false" target="_blank">
                         {% #button variant="outline" class="w-full" %}
                             <i data-lucide="file-text" class="mr-2 h-4 w-4"></i>
                             {% trans "Invoice" %}

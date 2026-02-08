@@ -40,7 +40,7 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-2 mt-2">
-                    <a href="{% url 'orgs:invite_template' %}" class="text-xs text-primary hover:underline">
+                    <a href="{% url 'orgs:invite_template' %}" hx-boost="false" class="text-xs text-primary hover:underline">
                         <i data-lucide="download" class="h-3 w-3 inline"></i>
                         {% trans "Download CSV template" %}
                     </a>

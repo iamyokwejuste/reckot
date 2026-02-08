@@ -93,7 +93,7 @@
                 </div>
 
                 <div class="flex gap-3 pt-2">
-                    <a href="{% url 'tickets:public_booking_pdf' booking_ref=booking.reference %}" class="flex-1">
+                    <a href="{% url 'tickets:public_booking_pdf' booking_ref=booking.reference %}" hx-boost="false" class="flex-1">
                         {% #button class="w-full" variant="gradient" %}
                             <i data-lucide="download" class="w-4 h-4 mr-2"></i>
                             {% trans "Download Tickets (PDF)" %}

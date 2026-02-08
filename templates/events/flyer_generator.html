@@ -122,7 +122,7 @@
                     <img id="flyer-result" class="w-full" alt="{% trans "Your flyer" %}">
                 </div>
                 <div class="flex gap-3 mt-4">
-                    <a id="download-btn" download="{{ event.slug }}-flyer.jpg" class="flex-1">
+                    <a id="download-btn" download="{{ event.slug }}-flyer.jpg" hx-boost="false" class="flex-1">
                         {% #button variant="default" class="w-full" %}
                             <i data-lucide="download" class="w-4 h-4 mr-2"></i>
                             {% trans "Download" %}

@@ -105,7 +105,7 @@
 
     <div class="card p-6 hidden" data-toggle-target="content">
         <h2 class="text-lg font-semibold mb-4">{% trans "Export Format" %}</h2>
-        <div class="flex flex-wrap gap-3" data-controller="toggle" data-toggle-initial-value="PDF">
+        <div class="flex flex-wrap gap-3">
             <button type="button" data-action="click->toggle#select" data-value="PDF"
                     class="px-4 py-2 rounded-lg border-2 font-medium transition-all flex items-center gap-2 border-foreground bg-muted"
                     data-toggle-target="formatOption">
@@ -155,7 +155,7 @@
     </div>
 
     <form method="post" action="{% url 'reports:export_generate' event.organization.slug event.slug %}"
-          data-toggle-target="form" class="hidden">
+          data-toggle-target="form" class="hidden" hx-boost="false">
         {% csrf_token %}
         <input type="hidden" name="report_type" data-toggle-target="reportTypeInput">
         <input type="hidden" name="format" value="PDF" data-toggle-target="formatInput">

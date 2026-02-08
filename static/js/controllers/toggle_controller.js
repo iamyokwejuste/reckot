@@ -14,7 +14,19 @@ export default class extends Controller {
         window.addEventListener('click', this.clickOutsideBound);
 
         if (this.initialValue && this.hasFormatOptionTarget) {
-            this.selectFormat(this.initialValue);
+            this.formatOptionTargets.forEach(opt => {
+                const isActive = opt.dataset.value === this.initialValue;
+                if (isActive) {
+                    opt.classList.remove('border-border', 'hover:border-muted-foreground');
+                    opt.classList.add('border-foreground', 'bg-muted');
+                } else {
+                    opt.classList.remove('border-foreground', 'bg-muted');
+                    opt.classList.add('border-border', 'hover:border-muted-foreground');
+                }
+            });
+            if (this.hasFormatInputTarget) {
+                this.formatInputTarget.value = this.initialValue;
+            }
         }
     }
 
@@ -65,6 +77,10 @@ export default class extends Controller {
 
             if (this.hasContentTarget) {
                 this.contentTarget.classList.remove('hidden');
+            }
+
+            if (this.hasFormTarget) {
+                this.formTarget.classList.remove('hidden');
             }
         }
 

@@ -78,21 +78,54 @@ def generate_csv_content(data: list) -> str:
     return output.getvalue()
 
 
-def generate_csv_export(event, report_type: str, user, mask_emails: bool = True):
+def _get_flat_data(event, report_type, mask_emails):
+    if report_type == "FINANCIAL":
+        summary = get_financial_summary(event)
+        rows = []
+        for item in summary["ticket_breakdown"]:
+            rows.append({
+                "ticket_type": item["ticket_type__name"],
+                "price": float(item["ticket_type__price"]),
+                "quantity": item["count"],
+                "revenue": float(item["revenue"]),
+            })
+        if not rows:
+            rows.append({
+                "total_revenue": float(summary["total_revenue"]),
+                "total_transactions": summary["total_transactions"],
+                "tickets_sold": summary["tickets_sold"],
+            })
+        return rows
+    elif report_type == "TICKET_SALES":
+        data = get_ticket_sales_data(event)
+        rows = []
+        for t in data["tickets"]:
+            email = t.booking.user.email
+            if mask_emails:
+                email = email[:3] + "***"
+            rows.append({
+                "ticket_code": t.code,
+                "ticket_type": t.ticket_type.name,
+                "price": float(t.ticket_type.price),
+                "buyer_email": email,
+                "is_checked_in": t.is_checked_in,
+            })
+        return rows
     fetcher = DATA_FETCHERS.get(report_type)
     if not fetcher:
         raise ValueError(f"Unknown report type: {report_type}")
-    data = fetcher(event.id, mask_emails)
+    return fetcher(event.id, mask_emails)
+
+
+def generate_csv_export(event, report_type: str, user, mask_emails: bool = True):
+    data = _get_flat_data(event, report_type, mask_emails)
     content = generate_csv_content(data)
     filename = f"{report_type.lower()}_{event.slug}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
     return content.encode("utf-8"), filename, "text/csv"
 
 
 def generate_excel_export(event, report_type: str, user, mask_emails: bool = True):
-    fetcher = DATA_FETCHERS.get(report_type)
-    if not fetcher:
-        raise ValueError(f"Unknown report type: {report_type}")
-    data = fetcher(event.id, mask_emails)
+    data = _get_flat_data(event, report_type, mask_emails)
     wb = Workbook()
     ws = wb.active
     ws.title = report_type

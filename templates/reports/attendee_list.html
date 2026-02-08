@@ -64,7 +64,7 @@
             <h3 class="text-lg font-semibold mb-4">{% trans "Export Attendee List" %}</h3>
             <p class="text-sm text-muted-foreground mb-4">{% trans "Choose a format to download" %}</p>
             <div class="space-y-2">
-                <form method="post" action="{% url 'reports:export_generate' org_slug=event.organization.slug event_slug=event.slug %}">
+                <form method="post" action="{% url 'reports:export_generate' org_slug=event.organization.slug event_slug=event.slug %}" hx-boost="false">
                     {% csrf_token %}
                     <input type="hidden" name="report_type" value="RSVP">
                     <input type="hidden" name="format" value="EXCEL">
@@ -78,7 +78,7 @@
                         </div>
                     </button>
                 </form>
-                <form method="post" action="{% url 'reports:export_generate' org_slug=event.organization.slug event_slug=event.slug %}">
+                <form method="post" action="{% url 'reports:export_generate' org_slug=event.organization.slug event_slug=event.slug %}" hx-boost="false">
                     {% csrf_token %}
                     <input type="hidden" name="report_type" value="RSVP">
                     <input type="hidden" name="format" value="PDF">
