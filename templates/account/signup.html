@@ -67,15 +67,15 @@
 
                 <div>
                     <label for="id_email" class="block text-sm font-medium mb-2">{% trans "Email" %}</label>
-                    <input type="email" name="email" id="id_email" placeholder="you@reckot.com" required autocomplete="email" class="input">
+                    <input type="email" name="email" id="id_email" placeholder="{% trans "you@reckot.com" %}" required autocomplete="email" class="input">
                 </div>
 
                 <div>
                     <label for="id_phone_number" class="block text-sm font-medium mb-2">
-                        {% trans "Phone Number" %}
+                        {% trans "Phone number" %}
                         <span class="text-muted-foreground font-normal">{% trans "(optional)" %}</span>
                     </label>
-                    <input type="tel" name="phone_number" id="id_phone_number" placeholder="6XX XXX XXX" autocomplete="tel" class="input">
+                    <input type="tel" name="phone_number" id="id_phone_number" placeholder="{% trans "6XX XXX XXX" %}" autocomplete="tel" class="input">
                 </div>
 
                 <div>
@@ -106,7 +106,7 @@
                       data-action="htmx:after-request->signup#handleOtpResponse">
                     {% csrf_token %}
                     <div>
-                        <label for="signup_phone" class="block text-sm font-medium mb-2">{% trans "Phone Number" %}</label>
+                        <label for="signup_phone" class="block text-sm font-medium mb-2">{% trans "Phone number" %}</label>
                         <input type="tel" name="phone_number" id="signup_phone" placeholder="6XX XXX XXX" required class="input">
                         <p class="text-xs text-muted-foreground mt-1">{% trans "We'll send you a verification code" %}</p>
                     </div>
@@ -145,7 +145,7 @@
                     {% /button %}
                     {% #button type="button" variant="outline" class="w-full" attrs='data-action="click->signup#backToPhone"' %}
                         <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                        {% trans "Change Phone Number" %}
+                        {% trans "Change phone number" %}
                     {% /button %}
                 </form>
             </div>

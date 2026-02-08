@@ -17,7 +17,7 @@
         <a href="{% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug %}">
             {% #button variant="outline" size="sm" %}
                 <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                {% trans "Back to Event" %}
+                {% trans "Back to event" %}
             {% /button %}
         </a>
         <a href="{% url 'events:public_detail' org_slug=event.organization.slug event_slug=event.slug %}" target="_blank">
@@ -147,7 +147,7 @@
                            {% if customization.hide_reckot_branding %}checked{% endif %}>
                     <div>
                         <p class="font-medium text-sm">{% trans "Hide Reckot branding" %}</p>
-                        <p class="text-xs text-muted-foreground">{% trans "Remove \"Powered by Reckot\" footer" %}</p>
+                        <p class="text-xs text-muted-foreground">{% trans 'Remove "Powered by Reckot" footer' %}</p>
                     </div>
                 </label>
             </div>
@@ -196,7 +196,7 @@
             </a>
             {% #button type="submit" variant="default" %}
                 <i data-lucide="save" class="w-4 h-4"></i>
-                {% trans "Save Changes" %}
+                {% trans "Save changes" %}
             {% /button %}
         </div>
     </form>

@@ -1,10 +1,13 @@
 {% extends 'base.html' %}
 {% load slippers %}
+{% load i18n %}
 
 {% block content %}
 <div class="max-w-md mx-auto py-12 text-center">
-    {% #empty_state title="Bad Request (400)" description="The server cannot process the request due to a client error. (e.g., malformed request syntax, invalid message framing, or deceptive request routing)." %}
-        <p class="text-sm text-muted mt-4">Please check your request and try again.</p>
+    {% trans "Bad Request (400)" as error_title %}
+    {% trans "The server cannot process the request due to a client error. (e.g., malformed request syntax, invalid message framing, or deceptive request routing)." as error_description %}
+    {% #empty_state title=error_title description=error_description %}
+        <p class="text-sm text-muted mt-4">{% trans "Please check your request and try again." %}</p>
     {% /empty_state %}
 </div>
 {% endblock %}

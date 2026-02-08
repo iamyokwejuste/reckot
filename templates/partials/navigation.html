@@ -32,6 +32,7 @@
                      data-controller="notifications"
                      data-notifications-csrf-token-value="{{ csrf_token }}"
                      data-notifications-unread-count-value="{{ unread_notifications_count|default:0 }}"
+                     data-notifications-empty-message-value="{% trans 'No notifications' %}"
                      data-action="click@window->notifications#clickOutside">
                     <button data-action="click->notifications#toggle"
                             class="relative p-2 rounded-lg hover:bg-muted transition-colors"
@@ -46,7 +47,7 @@
                             <h3 class="font-semibold">{% trans "Notifications" %}</h3>
                             <button data-action="click->notifications#markAllAsRead"
                                     data-notifications-target="markAllBtn"
-                                    class="hidden text-xs text-primary hover:underline">{% trans "Mark all read" %}</button>
+                                    class="hidden text-xs text-primary hover:underline">{% trans "Mark all as read" %}</button>
                         </div>
                         <div class="max-h-96 overflow-y-auto" data-notifications-target="list">
                             <div class="p-8 text-center text-muted-foreground">
@@ -105,7 +106,7 @@
                 </div>
                 {% else %}
                 <a href="{% url 'account_login' %}" class="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">{% trans "Log in" %}</a>
-                <a href="{% url 'account_signup' %}">{% #button variant="default" %}{% trans "Get Started" %}{% /button %}</a>
+                <a href="{% url 'account_signup' %}">{% #button variant="default" %}{% trans "Get started" %}{% /button %}</a>
                 {% endif %}
             </div>
 
@@ -203,7 +204,7 @@
             {% trans "Log in" %}
         </a>
         <a href="{% url 'account_signup' %}" hx-boost="false" class="flex items-center justify-center w-full py-4 rounded-xl bg-foreground text-background font-semibold text-lg hover:opacity-90 active:scale-95 transition-all touch-manipulation">
-            {% trans "Get Started" %}
+            {% trans "Get started" %}
         </a>
         {% endif %}
     </div>
@@ -215,7 +216,8 @@
      style="z-index: 60; display: none;"
      data-controller="notifications"
      data-notifications-csrf-token-value="{{ csrf_token }}"
-     data-notifications-unread-count-value="{{ unread_notifications_count|default:0 }}">
+     data-notifications-unread-count-value="{{ unread_notifications_count|default:0 }}"
+     data-notifications-empty-message-value="{% trans 'No notifications' %}">
     <div class="flex items-center justify-between h-16 px-4 border-b border-border">
         <h2 class="text-lg font-semibold">{% trans "Notifications" %}</h2>
         <button data-action="click->navbar#closeNotifications" class="p-2 rounded-lg hover:bg-muted transition-colors touch-manipulation active:scale-95" aria-label="Close notifications">

@@ -1,10 +1,13 @@
 {% extends 'base.html' %}
 {% load slippers %}
+{% load i18n %}
 
 {% block content %}
 <div class="max-w-md mx-auto py-12 text-center">
-    {% #empty_state title="Forbidden (403)" description="You don't have permission to access this resource." %}
-        <p class="text-sm text-muted mt-4">Please check your credentials or contact the administrator.</p>
+    {% trans "Forbidden (403)" as error_title %}
+    {% trans "You don't have permission to access this resource." as error_description %}
+    {% #empty_state title=error_title description=error_description %}
+        <p class="text-sm text-muted mt-4">{% trans "Please check your credentials or contact the administrator." %}</p>
     {% /empty_state %}
 </div>
 {% endblock %}

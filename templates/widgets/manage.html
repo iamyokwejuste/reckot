@@ -1,11 +1,12 @@
 {% extends "layouts/dashboard.html" %}
 {% load slippers %}
+{% load i18n %}
 
-{% block title %}Widget Settings - {{ event.title }} - Reckot{% endblock %}
+{% block title %}{% trans "Widget Settings" %} - {{ event.title }} - Reckot{% endblock %}
 
 {% block header_title %}
 <div class="min-w-0">
-    <h1 class="text-lg font-semibold truncate">Embed Widget</h1>
+    <h1 class="text-lg font-semibold truncate">{% trans "Embed Widget" %}</h1>
     <p class="text-sm text-muted-foreground hidden md:block">{{ event.title }}</p>
 </div>
 {% endblock %}
@@ -16,14 +17,14 @@
         <a href="{% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug %}">
             {% #button variant="outline" size="sm" %}
             <i data-lucide="arrow-left" class="w-4 h-4"></i>
-            Back to Event
+            {% trans "Back to event" %}
             {% /button %}
         </a>
         {% if widget %}
         <a href="{{ base_url }}/widgets/{{ widget.widget_id }}/" target="_blank">
             {% #button variant="outline" size="sm" %}
             <i data-lucide="external-link" class="w-4 h-4"></i>
-            Preview Widget
+            {% trans "Preview Widget" %}
             {% /button %}
         </a>
         {% endif %}
@@ -36,36 +37,36 @@
             <div class="card p-6 space-y-5">
                 <h2 class="font-semibold flex items-center gap-2">
                     <i data-lucide="settings-2" class="w-4 h-4"></i>
-                    Widget Settings
+                    {% trans "Widget Settings" %}
                 </h2>
 
                 <label class="flex items-center gap-3 p-3 rounded-lg border border-border cursor-pointer hover:bg-muted/50">
                     <input type="checkbox" name="is_active" class="h-4 w-4 rounded border-border"
                            {% if widget.is_active %}checked{% endif %}>
                     <div>
-                        <p class="font-medium text-sm">Enable Widget</p>
-                        <p class="text-xs text-muted-foreground">Allow embedding on external websites</p>
+                        <p class="font-medium text-sm">{% trans "Enable Widget" %}</p>
+                        <p class="text-xs text-muted-foreground">{% trans "Allow embedding on external websites" %}</p>
                     </div>
                 </label>
 
                 <div>
-                    <label for="theme" class="block text-sm font-medium mb-2">Theme</label>
+                    <label for="theme" class="block text-sm font-medium mb-2">{% trans "Theme" %}</label>
                     <select name="theme" id="theme" class="input">
-                        <option value="AUTO" {% if widget.theme == 'AUTO' %}selected{% endif %}>Auto (System)</option>
-                        <option value="LIGHT" {% if widget.theme == 'LIGHT' %}selected{% endif %}>Light</option>
-                        <option value="DARK" {% if widget.theme == 'DARK' %}selected{% endif %}>Dark</option>
+                        <option value="AUTO" {% if widget.theme == 'AUTO' %}selected{% endif %}>{% trans "Auto (System)" %}</option>
+                        <option value="LIGHT" {% if widget.theme == 'LIGHT' %}selected{% endif %}>{% trans "Light" %}</option>
+                        <option value="DARK" {% if widget.theme == 'DARK' %}selected{% endif %}>{% trans "Dark" %}</option>
                     </select>
                 </div>
 
                 <div>
-                    <label for="button_text" class="block text-sm font-medium mb-2">Button Text</label>
+                    <label for="button_text" class="block text-sm font-medium mb-2">{% trans "Button Text" %}</label>
                     <input type="text" name="button_text" id="button_text"
                            value="{{ widget.button_text|default:'Get Tickets' }}"
-                           placeholder="Get Tickets" class="input">
+                           placeholder="{% trans "Get Tickets" %}" class="input">
                 </div>
 
                 <div>
-                    <label for="button_color" class="block text-sm font-medium mb-2">Button Color</label>
+                    <label for="button_color" class="block text-sm font-medium mb-2">{% trans "Button Color" %}</label>
                     <div class="flex items-center gap-2">
                         <input type="color" name="button_color" id="button_color"
                                value="{{ widget.button_color|default:'#000000' }}"
@@ -79,12 +80,12 @@
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" name="show_price" class="h-4 w-4 rounded border-border"
                                {% if widget.show_price %}checked{% endif %}>
-                        <span class="text-sm">Show ticket prices</span>
+                        <span class="text-sm">{% trans "Show ticket prices" %}</span>
                     </label>
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" name="show_description" class="h-4 w-4 rounded border-border"
                                {% if widget.show_description %}checked{% endif %}>
-                        <span class="text-sm">Show event description</span>
+                        <span class="text-sm">{% trans "Show event description" %}</span>
                     </label>
                 </div>
             </div>
@@ -92,22 +93,22 @@
             <div class="card p-6 space-y-5">
                 <h2 class="font-semibold flex items-center gap-2">
                     <i data-lucide="shield" class="w-4 h-4"></i>
-                    Domain Restrictions
+                    {% trans "Domain Restrictions" %}
                 </h2>
 
                 <div>
-                    <label for="allowed_domains" class="block text-sm font-medium mb-2">Allowed Domains</label>
+                    <label for="allowed_domains" class="block text-sm font-medium mb-2">{% trans "Allowed Domains" %}</label>
                     <textarea name="allowed_domains" id="allowed_domains" rows="4"
-                              placeholder="example.com&#10;mysite.org&#10;(leave empty to allow all domains)"
+                              placeholder="{% trans "example.com" %}&#10;{% trans "mysite.org" %}&#10;{% trans "(leave empty to allow all domains)" %}"
                               class="input resize-none font-mono text-sm">{% for domain in widget.allowed_domains %}{{ domain }}{% if not forloop.last %}
 {% endif %}{% endfor %}</textarea>
-                    <p class="text-xs text-muted-foreground mt-1">One domain per line. Leave empty to allow all domains.</p>
+                    <p class="text-xs text-muted-foreground mt-1">{% trans "One domain per line. Leave empty to allow all domains." %}</p>
                 </div>
             </div>
 
             {% #button variant="default" type="submit" %}
             <i data-lucide="save" class="w-4 h-4"></i>
-            Save Settings
+            {% trans "Save Settings" %}
             {% /button %}
         </form>
 
@@ -116,11 +117,11 @@
             <div class="card p-6 space-y-4">
                 <h2 class="font-semibold flex items-center gap-2">
                     <i data-lucide="code" class="w-4 h-4"></i>
-                    Embed Code
+                    {% trans "Embed Code" %}
                 </h2>
 
                 <div>
-                    <label class="block text-sm font-medium mb-2">JavaScript Snippet</label>
+                    <label class="block text-sm font-medium mb-2">{% trans "JavaScript Snippet" %}</label>
                     <div class="relative">
                         <pre class="p-4 rounded-lg bg-muted text-xs overflow-x-auto"><code>&lt;div id="reckot-widget-{{ widget.widget_id }}"&gt;&lt;/div&gt;
 &lt;script src="{{ base_url }}/widgets/{{ widget.widget_id }}/embed.js" async&gt;&lt;/script&gt;</code></pre>
@@ -131,7 +132,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium mb-2">Direct iFrame URL</label>
+                    <label class="block text-sm font-medium mb-2">{% trans "Direct iFrame URL" %}</label>
                     <div class="relative">
                         <input type="text" readonly value="{{ base_url }}/widgets/{{ widget.widget_id }}/"
                                class="input font-mono text-sm pr-12">
@@ -145,12 +146,12 @@
             <div class="card p-6">
                 <h2 class="font-semibold flex items-center gap-2 mb-4">
                     <i data-lucide="eye" class="w-4 h-4"></i>
-                    Preview
+                    {% trans "Preview" %}
                 </h2>
                 <div class="border border-border rounded-lg overflow-hidden">
                     <iframe src="{{ base_url }}/widgets/{{ widget.widget_id }}/"
                             class="w-full" style="min-height: 300px; border: none;"
-                            title="Widget Preview"></iframe>
+                            title="{% trans "Widget Preview" %}"></iframe>
                 </div>
             </div>
             {% else %}
@@ -158,8 +159,8 @@
                 <div class="h-16 w-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
                     <i data-lucide="code" class="w-8 h-8 text-muted-foreground"></i>
                 </div>
-                <h3 class="font-semibold">No widget configured</h3>
-                <p class="text-muted-foreground text-sm mt-1">Enable the widget to get your embed code</p>
+                <h3 class="font-semibold">{% trans "No widget configured" %}</h3>
+                <p class="text-muted-foreground text-sm mt-1">{% trans "Enable the widget to get your embed code" %}</p>
             </div>
             {% endif %}
         </div>

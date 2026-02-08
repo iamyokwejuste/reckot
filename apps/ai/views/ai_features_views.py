@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from django.views import View
 from django.views.decorators.csrf import csrf_protect
 from django.utils.decorators import method_decorator
+from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.mixins import LoginRequiredMixin
 from decimal import Decimal
 from django.db.models import Sum
@@ -183,7 +184,7 @@ class VoiceToEventView(LoginRequiredMixin, View):
 
         except Exception as e:
             return JsonResponse(
-                {"error": str(e), "suggestion": "Please try again with clearer audio"},
+                {"error": str(e), "suggestion": str(_("Please try again with clearer audio"))},
                 status=500,
             )
 
@@ -447,14 +448,14 @@ class GenerateCoverImageView(LoginRequiredMixin, View):
                     {
                         "success": True,
                         "image": f"data:image/png;base64,{image_base64}",
-                        "message": "Cover image generated successfully",
+                        "message": str(_("Cover image generated successfully")),
                     }
                 )
             else:
                 return JsonResponse(
                     {
                         "success": False,
-                        "error": "AI did not generate any image. Please try again.",
+                        "error": str(_("AI did not generate any image. Please try again.")),
                     },
                     status=500,
                 )
@@ -539,7 +540,7 @@ class EventConciergeView(LoginRequiredMixin, View):
             )
 
             if not request.user.has_perm("events.view_event", event):
-                return JsonResponse({"error": "Permission denied"}, status=403)
+                return JsonResponse({"error": str(_("Permission denied"))}, status=403)
 
             event_data = self._build_event_data(event)
             conversation = event_concierge.orchestrate_discussion(event_data)
@@ -567,7 +568,7 @@ class EventConciergeView(LoginRequiredMixin, View):
             )
 
         except Event.DoesNotExist:
-            return JsonResponse({"error": "Event not found"}, status=404)
+            return JsonResponse({"error": str(_("Event not found"))}, status=404)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
 
@@ -632,7 +633,7 @@ class EventConciergeAuditView(LoginRequiredMixin, View):
             )
 
             if not request.user.has_perm("events.view_event", event):
-                return JsonResponse({"error": "Permission denied"}, status=403)
+                return JsonResponse({"error": str(_("Permission denied"))}, status=403)
 
             event_view = EventConciergeView()
             event_data = event_view._build_event_data(event)
@@ -664,7 +665,7 @@ class EventConciergeAuditView(LoginRequiredMixin, View):
             )
 
         except Event.DoesNotExist:
-            return JsonResponse({"error": "Event not found"}, status=404)
+            return JsonResponse({"error": str(_("Event not found"))}, status=404)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
 
@@ -678,7 +679,7 @@ class SmartEventScannerView(LoginRequiredMixin, View):
             image_b64 = body.get("image")
 
             if not image_b64:
-                return JsonResponse({"error": "No image provided"}, status=400)
+                return JsonResponse({"error": str(_("No image provided"))}, status=400)
 
             if "," in image_b64:
                 image_b64 = image_b64.split(",", 1)[1]
@@ -704,13 +705,13 @@ class SmartEventScannerView(LoginRequiredMixin, View):
 
                 if not result:
                     return JsonResponse(
-                        {"error": "Unable to extract data from image"}, status=422
+                        {"error": str(_("Unable to extract data from image"))}, status=422
                     )
 
                 return JsonResponse({"success": True, "extracted_data": result})
 
         except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON"}, status=400)
+            return JsonResponse({"error": str(_("Invalid JSON"))}, status=400)
         except Exception as e:
             logger.error(f"Smart scanner error: {e}")
             return JsonResponse({"error": str(e)}, status=500)
@@ -720,7 +721,7 @@ class SmartEventScannerView(LoginRequiredMixin, View):
 class AIMetricsDashboardView(LoginRequiredMixin, View):
     def get(self, request):
         if not request.user.is_staff:
-            return JsonResponse({"error": "Admin access required"}, status=403)
+            return JsonResponse({"error": str(_("Admin access required"))}, status=403)
 
         try:
             from apps.ai.utils.monitoring import metrics_collector
@@ -757,7 +758,7 @@ class StreamingChatView(LoginRequiredMixin, View):
             conversation_history = body.get("history", [])
 
             if not user_message:
-                return JsonResponse({"error": "No message provided"}, status=400)
+                return JsonResponse({"error": str(_("No message provided"))}, status=400)
 
             async def event_stream():
                 yield 'data: {"status": "connected"}\n\n'
@@ -808,10 +809,10 @@ class LowBandwidthModeView(LoginRequiredMixin, View):
                 result = low_bandwidth_service.mobile_friendly_response(query, context)
 
             else:
-                return JsonResponse({"error": "Invalid mode"}, status=400)
+                return JsonResponse({"error": str(_("Invalid mode"))}, status=400)
 
             if not result:
-                return JsonResponse({"error": "Generation failed"}, status=500)
+                return JsonResponse({"error": str(_("Generation failed"))}, status=500)
 
             return JsonResponse({"success": True, "result": result})
 
@@ -847,12 +848,12 @@ class CommunityTemplateView(LoginRequiredMixin, View):
                 )
 
                 if not result:
-                    return JsonResponse({"error": "Generation failed"}, status=500)
+                    return JsonResponse({"error": str(_("Generation failed"))}, status=500)
 
                 return JsonResponse({"success": True, "template": result})
 
             else:
-                return JsonResponse({"error": "Invalid action"}, status=400)
+                return JsonResponse({"error": str(_("Invalid action"))}, status=400)
 
         except Exception as e:
             logger.error(f"Community template error: {e}")
@@ -870,7 +871,7 @@ class ConversationalVoiceStartView(LoginRequiredMixin, View):
             audio_b64 = body.get("audio")
 
             if not audio_b64:
-                return JsonResponse({"error": "No audio provided"}, status=400)
+                return JsonResponse({"error": str(_("No audio provided"))}, status=400)
 
             if "," in audio_b64:
                 audio_b64 = audio_b64.split(",", 1)[1]
@@ -904,7 +905,7 @@ class ConversationalVoiceContinueView(LoginRequiredMixin, View):
             audio_b64 = body.get("audio")
 
             if not audio_b64:
-                return JsonResponse({"error": "No audio provided"}, status=400)
+                return JsonResponse({"error": str(_("No audio provided"))}, status=400)
 
             if "," in audio_b64:
                 audio_b64 = audio_b64.split(",", 1)[1]
@@ -943,7 +944,7 @@ class ConversationalVoiceFinalizeView(LoginRequiredMixin, View):
             org_id = body.get("organization_id")
 
             if not org_id:
-                return JsonResponse({"error": "Organization ID required"}, status=400)
+                return JsonResponse({"error": str(_("Organization ID is required."))}, status=400)
 
             session_data = request.session.get("voice_conversation", {})
             creator = ConversationalEventCreator()
@@ -965,14 +966,14 @@ class ConversationalVoiceFinalizeView(LoginRequiredMixin, View):
                             "event_slug": event.slug,
                             "org_slug": event.organization.slug,
                             "event_url": f"/events/{event.organization.slug}/{event.slug}/",
-                            "message": "Event created successfully via voice!",
+                            "message": str(_("Event created successfully via voice!")),
                         }
                     )
                 else:
                     return JsonResponse(
                         {
                             "success": False,
-                            "error": "Failed to create event in database",
+                            "error": str(_("Failed to create event in database")),
                         },
                         status=500,
                     )

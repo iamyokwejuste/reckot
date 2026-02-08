@@ -12,7 +12,7 @@
         </div>
         <h1 class="text-2xl font-bold mb-2">{% trans "Pay-Per-Use Feature" %}</h1>
         <p class="text-muted-foreground mb-6">
-            {% trans "The \"I Will Be There\" flyer generator costs 25 XAF per flyer for free events." %}
+            {% trans 'The "I Will Be There" flyer generator costs 25 XAF per flyer for free events.' %}
         </p>
 
         <div class="card p-6 text-left mb-6">
@@ -43,7 +43,7 @@
             <a href="{% url 'events:public_detail' org_slug=event.organization.slug event_slug=event.slug %}">
                 {% #button variant="outline" %}
                     <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i>
-                    {% trans "Back to Event" %}
+                    {% trans "Back to event" %}
                 {% /button %}
             </a>
         </div>

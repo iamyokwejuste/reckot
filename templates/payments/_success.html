@@ -14,7 +14,7 @@
 
     {% #alert variant="success" icon="ticket" %}
         <div class="space-y-2 text-sm">
-            <p><strong>{% trans "Reference:" %}</strong> {{ payment.reference }}</p>
+            <p><strong>{% trans "Reference" %}:</strong> {{ payment.reference }}</p>
             <p><strong>{% trans "Amount Paid:" %}</strong> {{ payment.amount }} XAF</p>
             <p><strong>{% trans "Confirmed at:" %}</strong> {{ payment.confirmed_at|date:"M d, Y H:i" }}</p>
         </div>
@@ -29,7 +29,7 @@
         </a>
         <a href="{% url 'home' %}" class="w-full">
             {% #button variant="outline" class="w-full" %}
-                {% trans "Back to Home" %}
+                {% trans "Back to home" %}
             {% /button %}
         </a>
     </div>

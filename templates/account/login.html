@@ -74,7 +74,7 @@
                 {% csrf_token %}
                 <div>
                     <label for="id_login" class="block text-sm font-medium mb-2">{% trans "Email" %}</label>
-                    <input type="email" name="login" id="id_login" placeholder="you@email.com" required autocomplete="email" class="input {% if form.login.errors %}border-red-500{% endif %}" value="{{ form.login.value|default:'' }}">
+                    <input type="email" name="login" id="id_login" placeholder="{% trans "you@email.com" %}" required autocomplete="email" class="input {% if form.login.errors %}border-red-500{% endif %}" value="{{ form.login.value|default:'' }}">
                     {% if form.login.errors %}
                     <p class="text-sm text-red-500 mt-1">{% for error in form.login.errors %}{{ error }}{% endfor %}</p>
                     {% endif %}
@@ -105,7 +105,7 @@
                 </div>
 
                 {% #button type="submit" variant="default" class="w-full mt-2" %}
-                    {% trans "Log In" %}
+                    {% trans "Log in" %}
                     <i data-lucide="arrow-right" class="w-4 h-4"></i>
                 {% /button %}
             </form>
@@ -116,7 +116,7 @@
                       hx-post="{% url 'phone_login_request' %}" hx-target="#phone-otp-result" hx-swap="innerHTML">
                     {% csrf_token %}
                     <div>
-                        <label for="phone_number" class="block text-sm font-medium mb-2">{% trans "Phone Number" %}</label>
+                        <label for="phone_number" class="block text-sm font-medium mb-2">{% trans "Phone number" %}</label>
                         <input type="tel" name="phone_number" id="phone_number" data-login-target="phoneInput" placeholder="6XX XXX XXX" required class="input">
                         <p class="text-xs text-muted-foreground mt-1">{% trans "We'll send you a verification code" %}</p>
                     </div>
@@ -143,12 +143,12 @@
                                class="input text-center text-lg tracking-widest font-mono">
                     </div>
                     {% #button type="submit" variant="default" class="w-full" %}
-                        {% trans "Verify & Log In" %}
+                        {% trans "Verify & Log in" %}
                         <i data-lucide="check" class="w-4 h-4"></i>
                     {% /button %}
                     <button type="button" data-action="click->login#backToPhone" class="btn btn-outline w-full">
                         <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                        {% trans "Change Phone Number" %}
+                        {% trans "Change phone number" %}
                     </button>
                 </form>
             </div>

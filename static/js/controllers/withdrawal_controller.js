@@ -4,7 +4,13 @@ export default class extends Controller {
     static targets = ["amount", "phone", "commission", "receive", "preview", "submit", "form", "status", "formFields", "error"]
     static values = {
         fee: { type: Number, default: 7 },
-        max: Number
+        max: Number,
+        msgSuccessTitle: { type: String, default: "Withdrawal Requested!" },
+        msgSuccessBody: { type: String, default: "Your withdrawal has been submitted successfully." },
+        msgSuccessHint: { type: String, default: "You will receive the funds shortly." },
+        msgProcessing: { type: String, default: "Processing..." },
+        msgFallbackError: { type: String, default: "Something went wrong. Please try again." },
+        msgNetworkError: { type: String, default: "Could not reach the server. Please check your connection and try again." }
     }
 
     connect() {
@@ -47,7 +53,7 @@ export default class extends Controller {
 
         submitBtn.disabled = true
         const originalHtml = submitBtn.innerHTML
-        submitBtn.innerHTML = `<svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg><span>Processing...</span>`
+        submitBtn.innerHTML = `<svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg><span>${this.msgProcessingValue}</span>`
 
         try {
             const response = await fetch(form.action, {
@@ -61,16 +67,15 @@ export default class extends Controller {
             if (data.success) {
                 this.showSuccess(data)
             } else {
-                const msg = data.error || "Something went wrong. Please try again."
+                const msg = data.error || this.msgFallbackErrorValue
                 this.showError(msg)
                 if (window.showToast) window.showToast("error", msg)
                 submitBtn.disabled = false
                 submitBtn.innerHTML = originalHtml
             }
         } catch (err) {
-            const msg = "Could not reach the server. Please check your connection and try again."
-            this.showError(msg)
-            if (window.showToast) window.showToast("error", msg)
+            this.showError(this.msgNetworkErrorValue)
+            if (window.showToast) window.showToast("error", this.msgNetworkErrorValue)
             submitBtn.disabled = false
             submitBtn.innerHTML = originalHtml
         }
@@ -92,14 +97,15 @@ export default class extends Controller {
 
     showSuccess(data) {
         this.formFieldsTarget.classList.add("hidden")
+        const body = `${this.msgSuccessBodyValue} Reference: ${data.reference}`
         this.statusTarget.innerHTML = `
             <div class="text-center py-6">
                 <div class="w-14 h-14 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                 </div>
-                <h3 class="text-lg font-semibold mb-2">Withdrawal Requested!</h3>
-                <p class="text-sm text-muted-foreground mb-4">Your withdrawal of ${this.formatCurrency(data.net_amount)} has been submitted. Reference: ${data.reference}</p>
-                <p class="text-xs text-muted-foreground">You will receive the funds shortly.</p>
+                <h3 class="text-lg font-semibold mb-2">${this.msgSuccessTitleValue}</h3>
+                <p class="text-sm text-muted-foreground mb-4">${body}</p>
+                <p class="text-xs text-muted-foreground">${this.msgSuccessHintValue}</p>
             </div>
         `
         this.statusTarget.classList.remove("hidden")

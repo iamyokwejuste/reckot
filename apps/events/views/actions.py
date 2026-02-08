@@ -766,7 +766,7 @@ class FlyerTicketVerificationView(View):
             return JsonResponse(
                 {
                     "success": False,
-                    "error": "Please provide your email, phone number, or ticket code.",
+                    "error": str(_("Please provide your email, phone number, or ticket code.")),
                 },
                 status=400,
             )
@@ -781,7 +781,7 @@ class FlyerTicketVerificationView(View):
                 return JsonResponse(
                     {
                         "success": False,
-                        "error": "You have already generated a flyer with this email. Each person can only generate one flyer per event.",
+                        "error": str(_("You have already generated a flyer with this email. Each person can only generate one flyer per event.")),
                     },
                     status=403,
                 )
@@ -811,7 +811,7 @@ class FlyerTicketVerificationView(View):
                 return JsonResponse(
                     {
                         "success": False,
-                        "error": "You have already generated a flyer with this phone number. Each person can only generate one flyer per event.",
+                        "error": str(_("You have already generated a flyer with this phone number. Each person can only generate one flyer per event.")),
                     },
                     status=403,
                 )
@@ -858,7 +858,7 @@ class FlyerTicketVerificationView(View):
                     return JsonResponse(
                         {
                             "success": False,
-                            "error": "A flyer has already been generated for this ticket's attendee.",
+                            "error": str(_("A flyer has already been generated for this ticket's attendee.")),
                         },
                         status=403,
                     )
@@ -871,7 +871,7 @@ class FlyerTicketVerificationView(View):
                     return JsonResponse(
                         {
                             "success": False,
-                            "error": "A flyer has already been generated for this ticket's attendee.",
+                            "error": str(_("A flyer has already been generated for this ticket's attendee.")),
                         },
                         status=403,
                     )
@@ -880,7 +880,7 @@ class FlyerTicketVerificationView(View):
             return JsonResponse(
                 {
                     "success": False,
-                    "error": "No valid ticket found. Please check your information and try again.",
+                    "error": str(_("No valid ticket found. Please check your information and try again.")),
                 },
                 status=403,
             )
@@ -956,7 +956,7 @@ class FlyerGeneratorView(View):
             return JsonResponse(
                 {
                     "success": False,
-                    "error": "Please provide your email, phone number, or ticket code to verify your ticket.",
+                    "error": str(_("Please provide your email, phone number, or ticket code to verify your ticket.")),
                 },
                 status=400,
             )
@@ -1032,7 +1032,7 @@ class FlyerGeneratorView(View):
                     return JsonResponse(
                         {
                             "success": False,
-                            "error": "A flyer has already been generated for this ticket's attendee.",
+                            "error": str(_("A flyer has already been generated for this ticket's attendee.")),
                         },
                         status=403,
                     )
@@ -1045,7 +1045,7 @@ class FlyerGeneratorView(View):
                     return JsonResponse(
                         {
                             "success": False,
-                            "error": "A flyer has already been generated for this ticket's attendee.",
+                            "error": str(_("A flyer has already been generated for this ticket's attendee.")),
                         },
                         status=403,
                     )
@@ -1057,7 +1057,7 @@ class FlyerGeneratorView(View):
             return JsonResponse(
                 {
                     "success": False,
-                    "error": "No valid ticket found. Please check your information and try again.",
+                    "error": str(_("No valid ticket found. Please check your information and try again.")),
                 },
                 status=403,
             )
@@ -1205,7 +1205,7 @@ class FlyerConfigView(LoginRequiredMixin, View):
             and not config.pay_per_use_accepted
         ):
             if not is_organizer:
-                messages.error(request, "Only organizers can accept pay-per-use terms")
+                messages.error(request, _("Only organizers can accept pay-per-use terms"))
                 return redirect(
                     "events:flyer_config", org_slug=org_slug, event_slug=event_slug
                 )
@@ -1258,7 +1258,7 @@ class FlyerConfigView(LoginRequiredMixin, View):
                 bg_color=field_bg,
             )
 
-        messages.success(request, "Flyer configuration saved successfully")
+        messages.success(request, _("Flyer configuration saved successfully"))
         return redirect("events:flyer_config", org_slug=org_slug, event_slug=event_slug)
 
 

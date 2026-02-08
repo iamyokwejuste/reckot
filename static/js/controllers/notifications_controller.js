@@ -7,7 +7,8 @@ export default class extends Controller {
         open: { type: Boolean, default: false },
         unreadCount: { type: Number, default: 0 },
         loading: { type: Boolean, default: false },
-        csrfToken: String
+        csrfToken: String,
+        emptyMessage: { type: String, default: "No notifications" }
     }
 
     connect() {
@@ -118,12 +119,12 @@ export default class extends Controller {
             this.listTarget.innerHTML = isMobile ? `
                 <div class="p-12 text-center text-muted-foreground">
                     <i data-lucide="bell-off" class="h-16 w-16 mx-auto mb-4 opacity-50"></i>
-                    <p>No notifications</p>
+                    <p>${this.emptyMessageValue}</p>
                 </div>
             ` : `
                 <div class="p-8 text-center text-muted-foreground">
                     <i data-lucide="bell-off" class="h-8 w-8 mx-auto mb-2"></i>
-                    <p class="text-sm">No notifications</p>
+                    <p class="text-sm">${this.emptyMessageValue}</p>
                 </div>
             `;
             if (typeof lucide !== 'undefined') lucide.createIcons();

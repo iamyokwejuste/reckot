@@ -17,7 +17,7 @@
 
     {% #alert variant="destructive" icon="alert-triangle" %}
         <div class="space-y-2 text-sm">
-            <p><strong>{% trans "Reference:" %}</strong> {{ payment.reference }}</p>
+            <p><strong>{% trans "Reference" %}:</strong> {{ payment.reference }}</p>
             <p><strong>{% trans "Status:" %}</strong> {{ payment.get_status_display }}</p>
             {% if payment.external_reference %}
             <p><strong>{% trans "Reason:" %}</strong> {{ payment.external_reference }}</p>
@@ -29,12 +29,12 @@
         <a href="{% url 'payments:select' booking_ref=payment.booking.reference %}" class="w-full">
             {% #button variant="default" class="w-full" %}
                 <i data-lucide="refresh-cw" class="mr-2 h-4 w-4"></i>
-                {% trans "Try Again" %}
+                {% trans "Try again" %}
             {% /button %}
         </a>
         <a href="{% url 'events:list' %}" class="w-full">
             {% #button variant="outline" class="w-full" %}
-                {% trans "Back to Events" %}
+                {% trans "Back to events" %}
             {% /button %}
         </a>
     </div>

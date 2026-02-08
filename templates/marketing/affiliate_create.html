@@ -1,12 +1,13 @@
 {% extends "layouts/dashboard.html" %}
 {% load slippers %}
+{% load i18n %}
 
-{% block title %}Create Affiliate Link - {{ organization.name }} - Reckot{% endblock %}
+{% block title %}{% trans "Create Affiliate Link" %} - {{ organization.name }} - Reckot{% endblock %}
 
 {% block header_title %}
 <div class="min-w-0">
-    <h1 class="text-lg font-semibold truncate">Create Affiliate Link</h1>
-    <p class="text-sm text-muted-foreground hidden md:block">Set up a new tracking link</p>
+    <h1 class="text-lg font-semibold truncate">{% trans "Create Affiliate Link" %}</h1>
+    <p class="text-sm text-muted-foreground hidden md:block">{% trans "Set up a new tracking link" %}</p>
 </div>
 {% endblock %}
 
@@ -18,59 +19,59 @@
         <div class="card p-6 space-y-5">
             <h2 class="font-semibold flex items-center gap-2">
                 <i data-lucide="link" class="w-4 h-4"></i>
-                Link Details
+                {% trans "Link Details" %}
             </h2>
 
             <div>
-                <label for="name" class="block text-sm font-medium mb-2">Link Name</label>
-                <input type="text" name="name" id="name" required placeholder="e.g., Partner - John Doe"
+                <label for="name" class="block text-sm font-medium mb-2">{% trans "Link Name" %}</label>
+                <input type="text" name="name" id="name" required placeholder="{% trans "e.g., Partner - John Doe" %}"
                        class="input">
-                <p class="text-xs text-muted-foreground mt-1">Internal name to identify this affiliate</p>
+                <p class="text-xs text-muted-foreground mt-1">{% trans "Internal name to identify this affiliate" %}</p>
             </div>
 
             <div>
-                <label for="event" class="block text-sm font-medium mb-2">Event (optional)</label>
+                <label for="event" class="block text-sm font-medium mb-2">{% trans "Event (optional)" %}</label>
                 <select name="event" id="event" class="input">
-                    <option value="">All Events</option>
+                    <option value="">{% trans "All Events" %}</option>
                     {% for event in events %}
                     <option value="{{ event.id }}">{{ event.title }}</option>
                     {% endfor %}
                 </select>
-                <p class="text-xs text-muted-foreground mt-1">Leave empty to track across all events</p>
+                <p class="text-xs text-muted-foreground mt-1">{% trans "Leave empty to track across all events" %}</p>
             </div>
         </div>
 
         <div class="card p-6 space-y-5">
             <h2 class="font-semibold flex items-center gap-2">
                 <i data-lucide="coins" class="w-4 h-4"></i>
-                Commission Settings
+                {% trans "Commission Settings" %}
             </h2>
 
             <div>
-                <label for="commission_type" class="block text-sm font-medium mb-2">Commission Type</label>
+                <label for="commission_type" class="block text-sm font-medium mb-2">{% trans "Commission Type" %}</label>
                 <select name="commission_type" id="commission_type" class="input">
-                    <option value="PERCENTAGE">Percentage</option>
-                    <option value="FIXED">Fixed Amount</option>
+                    <option value="PERCENTAGE">{% trans "Percentage" %}</option>
+                    <option value="FIXED">{% trans "Fixed Amount" %}</option>
                 </select>
             </div>
 
             <div>
-                <label for="commission_value" class="block text-sm font-medium mb-2">Commission Value</label>
+                <label for="commission_value" class="block text-sm font-medium mb-2">{% trans "Commission Value" %}</label>
                 <input type="number" name="commission_value" id="commission_value" value="0" min="0" step="0.01"
                        class="input">
-                <p class="text-xs text-muted-foreground mt-1">Percentage (e.g., 10 for 10%) or fixed amount in XAF</p>
+                <p class="text-xs text-muted-foreground mt-1">{% trans "Percentage (e.g., 10 for 10%) or fixed amount in XAF" %}</p>
             </div>
         </div>
 
         <div class="flex items-center gap-4">
             <a href="{% url 'marketing:affiliate_list' org_slug=organization.slug %}">
                 {% #button variant="outline" %}
-                Cancel
+                {% trans "Cancel" %}
                 {% /button %}
             </a>
             {% #button type="submit" variant="default" %}
                 <i data-lucide="plus" class="w-4 h-4"></i>
-                Create Link
+                {% trans "Create Link" %}
             {% /button %}
         </div>
     </form>

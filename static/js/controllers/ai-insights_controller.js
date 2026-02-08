@@ -6,7 +6,9 @@ export default class extends Controller {
         metrics: Object,
         analyzingText: String,
         generateText: String,
-        regenerateText: String
+        regenerateText: String,
+        errorMessage: { type: String, default: "Failed to generate insight" },
+        noResultMessage: { type: String, default: "No insight generated" }
     }
 
     connect() {
@@ -39,7 +41,7 @@ export default class extends Controller {
         .then(response => {
             return response.json().then(data => {
                 if (!response.ok) {
-                    throw new Error(data.error || 'Failed to generate insight');
+                    throw new Error(data.error || this.errorMessageValue);
                 }
                 return data;
             });
@@ -50,11 +52,11 @@ export default class extends Controller {
                 this.showState(this.resultStateTarget);
                 this.btnTextTarget.textContent = this.regenerateTextValue;
             } else {
-                throw new Error('No insight generated');
+                throw new Error(this.noResultMessageValue);
             }
         })
         .catch(err => {
-            this.errorTextTarget.textContent = err.message || 'Failed to generate insight';
+            this.errorTextTarget.textContent = err.message || this.errorMessageValue;
             this.showState(this.errorStateTarget);
             this.btnTextTarget.textContent = this.generateTextValue;
         })

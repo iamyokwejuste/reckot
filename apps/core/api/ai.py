@@ -23,7 +23,7 @@ def generate_description(request):
         cover_image_mime = data.get("cover_image_mime", "image/jpeg")
 
         if not title:
-            return JsonResponse({"error": _("Title is required")}, status=400)
+            return JsonResponse({"error": _("Title is required.")}, status=400)
 
         cover_image_data = None
         if cover_image_base64:
@@ -77,7 +77,7 @@ def improve_description(request):
         description = data.get("description", "")
 
         if not description:
-            return JsonResponse({"error": _("Description required")}, status=400)
+            return JsonResponse({"error": _("Description is required.")}, status=400)
 
         result = gemini_ai.improve_description(description)
 
@@ -98,7 +98,7 @@ def generate_seo(request):
         description = data.get("description", "")
 
         if not title:
-            return JsonResponse({"error": _("Title required")}, status=400)
+            return JsonResponse({"error": _("Title is required.")}, status=400)
 
         result = gemini_ai.generate_seo_meta(title, description)
 
@@ -120,7 +120,7 @@ def generate_social_caption(request):
         platform = data.get("platform", "general")
 
         if not title:
-            return JsonResponse({"error": _("Title required")}, status=400)
+            return JsonResponse({"error": _("Title is required.")}, status=400)
 
         result = gemini_ai.generate_social_caption(title, description, platform)
 
@@ -141,7 +141,7 @@ def translate_text(request):
         target_language = data.get("language", "French")
 
         if not text:
-            return JsonResponse({"error": _("Text required")}, status=400)
+            return JsonResponse({"error": _("Text is required.")}, status=400)
 
         result = gemini_ai.translate_text(text, target_language)
 
@@ -162,7 +162,7 @@ def summarize_text(request):
         max_words = data.get("max_words", 30)
 
         if not text:
-            return JsonResponse({"error": _("Text required")}, status=400)
+            return JsonResponse({"error": _("Text is required.")}, status=400)
 
         result = gemini_ai.summarize_description(text, max_words)
 
@@ -202,7 +202,7 @@ def suggest_tags(request):
         description = data.get("description", "")
 
         if not title:
-            return JsonResponse({"error": _("Title required")}, status=400)
+            return JsonResponse({"error": _("Title is required.")}, status=400)
 
         result = gemini_ai.suggest_event_tags(title, description)
 
@@ -222,7 +222,7 @@ def event_assistant(request):
         question = data.get("question", "")
 
         if not question:
-            return JsonResponse({"error": _("Question required")}, status=400)
+            return JsonResponse({"error": _("Question is required.")}, status=400)
 
         result = gemini_ai.answer_event_question(event_info, question)
 
@@ -242,7 +242,7 @@ def generate_insight(request):
         metrics = data.get("metrics", {})
 
         if not metrics:
-            return JsonResponse({"error": _("Metrics required")}, status=400)
+            return JsonResponse({"error": _("Metrics are required.")}, status=400)
 
         result = gemini_ai.generate_analytics_insight(metrics)
 

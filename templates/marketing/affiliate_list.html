@@ -1,12 +1,13 @@
 {% extends "layouts/dashboard.html" %}
 {% load slippers %}
+{% load i18n %}
 
-{% block title %}Affiliate Links - {{ organization.name }} - Reckot{% endblock %}
+{% block title %}{% trans "Affiliate Links" %} - {{ organization.name }} - Reckot{% endblock %}
 
 {% block header_title %}
 <div class="min-w-0">
-    <h1 class="text-lg font-semibold truncate">Affiliate Links</h1>
-    <p class="text-sm text-muted-foreground hidden md:block">Track referrals and commissions</p>
+    <h1 class="text-lg font-semibold truncate">{% trans "Affiliate Links" %}</h1>
+    <p class="text-sm text-muted-foreground hidden md:block">{% trans "Track referrals and commissions" %}</p>
 </div>
 {% endblock %}
 
@@ -14,7 +15,7 @@
 <a href="{% url 'marketing:affiliate_create' org_slug=organization.slug %}">
     {% #button variant="default" %}
     <i data-lucide="plus" class="w-4 h-4"></i>
-    Create Link
+    {% trans "Create Link" %}
     {% /button %}
 </a>
 {% endblock %}
@@ -29,7 +30,7 @@
                 </div>
                 <div>
                     <p class="text-2xl font-semibold">{{ stats.total_links }}</p>
-                    <p class="text-xs text-muted-foreground">Total Links</p>
+                    <p class="text-xs text-muted-foreground">{% trans "Total Links" %}</p>
                 </div>
             </div>
         </div>
@@ -40,7 +41,7 @@
                 </div>
                 <div>
                     <p class="text-2xl font-semibold">{{ stats.active_links }}</p>
-                    <p class="text-xs text-muted-foreground">Active Links</p>
+                    <p class="text-xs text-muted-foreground">{% trans "Active Links" %}</p>
                 </div>
             </div>
         </div>
@@ -51,7 +52,7 @@
                 </div>
                 <div>
                     <p class="text-2xl font-semibold">{{ stats.total_clicks }}</p>
-                    <p class="text-xs text-muted-foreground">Total Clicks</p>
+                    <p class="text-xs text-muted-foreground">{% trans "Total Clicks" %}</p>
                 </div>
             </div>
         </div>
@@ -62,7 +63,7 @@
                 </div>
                 <div>
                     <p class="text-2xl font-semibold">{{ stats.total_conversions }}</p>
-                    <p class="text-xs text-muted-foreground">Conversions</p>
+                    <p class="text-xs text-muted-foreground">{% trans "Conversions" %}</p>
                 </div>
             </div>
         </div>
@@ -87,7 +88,7 @@
                             {% if link.event %}
                             <span>{{ link.event.title }}</span>
                             {% else %}
-                            <span>All Events</span>
+                            <span>{% trans "All Events" %}</span>
                             {% endif %}
                         </div>
                     </div>
@@ -95,21 +96,21 @@
                 <div class="flex items-center gap-6">
                     <div class="text-center">
                         <p class="font-semibold">{{ link.clicks }}</p>
-                        <p class="text-xs text-muted-foreground">Clicks</p>
+                        <p class="text-xs text-muted-foreground">{% trans "Clicks" %}</p>
                     </div>
                     <div class="text-center">
                         <p class="font-semibold">{{ link.conversion_count|default:0 }}</p>
-                        <p class="text-xs text-muted-foreground">Conversions</p>
+                        <p class="text-xs text-muted-foreground">{% trans "Conversions" %}</p>
                     </div>
                     <div class="flex items-center gap-2">
                         {% if link.is_active %}
-                        <span class="badge badge-success">Active</span>
+                        <span class="badge badge-success">{% trans "Active" %}</span>
                         {% else %}
-                        <span class="badge badge-outline">Inactive</span>
+                        <span class="badge badge-outline">{% trans "Inactive" %}</span>
                         {% endif %}
                         <a href="{% url 'marketing:affiliate_detail' org_slug=organization.slug link_code=link.code %}">
                             {% #button variant="outline" size="sm" %}
-                            View
+                            {% trans "View" %}
                             {% /button %}
                         </a>
                     </div>
@@ -123,12 +124,12 @@
         <div class="h-16 w-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
             <i data-lucide="link" class="w-8 h-8 text-muted-foreground"></i>
         </div>
-        <h3 class="font-semibold text-lg">No affiliate links yet</h3>
-        <p class="text-muted-foreground mt-1">Create tracking links for your partners and affiliates</p>
+        <h3 class="font-semibold text-lg">{% trans "No affiliate links yet" %}</h3>
+        <p class="text-muted-foreground mt-1">{% trans "Create tracking links for your partners and affiliates" %}</p>
         <a href="{% url 'marketing:affiliate_create' org_slug=organization.slug %}" class="mt-6 inline-block">
             {% #button variant="default" %}
             <i data-lucide="plus" class="w-4 h-4"></i>
-            Create Your First Link
+            {% trans "Create Your First Link" %}
             {% /button %}
         </a>
     </div>

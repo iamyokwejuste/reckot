@@ -72,11 +72,11 @@
 
             {% if can_add_email %}
             <div class="border-t border-border pt-6">
-                <h2 class="text-sm font-semibold mb-3">{% trans "Add Email Address" %}</h2>
+                <h2 class="text-sm font-semibold mb-3">{% trans "Add email address" %}</h2>
                 <form method="post" action="{% url 'account_email' %}" class="space-y-4">
                     {% csrf_token %}
                     <div>
-                        <input type="email" name="email" placeholder="new@email.com" required class="input">
+                        <input type="email" name="email" placeholder="{% trans "new@email.com" %}" required class="input">
                     </div>
                     {% #button type="submit" variant="default" size="sm" class="w-full" attrs='name="action_add"' %}
                         <i data-lucide="plus" class="w-4 h-4"></i>

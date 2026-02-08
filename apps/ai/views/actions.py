@@ -8,6 +8,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from django.contrib import messages
 from django.db.models import Sum
 from django.conf import settings
@@ -79,18 +80,18 @@ class AIAssistantChatView(View):
             data = json.loads(request.body)
         except json.JSONDecodeError:
             logger.error("Invalid JSON in request body")
-            return JsonResponse({"error": "Invalid JSON"}, status=400)
+            return JsonResponse({"error": str(_("Invalid JSON"))}, status=400)
 
         user_message = data.get("message", "").strip()
         session_id = data.get("session_id")
 
         if not user_message:
-            return JsonResponse({"error": "Message is required"}, status=400)
+            return JsonResponse({"error": str(_("Message is required"))}, status=400)
 
         word_count = len(user_message.split())
         if word_count > 50:
             return JsonResponse(
-                {"error": "Message too long. Please limit to 50 words or less."},
+                {"error": str(_("Message too long. Please limit to 50 words or less."))},
                 status=400,
             )
 
@@ -108,7 +109,7 @@ class AIAssistantChatView(View):
             if user_messages_today >= daily_limit:
                 return JsonResponse(
                     {
-                        "error": f"Daily chat limit reached. You can send up to {daily_limit} messages per day. Please try again tomorrow."
+                        "error": str(_("Daily chat limit reached. You can send up to %(daily_limit)s messages per day. Please try again tomorrow.") % {"daily_limit": daily_limit})
                     },
                     status=429,
                 )
@@ -152,8 +153,8 @@ class AIAssistantChatView(View):
             logger.error(f"Error in AI chat: {str(e)}", exc_info=True)
             return JsonResponse(
                 {
-                    "error": "An error occurred processing your request",
-                    "message": "Sorry, I encountered an error. Please try again.",
+                    "error": str(_("An error occurred processing your request")),
+                    "message": str(_("Sorry, I encountered an error. Please try again.")),
                 },
                 status=500,
             )
@@ -202,7 +203,7 @@ class AIGenerateContentView(LoginRequiredMixin, View):
         try:
             data = json.loads(request.body)
         except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON"}, status=400)
+            return JsonResponse({"error": str(_("Invalid JSON"))}, status=400)
 
         content_type = data.get("type", "description")
 
@@ -214,7 +215,7 @@ class AIGenerateContentView(LoginRequiredMixin, View):
 
         generator = generators.get(content_type)
         if not generator:
-            return JsonResponse({"error": "Invalid content type"}, status=400)
+            return JsonResponse({"error": str(_("Invalid content type"))}, status=400)
 
         result = generator(data)
         return JsonResponse(result)
@@ -250,7 +251,7 @@ class AIAnalyzeIssueView(View):
         try:
             data = json.loads(request.body)
         except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON"}, status=400)
+            return JsonResponse({"error": str(_("Invalid JSON"))}, status=400)
 
         result = services.analyze_issue(
             issue_description=data.get("issue", ""), error_logs=data.get("logs", "")
@@ -266,7 +267,7 @@ class AIEventInsightsView(LoginRequiredMixin, View):
         event = get_object_or_404(Event, id=event_id)
 
         if not event.organization.members.filter(id=request.user.id).exists():
-            return JsonResponse({"error": "Permission denied"}, status=403)
+            return JsonResponse({"error": str(_("Permission denied"))}, status=403)
 
         event_data = {
             "title": event.title,
@@ -321,7 +322,7 @@ class SupportTicketCreateView(View):
             ticket.priority = analysis.get("priority", SupportTicket.Priority.MEDIUM)
             ticket.save()
 
-        messages.success(request, f"Ticket #{ticket.reference} created successfully.")
+        messages.success(request, _("Ticket #%(reference)s created successfully.") % {"reference": ticket.reference})
         return redirect("ai:ticket_detail", reference=ticket.reference)
 
 
@@ -366,7 +367,7 @@ class AudioTranscribeView(View):
             mime_type = data.get("mimeType", "audio/webm")
 
             if not audio_base64:
-                return JsonResponse({"error": "No audio data provided"}, status=400)
+                return JsonResponse({"error": str(_("No audio data provided"))}, status=400)
 
             audio_data = base64.b64decode(audio_base64)
 
@@ -374,12 +375,12 @@ class AudioTranscribeView(View):
             transcription = gemini_ai.chat_with_audio(prompt, audio_data, mime_type)
 
             if not transcription:
-                return JsonResponse({"error": "Transcription failed"}, status=500)
+                return JsonResponse({"error": str(_("Transcription failed"))}, status=500)
 
             return JsonResponse({"transcription": transcription.strip()})
 
         except Exception as e:
             logger.error(f"Error transcribing audio: {str(e)}", exc_info=True)
             return JsonResponse(
-                {"error": f"Transcription failed: {str(e)}"}, status=500
+                {"error": str(_("Transcription failed: %(error)s") % {"error": str(e)})}, status=500
             )

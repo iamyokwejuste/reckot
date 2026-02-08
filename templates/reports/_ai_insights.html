@@ -5,7 +5,9 @@
      data-ai-insights-metrics-value="{{ metrics_json|escapejs }}"
      data-ai-insights-analyzing-text-value="{% trans 'Analyzing...' %}"
      data-ai-insights-generate-text-value="{% trans 'Generate Insight' %}"
-     data-ai-insights-regenerate-text-value="{% trans 'Regenerate' %}">
+     data-ai-insights-regenerate-text-value="{% trans 'Regenerate' %}"
+     data-ai-insights-error-message-value="{% trans 'Failed to generate insight' %}"
+     data-ai-insights-no-result-message-value="{% trans 'No insight generated' %}">
     <div class="flex items-center justify-between mb-4">
         <h3 class="font-semibold flex items-center gap-2">
             <i data-lucide="sparkles" class="w-4 h-4 text-primary"></i>
@@ -25,7 +27,7 @@
             <i data-lucide="brain" class="w-8 h-8 text-primary"></i>
         </div>
         <p class="text-sm text-muted-foreground mb-2">{% trans "Get AI-powered analysis of your data" %}</p>
-        <p class="text-xs text-muted-foreground">{% trans "Click \"Generate Insight\" to analyze trends and get actionable recommendations" %}</p>
+        <p class="text-xs text-muted-foreground">{% trans 'Click "Generate Insight" to analyze trends and get actionable recommendations' %}</p>
     </div>
 
     <div data-ai-insights-target="loadingState" class="text-center py-8 hidden">

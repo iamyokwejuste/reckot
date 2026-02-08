@@ -248,8 +248,24 @@
     </div>
 </div>
 
-{% #modal id="withdrawModal" title="Withdraw Funds" description="Enter withdrawal details" size="lg" %}
-    <div class="space-y-4" data-controller="withdrawal" data-withdrawal-fee-value="{{ PLATFORM_FEE_PERCENTAGE }}" data-withdrawal-max-value="{{ available_balance }}">
+{% trans "Withdraw Funds" as withdraw_title %}
+{% trans "Enter withdrawal details" as withdraw_desc %}
+{% trans "Withdrawal Requested!" as msg_success_title %}
+{% trans "Your withdrawal has been submitted successfully." as msg_success_body %}
+{% trans "You will receive the funds shortly." as msg_success_hint %}
+{% trans "Processing..." as msg_processing %}
+{% trans "Something went wrong. Please try again." as msg_fallback_error %}
+{% trans "Could not reach the server. Please check your connection and try again." as msg_network_error %}
+{% #modal id="withdrawModal" title=withdraw_title description=withdraw_desc size="lg" %}
+    <div class="space-y-4" data-controller="withdrawal"
+         data-withdrawal-fee-value="{{ PLATFORM_FEE_PERCENTAGE }}"
+         data-withdrawal-max-value="{{ available_balance }}"
+         data-withdrawal-msg-success-title-value="{{ msg_success_title }}"
+         data-withdrawal-msg-success-body-value="{{ msg_success_body }}"
+         data-withdrawal-msg-success-hint-value="{{ msg_success_hint }}"
+         data-withdrawal-msg-processing-value="{{ msg_processing }}"
+         data-withdrawal-msg-fallback-error-value="{{ msg_fallback_error }}"
+         data-withdrawal-msg-network-error-value="{{ msg_network_error }}">
         <div data-withdrawal-target="status" class="hidden"></div>
         <div data-withdrawal-target="formFields">
             <div class="space-y-4">
@@ -277,7 +293,7 @@
                             <p class="text-xs text-muted-foreground mt-1">{% trans "We take care of all withdrawal fees" %}</p>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-2">{% trans "Phone Number (with country code)" %}</label>
+                            <label class="block text-sm font-medium mb-2">{% trans "Phone number (with country code)" %}</label>
                             <input type="tel" name="phone_number" data-withdrawal-target="phone" class="input w-full" placeholder="{% trans 'e.g., 237679587525' %}" required>
                             <p class="text-xs text-muted-foreground mt-1">{% trans "Include country code (e.g., 237 for Cameroon)" %}</p>
                         </div>
@@ -306,7 +322,9 @@
     </div>
 {% /modal %}
 
-{% #modal id="exportModal" title="Export Event Data" description="Select an event to export data from" size="lg" %}
+{% trans "Export Event Data" as export_title %}
+{% trans "Select an event to export data from" as export_desc %}
+{% #modal id="exportModal" title=export_title description=export_desc size="lg" %}
     {% if all_events %}
     <div class="space-y-2 max-h-96 overflow-y-auto">
         {% for event in all_events %}

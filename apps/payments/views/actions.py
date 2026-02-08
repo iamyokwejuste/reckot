@@ -862,7 +862,7 @@ class WithdrawalBalanceView(LoginRequiredMixin, View):
         user_org = Organization.objects.filter(members=request.user).first()
 
         if not user_org:
-            return JsonResponse({"error": "No organization found"}, status=404)
+            return JsonResponse({"error": str(_("No organization found"))}, status=404)
 
         balance_data = calculate_organization_balance(user_org)
 
@@ -894,7 +894,8 @@ class WithdrawalRequestView(LoginRequiredMixin, View):
             user_orgs = Organization.objects.filter(members=request.user).first()
             if not user_orgs:
                 return JsonResponse(
-                    {"success": False, "error": "No organization found"}, status=400
+                    {"success": False, "error": str(_("No organization found"))},
+                    status=400,
                 )
 
             org_currency = user_orgs.currency
@@ -904,21 +905,37 @@ class WithdrawalRequestView(LoginRequiredMixin, View):
                 return JsonResponse(
                     {
                         "success": False,
-                        "error": f"Minimum withdrawal amount is {self.MINIMUM_WITHDRAWAL_AMOUNT} {org_currency}",
+                        "error": str(
+                            _(
+                                "Minimum withdrawal amount is %(amount)s %(currency)s"
+                            )
+                            % {
+                                "amount": self.MINIMUM_WITHDRAWAL_AMOUNT,
+                                "currency": org_currency,
+                            }
+                        ),
                     },
                     status=400,
                 )
 
             if not phone_number:
                 return JsonResponse(
-                    {"success": False, "error": "Phone number is required"}, status=400
+                    {
+                        "success": False,
+                        "error": str(_("Phone number is required")),
+                    },
+                    status=400,
                 )
 
             if not self.PHONE_NUMBER_PATTERN.match(phone_number):
                 return JsonResponse(
                     {
                         "success": False,
-                        "error": "Invalid phone number format. Expected Cameroon number (e.g., +237XXXXXXXXX)",
+                        "error": str(
+                            _(
+                                "Invalid phone number format. Expected Cameroon number (e.g., +237XXXXXXXXX)"
+                            )
+                        ),
                     },
                     status=400,
                 )
@@ -934,7 +951,12 @@ class WithdrawalRequestView(LoginRequiredMixin, View):
                 return JsonResponse(
                     {
                         "success": False,
-                        "error": f"Maximum {self.MAX_WITHDRAWALS_PER_DAY} withdrawals per day exceeded. Try again tomorrow.",
+                        "error": str(
+                            _(
+                                "Maximum %(max)s withdrawals per day exceeded. Try again tomorrow."
+                            )
+                            % {"max": self.MAX_WITHDRAWALS_PER_DAY}
+                        ),
                     },
                     status=429,
                 )
@@ -946,7 +968,16 @@ class WithdrawalRequestView(LoginRequiredMixin, View):
                 return JsonResponse(
                     {
                         "success": False,
-                        "error": f"Minimum balance required is {self.MINIMUM_WITHDRAWAL_AMOUNT} {org_currency}. Your balance: {available_balance} {org_currency}",
+                        "error": str(
+                            _(
+                                "Minimum balance required is %(amount)s %(currency)s. Your balance: %(balance)s %(currency)s"
+                            )
+                            % {
+                                "amount": self.MINIMUM_WITHDRAWAL_AMOUNT,
+                                "currency": org_currency,
+                                "balance": available_balance,
+                            }
+                        ),
                     },
                     status=400,
                 )
@@ -955,7 +986,15 @@ class WithdrawalRequestView(LoginRequiredMixin, View):
                 return JsonResponse(
                     {
                         "success": False,
-                        "error": f"Insufficient balance. Available: {available_balance} {org_currency}",
+                        "error": str(
+                            _(
+                                "Insufficient balance. Available: %(balance)s %(currency)s"
+                            )
+                            % {
+                                "balance": available_balance,
+                                "currency": org_currency,
+                            }
+                        ),
                     },
                     status=400,
                 )
@@ -1006,7 +1045,9 @@ class WithdrawalRequestView(LoginRequiredMixin, View):
                 return JsonResponse(
                     {
                         "success": True,
-                        "message": "Withdrawal request submitted successfully",
+                        "message": str(
+                            _("Withdrawal request submitted successfully")
+                        ),
                         "reference": str(withdrawal.reference),
                         "net_amount": float(net_amount),
                         "platform_commission": float(platform_commission),
@@ -1024,23 +1065,35 @@ class WithdrawalRequestView(LoginRequiredMixin, View):
             return JsonResponse(
                 {
                     "success": False,
-                    "error": "An unexpected error occurred. Please try again later.",
+                    "error": str(
+                        _(
+                            "An unexpected error occurred. Please try again later."
+                        )
+                    ),
                 },
                 status=500,
             )
 
     GATEWAY_ERROR_MAP = {
-        "insufficient balance": "Withdrawal is temporarily unavailable. Please try again later or contact support.",
-        "token error": "Payment service is temporarily unavailable. Please try again later.",
-        "disburse error": "Could not process your withdrawal. Please try again later.",
+        "insufficient balance": _(
+            "Withdrawal is temporarily unavailable. Please try again later or contact support."
+        ),
+        "token error": _(
+            "Payment service is temporarily unavailable. Please try again later."
+        ),
+        "disburse error": _(
+            "Could not process your withdrawal. Please try again later."
+        ),
     }
 
     def _friendly_gateway_error(self, raw_message):
         lower = (raw_message or "").lower().strip()
         for key, friendly in self.GATEWAY_ERROR_MAP.items():
             if key in lower:
-                return friendly
-        return "Could not process your withdrawal. Please try again later."
+                return str(friendly)
+        return str(
+            _("Could not process your withdrawal. Please try again later.")
+        )
 
 
 class WithdrawalListView(LoginRequiredMixin, View):

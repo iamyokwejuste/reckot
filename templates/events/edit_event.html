@@ -33,7 +33,7 @@
 <a href="{% url 'events:dashboard' event.organization.slug event.slug %}">
     {% #button variant="outline" size="sm" %}
         <i data-lucide="arrow-left" class="w-4 h-4"></i>
-        {% trans "Back to Dashboard" %}
+        {% trans "Back to dashboard" %}
     {% /button %}
 </a>
 {% endblock %}
@@ -406,7 +406,7 @@
             </button>
 
             <button data-submit-button type="button" data-action="click->event-form#submitFormButton" class="btn btn-default hidden">
-                <span>{% trans "Save Changes" %}</span>
+                <span>{% trans "Save changes" %}</span>
                 <i data-lucide="check" class="w-4 h-4 ml-1"></i>
             </button>
         </div>

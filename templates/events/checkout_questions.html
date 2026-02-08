@@ -17,7 +17,7 @@
         <a href="{% url 'events:dashboard' org_slug=event.organization.slug event_slug=event.slug %}">
             {% #button variant="outline" size="sm" %}
                 <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                {% trans "Back to Event" %}
+                {% trans "Back to event" %}
             {% /button %}
         </a>
         <span class="text-sm text-muted-foreground">{% blocktrans count counter=questions.count %}{{ counter }} question{% plural %}{{ counter }} questions{% endblocktrans %}</span>
@@ -128,7 +128,7 @@
             </li>
             <li class="flex items-start gap-2">
                 <i data-lucide="check" class="w-4 h-4 text-emerald-500 mt-0.5"></i>
-                <span>{% trans "\"Per ticket\" questions are asked for each ticket purchased" %}</span>
+                <span>{% trans '"Per ticket" questions are asked for each ticket purchased' %}</span>
             </li>
             <li class="flex items-start gap-2">
                 <i data-lucide="check" class="w-4 h-4 text-emerald-500 mt-0.5"></i>

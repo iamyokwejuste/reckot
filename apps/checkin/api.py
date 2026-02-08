@@ -3,6 +3,7 @@ import logging
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
+from django.utils.translation import gettext_lazy as _
 from django.views import View
 
 from apps.checkin.models import CheckIn
@@ -21,7 +22,7 @@ class OfflineDataView(View):
             event = Event.objects.get(slug=event_slug, organization__slug=org_slug)
 
             if not event.organization.members.filter(id=request.user.id).exists():
-                return JsonResponse({"error": "Permission denied"}, status=403)
+                return JsonResponse({"error": str(_("Permission denied"))}, status=403)
 
             tickets = list(
                 Ticket.objects.filter(booking__event=event)
@@ -69,10 +70,10 @@ class OfflineDataView(View):
             )
 
         except Event.DoesNotExist:
-            return JsonResponse({"error": "Event not found"}, status=404)
+            return JsonResponse({"error": str(_("Event not found"))}, status=404)
         except Exception as e:
             logger.error(f"Error fetching offline data: {e}", exc_info=True)
-            return JsonResponse({"error": str(e)}, status=500)
+            return JsonResponse({"error": str(_("An error occurred. Please try again."))}, status=500)
 
 
 @method_decorator(login_required, name="dispatch")
@@ -86,7 +87,7 @@ class SyncCheckinView(View):
             notes = data.get("notes", "")
 
             if not ticket_code:
-                return JsonResponse({"error": "Ticket code required"}, status=400)
+                return JsonResponse({"error": str(_("Ticket code is required."))}, status=400)
 
             result = verify_and_checkin(ticket_code, request.user)
 
@@ -110,7 +111,7 @@ class SyncCheckinView(View):
 
         except Exception as e:
             logger.error(f"Error syncing check-in: {e}", exc_info=True)
-            return JsonResponse({"error": str(e)}, status=500)
+            return JsonResponse({"error": str(_("An error occurred. Please try again."))}, status=500)
 
 
 @method_decorator(login_required, name="dispatch")
@@ -124,7 +125,7 @@ class SyncSwagCollectionView(View):
             swag_item_id = data.get("swagItemId")
 
             if not ticket_code or not swag_item_id:
-                return JsonResponse({"error": "Missing required fields"}, status=400)
+                return JsonResponse({"error": str(_("Missing required fields"))}, status=400)
 
             checkin = (
                 CheckIn.objects.filter(ticket__code=ticket_code)
@@ -133,7 +134,7 @@ class SyncSwagCollectionView(View):
             )
 
             if not checkin:
-                return JsonResponse({"error": "Check-in not found"}, status=404)
+                return JsonResponse({"error": str(_("Check-in not found"))}, status=404)
 
             result = collect_swag(checkin.id, swag_item_id)
 
@@ -144,4 +145,4 @@ class SyncSwagCollectionView(View):
 
         except Exception as e:
             logger.error(f"Error syncing swag collection: {e}", exc_info=True)
-            return JsonResponse({"error": str(e)}, status=500)
+            return JsonResponse({"error": str(_("An error occurred. Please try again."))}, status=500)

@@ -212,7 +212,7 @@ class InviteMemberView(LoginRequiredMixin, OrgPermissionMixin, View):
             return redirect("orgs:invite_member", slug=slug)
 
         if role == MemberRole.OWNER:
-            messages.error(request, _("Cannot invite someone as Owner."))
+            messages.error(request, _("Cannot invite users as Owner."))
             return redirect("orgs:invite_member", slug=slug)
 
         existing_user = User.objects.filter(email=email).first()

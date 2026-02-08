@@ -1,10 +1,13 @@
 {% extends 'base.html' %}
 {% load slippers %}
+{% load i18n %}
 
 {% block content %}
 <div class="max-w-md mx-auto py-12 text-center">
-    {% #empty_state title="Server Error (500)" description="Something went wrong on our end." %}
-        <p class="text-sm text-muted mt-4">We're working to fix it. Please try again later.</p>
+    {% trans "Server Error (500)" as error_title %}
+    {% trans "Something went wrong on our end." as error_description %}
+    {% #empty_state title=error_title description=error_description %}
+        <p class="text-sm text-muted mt-4">{% trans "We're working to fix it. Please try again later." %}</p>
     {% /empty_state %}
 </div>
 {% endblock %}

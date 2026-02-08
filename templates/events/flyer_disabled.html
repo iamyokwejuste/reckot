@@ -12,12 +12,12 @@
         </div>
         <h1 class="text-2xl font-bold mb-2">{% trans "Flyer Not Available" %}</h1>
         <p class="text-muted-foreground mb-6">
-            {% trans "The \"I Will Be There\" flyer feature is not enabled for this event." %}
+            {% trans 'The "I Will Be There" flyer feature is not enabled for this event.' %}
         </p>
         <a href="{% url 'events:public_detail' org_slug=event.organization.slug event_slug=event.slug %}">
             {% #button variant="default" %}
                 <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i>
-                {% trans "Back to Event" %}
+                {% trans "Back to event" %}
             {% /button %}
         </a>
     </div>

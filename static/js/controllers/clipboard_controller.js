@@ -5,6 +5,7 @@ export default class extends Controller {
     static values = {
         text: String,
         successMessage: { type: String, default: "Copied!" },
+        errorMessage: { type: String, default: "Failed to copy" },
         successDuration: { type: Number, default: 2000 }
     }
 
@@ -59,7 +60,7 @@ export default class extends Controller {
         const originalHTML = button.innerHTML
         const originalClasses = button.className
 
-        button.innerHTML = 'Failed to copy'
+        button.innerHTML = this.errorMessageValue
         button.classList.add('bg-destructive', 'text-destructive-foreground')
 
         setTimeout(() => {
