@@ -5,7 +5,7 @@ export default class extends Controller {
   static values = {
     eventSlug: String,
     orgSlug: String,
-    syncInterval: { type: Number, default: 300000 } // 5 minutes
+    syncInterval: { type: Number, default: 300000 }
   };
 
   connect() {
@@ -367,20 +367,25 @@ export default class extends Controller {
     this.updateStatusUI();
   }
 
-  // Sync operations
   async syncEventData() {
-    if (!this.isOnline || !this.hasEventSlugValue) {
+    if (!this.isOnline || !this.hasEventSlugValue || !this.hasOrgSlugValue) {
       return false;
     }
 
     if (this.hasSyncButtonTarget) {
       this.syncButtonTarget.disabled = true;
-      const originalText = this.syncButtonTarget.textContent;
-      this.syncButtonTarget.textContent = 'Syncing...';
+      const icon = this.syncButtonTarget.querySelector('i[data-lucide]');
+      if (icon) {
+        icon.setAttribute('data-lucide', 'loader-2');
+        icon.classList.add('animate-spin');
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      }
     }
 
     try {
-      const response = await fetch(`/api/checkin/${this.eventSlugValue}/offline-data/`, {
+      const response = await fetch(`/api/checkin/${this.orgSlugValue}/${this.eventSlugValue}/offline-data/`, {
         headers: {
           'X-Requested-With': 'XMLHttpRequest'
         }
@@ -398,12 +403,22 @@ export default class extends Controller {
       this.updateStatusUI();
       return true;
     } catch (error) {
+      console.error('[CheckinOffline] Sync failed:', error);
       this.showNotification('Failed to sync event data', 'error');
       return false;
     } finally {
       if (this.hasSyncButtonTarget) {
         this.syncButtonTarget.disabled = false;
-        this.syncButtonTarget.textContent = 'Sync Data';
+        // Restore the icon
+        const icon = this.syncButtonTarget.querySelector('i[data-lucide]');
+        if (icon) {
+          icon.setAttribute('data-lucide', 'refresh-cw');
+          icon.classList.remove('animate-spin');
+          // Re-initialize lucide icons
+          if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+          }
+        }
       }
     }
   }

@@ -53,7 +53,6 @@ waitForStimulus(async () => {
         { name: 'form-persistence', path: 'form-persistence_controller.js' },
         { name: 'motion', path: 'motion_controller.js' },
         { name: 'coupon-form', path: 'coupon-form_controller.js' },
-        { name: 'checkin-offline', path: 'checkin-offline_controller.js' },
         { name: 'checkin-offline-sync', path: 'checkin-offline-sync_controller.js' },
         { name: 'withdrawal', path: 'withdrawal_controller.js' },
         { name: 'image-compress', path: 'image_compress_controller.js' },

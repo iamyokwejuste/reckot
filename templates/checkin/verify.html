@@ -28,7 +28,7 @@
 
 {% block header_actions %}
 <div class="flex items-center gap-2">
-    <div data-checkin-offline-sync-target="offlineModeIndicator" class="hidden flex items-center gap-2">
+    <div data-checkin-offline-sync-target="indicator" class="hidden flex items-center gap-2">
         {% #badge data-checkin-offline-sync-target="statusBadge" variant="warning" %}Offline{% /badge %}
         <span data-checkin-offline-sync-target="pendingCount" class="text-xs text-muted-foreground hidden"></span>
     </div>
@@ -58,12 +58,15 @@
                 <div class="flex items-center gap-4">
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox"
-                               data-checkin-offline-sync-target="offlineModeToggle"
+                               data-checkin-offline-sync-target="toggle"
                                data-action="change->checkin-offline-sync#toggleOfflineMode"
                                class="toggle">
                         <span class="text-sm">{% trans "Enable" %}</span>
                     </label>
-                    {% #button data-action="click->checkin-offline-sync#syncNow" variant="outline" size="sm" %}
+                    {% #button data-checkin-offline-sync-target="syncButton"
+                               data-action="click->checkin-offline-sync#syncNow"
+                               variant="outline"
+                               size="sm" %}
                         <i data-lucide="refresh-cw" class="mr-2 h-4 w-4"></i>
                         {% trans "Sync Data" %}
                     {% /button %}
