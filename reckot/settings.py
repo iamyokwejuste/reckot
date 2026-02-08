@@ -162,7 +162,10 @@ DATABASES = {
     },
 }
 
+import ssl
+
 REDIS_URL = os.getenv("REDIS_URL", "redis://127.0.0.1:6379/1")
+_SSL_CERT_REQS = getattr(ssl, os.getenv("REDIS_SSL_CERT_REQS", "CERT_NONE"), ssl.CERT_NONE)
 
 _redis_options = {
     "CLIENT_CLASS": "django_redis.client.DefaultClient",
@@ -174,8 +177,7 @@ _redis_options = {
 }
 
 if REDIS_URL.startswith("rediss://"):
-
-    _redis_options["CONNECTION_POOL_KWARGS"] = {"ssl_cert_reqs": ssl.CERT_REQUIRED}
+    _redis_options["CONNECTION_POOL_KWARGS"] = {"ssl_cert_reqs": _SSL_CERT_REQS}
 
 CACHES = {
     "default": {
@@ -210,10 +212,8 @@ CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://127.0.0.1:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://127.0.0.1:6379/0")
 
 if CELERY_BROKER_URL.startswith("rediss://"):
-    import ssl
-
-    CELERY_BROKER_USE_SSL = {"ssl_cert_reqs": ssl.CERT_REQUIRED}
-    CELERY_REDIS_BACKEND_USE_SSL = {"ssl_cert_reqs": ssl.CERT_REQUIRED}
+    CELERY_BROKER_USE_SSL = {"ssl_cert_reqs": _SSL_CERT_REQS}
+    CELERY_REDIS_BACKEND_USE_SSL = {"ssl_cert_reqs": _SSL_CERT_REQS}
 
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
