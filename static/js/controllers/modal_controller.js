@@ -9,6 +9,25 @@ export default class extends Controller {
 
     open(event) {
         event?.preventDefault();
+
+        const modalId = event?.currentTarget?.dataset?.modalId;
+        if (modalId) {
+            const modalElement = document.getElementById(modalId);
+            if (modalElement) {
+                modalElement.classList.remove("hidden");
+                const escapeHandlerForModal = (e) => {
+                    if (e.key === "Escape") {
+                        modalElement.classList.add("hidden");
+                        document.removeEventListener("keydown", escapeHandlerForModal);
+                        document.body.style.overflow = "";
+                    }
+                };
+                document.addEventListener("keydown", escapeHandlerForModal);
+                document.body.style.overflow = "hidden";
+                return;
+            }
+        }
+
         if (this.hasContainerTarget) {
             this.containerTarget.classList.remove("hidden");
             document.addEventListener("keydown", this.escapeHandler);
