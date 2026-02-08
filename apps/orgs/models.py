@@ -251,7 +251,7 @@ class Invitation(models.Model):
     organization = models.ForeignKey(
         Organization, on_delete=models.CASCADE, related_name="invitations"
     )
-    email = models.EmailField()
+    email = models.EmailField(blank=True, help_text=_("Email address (leave blank for shareable links)"))
     role = models.CharField(
         max_length=20, choices=MemberRole.choices, default=MemberRole.MEMBER
     )

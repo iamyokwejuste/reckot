@@ -272,6 +272,38 @@ class InviteMemberView(LoginRequiredMixin, OrgPermissionMixin, View):
         return redirect("orgs:members", slug=slug)
 
 
+class GenerateInviteLinkView(LoginRequiredMixin, OrgPermissionMixin, View):
+    required_permission = "invite_members"
+
+    def post(self, request, slug):
+        organization = self.organization
+        role = request.POST.get("role", MemberRole.MEMBER)
+
+        if role == MemberRole.OWNER:
+            messages.error(request, _("Cannot create invite links for Owner role."))
+            return redirect("orgs:invite_member", slug=slug)
+
+        if role not in [r[0] for r in MemberRole.choices]:
+            messages.error(request, _("Invalid role selected."))
+            return redirect("orgs:invite_member", slug=slug)
+
+        invitation = Invitation.objects.create(
+            organization=organization,
+            email="",
+            role=role,
+            message="",
+            invited_by=request.user,
+        )
+
+        invite_url = request.build_absolute_uri(f"/orgs/invite/{invitation.token}/")
+
+        request.session['generated_invite_url'] = invite_url
+        request.session['generated_invite_role'] = role
+
+        messages.success(request, _("Shareable invitation link generated successfully."))
+        return redirect("orgs:invite_member", slug=slug)
+
+
 class UpdateMemberRoleView(LoginRequiredMixin, OrgPermissionMixin, View):
     required_permission = "manage_members"
 

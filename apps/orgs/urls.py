@@ -29,6 +29,11 @@ urlpatterns = [
         name="invite_member",
     ),
     path(
+        "<slug:slug>/members/generate-link/",
+        actions.GenerateInviteLinkView.as_view(),
+        name="generate_invite_link",
+    ),
+    path(
         "<slug:slug>/members/bulk-invite/",
         actions.BulkInviteView.as_view(),
         name="bulk_invite",
