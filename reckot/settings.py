@@ -1,4 +1,5 @@
 import os
+import ssl
 from pathlib import Path
 from decimal import Decimal
 from dotenv import load_dotenv
@@ -161,36 +162,40 @@ DATABASES = {
     },
 }
 
+REDIS_URL = os.getenv("REDIS_URL", "redis://127.0.0.1:6379/1")
+
+_redis_options = {
+    "CLIENT_CLASS": "django_redis.client.DefaultClient",
+    "PARSER_CLASS": "redis.connection._HiredisParser",
+    "CONNECTION_POOL_CLASS_KWARGS": {
+        "max_connections": 50,
+        "retry_on_timeout": True,
+    },
+}
+
+if REDIS_URL.startswith("rediss://"):
+
+    _redis_options["CONNECTION_POOL_KWARGS"] = {"ssl_cert_reqs": ssl.CERT_REQUIRED}
+
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.getenv("REDIS_URL", "redis://127.0.0.1:6379/1"),
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "PARSER_CLASS": "redis.connection._HiredisParser",
-            "CONNECTION_POOL_CLASS_KWARGS": {
-                "max_connections": 50,
-                "retry_on_timeout": True,
-            },
-        },
+        "LOCATION": REDIS_URL,
+        "OPTIONS": {**_redis_options},
         "KEY_PREFIX": "reckot",
         "TIMEOUT": 300,
     },
     "analytics": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.getenv("REDIS_URL", "redis://127.0.0.1:6379/2"),
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        },
+        "LOCATION": REDIS_URL.rsplit("/", 1)[0] + "/2",
+        "OPTIONS": {**_redis_options},
         "KEY_PREFIX": "analytics",
         "TIMEOUT": 600,
     },
     "reports": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.getenv("REDIS_URL", "redis://127.0.0.1:6379/3"),
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        },
+        "LOCATION": REDIS_URL.rsplit("/", 1)[0] + "/3",
+        "OPTIONS": {**_redis_options},
         "KEY_PREFIX": "reports",
         "TIMEOUT": 900,
     },
@@ -203,6 +208,13 @@ SESSION_CACHE_ALIAS = "default"
 
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://127.0.0.1:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://127.0.0.1:6379/0")
+
+if CELERY_BROKER_URL.startswith("rediss://"):
+    import ssl
+
+    CELERY_BROKER_USE_SSL = {"ssl_cert_reqs": ssl.CERT_REQUIRED}
+    CELERY_REDIS_BACKEND_USE_SSL = {"ssl_cert_reqs": ssl.CERT_REQUIRED}
+
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
