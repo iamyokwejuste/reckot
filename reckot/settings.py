@@ -169,15 +169,14 @@ _SSL_CERT_REQS = getattr(ssl, os.getenv("REDIS_SSL_CERT_REQS", "CERT_NONE"), ssl
 
 _redis_options = {
     "CLIENT_CLASS": "django_redis.client.DefaultClient",
-    "PARSER_CLASS": "redis.connection._HiredisParser",
-    "CONNECTION_POOL_CLASS_KWARGS": {
+    "CONNECTION_POOL_KWARGS": {
         "max_connections": 50,
         "retry_on_timeout": True,
     },
 }
 
 if REDIS_URL.startswith("rediss://"):
-    _redis_options["CONNECTION_POOL_KWARGS"] = {"ssl_cert_reqs": _SSL_CERT_REQS}
+    _redis_options["CONNECTION_POOL_KWARGS"]["ssl_cert_reqs"] = _SSL_CERT_REQS
 
 CACHES = {
     "default": {

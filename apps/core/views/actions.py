@@ -109,6 +109,8 @@ class WhyUsView(View):
 
 @method_decorator(csrf_exempt, name="dispatch")
 class HealthCheckView(View):
+    logger = __import__("logging").getLogger("reckot.health")
+
     def get(self, request):
         status = {"status": "ok", "service": "reckot"}
         http_status = 200
@@ -120,6 +122,7 @@ class HealthCheckView(View):
             status["database"] = f"error: {str(e)}"
             status["status"] = "unhealthy"
             http_status = 503
+            self.logger.error("Health check DB failed: %s", e)
 
         try:
             cache.set("health_check", "ok", 10)
@@ -129,10 +132,12 @@ class HealthCheckView(View):
                 status["redis"] = "cache test failed"
                 status["status"] = "unhealthy"
                 http_status = 503
+                self.logger.error("Health check Redis: cache test failed")
         except Exception as e:
             status["redis"] = f"error: {str(e)}"
             status["status"] = "unhealthy"
             http_status = 503
+            self.logger.error("Health check Redis failed: %s", e)
 
         return JsonResponse(status, status=http_status)
 
