@@ -29,7 +29,7 @@ export default class extends Controller {
     currentStepValueChanged(newStep) {
         this.updateUI();
 
-        if (newStep === 2 || newStep === 5) {
+        if (newStep === 2) {
             this.initializeDatePickers();
         }
     }
@@ -134,8 +134,9 @@ export default class extends Controller {
     }
 
     submitFormButton() {
+        if (!this.validateStep5()) return;
         const form = this.element.querySelector('form');
-        if (form) form.submit();
+        if (form) form.requestSubmit();
     }
 
     clearError(event) {
@@ -244,13 +245,37 @@ export default class extends Controller {
         if (checkbox && cfpFields) {
             cfpFields.classList.toggle('hidden', !checkbox.checked);
         }
-
-        if (checkbox?.checked && this.currentStepValue === 5) {
-            this.initializeDatePickers();
-        }
     }
 
-    submitForm(event) {}
+    validateStep5() {
+        this.errors = {};
+
+        const checkbox = this.element.querySelector('[name="enable_cfp"]');
+        if (checkbox?.checked) {
+            const opensAt = this.element.querySelector('[name="cfp_opens_at"]');
+            if (!opensAt?.value) {
+                this.errors.cfp_opens_at = 'CFP opening date is required';
+            }
+
+            const closesAt = this.element.querySelector('[name="cfp_closes_at"]');
+            if (!closesAt?.value) {
+                this.errors.cfp_closes_at = 'CFP closing date is required';
+            }
+
+            if (opensAt?.value && closesAt?.value && new Date(opensAt.value) >= new Date(closesAt.value)) {
+                this.errors.cfp_closes_at = 'Closing date must be after opening date';
+            }
+        }
+
+        this.displayErrors();
+        return Object.keys(this.errors).length === 0;
+    }
+
+    submitForm(event) {
+        if (!this.validateStep5()) {
+            event.preventDefault();
+        }
+    }
 
     updateUI() {
         const steps = [this.step1Target, this.step2Target, this.step3Target, this.step4Target];

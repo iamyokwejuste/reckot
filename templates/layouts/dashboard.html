@@ -10,8 +10,27 @@
             var mode = localStorage.getItem('theme') || 'system';
             var isDark = mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
             if (isDark) document.documentElement.classList.add('dark');
+            if (localStorage.getItem('sidebarCollapsed') === 'true') {
+                document.documentElement.dataset.sidebarCollapsed = 'true';
+            }
         })();
     </script>
+    <style>
+        @media (min-width: 1024px) {
+            html[data-sidebar-collapsed="true"] [data-sidebar-target="sidebar"] { width: 68px; }
+            html[data-sidebar-collapsed="true"] .main-content { padding-left: 68px; }
+            html[data-sidebar-collapsed="true"] .sidebar-text,
+            html[data-sidebar-collapsed="true"] .theme-text,
+            html[data-sidebar-collapsed="true"] .sidebar-section-title,
+            html[data-sidebar-collapsed="true"] .sidebar-footer,
+            html[data-sidebar-collapsed="true"] .sidebar-logo-full,
+            html[data-sidebar-collapsed="true"] .sidebar-mode-full { display: none; }
+            html[data-sidebar-collapsed="true"] .sidebar-logo-icon,
+            html[data-sidebar-collapsed="true"] .sidebar-mode-icon { display: block; }
+            html[data-sidebar-collapsed="true"] [data-sidebar-target="collapseIcon"] { display: none; }
+            html[data-sidebar-collapsed="true"] [data-sidebar-target="expandIcon"] { display: block; }
+        }
+    </style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% trans "Dashboard" %} - Reckot{% endblock %}</title>
 

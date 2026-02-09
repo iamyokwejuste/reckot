@@ -55,6 +55,11 @@ export default class extends Controller {
             config.maxDate = new Date(this.maxDateValue);
         }
 
+        config.onChange = (selectedDates, dateStr) => {
+            this.element.value = dateStr;
+            this.element.dispatchEvent(new Event('change', { bubbles: true }));
+        };
+
         try {
             this.flatpickrInstance = flatpickr(this.element, config);
         } catch(e) {

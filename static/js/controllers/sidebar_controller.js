@@ -14,6 +14,7 @@ export default class extends Controller {
         }
 
         this.updateCollapsedUI(this.collapsedValue);
+        delete document.documentElement.dataset.sidebarCollapsed;
     }
 
     openValueChanged(isOpen) {

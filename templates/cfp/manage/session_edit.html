@@ -3,6 +3,10 @@
 
 {% block title %}{% trans "Edit Session" %} - {{ session.title }} - Reckot{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+{% endblock %}
+
 {% block breadcrumbs %}
 {% #breadcrumb class="mb-4" %}
     {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
@@ -123,14 +127,36 @@
 
             <div class="grid gap-4 sm:grid-cols-2">
                 {% #form_field label=_("Starts at") name="starts_at" %}
-                    {% #input type="datetime-local" name="starts_at" id="starts_at" value=form.starts_at.value %}{% /input %}
+                    <div class="relative">
+                        <div class="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground z-10">
+                            <i data-lucide="calendar-clock" class="w-4 h-4"></i>
+                        </div>
+                        <input type="text" name="starts_at" id="starts_at"
+                               {% if form.starts_at.value %}value="{{ form.starts_at.value }}"{% endif %}
+                               placeholder="{% trans "Select date and time" %}"
+                               class="input w-full pl-12 cursor-pointer"
+                               data-controller="datepicker"
+                               data-datepicker-enable-time-value="true"
+                               readonly>
+                    </div>
                     {% if form.starts_at.errors %}
                     <p class="text-sm text-destructive mt-1">{{ form.starts_at.errors.0 }}</p>
                     {% endif %}
                 {% /form_field %}
 
                 {% #form_field label=_("Ends at") name="ends_at" %}
-                    {% #input type="datetime-local" name="ends_at" id="ends_at" value=form.ends_at.value %}{% /input %}
+                    <div class="relative">
+                        <div class="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground z-10">
+                            <i data-lucide="calendar-clock" class="w-4 h-4"></i>
+                        </div>
+                        <input type="text" name="ends_at" id="ends_at"
+                               {% if form.ends_at.value %}value="{{ form.ends_at.value }}"{% endif %}
+                               placeholder="{% trans "Select date and time" %}"
+                               class="input w-full pl-12 cursor-pointer"
+                               data-controller="datepicker"
+                               data-datepicker-enable-time-value="true"
+                               readonly>
+                    </div>
                     {% if form.ends_at.errors %}
                     <p class="text-sm text-destructive mt-1">{{ form.ends_at.errors.0 }}</p>
                     {% endif %}
@@ -162,4 +188,8 @@
         </form>
     {% /card %}
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+{% include "partials/datepicker_init.html" %}
 {% endblock %}

@@ -99,7 +99,7 @@
                                    {% if ticket_type.sales_start %}value="{{ ticket_type.sales_start|date:'Y-m-d H:i' }}"{% endif %}
                                    placeholder="Select date and time"
                                    class="input w-full pl-12 cursor-pointer"
-                                   data-datepicker data-enable-time="true" data-min-date="today" readonly>
+                                   data-controller="datepicker" data-datepicker-enable-time-value="true" data-datepicker-min-date-value="today" readonly>
                         </div>
                         <p class="text-xs text-muted-foreground mt-1">{% trans "When ticket sales begin" %}</p>
                     </div>
@@ -114,7 +114,7 @@
                                    {% if ticket_type.sales_end %}value="{{ ticket_type.sales_end|date:'Y-m-d H:i' }}"{% endif %}
                                    placeholder="Select date and time"
                                    class="input w-full pl-12 cursor-pointer"
-                                   data-datepicker data-enable-time="true" data-min-date="today" readonly>
+                                   data-controller="datepicker" data-datepicker-enable-time-value="true" data-datepicker-min-date-value="today" readonly>
                         </div>
                         <p class="text-xs text-muted-foreground mt-1">{% trans "When ticket sales end (e.g., early bird deadline)" %}</p>
                     </div>

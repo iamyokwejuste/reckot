@@ -413,12 +413,14 @@ class EventEditView(LoginRequiredMixin, View):
             organization__members=request.user,
         )
         form = EventForm(instance=event)
+        has_cfp = hasattr(event, "cfp")
         return render(
             request,
             "events/edit_event.html",
             {
                 "form": form,
                 "event": event,
+                "has_cfp": has_cfp,
             },
         )
 
@@ -433,16 +435,37 @@ class EventEditView(LoginRequiredMixin, View):
         form = EventForm(request.POST, request.FILES, instance=event)
         if form.is_valid():
             form.save()
+
+            enable_cfp = request.POST.get("enable_cfp")
+            has_cfp = hasattr(event, "cfp")
+
+            if enable_cfp and request.POST.get("cfp_opens_at") and request.POST.get("cfp_closes_at"):
+                cfp_data = {
+                    "title": request.POST.get("cfp_title", "Call for proposals"),
+                    "description": request.POST.get("cfp_description", ""),
+                    "opens_at": request.POST.get("cfp_opens_at"),
+                    "closes_at": request.POST.get("cfp_closes_at"),
+                    "max_submissions_per_speaker": int(request.POST.get("cfp_max_submissions", 3)),
+                }
+                if has_cfp:
+                    for attr, value in cfp_data.items():
+                        setattr(event.cfp, attr, value)
+                    event.cfp.save()
+                else:
+                    CallForProposals.objects.create(event=event, **cfp_data)
+
             return redirect(
                 "events:dashboard", org_slug=org_slug, event_slug=event.slug
             )
 
+        has_cfp = hasattr(event, "cfp")
         return render(
             request,
             "events/edit_event.html",
             {
                 "form": form,
                 "event": event,
+                "has_cfp": has_cfp,
             },
         )
 

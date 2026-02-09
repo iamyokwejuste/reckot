@@ -18,11 +18,11 @@
             placeholder="{{ placeholder|default:'Select date' }}"
             class="input w-full pl-12 cursor-pointer {{ class }}"
             {% if required %}required{% endif %}
-            data-datepicker
-            {% if enable_time %}data-enable-time="true"{% endif %}
-            {% if time_24hr %}data-time-24hr="true"{% endif %}
-            {% if min_date %}data-min-date="{{ min_date }}"{% endif %}
-            {% if max_date %}data-max-date="{{ max_date }}"{% endif %}
+            data-controller="datepicker"
+            {% if enable_time %}data-datepicker-enable-time-value="true"{% endif %}
+            {% if time_24hr %}data-datepicker-time24hr-value="true"{% endif %}
+            {% if min_date %}data-datepicker-min-date-value="{{ min_date }}"{% endif %}
+            {% if max_date %}data-datepicker-max-date-value="{{ max_date }}"{% endif %}
             readonly
         >
     </div>
