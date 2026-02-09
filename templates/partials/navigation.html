@@ -2,11 +2,12 @@
 {% load static %}
 {% load i18n %}
 
-<div data-controller="navbar">
-<header class="sticky top-0 z-50 w-full bg-background border-b border-border backdrop-blur-sm bg-background/95 supports-[backdrop-filter]:bg-background/80">
+<div data-controller="navbar" data-action="scroll@window->navbar#onScroll">
+<div class="h-16"></div>
+<header data-navbar-target="header" class="navbar-header fixed z-50 bg-background border-b border-border backdrop-blur-sm bg-background/95 supports-[backdrop-filter]:bg-background/80">
     <div class="container">
         <nav class="flex h-16 items-center justify-between" aria-label="Main navigation">
-            <a href="/" class="flex items-center gap-2" aria-label="Reckot Home">
+            <a href="/" class="flex shrink-0 items-center gap-2" aria-label="Reckot Home">
                 {% include "partials/logo_full.html" with class="h-9 w-auto" attrs='width="120" height="36"' %}
             </a>
 
@@ -20,7 +21,7 @@
             </div>
 
             <div class="hidden md:flex items-center gap-3">
-                {% include "partials/language_switcher.html" %}
+                <div class="navbar-dock-only">{% include "partials/language_switcher.html" %}</div>
 
                 <button data-action="click->theme#toggleMode" class="p-2 rounded-lg hover:bg-muted transition-colors" aria-label="Toggle theme">
                     <i data-lucide="moon" class="h-5 w-5 dark:hidden" aria-hidden="true"></i>
@@ -28,7 +29,7 @@
                 </button>
 
                 {% if user.is_authenticated %}
-                <div class="relative"
+                <div class="relative navbar-dock-only"
                      data-controller="notifications"
                      data-notifications-csrf-token-value="{{ csrf_token }}"
                      data-notifications-unread-count-value="{{ unread_notifications_count|default:0 }}"
@@ -56,7 +57,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="relative"
+                <div class="relative navbar-dock-only"
                      data-controller="toggle"
                      data-action="click@window->toggle#clickOutside">
                     <button data-action="click->toggle#toggle"
@@ -105,8 +106,8 @@
                     </div>
                 </div>
                 {% else %}
-                <a href="{% url 'account_login' %}" class="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">{% trans "Log in" %}</a>
-                <a href="{% url 'account_signup' %}">{% #button variant="default" %}{% trans "Get started" %}{% /button %}</a>
+                <a href="{% url 'account_login' %}" class="navbar-dock-only px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">{% trans "Log in" %}</a>
+                <a href="{% url 'account_signup' %}" class="navbar-dock-only">{% #button variant="default" %}{% trans "Get started" %}{% /button %}</a>
                 {% endif %}
             </div>
 

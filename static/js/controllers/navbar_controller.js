@@ -1,12 +1,26 @@
 import { Controller } from "https://unpkg.com/@hotwired/stimulus@3.2.2/dist/stimulus.js"
 
 export default class extends Controller {
-    static targets = ["menu", "hamburger", "close", "notifications", "logoLight", "logoDark"]
+    static targets = ["menu", "hamburger", "close", "notifications", "logoLight", "logoDark", "header"]
 
     connect() {
         this.bodyOverflowOriginal = document.body.style.overflow
         this.updateLogos()
         this.setupThemeObserver()
+
+        this.scrollThreshold = 64
+        this.navState = 'docked'
+        this.ticking = false
+
+        if (this.hasHeaderTarget && window.scrollY > this.scrollThreshold && window.innerWidth >= 768) {
+            this.headerTarget.setAttribute('data-navbar-floating', '')
+            const inset = this.measureNavInset() + 'px'
+            this.headerTarget.style.left = inset
+            this.headerTarget.style.right = inset
+            this.headerTarget.style.paddingLeft = '1.5rem'
+            this.headerTarget.style.paddingRight = '1.5rem'
+            this.navState = 'floating'
+        }
     }
 
     setupThemeObserver() {
@@ -100,6 +114,54 @@ export default class extends Controller {
         this.logoDarkTargets.forEach(logo => {
             logo.style.display = isDark ? 'none' : 'block'
         })
+    }
+
+    onScroll() {
+        if (!this.ticking) {
+            requestAnimationFrame(() => {
+                this.updateNavbarState()
+                this.ticking = false
+            })
+            this.ticking = true
+        }
+    }
+
+    measureNavInset() {
+        const nav = this.headerTarget.querySelector('nav')
+        if (!nav) return 8
+        let contentWidth = 0
+        for (const child of nav.children) {
+            if (child.offsetWidth > 0) contentWidth += child.offsetWidth
+        }
+        contentWidth += 96
+        return Math.max(8, (window.innerWidth - contentWidth) / 2)
+    }
+
+    updateNavbarState() {
+        if (!this.hasHeaderTarget) return
+
+        const header = this.headerTarget
+
+        if (window.scrollY <= this.scrollThreshold || window.innerWidth < 768) {
+            if (this.navState !== 'docked') {
+                header.removeAttribute('data-navbar-floating')
+                header.style.left = ''
+                header.style.right = ''
+                header.style.paddingLeft = ''
+                header.style.paddingRight = ''
+                this.navState = 'docked'
+            }
+        } else {
+            if (this.navState !== 'floating') {
+                header.setAttribute('data-navbar-floating', '')
+                const inset = this.measureNavInset() + 'px'
+                header.style.left = inset
+                header.style.right = inset
+                header.style.paddingLeft = '1.5rem'
+                header.style.paddingRight = '1.5rem'
+                this.navState = 'floating'
+            }
+        }
     }
 
     disconnect() {
