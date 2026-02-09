@@ -165,9 +165,10 @@
                     <h3 class="text-sm font-semibold mb-4">{% trans "Sales Window (Early Bird / Limited Time)" %}</h3>
                     <p class="text-xs text-muted-foreground mb-4">{% trans "Leave empty for tickets to be always available. Set dates to create early bird or limited time offers." %}</p>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        {% #datepicker name="sales_start" id="id_sales_start" label="Sales Start" placeholder="{% trans "Select date and time" %}" value=form.sales_start.value|default:'' enable_time=True min_date="today" help_text="When ticket sales begin" %}{% /datepicker %}
+                        {% trans "Select date and time" as datepicker_placeholder %}
+                        {% #datepicker name="sales_start" id="id_sales_start" label="Sales Start" placeholder=datepicker_placeholder value=form.sales_start.value|default:'' enable_time=True min_date="today" help_text="When ticket sales begin" %}{% /datepicker %}
 
-                        {% #datepicker name="sales_end" id="id_sales_end" label="Sales End" placeholder="{% trans "Select date and time" %}" value=form.sales_end.value|default:'' enable_time=True min_date="today" help_text="When ticket sales end (e.g., early bird deadline)" %}{% /datepicker %}
+                        {% #datepicker name="sales_end" id="id_sales_end" label="Sales End" placeholder=datepicker_placeholder value=form.sales_end.value|default:'' enable_time=True min_date="today" help_text="When ticket sales end (e.g., early bird deadline)" %}{% /datepicker %}
                     </div>
                 </div>
 

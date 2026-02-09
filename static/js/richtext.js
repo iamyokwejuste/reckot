@@ -164,7 +164,6 @@ if (typeof window.RichTextEditor === 'undefined') {
     };
 }
 
-// Initialize richtext editors
 if (typeof window.initializeRichTextEditors === 'undefined') {
     window.initializeRichTextEditors = function initializeRichTextEditors(container = document) {
         container.querySelectorAll('[data-richtext]:not([data-richtext-initialized])').forEach(el => {
@@ -189,7 +188,7 @@ if (typeof window.initializeRichTextEditors === 'undefined') {
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 mutation.addedNodes.forEach((node) => {
-                    if (node.nodeType === 1) { // Element node
+                    if (node.nodeType === 1) {
                         if (node.hasAttribute && node.hasAttribute('data-richtext')) {
                             window.initializeRichTextEditors(node.parentElement);
                         } else if (node.querySelectorAll) {

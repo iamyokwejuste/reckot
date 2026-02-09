@@ -41,7 +41,7 @@ const BASE_STEPS = [
         iconColor: 'text-emerald-500',
         title: 'Pricing calculator',
         description: 'Enter your ticket price and quantity to see exactly what you earn. No hidden fees.',
-        arrow: 'right',
+        arrow: 'up',
         navigateTo: '/why-us/#pricing-calculator'
     },
 ];
@@ -199,8 +199,7 @@ export default class extends Controller {
                 setTimeout(() => {
                     const t = this._findVisibleTarget(step.target);
                     if (!t) { this._showStep(index + 1); return; }
-                    this._highlight(t);
-                    this._renderTooltip(t, step, index);
+                    this._positionStep(t, step, index);
                 }, 350);
                 return;
             }
@@ -210,15 +209,27 @@ export default class extends Controller {
 
         if (this._mobileMenuOpened && !target.closest('[data-navbar-target="menu"]')) {
             this._closeMobileMenuIfOpen();
-            setTimeout(() => {
-                this._highlight(target);
-                this._renderTooltip(target, step, index);
-            }, 350);
+            setTimeout(() => this._positionStep(target, step, index), 350);
             return;
         }
 
-        this._highlight(target);
-        this._renderTooltip(target, step, index);
+        this._positionStep(target, step, index);
+    }
+
+    _positionStep(target, step, index) {
+        const rect = target.getBoundingClientRect();
+        const inView = rect.top >= -50 && rect.bottom <= window.innerHeight + 50 && rect.width > 0;
+
+        if (!inView) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+            setTimeout(() => {
+                this._highlight(target);
+                this._renderTooltip(target, step, index);
+            }, 500);
+        } else {
+            this._highlight(target);
+            this._renderTooltip(target, step, index);
+        }
     }
 
     _findVisibleTarget(selector) {
@@ -270,13 +281,11 @@ export default class extends Controller {
         const pad = 12;
         const s = this.spotlightTarget;
 
-        s.style.top = (rect.top + window.scrollY - pad) + 'px';
-        s.style.left = (rect.left + window.scrollX - pad) + 'px';
+        s.style.top = (rect.top - pad) + 'px';
+        s.style.left = (rect.left - pad) + 'px';
         s.style.width = (rect.width + pad * 2) + 'px';
         s.style.height = (rect.height + pad * 2) + 'px';
         s.classList.remove('hidden');
-
-        el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
     }
 
     _renderTooltip(el, step, index) {
@@ -314,24 +323,24 @@ export default class extends Controller {
 
             switch (step.arrow) {
                 case 'up':
-                    top = rect.bottom + window.scrollY + 16;
-                    left = rect.left + window.scrollX + rect.width / 2 - tt.width / 2;
+                    top = rect.bottom + 16;
+                    left = rect.left + rect.width / 2 - tt.width / 2;
                     break;
                 case 'down':
-                    top = rect.top + window.scrollY - tt.height - 16;
-                    left = rect.left + window.scrollX + rect.width / 2 - tt.width / 2;
+                    top = rect.top - tt.height - 16;
+                    left = rect.left + rect.width / 2 - tt.width / 2;
                     break;
                 case 'left':
-                    top = rect.top + window.scrollY + rect.height / 2 - tt.height / 2;
-                    left = rect.right + window.scrollX + 16;
+                    top = rect.top + rect.height / 2 - tt.height / 2;
+                    left = rect.right + 16;
                     break;
                 case 'right':
-                    top = rect.top + window.scrollY + rect.height / 2 - tt.height / 2;
-                    left = rect.left + window.scrollX - tt.width - 16;
+                    top = rect.top + rect.height / 2 - tt.height / 2;
+                    left = rect.left - tt.width - 16;
                     break;
             }
 
-            top = Math.max(16, Math.min(top, window.innerHeight + window.scrollY - tt.height - 16));
+            top = Math.max(16, Math.min(top, window.innerHeight - tt.height - 16));
             left = Math.max(16, Math.min(left, window.innerWidth - tt.width - 16));
 
             this.tooltipTarget.style.top = top + 'px';

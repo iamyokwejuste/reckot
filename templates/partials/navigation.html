@@ -74,7 +74,7 @@
                         <i data-lucide="chevron-down" class="h-4 w-4 text-muted-foreground" aria-hidden="true"></i>
                     </button>
                     <div data-toggle-target="content"
-                         class="hidden absolute right-0 mt-2 w-56 rounded-xl border border-border bg-card p-2 shadow-lg"
+                         class="hidden absolute right-0 mt-2 w-60 max-h-[calc(100vh-5rem)] overflow-y-auto rounded-xl border border-border bg-card p-2 shadow-lg"
                          role="menu">
                         <div class="px-3 py-2 border-b border-border mb-2">
                             <p class="text-sm font-medium truncate">{{ user.email }}</p>
@@ -94,43 +94,66 @@
                             {% trans "My tickets" %}
                         </a>
                         {% if user.active_mode == 'ORGANIZER' %}
-                        <a href="{% url 'events:list' %}" hx-boost="false" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors" role="menuitem">
-                            <i data-lucide="calendar" class="h-4 w-4" aria-hidden="true"></i>
-                            {% trans "Events" %}
-                        </a>
-                        <a href="{% url 'orgs:list' %}" hx-boost="false" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors" role="menuitem">
-                            <i data-lucide="building-2" class="h-4 w-4" aria-hidden="true"></i>
-                            {% trans "Organizations" %}
-                        </a>
-                        <a href="{% url 'reports:analytics' %}" hx-boost="false" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors" role="menuitem">
-                            <i data-lucide="bar-chart-3" class="h-4 w-4" aria-hidden="true"></i>
-                            {% trans "Analytics" %}
-                        </a>
                         <div class="border-t border-border mt-1 pt-1">
-                            <p class="px-3 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">{% trans "Operations" %}</p>
-                            <a href="{% url 'checkin:list' %}" hx-boost="false" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors" role="menuitem">
-                                <i data-lucide="scan-line" class="h-4 w-4" aria-hidden="true"></i>
-                                {% trans "Check-in" %}
-                            </a>
-                            <a href="{% url 'payments:list' %}" hx-boost="false" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors" role="menuitem">
-                                <i data-lucide="credit-card" class="h-4 w-4" aria-hidden="true"></i>
-                                {% trans "Payments" %}
-                            </a>
-                            <a href="{% url 'events:coupons' %}" hx-boost="false" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors" role="menuitem">
-                                <i data-lucide="tag" class="h-4 w-4" aria-hidden="true"></i>
-                                {% trans "Coupons" %}
-                            </a>
-                        </div>
-                        <div class="border-t border-border mt-1 pt-1">
-                            <p class="px-3 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">{% trans "CFP" %}</p>
-                            <a href="{% url 'cfp:dashboard' %}" hx-boost="false" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors" role="menuitem">
-                                <i data-lucide="megaphone" class="h-4 w-4" aria-hidden="true"></i>
-                                {% trans "Call for proposals" %}
-                            </a>
-                            <a href="{% url 'cfp:speakers' %}" hx-boost="false" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors" role="menuitem">
-                                <i data-lucide="mic-2" class="h-4 w-4" aria-hidden="true"></i>
-                                {% trans "Speakers" %}
-                            </a>
+                            <details class="group">
+                                <summary class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors cursor-pointer list-none [&::-webkit-details-marker]:hidden" role="menuitem">
+                                    <i data-lucide="layout-dashboard" class="h-4 w-4" aria-hidden="true"></i>
+                                    {% trans "Manage" %}
+                                    <i data-lucide="chevron-right" class="h-3 w-3 ml-auto text-muted-foreground transition-transform group-open:rotate-90" aria-hidden="true"></i>
+                                </summary>
+                                <div class="ml-7 border-l border-border pl-2 mt-0.5 space-y-0.5">
+                                    <a href="{% url 'events:list' %}" hx-boost="false" class="flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm hover:bg-muted transition-colors" role="menuitem">
+                                        <i data-lucide="calendar" class="h-3.5 w-3.5" aria-hidden="true"></i>
+                                        {% trans "Events" %}
+                                    </a>
+                                    <a href="{% url 'orgs:list' %}" hx-boost="false" class="flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm hover:bg-muted transition-colors" role="menuitem">
+                                        <i data-lucide="building-2" class="h-3.5 w-3.5" aria-hidden="true"></i>
+                                        {% trans "Organizations" %}
+                                    </a>
+                                    <a href="{% url 'reports:analytics' %}" hx-boost="false" class="flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm hover:bg-muted transition-colors" role="menuitem">
+                                        <i data-lucide="bar-chart-3" class="h-3.5 w-3.5" aria-hidden="true"></i>
+                                        {% trans "Analytics" %}
+                                    </a>
+                                </div>
+                            </details>
+                            <details class="group">
+                                <summary class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors cursor-pointer list-none [&::-webkit-details-marker]:hidden" role="menuitem">
+                                    <i data-lucide="wrench" class="h-4 w-4" aria-hidden="true"></i>
+                                    {% trans "Operations" %}
+                                    <i data-lucide="chevron-right" class="h-3 w-3 ml-auto text-muted-foreground transition-transform group-open:rotate-90" aria-hidden="true"></i>
+                                </summary>
+                                <div class="ml-7 border-l border-border pl-2 mt-0.5 space-y-0.5">
+                                    <a href="{% url 'checkin:list' %}" hx-boost="false" class="flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm hover:bg-muted transition-colors" role="menuitem">
+                                        <i data-lucide="scan-line" class="h-3.5 w-3.5" aria-hidden="true"></i>
+                                        {% trans "Check-in" %}
+                                    </a>
+                                    <a href="{% url 'payments:list' %}" hx-boost="false" class="flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm hover:bg-muted transition-colors" role="menuitem">
+                                        <i data-lucide="credit-card" class="h-3.5 w-3.5" aria-hidden="true"></i>
+                                        {% trans "Payments" %}
+                                    </a>
+                                    <a href="{% url 'events:coupons' %}" hx-boost="false" class="flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm hover:bg-muted transition-colors" role="menuitem">
+                                        <i data-lucide="tag" class="h-3.5 w-3.5" aria-hidden="true"></i>
+                                        {% trans "Coupons" %}
+                                    </a>
+                                </div>
+                            </details>
+                            <details class="group">
+                                <summary class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors cursor-pointer list-none [&::-webkit-details-marker]:hidden" role="menuitem">
+                                    <i data-lucide="megaphone" class="h-4 w-4" aria-hidden="true"></i>
+                                    {% trans "CFP" %}
+                                    <i data-lucide="chevron-right" class="h-3 w-3 ml-auto text-muted-foreground transition-transform group-open:rotate-90" aria-hidden="true"></i>
+                                </summary>
+                                <div class="ml-7 border-l border-border pl-2 mt-0.5 space-y-0.5">
+                                    <a href="{% url 'cfp:dashboard' %}" hx-boost="false" class="flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm hover:bg-muted transition-colors" role="menuitem">
+                                        <i data-lucide="file-text" class="h-3.5 w-3.5" aria-hidden="true"></i>
+                                        {% trans "Call for proposals" %}
+                                    </a>
+                                    <a href="{% url 'cfp:speakers' %}" hx-boost="false" class="flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm hover:bg-muted transition-colors" role="menuitem">
+                                        <i data-lucide="mic-2" class="h-3.5 w-3.5" aria-hidden="true"></i>
+                                        {% trans "Speakers" %}
+                                    </a>
+                                </div>
+                            </details>
                         </div>
                         {% endif %}
                         {% if user.active_mode == 'SPEAKER' or user.speaker_profiles.exists %}
@@ -141,28 +164,42 @@
                             </a>
                         </div>
                         {% endif %}
-                        <div class="border-t border-border mt-2 pt-2"
-                             data-controller="user-mode"
-                             data-user-mode-switch-url-value="{% url 'core:switch_mode' %}"
-                             data-user-mode-csrf-token-value="{{ csrf_token }}">
-                            <p class="px-3 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">{% trans "Switch mode" %}</p>
-                            <button type="button" data-mode="ATTENDEE" data-action="click->user-mode#selectMode" class="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors {% if user.active_mode == 'ATTENDEE' %}bg-muted{% endif %}" role="menuitem">
-                                <i data-lucide="user" class="h-4 w-4" aria-hidden="true"></i>
-                                {% trans "Attendee" %}
-                                {% if user.active_mode == 'ATTENDEE' %}<i data-lucide="check" class="h-3 w-3 ml-auto text-primary"></i>{% endif %}
-                            </button>
-                            <button type="button" data-mode="ORGANIZER" data-action="click->user-mode#selectMode" class="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors {% if user.active_mode == 'ORGANIZER' %}bg-muted{% endif %}" role="menuitem">
-                                <i data-lucide="building-2" class="h-4 w-4" aria-hidden="true"></i>
-                                {% trans "Organizer" %}
-                                {% if user.active_mode == 'ORGANIZER' %}<i data-lucide="check" class="h-3 w-3 ml-auto text-primary"></i>{% endif %}
-                            </button>
-                            <button type="button" data-mode="SPEAKER" data-action="click->user-mode#selectMode" class="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors {% if user.active_mode == 'SPEAKER' %}bg-muted{% endif %}" role="menuitem">
-                                <i data-lucide="mic-2" class="h-4 w-4" aria-hidden="true"></i>
-                                {% trans "Speaker" %}
-                                {% if user.active_mode == 'SPEAKER' %}<i data-lucide="check" class="h-3 w-3 ml-auto text-primary"></i>{% endif %}
-                            </button>
+                        <div class="border-t border-border mt-1 pt-1">
+                            <a href="{% url 'core:settings' %}" hx-boost="false" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors" role="menuitem">
+                                <i data-lucide="settings" class="h-4 w-4" aria-hidden="true"></i>
+                                {% trans "Settings" %}
+                            </a>
                         </div>
-                        <div class="border-t border-border mt-2 pt-2">
+                        <div class="border-t border-border mt-1 pt-1">
+                            <details class="group"
+                                     data-controller="user-mode"
+                                     data-user-mode-switch-url-value="{% url 'core:switch_mode' %}"
+                                     data-user-mode-csrf-token-value="{{ csrf_token }}">
+                                <summary class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors cursor-pointer list-none [&::-webkit-details-marker]:hidden" role="menuitem">
+                                    <i data-lucide="repeat" class="h-4 w-4" aria-hidden="true"></i>
+                                    {% trans "Switch mode" %}
+                                    <i data-lucide="chevron-right" class="h-3 w-3 ml-auto text-muted-foreground transition-transform group-open:rotate-90" aria-hidden="true"></i>
+                                </summary>
+                                <div class="ml-7 border-l border-border pl-2 mt-0.5 space-y-0.5">
+                                    <button type="button" data-mode="ATTENDEE" data-action="click->user-mode#selectMode" class="w-full flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm hover:bg-muted transition-colors {% if user.active_mode == 'ATTENDEE' %}bg-muted{% endif %}" role="menuitem">
+                                        <i data-lucide="user" class="h-3.5 w-3.5" aria-hidden="true"></i>
+                                        {% trans "Attendee" %}
+                                        {% if user.active_mode == 'ATTENDEE' %}<i data-lucide="check" class="h-3 w-3 ml-auto text-primary"></i>{% endif %}
+                                    </button>
+                                    <button type="button" data-mode="ORGANIZER" data-action="click->user-mode#selectMode" class="w-full flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm hover:bg-muted transition-colors {% if user.active_mode == 'ORGANIZER' %}bg-muted{% endif %}" role="menuitem">
+                                        <i data-lucide="building-2" class="h-3.5 w-3.5" aria-hidden="true"></i>
+                                        {% trans "Organizer" %}
+                                        {% if user.active_mode == 'ORGANIZER' %}<i data-lucide="check" class="h-3 w-3 ml-auto text-primary"></i>{% endif %}
+                                    </button>
+                                    <button type="button" data-mode="SPEAKER" data-action="click->user-mode#selectMode" class="w-full flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm hover:bg-muted transition-colors {% if user.active_mode == 'SPEAKER' %}bg-muted{% endif %}" role="menuitem">
+                                        <i data-lucide="mic-2" class="h-3.5 w-3.5" aria-hidden="true"></i>
+                                        {% trans "Speaker" %}
+                                        {% if user.active_mode == 'SPEAKER' %}<i data-lucide="check" class="h-3 w-3 ml-auto text-primary"></i>{% endif %}
+                                    </button>
+                                </div>
+                            </details>
+                        </div>
+                        <div class="border-t border-border mt-1 pt-1">
                             <a href="{% url 'account_logout' %}?next={{ request.path }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-red-500 hover:bg-red-500/10 transition-colors" role="menuitem">
                                 <i data-lucide="log-out" class="h-4 w-4" aria-hidden="true"></i>
                                 {% trans "Log out" %}
@@ -356,6 +393,10 @@
 
     <div class="p-6 border-t border-border space-y-3">
         {% if user.is_authenticated %}
+        <a href="{% url 'core:settings' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-muted text-foreground font-medium text-lg active:scale-95 transition-all touch-manipulation">
+            <i data-lucide="settings" class="h-5 w-5" aria-hidden="true"></i>
+            {% trans "Settings" %}
+        </a>
         <a href="{% url 'account_logout' %}?next={{ request.path }}" hx-boost="false" class="flex items-center justify-center gap-2 w-full py-4 rounded-xl text-red-500 bg-red-500/10 font-semibold text-lg active:scale-95 transition-all touch-manipulation">
             <i data-lucide="log-out" class="h-5 w-5" aria-hidden="true"></i>
             {% trans "Log out" %}

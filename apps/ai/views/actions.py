@@ -370,7 +370,6 @@ class ClearConversationView(View):
             session_id = None
 
         if session_id:
-            # Delete the conversation by session_id
             deleted_count, _ = AIConversation.objects.filter(
                 session_id=session_id
             ).delete()
@@ -379,7 +378,6 @@ class ClearConversationView(View):
             )
             return JsonResponse({"status": "ok", "deleted": deleted_count})
         else:
-            # If no session_id, delete all conversations for the authenticated user
             if request.user.is_authenticated:
                 deleted_count, _ = AIConversation.objects.filter(
                     user=request.user

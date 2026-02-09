@@ -56,7 +56,6 @@ export default class extends Controller {
         this.notificationsTarget.style.display = 'flex'
         document.body.style.overflow = 'hidden'
 
-        // Trigger notifications fetch
         const controller = this.notificationsTarget.querySelector('[data-controller~="notifications"]')
         if (controller && window.Stimulus) {
             const instance = window.Stimulus.getControllerForElementAndIdentifier(

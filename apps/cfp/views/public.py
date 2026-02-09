@@ -11,7 +11,6 @@ from apps.events.models import Event
 
 
 def get_public_event(org_slug, event_slug):
-    """Helper to resolve a public event."""
     return get_object_or_404(
         Event.objects.select_related("organization"),
         organization__slug=org_slug,

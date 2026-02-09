@@ -26,10 +26,6 @@ def unread_notifications(request):
 
 
 def user_currency(request):
-    """
-    Provides the user's preferred currency based on their organization settings.
-    Defaults to XAF if no organization is found or user is not authenticated.
-    """
     currency = "XAF"
 
     user = getattr(request, "user", None)

@@ -75,7 +75,6 @@ if (!window.FormPersistence) {
                     if (field.type === 'checkbox') {
                         field.checked = value === 'on' || value === true;
                     } else if (field.type === 'file') {
-                        // Cannot restore file inputs
                     } else {
                         field.value = value;
                     }

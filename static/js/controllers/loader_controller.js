@@ -35,7 +35,6 @@ export default class extends Controller {
     }
 
     setupHideTimer() {
-        // Hide loader after DOM is ready
         const hideLoader = () => {
             this.element.style.opacity = '0'
             setTimeout(() => {
@@ -51,7 +50,6 @@ export default class extends Controller {
             setTimeout(hideLoader, 300)
         }
 
-        // Also listen for Stimulus ready
         document.addEventListener('stimulus:ready', () => {
             setTimeout(hideLoader, 100)
         })

@@ -5,7 +5,6 @@ from apps.cfp.models import Proposal, Session
 
 
 def create_session_from_proposal(proposal):
-    """Create a Session from a confirmed Proposal."""
     session = Session.objects.create(
         proposal=proposal,
         event=proposal.cfp.event,
@@ -21,7 +20,6 @@ def create_session_from_proposal(proposal):
 
 
 def bulk_create_sessions(proposal_ids):
-    """Create Sessions for multiple confirmed proposals."""
     proposals = Proposal.objects.filter(
         id__in=proposal_ids,
         status=Proposal.Status.CONFIRMED,
@@ -35,7 +33,6 @@ def bulk_create_sessions(proposal_ids):
 
 
 def detect_schedule_conflicts(event):
-    """Find scheduling conflicts where the same speaker has overlapping sessions."""
     scheduled = Session.objects.filter(
         event=event,
         status=Session.Status.SCHEDULED,
@@ -57,7 +54,6 @@ def detect_schedule_conflicts(event):
 
 
 def get_cfp_stats(cfp):
-    """Get statistics for a CFP."""
     proposals = cfp.proposals.all()
     total = proposals.count()
     if total == 0:

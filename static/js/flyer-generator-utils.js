@@ -59,7 +59,6 @@ window.FlyerGeneratorUtils = {
     }
 };
 
-// Expose individual functions globally for backward compatibility
 window.getCookie = window.FlyerGeneratorUtils.getCookie;
 window.previewPhoto = window.FlyerGeneratorUtils.previewPhoto;
 window.showGenerationError = window.FlyerGeneratorUtils.showGenerationError;

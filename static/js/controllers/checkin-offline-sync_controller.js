@@ -40,7 +40,6 @@ export default class extends Controller {
       await this.checkOfflineMode();
       this.updateStatusUI();
 
-      // Global reference for backward compatibility
       window.checkinOffline = this;
     } catch (error) {
       console.error('[CheckinOffline] Failed to initialize:', error);
@@ -104,7 +103,6 @@ export default class extends Controller {
     return transaction.objectStore(storeName);
   }
 
-  // Settings
   async saveSetting(key, value) {
     const store = await this.getStore('settings', 'readwrite');
     return new Promise((resolve, reject) => {
@@ -123,7 +121,6 @@ export default class extends Controller {
     });
   }
 
-  // Event data
   async saveEvent(eventData) {
     const store = await this.getStore('events', 'readwrite');
     eventData.syncedAt = Date.now();
@@ -144,7 +141,6 @@ export default class extends Controller {
     });
   }
 
-  // Tickets
   async saveTickets(tickets) {
     const store = await this.getStore('tickets', 'readwrite');
     const promises = tickets.map(ticket => {
@@ -186,7 +182,6 @@ export default class extends Controller {
     });
   }
 
-  // Check-ins
   async saveCheckin(checkinData) {
     const store = await this.getStore('checkins', 'readwrite');
     checkinData.synced = false;
@@ -228,7 +223,6 @@ export default class extends Controller {
     });
   }
 
-  // Swag
   async saveSwagItems(swagItems) {
     const store = await this.getStore('swagItems', 'readwrite');
     const promises = swagItems.map(item => {
@@ -291,7 +285,6 @@ export default class extends Controller {
     });
   }
 
-  // Network handling
   setupNetworkListeners() {
     this.handleOnline = () => {
       this.isOnline = true;
@@ -309,7 +302,6 @@ export default class extends Controller {
     window.addEventListener('online', this.handleOnline);
     window.addEventListener('offline', this.handleOffline);
 
-    // Periodic connectivity check
     setInterval(async () => {
       const wasOnline = this.isOnline;
       const isOnline = await this.checkConnectivity();
@@ -344,7 +336,6 @@ export default class extends Controller {
     }, this.syncIntervalValue);
   }
 
-  // Offline mode toggle
   async checkOfflineMode() {
     this.isOfflineMode = await this.getSetting('offlineMode') || false;
     if (this.hasToggleTarget) {
@@ -409,12 +400,10 @@ export default class extends Controller {
     } finally {
       if (this.hasSyncButtonTarget) {
         this.syncButtonTarget.disabled = false;
-        // Restore the icon
         const icon = this.syncButtonTarget.querySelector('i[data-lucide]');
         if (icon) {
           icon.setAttribute('data-lucide', 'refresh-cw');
           icon.classList.remove('animate-spin');
-          // Re-initialize lucide icons
           if (typeof lucide !== 'undefined') {
             lucide.createIcons();
           }
@@ -505,7 +494,6 @@ export default class extends Controller {
     }
   }
 
-  // UI updates
   async updateStatusUI() {
     const status = await this.getOfflineStatus();
 

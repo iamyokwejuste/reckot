@@ -104,7 +104,6 @@ class AnalyticsView(LoginRequiredMixin, View):
             available_balance = 0
             currency = "XAF"
 
-        # Convert to list to get accurate count after slicing
         upcoming_events_list = list(upcoming_events)
 
         analytics_metrics = json.dumps(
@@ -192,7 +191,6 @@ class ReportsDashboardView(LoginRequiredMixin, View):
         ]
         summary["revenue_breakdown"] = revenue_breakdown_list
 
-        # Ticket breakdown for initial load
         ticket_breakdown = (
             Ticket.objects.filter(
                 booking__event=event, booking__status=Booking.Status.CONFIRMED
@@ -241,7 +239,6 @@ class ReportsDashboardView(LoginRequiredMixin, View):
         activities = []
         now = timezone.now()
 
-        # Recent ticket sales
         recent_tickets = (
             Ticket.objects.filter(
                 booking__event=event, booking__status=Booking.Status.CONFIRMED
@@ -262,7 +259,6 @@ class ReportsDashboardView(LoginRequiredMixin, View):
                 }
             )
 
-        # Recent check-ins
         recent_checkins = (
             Ticket.objects.filter(
                 booking__event=event, is_checked_in=True, checked_in_at__isnull=False
@@ -283,7 +279,6 @@ class ReportsDashboardView(LoginRequiredMixin, View):
                 }
             )
 
-        # Sort by timestamp and limit
         activities.sort(key=lambda x: x["timestamp"], reverse=True)
         return activities[:limit]
 
@@ -304,7 +299,6 @@ class RecentActivityView(LoginRequiredMixin, View):
         activities = []
         now = timezone.now()
 
-        # Recent ticket sales
         recent_tickets = (
             Ticket.objects.filter(
                 booking__event=event, booking__status=Booking.Status.CONFIRMED

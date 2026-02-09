@@ -9,7 +9,6 @@ from apps.orgs.models import Organization
 
 
 class EventCategory(models.Model):
-    """Categories for organizing and filtering events"""
 
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=110, unique=True, blank=True)

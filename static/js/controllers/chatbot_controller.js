@@ -387,7 +387,12 @@ export default class extends Controller {
     }
 
     formatMessage(content) {
-        return content
+        let cleaned = content.replace(/```json?\s*\{[\s\S]*?"action"\s*:[\s\S]*?\}\s*```/g, '');
+        cleaned = cleaned.replace(/`json?\s*\{[\s\S]*?"action"\s*:[\s\S]*?\}\s*`/g, '');
+        cleaned = cleaned.replace(/\{\s*"action"\s*:\s*"(?:create_event|create_cfp|create_ticket_type|create_ticket)"[\s\S]*\}$/g, '');
+        cleaned = cleaned.trim();
+
+        return cleaned
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
             .replace(/\*(.*?)\*/g, '<em>$1</em>')
             .replace(/`(.*?)`/g, '<code>$1</code>')

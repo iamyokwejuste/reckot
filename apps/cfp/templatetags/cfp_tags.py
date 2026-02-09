@@ -21,13 +21,11 @@ STATUS_COLORS = {
 
 @register.filter
 def cfp_status_color(status):
-    """Return the color variant for a CFP/proposal status."""
     return STATUS_COLORS.get(status, "muted")
 
 
 @register.filter
 def star_range(value):
-    """Return a range for star rating display."""
     try:
         return range(1, 6)
     except (TypeError, ValueError):
@@ -36,7 +34,6 @@ def star_range(value):
 
 @register.filter
 def filled_stars(value):
-    """Return the number of filled stars for a rating."""
     try:
         return int(round(float(value)))
     except (TypeError, ValueError):

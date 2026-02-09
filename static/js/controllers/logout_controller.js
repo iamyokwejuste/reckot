@@ -13,12 +13,10 @@ export default class extends Controller {
                 credentials: 'same-origin'
             })
 
-            // Clear all cookies
             document.cookie.split(";").forEach(function(c) {
                 document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/")
             })
 
-            // Redirect to next URL or home
             const nextUrl = form.querySelector('input[name="next"]')?.value || '/'
             window.location.href = nextUrl
             window.location.reload(true)

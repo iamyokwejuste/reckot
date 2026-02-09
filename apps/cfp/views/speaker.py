@@ -24,7 +24,6 @@ from apps.events.models import Event
 
 
 def get_event_and_cfp(org_slug, event_slug):
-    """Helper to resolve event and its CFP."""
     event = get_object_or_404(
         Event.objects.select_related("organization"),
         organization__slug=org_slug,

@@ -200,7 +200,6 @@ export default class extends Controller {
     return cookie ? cookie.split('=')[1] : '';
   }
 
-  // Offline Indicator
   setupOfflineIndicator() {
     this.indicator = document.createElement('div');
     this.indicator.id = 'offline-indicator';

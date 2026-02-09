@@ -497,63 +497,6 @@
         </div>
     </div>
 
-    {% if is_owner %}
-    <div class="card p-6 border-red-500/20 mt-6" data-controller="modal">
-        <h2 class="text-lg font-semibold mb-4 text-red-500">{% trans "Danger Zone" %}</h2>
-        <div class="rounded-lg bg-red-500/10 border border-red-500/20 p-4">
-            <div class="flex items-start gap-3">
-                <i data-lucide="alert-triangle" class="w-5 h-5 shrink-0 mt-0.5 text-red-500"></i>
-                <div class="flex-1">
-                    <p class="font-medium text-red-500 mb-1">{% trans "Delete Event" %}</p>
-                    <p class="text-sm text-red-600 dark:text-red-400 mb-3">
-                        {% trans "Permanently delete this event and all its tickets and data. This action cannot be undone." %}
-                    </p>
-                    <button type="button"
-                            data-action="click->modal#open"
-                            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-medium">
-                        {% trans "Delete Event" %}
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Delete Modal -->
-        <div data-modal-target="container"
-             class="hidden fixed inset-0 z-50 overflow-y-auto">
-            <div class="flex min-h-screen items-center justify-center p-4">
-                <div class="fixed inset-0 bg-black/50 transition-opacity"
-                     data-action="click->modal#close"></div>
-                <div class="relative bg-card rounded-lg shadow-xl max-w-md w-full p-6 border border-border">
-                    <div class="flex items-start gap-4 mb-4">
-                        <div class="h-12 w-12 rounded-full bg-red-500/10 flex items-center justify-center shrink-0">
-                            <i data-lucide="alert-triangle" class="h-6 w-6 text-red-500"></i>
-                        </div>
-                        <div class="flex-1">
-                            <h3 class="text-lg font-semibold mb-1">{% trans "Delete Event" %}</h3>
-                            <p class="text-sm text-muted-foreground">
-                                {% trans "Are you absolutely sure? This will permanently delete" %} <strong>{{ event.title }}</strong> {% trans "and all its tickets and data. This action cannot be undone." %}
-                            </p>
-                        </div>
-                    </div>
-                    <form method="post" action="{% url 'events:delete' org_slug=event.organization.slug event_slug=event.slug %}" class="space-y-4">
-                        {% csrf_token %}
-                        <div class="flex gap-3 justify-end">
-                            <button type="button"
-                                    data-action="click->modal#close"
-                                    class="px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors">
-                                {% trans "Cancel" %}
-                            </button>
-                            <button type="submit"
-                                    class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium">
-                                {% trans "Delete Event" %}
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
 </div>
 {% endblock %}
 

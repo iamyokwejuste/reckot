@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal, InvalidOperation
 
 from django.core.files.base import ContentFile
@@ -114,6 +114,11 @@ def create_event_from_chat(user, data):
     if not start_at or not end_at:
         return {"success": False, "error": "Valid start and end dates are required."}
 
+    location = data.get("location", "")
+    if not location:
+        parts = [data.get("venue_name", ""), data.get("city", ""), data.get("country", "Cameroon")]
+        location = ", ".join(p for p in parts if p)
+
     form_data = {
         "title": title,
         "description": data.get("description", title),
@@ -122,7 +127,7 @@ def create_event_from_chat(user, data):
         "start_at": start_at,
         "end_at": end_at,
         "timezone": data.get("timezone", "Africa/Douala"),
-        "location": data.get("location", ""),
+        "location": location,
         "venue_name": data.get("venue_name", ""),
         "city": data.get("city", ""),
         "country": data.get("country", "Cameroon"),
@@ -146,7 +151,11 @@ def create_event_from_chat(user, data):
     cfp_data = data.get("cfp")
     if cfp_data and isinstance(cfp_data, dict):
         opens_at = _parse_datetime(cfp_data.get("opens_at")) or timezone.now()
-        closes_at = _parse_datetime(cfp_data.get("closes_at")) or event.start_at
+        closes_at = _parse_datetime(cfp_data.get("closes_at"))
+        if not closes_at:
+            closes_at = event.start_at - timedelta(weeks=2)
+            if closes_at <= timezone.now():
+                closes_at = event.start_at
         try:
             CallForProposals.objects.create(
                 event=event,
@@ -188,9 +197,12 @@ def create_event_from_chat(user, data):
             except Exception as e:
                 logger.warning(f"Ticket type creation failed for event {event.pk}: {e}")
 
+    base_url = f"/events/{org.slug}/{event.slug}/"
+    url = f"{base_url}dashboard/" if event.state != Event.State.PUBLISHED else base_url
+
     return {
         "success": True,
-        "url": f"/events/{org.slug}/{event.slug}/",
+        "url": url,
         "title": event.title,
         "created": created,
     }

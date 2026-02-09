@@ -514,6 +514,21 @@ class EventDashboardView(LoginRequiredMixin, View):
         if event.preview_token:
             preview_url = f"{public_url}?preview={event.preview_token}"
 
+        is_owner = event.organization.owner == request.user
+        transfer_orgs = []
+        if is_owner:
+            transfer_orgs = (
+                Organization.objects.filter(
+                    Q(owner=request.user)
+                    | Q(
+                        memberships__user=request.user,
+                        memberships__role__in=[MemberRole.OWNER, MemberRole.ADMIN],
+                    )
+                )
+                .exclude(pk=event.organization.pk)
+                .distinct()
+            )
+
         return render(
             request,
             "events/event_dashboard.html",
@@ -541,6 +556,8 @@ class EventDashboardView(LoginRequiredMixin, View):
                 "edit_event_url": reverse("events:edit", args=[org_slug, event_slug]),
                 "cfp_stats": cfp_stats,
                 "has_cfp": has_cfp,
+                "is_owner": is_owner,
+                "transfer_orgs": transfer_orgs,
             },
         )
 
@@ -1454,3 +1471,55 @@ class EventDeleteView(LoginRequiredMixin, View):
             request, _("Event '{}' has been deleted successfully.").format(event_title)
         )
         return redirect("orgs:detail", slug=org_slug)
+
+
+class EventTransferView(LoginRequiredMixin, View):
+    def post(self, request, org_slug, event_slug):
+        event = get_object_or_404(
+            Event.objects.select_related("organization"),
+            organization__slug=org_slug,
+            slug=event_slug,
+        )
+
+        if event.organization.owner != request.user:
+            messages.error(request, _("Only the organization owner can transfer events."))
+            return redirect(
+                "events:dashboard", org_slug=org_slug, event_slug=event_slug
+            )
+
+        target_org = None
+        target_org_id = request.POST.get("target_organization")
+        target_org_slug = request.POST.get("target_org_slug", "").strip()
+
+        if target_org_id:
+            target_org = Organization.objects.filter(pk=target_org_id).first()
+        elif target_org_slug:
+            target_org = Organization.objects.filter(slug=target_org_slug).first()
+
+        if not target_org:
+            messages.error(request, _("Organization not found. Please check the slug and try again."))
+            return redirect(
+                "events:dashboard", org_slug=org_slug, event_slug=event_slug
+            )
+
+        if target_org.pk == event.organization.pk:
+            messages.error(request, _("Event is already in this organization."))
+            return redirect(
+                "events:dashboard", org_slug=org_slug, event_slug=event_slug
+            )
+
+        old_org_name = event.organization.name
+        event.organization = target_org
+        event.save(update_fields=["organization"])
+
+        messages.success(
+            request,
+            _("Event '%(event)s' has been transferred from '%(old_org)s' to '%(new_org)s'.") % {
+                "event": event.title,
+                "old_org": old_org_name,
+                "new_org": target_org.name,
+            },
+        )
+        return redirect(
+            "events:dashboard", org_slug=target_org.slug, event_slug=event.slug
+        )

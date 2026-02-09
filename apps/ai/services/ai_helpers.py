@@ -137,7 +137,16 @@ def _format_prompt(template: str, **kwargs) -> str:
     return template.format(**kwargs)
 
 
-SUPPORT_SYSTEM_PROMPT = _load_prompt("support_assistant.md")
+_support_prompt_path = Path(settings.BASE_DIR) / "static" / "markdown" / "support_assistant.md"
+_support_prompt_cache = {"mtime": 0, "content": ""}
+
+
+def _get_support_prompt():
+    mtime = _support_prompt_path.stat().st_mtime
+    if mtime != _support_prompt_cache["mtime"]:
+        _support_prompt_cache["content"] = _support_prompt_path.read_text(encoding="utf-8")
+        _support_prompt_cache["mtime"] = mtime
+    return _support_prompt_cache["content"]
 
 
 def _format_query_result(result):
@@ -202,6 +211,48 @@ def _format_query_result(result):
     return str(result)
 
 
+def _extract_entity_action(response):
+    normalized = re.sub(r"```json?\s*", "", response)
+    normalized = re.sub(r"```", "", normalized)
+    normalized = re.sub(r"`json?\s*(\{)", r"\1", normalized)
+
+    for action_name in ("create_event", "create_cfp", "create_ticket_type"):
+        pattern = re.compile(r'\{\s*"action"\s*:\s*"' + action_name + r'"')
+        match = pattern.search(normalized)
+        if not match:
+            continue
+
+        start = match.start()
+        depth = 0
+        end = start
+        for i in range(start, len(normalized)):
+            if normalized[i] == "{":
+                depth += 1
+            elif normalized[i] == "}":
+                depth -= 1
+                if depth == 0:
+                    end = i + 1
+                    break
+
+        try:
+            entity_json = json.loads(normalized[start:end])
+        except json.JSONDecodeError:
+            continue
+
+        before = normalized[:start].strip()
+        after = normalized[end:].strip()
+        after = after.lstrip("`").strip()
+        clean_msg = before
+        if after:
+            clean_msg = f"{clean_msg}\n\n{after}".strip() if clean_msg else after
+        if not clean_msg:
+            clean_msg = f"Creating your {action_name.replace('_', ' ')} now..."
+
+        return clean_msg, action_name, entity_json.get("data", {})
+
+    return None, None, None
+
+
 def chat_with_assistant(
     user_message: str, conversation_history: list, context: Optional[dict] = None
 ) -> dict:
@@ -228,7 +279,7 @@ def chat_with_assistant(
         ]
     )
 
-    prompt = f"""{SUPPORT_SYSTEM_PROMPT}
+    prompt = f"""{_get_support_prompt()}
         {context_str}
 
         Conversation History:
@@ -241,30 +292,13 @@ def chat_with_assistant(
 
     try:
         entity_action_detected = False
-        for action_name in ("create_event", "create_cfp", "create_ticket_type"):
-            marker = f'{{"action": "{action_name}"'
-            if marker in response:
-                start = response.find(marker)
-                depth = 0
-                end = start
-                for i in range(start, len(response)):
-                    if response[i] == "{":
-                        depth += 1
-                    elif response[i] == "}":
-                        depth -= 1
-                        if depth == 0:
-                            end = i + 1
-                            break
-                entity_json = json.loads(response[start:end])
-                result["action"] = action_name
-                result["entity_data"] = entity_json.get("data", {})
-                result["message"] = (
-                    response[:start].strip()
-                    if start > 0
-                    else f"Creating {action_name.replace('_', ' ')} for you."
-                )
-                entity_action_detected = True
-                break
+
+        clean_msg, action_name, entity_data = _extract_entity_action(response)
+        if action_name:
+            result["action"] = action_name
+            result["entity_data"] = entity_data
+            result["message"] = clean_msg
+            entity_action_detected = True
 
         if entity_action_detected:
             pass

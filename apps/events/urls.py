@@ -119,4 +119,9 @@ urlpatterns = [
         actions.EventDeleteView.as_view(),
         name="delete",
     ),
+    path(
+        "<slug:org_slug>/<slug:event_slug>/transfer/",
+        actions.EventTransferView.as_view(),
+        name="transfer",
+    ),
 ]
