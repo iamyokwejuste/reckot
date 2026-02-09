@@ -1,0 +1,459 @@
+{% extends "layouts/dashboard.html" %}
+{% load slippers i18n %}
+
+{% block title %}{{ proposal.title }} - {% trans "Proposals" %} - {{ event.title }} - Reckot{% endblock %}
+
+{% block breadcrumbs %}
+{% #breadcrumb class="mb-4" %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item href="/events/" %}{% trans "Events" %}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item %}{{ event.title|truncatewords:3 }}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item href="{% url 'cfp:proposals_list' event.organization.slug event.slug %}" %}{% trans "Proposals" %}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item %}{{ proposal.title|truncatewords:5 }}{% /breadcrumb_item %}
+{% /breadcrumb %}
+{% endblock %}
+
+{% block header_title %}
+<div class="min-w-0">
+    <h1 class="text-lg font-semibold truncate">{{ proposal.title }}</h1>
+    <p class="text-sm text-muted-foreground hidden md:block">{{ event.title }}</p>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'cfp:proposals_list' event.organization.slug event.slug %}">
+    {% #button variant="ghost" size="sm" %}
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        <span class="hidden md:inline">{% trans "All proposals" %}</span>
+    {% /button %}
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="grid gap-6 lg:grid-cols-3">
+    <div class="lg:col-span-2 space-y-6">
+        {% #card %}
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
+                <div class="min-w-0">
+                    <h2 class="text-xl font-bold">{{ proposal.title }}</h2>
+                    <div class="flex flex-wrap items-center gap-2 mt-2">
+                        {% if proposal.status == "SUBMITTED" %}
+                        {% #badge variant="default" %}{% trans "Submitted" %}{% /badge %}
+                        {% elif proposal.status == "UNDER_REVIEW" %}
+                        {% #badge variant="warning" %}{% trans "Under review" %}{% /badge %}
+                        {% elif proposal.status == "ACCEPTED" %}
+                        {% #badge variant="success" %}{% trans "Accepted" %}{% /badge %}
+                        {% elif proposal.status == "REJECTED" %}
+                        {% #badge variant="destructive" %}{% trans "Rejected" %}{% /badge %}
+                        {% elif proposal.status == "WAITLISTED" %}
+                        {% #badge variant="secondary" %}{% trans "Waitlisted" %}{% /badge %}
+                        {% elif proposal.status == "CONFIRMED" %}
+                        {% #badge variant="success" %}{% trans "Confirmed" %}{% /badge %}
+                        {% elif proposal.status == "WITHDRAWN" %}
+                        {% #badge variant="outline" %}{% trans "Withdrawn" %}{% /badge %}
+                        {% else %}
+                        {% #badge variant="outline" %}{{ proposal.get_status_display }}{% /badge %}
+                        {% endif %}
+                        <span class="text-sm text-muted-foreground">{% trans "Submitted" %} {{ proposal.submitted_at|date:"M d, Y H:i" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div>
+                    <h3 class="text-sm font-medium text-muted-foreground mb-2">{% trans "Abstract" %}</h3>
+                    <div class="prose prose-sm dark:prose-invert max-w-none">{{ proposal.abstract|linebreaksbr }}</div>
+                </div>
+
+                {% #separator %}{% /separator %}
+
+                <div>
+                    <h3 class="text-sm font-medium text-muted-foreground mb-2">{% trans "Description" %}</h3>
+                    <div class="prose prose-sm dark:prose-invert max-w-none">{{ proposal.description|linebreaksbr }}</div>
+                </div>
+
+                {% if proposal.outline %}
+                {% #separator %}{% /separator %}
+                <div>
+                    <h3 class="text-sm font-medium text-muted-foreground mb-2">{% trans "Outline" %}</h3>
+                    <div class="prose prose-sm dark:prose-invert max-w-none">{{ proposal.outline|linebreaksbr }}</div>
+                </div>
+                {% endif %}
+            </div>
+        {% /card %}
+
+        {% #card %}
+            <h3 class="text-base font-semibold mb-4">{% trans "Details" %}</h3>
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div class="flex items-center gap-3 rounded-xl border border-border p-3">
+                    <div class="h-9 w-9 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                        <i data-lucide="layout-grid" class="w-4 h-4 text-blue-500"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-muted-foreground">{% trans "Format" %}</p>
+                        <p class="text-sm font-medium">{{ proposal.session_format.name|default:"-" }}</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 rounded-xl border border-border p-3">
+                    <div class="h-9 w-9 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
+                        <i data-lucide="git-branch" class="w-4 h-4 text-purple-500"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-muted-foreground">{% trans "Track" %}</p>
+                        {% if proposal.track %}
+                        <p class="text-sm font-medium">
+                            <span class="inline-block h-2.5 w-2.5 rounded-full mr-1" style="background-color: {{ proposal.track.color }};"></span>
+                            {{ proposal.track.name }}
+                        </p>
+                        {% else %}
+                        <p class="text-sm text-muted-foreground">-</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 rounded-xl border border-border p-3">
+                    <div class="h-9 w-9 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+                        <i data-lucide="bar-chart-2" class="w-4 h-4 text-amber-500"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-muted-foreground">{% trans "Level" %}</p>
+                        <p class="text-sm font-medium">{{ proposal.get_level_display }}</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 rounded-xl border border-border p-3">
+                    <div class="h-9 w-9 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
+                        <i data-lucide="globe" class="w-4 h-4 text-green-500"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-muted-foreground">{% trans "Language" %}</p>
+                        <p class="text-sm font-medium">{{ proposal.language|upper }}</p>
+                    </div>
+                </div>
+            </div>
+
+            {% if proposal.tags %}
+            <div class="mt-4">
+                <p class="text-xs text-muted-foreground mb-2">{% trans "Tags" %}</p>
+                <div class="flex flex-wrap gap-1.5">
+                    {% for tag in proposal.tags %}
+                    {% #badge variant="outline" %}{{ tag }}{% /badge %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if proposal.speaker_notes %}
+            <div class="mt-4 rounded-xl bg-muted/50 p-4">
+                <p class="text-xs font-medium text-muted-foreground mb-1">{% trans "Speaker notes" %}</p>
+                <p class="text-sm">{{ proposal.speaker_notes|linebreaksbr }}</p>
+            </div>
+            {% endif %}
+        {% /card %}
+
+        {% if proposal.question_answers.exists %}
+        {% #card %}
+            <h3 class="text-base font-semibold mb-4">{% trans "Custom question answers" %}</h3>
+            <div class="space-y-4">
+                {% for answer in proposal.question_answers.all %}
+                <div>
+                    <p class="text-sm font-medium text-muted-foreground">{{ answer.question.question }}</p>
+                    <p class="text-sm mt-1">{{ answer.answer|linebreaksbr }}</p>
+                </div>
+                {% if not forloop.last %}
+                {% #separator %}{% /separator %}
+                {% endif %}
+                {% endfor %}
+            </div>
+        {% /card %}
+        {% endif %}
+
+        {% if not anonymous_review or proposal.decided_at %}
+        {% #card %}
+            <h3 class="text-base font-semibold mb-4">{% trans "Speaker information" %}</h3>
+            <div class="flex items-start gap-4">
+                {% if proposal.speaker.get_profile_image_url %}
+                <img src="{{ proposal.speaker.get_profile_image_url }}" alt="{{ proposal.speaker.get_full_name }}" class="h-14 w-14 rounded-full object-cover shrink-0">
+                {% else %}
+                <div class="h-14 w-14 rounded-full bg-muted flex items-center justify-center shrink-0">
+                    <span class="text-lg font-semibold">{{ proposal.speaker.email|slice:":1"|upper }}</span>
+                </div>
+                {% endif %}
+                <div class="min-w-0">
+                    <p class="text-base font-semibold">{{ proposal.speaker.get_full_name|default:proposal.speaker.email }}</p>
+                    <p class="text-sm text-muted-foreground">{{ proposal.speaker.email }}</p>
+                    {% if proposal.co_speakers.exists %}
+                    <div class="mt-3">
+                        <p class="text-xs font-medium text-muted-foreground mb-1">{% trans "Co-speakers" %}</p>
+                        <div class="flex flex-wrap gap-2">
+                            {% for co_speaker in proposal.co_speakers.all %}
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs font-medium">
+                                {{ co_speaker.get_full_name|default:co_speaker.email }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% /card %}
+        {% endif %}
+    </div>
+
+    <div class="space-y-6">
+        {% #card %}
+            <h3 class="text-base font-semibold mb-4">{% trans "Decision" %}</h3>
+            <form method="post" action="{% url 'cfp:proposal_decide' event.organization.slug event.slug proposal.pk %}" class="space-y-4">
+                {% csrf_token %}
+
+                {% #form_field label=_("Organizer notes") name="organizer_notes" %}
+                    {% #textarea name="organizer_notes" id="organizer_notes" rows="3" placeholder=_("Internal notes about this proposal") %}{{ proposal.organizer_notes|default:"" }}{% /textarea %}
+                {% /form_field %}
+
+                <div class="grid grid-cols-3 gap-2">
+                    {% #button type="submit" name="decision" value="accept" variant="default" size="sm" class="w-full !bg-green-600 hover:!bg-green-700 !text-white" %}
+                        <i data-lucide="check" class="w-4 h-4"></i>
+                        {% trans "Accept" %}
+                    {% /button %}
+                    {% #button type="submit" name="decision" value="reject" variant="destructive" size="sm" class="w-full" %}
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                        {% trans "Reject" %}
+                    {% /button %}
+                    {% #button type="submit" name="decision" value="waitlist" variant="secondary" size="sm" class="w-full" %}
+                        <i data-lucide="clock" class="w-4 h-4"></i>
+                        {% trans "Waitlist" %}
+                    {% /button %}
+                </div>
+            </form>
+        {% /card %}
+
+        {% #card %}
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-base font-semibold">{% trans "Reviews" %} ({{ proposal.reviews.count }})</h3>
+                {% if proposal.average_rating %}
+                <div class="flex items-center gap-1.5">
+                    <div class="flex items-center gap-0.5">
+                        {% for i in "12345" %}
+                        {% if forloop.counter <= proposal.average_rating|floatformat:"0"|add:"0" %}
+                        <i data-lucide="star" class="w-3.5 h-3.5 fill-yellow-400 text-yellow-400"></i>
+                        {% else %}
+                        <i data-lucide="star" class="w-3.5 h-3.5 text-muted-foreground/30"></i>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    <span class="text-sm font-medium">{{ proposal.average_rating|floatformat:"1" }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if proposal.reviews.exists %}
+            <div class="space-y-4">
+                {% for review in proposal.reviews.all %}
+                <div class="rounded-xl border border-border p-3">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <div class="h-7 w-7 rounded-full bg-muted flex items-center justify-center">
+                                <span class="text-xs font-medium">{{ review.reviewer.email|slice:":1"|upper }}</span>
+                            </div>
+                            <span class="text-sm font-medium">{{ review.reviewer.get_full_name|default:review.reviewer.email }}</span>
+                        </div>
+                        {% if review.is_abstained %}
+                        {% #badge variant="outline" %}{% trans "Abstained" %}{% /badge %}
+                        {% else %}
+                        <div class="flex items-center gap-0.5">
+                            {% for i in "12345" %}
+                            {% if forloop.counter <= review.rating %}
+                            <i data-lucide="star" class="w-3 h-3 fill-yellow-400 text-yellow-400"></i>
+                            {% else %}
+                            <i data-lucide="star" class="w-3 h-3 text-muted-foreground/30"></i>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% if not review.is_abstained %}
+                    {% if review.content_score or review.relevance_score or review.speaker_score %}
+                    <div class="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground mb-2">
+                        {% if review.content_score %}
+                        <span>{% trans "Content" %}: {{ review.content_score }}/5</span>
+                        {% endif %}
+                        {% if review.relevance_score %}
+                        <span>{% trans "Relevance" %}: {{ review.relevance_score }}/5</span>
+                        {% endif %}
+                        {% if review.speaker_score %}
+                        <span>{% trans "Speaker" %}: {{ review.speaker_score }}/5</span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                    {% if review.comment %}
+                    <p class="text-sm text-muted-foreground">{{ review.comment }}</p>
+                    {% endif %}
+                    <p class="text-xs text-muted-foreground mt-2">{{ review.created_at|date:"M d, Y" }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-sm text-muted-foreground">{% trans "No reviews yet." %}</p>
+            {% endif %}
+        {% /card %}
+
+        {% if not existing_review %}
+        {% #card %}
+            <h3 class="text-base font-semibold mb-4">{% trans "Submit review" %}</h3>
+            <form method="post" action="{% url 'cfp:proposal_review' event.organization.slug event.slug proposal.pk %}" class="space-y-4">
+                {% csrf_token %}
+
+                <div>
+                    <p class="text-sm font-medium mb-2">{% trans "Overall rating" %}</p>
+                    <div class="flex items-center gap-1" data-controller="star-rating">
+                        {% for i in "12345" %}
+                        <button type="button" data-action="click->star-rating#rate" data-star-rating-value-param="{{ forloop.counter }}" class="p-0.5 transition-colors">
+                            <i data-lucide="star" class="w-6 h-6 text-muted-foreground/30 hover:text-yellow-400"></i>
+                        </button>
+                        {% endfor %}
+                        <input type="hidden" name="rating" value="" data-star-rating-target="input">
+                    </div>
+                    {% if review_form.rating.errors %}
+                    <p class="text-sm text-destructive mt-1">{{ review_form.rating.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="grid gap-3 sm:grid-cols-2">
+                    {% #form_field label=_("Content score") name="content_score" %}
+                        <select name="content_score" id="content_score" class="flex h-10 w-full rounded-xl border-2 border-border bg-card px-3 text-sm text-foreground transition-all hover:border-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary">
+                            <option value="">-</option>
+                            {% for i in "12345" %}
+                            <option value="{{ forloop.counter }}">{{ forloop.counter }}</option>
+                            {% endfor %}
+                        </select>
+                    {% /form_field %}
+
+                    {% #form_field label=_("Relevance score") name="relevance_score" %}
+                        <select name="relevance_score" id="relevance_score" class="flex h-10 w-full rounded-xl border-2 border-border bg-card px-3 text-sm text-foreground transition-all hover:border-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary">
+                            <option value="">-</option>
+                            {% for i in "12345" %}
+                            <option value="{{ forloop.counter }}">{{ forloop.counter }}</option>
+                            {% endfor %}
+                        </select>
+                    {% /form_field %}
+                </div>
+
+                {% if not anonymous_review %}
+                {% #form_field label=_("Speaker score") name="speaker_score" %}
+                    <select name="speaker_score" id="speaker_score" class="flex h-10 w-full rounded-xl border-2 border-border bg-card px-3 text-sm text-foreground transition-all hover:border-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary">
+                        <option value="">-</option>
+                        {% for i in "12345" %}
+                        <option value="{{ forloop.counter }}">{{ forloop.counter }}</option>
+                        {% endfor %}
+                    </select>
+                {% /form_field %}
+                {% endif %}
+
+                {% #separator %}{% /separator %}
+
+                {% #form_field label=_("Comment") name="comment" %}
+                    {% #textarea name="comment" id="comment" rows="4" placeholder=_("Share your thoughts on this proposal") %}{% /textarea %}
+                    {% if review_form.comment.errors %}
+                    <p class="text-sm text-destructive mt-1">{{ review_form.comment.errors.0 }}</p>
+                    {% endif %}
+                {% /form_field %}
+
+                <label class="flex items-center gap-3 cursor-pointer group">
+                    <input type="checkbox" name="is_abstained" class="h-4 w-4 rounded border-border text-primary focus:ring-primary">
+                    <div>
+                        <span class="text-sm font-medium group-hover:text-primary transition-colors">{% trans "Abstain" %}</span>
+                        <p class="text-xs text-muted-foreground">{% trans "I have a conflict of interest" %}</p>
+                    </div>
+                </label>
+
+                {% #button type="submit" variant="default" size="sm" class="w-full" %}
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                    {% trans "Submit review" %}
+                {% /button %}
+            </form>
+        {% /card %}
+        {% else %}
+        {% #card %}
+            <h3 class="text-base font-semibold mb-4">{% trans "Update review" %}</h3>
+            <form method="post" action="{% url 'cfp:proposal_review' event.organization.slug event.slug proposal.pk %}" class="space-y-4">
+                {% csrf_token %}
+
+                <div>
+                    <p class="text-sm font-medium mb-2">{% trans "Overall rating" %}</p>
+                    <div class="flex items-center gap-1" data-controller="star-rating">
+                        {% for i in "12345" %}
+                        <button type="button" data-action="click->star-rating#rate" data-star-rating-value-param="{{ forloop.counter }}" class="p-0.5 transition-colors">
+                            <i data-lucide="star" class="w-6 h-6 {% if forloop.counter <= existing_review.rating %}fill-yellow-400 text-yellow-400{% else %}text-muted-foreground/30 hover:text-yellow-400{% endif %}"></i>
+                        </button>
+                        {% endfor %}
+                        <input type="hidden" name="rating" value="{{ existing_review.rating|default:'' }}" data-star-rating-target="input">
+                    </div>
+                    {% if review_form.rating.errors %}
+                    <p class="text-sm text-destructive mt-1">{{ review_form.rating.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="grid gap-3 sm:grid-cols-2">
+                    {% #form_field label=_("Content score") name="content_score" %}
+                        <select name="content_score" id="content_score_edit" class="flex h-10 w-full rounded-xl border-2 border-border bg-card px-3 text-sm text-foreground transition-all hover:border-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary">
+                            <option value="">-</option>
+                            {% for i in "12345" %}
+                            <option value="{{ forloop.counter }}" {% if existing_review.content_score == forloop.counter %}selected{% endif %}>{{ forloop.counter }}</option>
+                            {% endfor %}
+                        </select>
+                    {% /form_field %}
+
+                    {% #form_field label=_("Relevance score") name="relevance_score" %}
+                        <select name="relevance_score" id="relevance_score_edit" class="flex h-10 w-full rounded-xl border-2 border-border bg-card px-3 text-sm text-foreground transition-all hover:border-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary">
+                            <option value="">-</option>
+                            {% for i in "12345" %}
+                            <option value="{{ forloop.counter }}" {% if existing_review.relevance_score == forloop.counter %}selected{% endif %}>{{ forloop.counter }}</option>
+                            {% endfor %}
+                        </select>
+                    {% /form_field %}
+                </div>
+
+                {% if not anonymous_review %}
+                {% #form_field label=_("Speaker score") name="speaker_score" %}
+                    <select name="speaker_score" id="speaker_score_edit" class="flex h-10 w-full rounded-xl border-2 border-border bg-card px-3 text-sm text-foreground transition-all hover:border-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary">
+                        <option value="">-</option>
+                        {% for i in "12345" %}
+                        <option value="{{ forloop.counter }}" {% if existing_review.speaker_score == forloop.counter %}selected{% endif %}>{{ forloop.counter }}</option>
+                        {% endfor %}
+                    </select>
+                {% /form_field %}
+                {% endif %}
+
+                {% #separator %}{% /separator %}
+
+                {% #form_field label=_("Comment") name="comment" %}
+                    {% #textarea name="comment" id="comment_edit" rows="4" placeholder=_("Share your thoughts on this proposal") %}{{ existing_review.comment|default:"" }}{% /textarea %}
+                    {% if review_form.comment.errors %}
+                    <p class="text-sm text-destructive mt-1">{{ review_form.comment.errors.0 }}</p>
+                    {% endif %}
+                {% /form_field %}
+
+                <label class="flex items-center gap-3 cursor-pointer group">
+                    <input type="checkbox" name="is_abstained" {% if existing_review.is_abstained %}checked{% endif %} class="h-4 w-4 rounded border-border text-primary focus:ring-primary">
+                    <div>
+                        <span class="text-sm font-medium group-hover:text-primary transition-colors">{% trans "Abstain" %}</span>
+                        <p class="text-xs text-muted-foreground">{% trans "I have a conflict of interest" %}</p>
+                    </div>
+                </label>
+
+                {% #button type="submit" variant="default" size="sm" class="w-full" %}
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                    {% trans "Update review" %}
+                {% /button %}
+            </form>
+        {% /card %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

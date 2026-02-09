@@ -7,6 +7,7 @@ from django.core.cache import cache
 from django.db.models import Count, Sum, Avg
 from django.utils import timezone
 from apps.ai.models import AIUsageLog
+from apps.ai.utils.circuit_breaker import gemini_circuit_breaker, model_fallback
 
 logger = logging.getLogger(__name__)
 
@@ -202,8 +203,6 @@ class AIMetricsCollector:
         }
 
     def get_system_health(self) -> Dict[str, Any]:
-        from apps.ai.circuit_breaker import gemini_circuit_breaker, model_fallback
-
         circuit_metrics = gemini_circuit_breaker.get_metrics()
 
         real_time = self.get_real_time_metrics()

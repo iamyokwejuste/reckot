@@ -12,6 +12,8 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from apps.cfp.models import CallForProposals
+from apps.cfp.services.cfp_service import get_cfp_stats
 from apps.events.forms import EventForm, TicketTypeForm
 from apps.events.services.event_service import create_event
 from apps.events.services.queries import get_user_events
@@ -271,6 +273,15 @@ class EventCreateView(LoginRequiredMixin, View):
             request.user, organization, request.POST, request.FILES
         )
         if event:
+            if request.POST.get("enable_cfp") and request.POST.get("cfp_opens_at") and request.POST.get("cfp_closes_at"):
+                CallForProposals.objects.create(
+                    event=event,
+                    title=request.POST.get("cfp_title", "Call for proposals"),
+                    description=request.POST.get("cfp_description", ""),
+                    opens_at=request.POST.get("cfp_opens_at"),
+                    closes_at=request.POST.get("cfp_closes_at"),
+                    max_submissions_per_speaker=int(request.POST.get("cfp_max_submissions", 3)),
+                )
             messages.success(
                 request,
                 _('Event "%(title)s" created successfully!') % {"title": event.title},
@@ -445,7 +456,7 @@ class EventDashboardView(LoginRequiredMixin, View):
             organization__members=request.user,
         )
 
-        tickets = Ticket.objects.filter(booking__event=event)
+        tickets = Ticket.objects.filter(booking__event=event).select_related("ticket_type", "booking")
 
         tickets_sold = tickets.count()
         checked_in = tickets.filter(is_checked_in=True).count()
@@ -464,6 +475,16 @@ class EventDashboardView(LoginRequiredMixin, View):
             "checkin_rate": checkin_rate,
             "revenue": revenue,
         }
+
+        cfp_stats = None
+        has_cfp = hasattr(event, "cfp")
+        if not has_cfp:
+            try:
+                has_cfp = event.cfp is not None
+            except Exception:
+                has_cfp = False
+        if has_cfp:
+            cfp_stats = get_cfp_stats(event.cfp)
 
         public_url = reverse("events:public_detail", args=[org_slug, event_slug])
         preview_url = None
@@ -495,6 +516,8 @@ class EventDashboardView(LoginRequiredMixin, View):
                     "events:flyer_config", args=[org_slug, event_slug]
                 ),
                 "edit_event_url": reverse("events:edit", args=[org_slug, event_slug]),
+                "cfp_stats": cfp_stats,
+                "has_cfp": has_cfp,
             },
         )
 

@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{{ session.title }} - {{ event.title }} - Reckot{% endblock %}
+
+{% block content %}
+<div class="container py-8">
+    <div class="max-w-3xl mx-auto">
+        {% url 'cfp:public_schedule' org_slug=event.organization.slug event_slug=event.slug as schedule_url %}
+        {% #breadcrumb class="mb-6" %}
+            {% #breadcrumb_item href=schedule_url %}{% trans "Schedule" %}{% /breadcrumb_item %}
+            {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+            {% #breadcrumb_item %}{{ session.title|truncatewords:5 }}{% /breadcrumb_item %}
+        {% /breadcrumb %}
+
+        <div class="space-y-6" data-animate="fade-up">
+            <div class="space-y-3">
+                <h1 class="text-3xl font-bold">{{ session.title }}</h1>
+                <div class="flex flex-wrap items-center gap-2">
+                    {% if session.track %}
+                    <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold" style="border-color: {{ session.track.color }}40; background-color: {{ session.track.color }}10; color: {{ session.track.color }}">
+                        <span class="h-1.5 w-1.5 rounded-full" style="background-color: {{ session.track.color }}"></span>
+                        {{ session.track.name }}
+                    </span>
+                    {% endif %}
+                    {% if session.session_format %}
+                    {% #badge variant="secondary" %}{{ session.session_format.name }} ({{ session.session_format.duration_minutes }} {% trans "min" %}){% /badge %}
+                    {% endif %}
+                    {% if session.proposal and session.proposal.level %}
+                    {% #badge variant="outline" %}{{ session.proposal.get_level_display }}{% /badge %}
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if session.starts_at or session.room %}
+            <div class="flex flex-wrap gap-4">
+                {% if session.starts_at %}
+                <div class="flex items-center gap-2 rounded-xl bg-muted border border-border px-4 py-2.5">
+                    <i data-lucide="calendar" class="h-4 w-4 text-muted-foreground"></i>
+                    <span class="text-sm font-medium">{{ session.starts_at|date:"D, M d" }}</span>
+                </div>
+                <div class="flex items-center gap-2 rounded-xl bg-muted border border-border px-4 py-2.5">
+                    <i data-lucide="clock" class="h-4 w-4 text-muted-foreground"></i>
+                    <span class="text-sm font-medium">
+                        {{ session.starts_at|date:"H:i" }}{% if session.ends_at %} - {{ session.ends_at|date:"H:i" }}{% endif %}
+                    </span>
+                </div>
+                {% endif %}
+                {% if session.room %}
+                <div class="flex items-center gap-2 rounded-xl bg-muted border border-border px-4 py-2.5">
+                    <i data-lucide="map-pin" class="h-4 w-4 text-muted-foreground"></i>
+                    <span class="text-sm font-medium">{{ session.room }}</span>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% if session.description %}
+            {% #card %}
+                <div class="prose prose-sm dark:prose-invert max-w-none">
+                    {{ session.description|linebreaksbr }}
+                </div>
+            {% /card %}
+            {% endif %}
+
+            {% #card %}
+                <h2 class="text-lg font-semibold mb-4">{% trans "Speaker" %}</h2>
+                <div class="flex items-start gap-4">
+                    {% if speaker_profile and speaker_profile.get_photo_url %}
+                    <img src="{{ speaker_profile.get_photo_url }}" alt="{{ session.speaker.get_full_name|default:session.speaker.email }}" class="h-16 w-16 rounded-full object-cover border-2 border-border shrink-0">
+                    {% else %}
+                    <div class="h-16 w-16 rounded-full bg-muted flex items-center justify-center border-2 border-border shrink-0">
+                        <span class="text-lg font-semibold text-muted-foreground">{{ session.speaker.get_full_name|slice:":1"|upper|default:session.speaker.email|slice:":1"|upper }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="space-y-1 min-w-0">
+                        <h3 class="font-semibold text-lg">{{ session.speaker.get_full_name|default:session.speaker.email }}</h3>
+                        {% if speaker_profile.tagline %}
+                        <p class="text-sm text-muted-foreground">{{ speaker_profile.tagline }}</p>
+                        {% endif %}
+                        {% if speaker_profile.company or speaker_profile.job_title %}
+                        <p class="text-sm text-muted-foreground">
+                            {% if speaker_profile.job_title %}{{ speaker_profile.job_title }}{% endif %}
+                            {% if speaker_profile.job_title and speaker_profile.company %} {% trans "at" %} {% endif %}
+                            {% if speaker_profile.company %}{{ speaker_profile.company }}{% endif %}
+                        </p>
+                        {% endif %}
+                        {% if speaker_profile.bio %}
+                        <p class="text-sm text-muted-foreground mt-2">{{ speaker_profile.bio }}</p>
+                        {% endif %}
+                        {% if speaker_profile %}
+                        <div class="flex items-center gap-2 mt-3">
+                            {% if speaker_profile.twitter %}
+                            <a href="https://twitter.com/{{ speaker_profile.twitter }}" target="_blank" rel="noopener noreferrer"
+                               class="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                               aria-label="Twitter">
+                                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                            </a>
+                            {% endif %}
+                            {% if speaker_profile.github %}
+                            <a href="https://github.com/{{ speaker_profile.github }}" target="_blank" rel="noopener noreferrer"
+                               class="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                               aria-label="GitHub">
+                                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                            </a>
+                            {% endif %}
+                            {% if speaker_profile.linkedin %}
+                            <a href="{{ speaker_profile.linkedin }}" target="_blank" rel="noopener noreferrer"
+                               class="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                               aria-label="LinkedIn">
+                                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                            </a>
+                            {% endif %}
+                            {% if speaker_profile.website %}
+                            <a href="{{ speaker_profile.website }}" target="_blank" rel="noopener noreferrer"
+                               class="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                               aria-label="{% trans 'Website' %}">
+                                <i data-lucide="globe" class="h-4 w-4"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% /card %}
+
+            {% if session.co_speakers.exists %}
+            {% #card %}
+                <h2 class="text-lg font-semibold mb-4">{% trans "Co-speakers" %}</h2>
+                <div class="space-y-4">
+                    {% for co_speaker in session.co_speakers.all %}
+                    <div class="flex items-center gap-3">
+                        {% #avatar initials=co_speaker.get_full_name|slice:":1"|upper|default:co_speaker.email|slice:":1"|upper size="sm" %}{% /avatar %}
+                        <div>
+                            <p class="font-medium">{{ co_speaker.get_full_name|default:co_speaker.email }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% /card %}
+            {% endif %}
+
+            <div class="pt-2">
+                <a href="{{ schedule_url }}" class="inline-flex items-center gap-2 text-sm text-primary hover:underline">
+                    <i data-lucide="arrow-left" class="h-4 w-4"></i>
+                    {% trans "Back to schedule" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

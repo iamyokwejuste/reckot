@@ -1,8 +1,10 @@
 import uuid
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from apps.core.validators import ALLOWED_IMAGE_EXTENSIONS, validate_image_file_size
 from apps.orgs.models import Organization
 
 
@@ -69,7 +71,11 @@ class Event(models.Model):
     slug = models.SlugField(max_length=220, blank=True)
     description = models.TextField()
     short_description = models.CharField(max_length=300, blank=True)
-    cover_image = models.ImageField(upload_to="event_covers/", blank=True)
+    cover_image = models.ImageField(
+        upload_to="event_covers/",
+        blank=True,
+        validators=[FileExtensionValidator(ALLOWED_IMAGE_EXTENSIONS), validate_image_file_size],
+    )
     start_at = models.DateTimeField()
     end_at = models.DateTimeField()
     timezone = models.CharField(max_length=50, default="Africa/Douala")

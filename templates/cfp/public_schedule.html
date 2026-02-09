@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Schedule" %} - {{ event.title }} - Reckot{% endblock %}
+
+{% block content %}
+<div class="container py-8">
+    <div class="max-w-5xl mx-auto">
+        <div class="text-center space-y-2 mb-8" data-animate="fade-up">
+            <p class="text-sm font-medium text-primary">{{ event.title }}</p>
+            <h1 class="text-3xl sm:text-4xl font-bold">{% trans "Schedule" %}</h1>
+        </div>
+
+        {% if days %}
+        {% if tracks %}
+        <div class="flex flex-wrap items-center gap-2 mb-6" data-animate="fade-up" data-delay="0.05">
+            <span class="text-sm font-medium text-muted-foreground mr-1">{% trans "Filter" %}:</span>
+            <a href="{% url 'cfp:public_schedule' org_slug=event.organization.slug event_slug=event.slug %}"
+               class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium transition-colors {% if not current_track %}bg-primary text-primary-foreground{% else %}bg-muted text-muted-foreground hover:bg-muted/80{% endif %}">
+                {% trans "All" %}
+            </a>
+            {% for track in tracks %}
+            <a href="{% url 'cfp:public_schedule' org_slug=event.organization.slug event_slug=event.slug %}?track={{ track.id }}"
+               class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-colors {% if current_track|stringformat:'s' == track.id|stringformat:'s' %}bg-primary text-primary-foreground{% else %}bg-muted text-muted-foreground hover:bg-muted/80{% endif %}">
+                <span class="h-2 w-2 rounded-full" style="background-color: {{ track.color }}"></span>
+                {{ track.name }}
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if days.keys|length > 1 %}
+        {% #tabs default=days.keys|first class="mb-8" %}
+            {% #tabs_list class="flex flex-wrap gap-1 w-full" %}
+                {% for day, sessions in days.items %}
+                {% #tabs_trigger value=day|date:"Y-m-d" %}
+                    {{ day|date:"D, M d" }}
+                {% /tabs_trigger %}
+                {% endfor %}
+            {% /tabs_list %}
+
+            {% for day, sessions in days.items %}
+            {% #tabs_content value=day|date:"Y-m-d" %}
+                {% include "cfp/_schedule_day.html" with sessions=sessions %}
+            {% /tabs_content %}
+            {% endfor %}
+        {% /tabs %}
+        {% else %}
+            {% for day, sessions in days.items %}
+            <div class="mb-4">
+                <h2 class="text-lg font-semibold text-muted-foreground">{{ day|date:"l, F d, Y" }}</h2>
+            </div>
+            {% include "cfp/_schedule_day.html" with sessions=sessions %}
+            {% endfor %}
+        {% endif %}
+
+        {% else %}
+        {% #empty_state icon="calendar" title=_("Schedule not available yet") description=_("The schedule for this event has not been published yet. Check back later.") %}{% /empty_state %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

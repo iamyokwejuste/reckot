@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{{ cfp.title|default:_("Call for Proposals") }} - {{ event.title }} - Reckot{% endblock %}
+
+{% block content %}
+<div class="container py-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-center space-y-4" data-animate="fade-up">
+            <p class="text-sm font-medium text-primary">{{ event.title }}</p>
+            <h1 class="text-4xl sm:text-5xl font-bold tracking-tight">{{ cfp.title|default:_("Call for Proposals") }}</h1>
+            <div class="flex items-center justify-center gap-3">
+                {% if cfp.is_open %}
+                    {% #status_pill variant="success" dot=True %}{% trans "Open" %}{% /status_pill %}
+                {% else %}
+                    {% #status_pill variant="destructive" dot=True %}{% trans "Closed" %}{% /status_pill %}
+                {% endif %}
+                {% if cfp.closes_at %}
+                <span class="text-sm text-muted-foreground">
+                    {% if cfp.is_open %}
+                        {% trans "Deadline" %}: {{ cfp.closes_at|date:"M d, Y H:i" }}
+                    {% else %}
+                        {% trans "Closed on" %} {{ cfp.closes_at|date:"M d, Y" }}
+                    {% endif %}
+                </span>
+                {% endif %}
+            </div>
+            {% if cfp.is_open and cfp.closes_at %}
+            <div class="inline-flex items-center gap-2 rounded-xl border border-border bg-muted px-4 py-2 text-sm"
+                 data-controller="countdown"
+                 data-countdown-deadline-value="{{ cfp.closes_at|date:'c' }}">
+                <i data-lucide="clock" class="h-4 w-4 text-muted-foreground"></i>
+                <span data-countdown-target="display" class="font-medium">{{ cfp.closes_at|timeuntil }} {% trans "remaining" %}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if cfp.description %}
+        <div class="mt-12" data-animate="fade-up" data-delay="0.1">
+            {% #card %}
+                <h2 class="text-xl font-semibold mb-4">{% trans "Guidelines" %}</h2>
+                <div class="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
+                    {{ cfp.description|linebreaksbr }}
+                </div>
+            {% /card %}
+        </div>
+        {% endif %}
+
+        {% if formats %}
+        <div class="mt-8" data-animate="fade-up" data-delay="0.15">
+            <h2 class="text-xl font-semibold mb-4">{% trans "Session formats" %}</h2>
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {% for format in formats %}
+                <div class="rounded-2xl border border-border bg-card p-5 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-semibold">{{ format.name }}</h3>
+                        {% #badge variant="secondary" %}{{ format.duration_minutes }} {% trans "min" %}{% /badge %}
+                    </div>
+                    {% if format.description %}
+                    <p class="text-sm text-muted-foreground">{{ format.description }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if tracks %}
+        <div class="mt-8" data-animate="fade-up" data-delay="0.2">
+            <h2 class="text-xl font-semibold mb-4">{% trans "Tracks" %}</h2>
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {% for track in tracks %}
+                <div class="rounded-2xl border border-border bg-card p-5 space-y-2">
+                    <div class="flex items-center gap-2">
+                        <span class="h-3 w-3 rounded-full shrink-0" style="background-color: {{ track.color }}"></span>
+                        <h3 class="font-semibold">{{ track.name }}</h3>
+                    </div>
+                    {% if track.description %}
+                    <p class="text-sm text-muted-foreground">{{ track.description }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="mt-8 flex items-center justify-center" data-animate="fade-up" data-delay="0.25">
+            <div class="inline-flex items-center gap-2 rounded-xl border border-border bg-muted px-4 py-2 text-sm">
+                <i data-lucide="file-text" class="h-4 w-4 text-muted-foreground"></i>
+                <span class="text-muted-foreground">{% blocktrans with count=submission_count %}{{ count }} proposals submitted{% endblocktrans %}</span>
+            </div>
+        </div>
+
+        <div class="mt-8 text-center" data-animate="fade-up" data-delay="0.3">
+            {% if cfp.is_open %}
+            <a href="{% url 'cfp:submit_proposal' org_slug=event.organization.slug event_slug=event.slug %}">
+                {% #button variant="default" size="lg" %}
+                    <i data-lucide="send" class="mr-2 h-5 w-5"></i>
+                    {% trans "Submit a proposal" %}
+                {% /button %}
+            </a>
+            {% else %}
+            {% #alert variant="warning" icon="info" %}
+                {% trans "Submissions are closed for this call for proposals." %}
+            {% /alert %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

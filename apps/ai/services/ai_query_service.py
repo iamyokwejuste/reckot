@@ -1,10 +1,13 @@
+import hashlib
 import json
 import logging
 from typing import Any, Dict, List, Optional
 from django.conf import settings
+from django.core.cache import cache
 from google import genai
 from apps.ai.services.query_executor import ReadOnlyQueryExecutor
 from apps.ai.services.schema_validator import SchemaValidator
+from apps.orgs.models import Membership
 
 logger = logging.getLogger(__name__)
 
@@ -23,8 +26,6 @@ class AIQueryService:
         if not user or not user.is_authenticated:
             return "PUBLIC"
 
-        from apps.orgs.models import Membership
-
         if Membership.objects.filter(user=user).exists():
             return "ORG_MEMBER"
 
@@ -33,8 +34,6 @@ class AIQueryService:
     def get_user_org_ids(self, user) -> List[int]:
         if not user or not user.is_authenticated:
             return []
-
-        from apps.orgs.models import Membership
 
         return list(
             Membership.objects.filter(user=user).values_list(
@@ -45,6 +44,12 @@ class AIQueryService:
     def generate_sql(
         self, user_question: str, access_level: str = "PUBLIC"
     ) -> Dict[str, Any]:
+        cache_hash = hashlib.sha256(f"{access_level}:{user_question}".encode()).hexdigest()
+        cache_key = f"ai_query_result:{cache_hash}"
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return cached
+
         accessible_tables = {}
 
         for table_name, table_schema in self.validator.tables.items():
@@ -87,11 +92,13 @@ class AIQueryService:
                     "sql": sql,
                 }
 
-            return {
+            result = {
                 "success": True,
                 "sql": sql,
                 "schema_used": list(accessible_tables.keys()),
             }
+            cache.set(cache_key, result, 600)
+            return result
 
         except Exception as e:
             logger.error(f"SQL generation failed: {str(e)}")

@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import admin
+from django.core.cache import caches
 from django.db.models import Sum, Count, Q
 from django.db.models.functions import TruncDate
 from django.utils import timezone
@@ -47,6 +48,12 @@ def get_admin_context(request, title):
 
 
 def dashboard_callback(request, context):
+    cache = caches["analytics"]
+    cached = cache.get("admin_dashboard_kpis")
+    if cached is not None:
+        context.update(cached)
+        return context
+
     today = timezone.now().date()
     last_30_days = today - timedelta(days=30)
     last_7_days = today - timedelta(days=7)
@@ -74,45 +81,45 @@ def dashboard_callback(request, context):
     revenue_chart = generate_revenue_chart(last_30_days, today)
     sales_chart = generate_sales_chart(last_30_days, today)
 
-    context.update(
-        {
-            "navigation": [
-                {"title": "Dashboard", "link": "/admin/"},
-                {"title": "Analytics", "link": "/admin/reports/revenue/"},
-            ],
-            "kpi_data": [
-                {
-                    "title": "Total Revenue (30d)",
-                    "metric": f"${total_revenue:,.2f}",
-                    "footer": f"Last 7 days: ${revenue_last_7:,.2f}",
-                    "icon": "attach_money",
-                },
-                {
-                    "title": "Total Orders (30d)",
-                    "metric": str(total_orders),
-                    "footer": f"Last 7 days: {orders_last_7}",
-                    "icon": "shopping_cart",
-                },
-                {
-                    "title": "Tickets Sold (30d)",
-                    "metric": str(total_tickets),
-                    "footer": f"Active now: {total_tickets}",
-                    "icon": "confirmation_number",
-                },
-                {
-                    "title": "Active Events",
-                    "metric": str(active_events),
-                    "footer": "Currently running or upcoming",
-                    "icon": "event",
-                },
-            ],
-            "charts": [
-                {"title": "Revenue Trend", "html": revenue_chart},
-                {"title": "Sales Overview", "html": sales_chart},
-            ],
-        }
-    )
+    result = {
+        "navigation": [
+            {"title": "Dashboard", "link": "/admin/"},
+            {"title": "Analytics", "link": "/admin/reports/revenue/"},
+        ],
+        "kpi_data": [
+            {
+                "title": "Total Revenue (30d)",
+                "metric": f"${total_revenue:,.2f}",
+                "footer": f"Last 7 days: ${revenue_last_7:,.2f}",
+                "icon": "attach_money",
+            },
+            {
+                "title": "Total Orders (30d)",
+                "metric": str(total_orders),
+                "footer": f"Last 7 days: {orders_last_7}",
+                "icon": "shopping_cart",
+            },
+            {
+                "title": "Tickets Sold (30d)",
+                "metric": str(total_tickets),
+                "footer": f"Active now: {total_tickets}",
+                "icon": "confirmation_number",
+            },
+            {
+                "title": "Active Events",
+                "metric": str(active_events),
+                "footer": "Currently running or upcoming",
+                "icon": "event",
+            },
+        ],
+        "charts": [
+            {"title": "Revenue Trend", "html": revenue_chart},
+            {"title": "Sales Overview", "html": sales_chart},
+        ],
+    }
 
+    cache.set("admin_dashboard_kpis", result, 300)
+    context.update(result)
     return context
 
 

@@ -1,0 +1,146 @@
+{% extends "layouts/dashboard.html" %}
+{% load slippers i18n %}
+
+{% block title %}{% trans "Tracks" %} - {{ event.title }} - Reckot{% endblock %}
+
+{% block breadcrumbs %}
+{% #breadcrumb class="mb-4" %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item href="/events/" %}{% trans "Events" %}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item %}{{ event.title|truncatewords:3 }}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item %}{% trans "Tracks" %}{% /breadcrumb_item %}
+{% /breadcrumb %}
+{% endblock %}
+
+{% block header_title %}
+<div class="min-w-0">
+    <h1 class="text-lg font-semibold truncate">{% trans "Tracks" %}</h1>
+    <p class="text-sm text-muted-foreground hidden md:block">{{ event.title }}</p>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'cfp:manage_config' event.organization.slug event.slug %}">
+    {% #button variant="ghost" size="sm" %}
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        <span class="hidden md:inline">{% trans "Back to CFP" %}</span>
+    {% /button %}
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    {% #card %}
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-lg font-semibold">{% trans "Existing tracks" %}</h2>
+                <p class="text-sm text-muted-foreground">{% trans "Organize proposals into thematic tracks" %}</p>
+            </div>
+        </div>
+
+        {% if tracks %}
+        {% #table %}
+            {% #table_header %}
+                {% #table_row %}
+                    {% #table_head %}{% trans "Name" %}{% /table_head %}
+                    {% #table_head %}{% trans "Color" %}{% /table_head %}
+                    {% #table_head %}{% trans "Description" %}{% /table_head %}
+                    {% #table_head %}{% trans "Active" %}{% /table_head %}
+                    {% #table_head class="text-right" %}{% trans "Actions" %}{% /table_head %}
+                {% /table_row %}
+            {% /table_header %}
+            {% #table_body %}
+                {% for track in tracks %}
+                {% #table_row %}
+                    {% #table_cell %}
+                        <span class="font-medium">{{ track.name }}</span>
+                    {% /table_cell %}
+                    {% #table_cell %}
+                        <div class="flex items-center gap-2">
+                            <span class="inline-block h-4 w-4 rounded-full border border-border" style="background-color: {{ track.color }};"></span>
+                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold" style="background-color: {{ track.color }}20; color: {{ track.color }};">{{ track.name }}</span>
+                        </div>
+                    {% /table_cell %}
+                    {% #table_cell %}
+                        <span class="text-muted-foreground text-sm">{{ track.description|default:"-"|truncatewords:8 }}</span>
+                    {% /table_cell %}
+                    {% #table_cell %}
+                        {% if track.is_active %}
+                        {% #badge variant="success" %}{% trans "Active" %}{% /badge %}
+                        {% else %}
+                        {% #badge variant="default" %}{% trans "Inactive" %}{% /badge %}
+                        {% endif %}
+                    {% /table_cell %}
+                    {% #table_cell class="text-right" %}
+                        <div class="flex items-center justify-end gap-1">
+                            <a href="{% url 'cfp:edit_track' event.organization.slug event.slug track.pk %}">
+                                {% #button variant="ghost" size="icon" %}
+                                    <i data-lucide="pencil" class="w-4 h-4"></i>
+                                {% /button %}
+                            </a>
+                            <form method="post" action="{% url 'cfp:delete_track' event.organization.slug event.slug track.pk %}" onsubmit="return confirm('{% trans 'Are you sure you want to delete this track?' %}');">
+                                {% csrf_token %}
+                                {% #button type="submit" variant="ghost" size="icon" class="text-destructive hover:text-destructive" %}
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                {% /button %}
+                            </form>
+                        </div>
+                    {% /table_cell %}
+                {% /table_row %}
+                {% endfor %}
+            {% /table_body %}
+        {% /table %}
+        {% else %}
+        {% #empty_state icon="git-branch" title=_("No tracks yet") description=_("Add your first track below.") %}{% /empty_state %}
+        {% endif %}
+    {% /card %}
+
+    {% #card %}
+        <h2 class="text-lg font-semibold mb-6">{% trans "Add new track" %}</h2>
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+
+            <div class="grid gap-4 sm:grid-cols-2">
+                {% #form_field label=_("Name") name="name" required=True %}
+                    {% #input type="text" name="name" id="name" value=form.name.value placeholder=_("e.g. Frontend, Backend, DevOps") required=True %}{% /input %}
+                    {% if form.name.errors %}
+                    <p class="text-sm text-destructive mt-1">{{ form.name.errors.0 }}</p>
+                    {% endif %}
+                {% /form_field %}
+
+                {% #form_field label=_("Color") name="color" required=True %}
+                    <div class="flex items-center gap-3">
+                        <input type="color" name="color" id="color" value="{{ form.color.value|default:'#6366f1' }}" class="h-12 w-16 rounded-xl border-2 border-border cursor-pointer">
+                        <span class="text-sm text-muted-foreground" id="color-preview">{{ form.color.value|default:"#6366f1" }}</span>
+                    </div>
+                    {% if form.color.errors %}
+                    <p class="text-sm text-destructive mt-1">{{ form.color.errors.0 }}</p>
+                    {% endif %}
+                {% /form_field %}
+            </div>
+
+            {% #form_field label=_("Description") name="description" %}
+                {% #textarea name="description" id="description" rows="3" placeholder=_("Describe what kind of proposals fit this track") %}{{ form.description.value|default:"" }}{% /textarea %}
+                {% if form.description.errors %}
+                <p class="text-sm text-destructive mt-1">{{ form.description.errors.0 }}</p>
+                {% endif %}
+            {% /form_field %}
+
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="is_active" checked class="h-4 w-4 rounded border-border text-primary focus:ring-primary">
+                <span class="text-sm font-medium">{% trans "Active" %}</span>
+            </label>
+
+            <div class="flex justify-end">
+                {% #button type="submit" variant="default" size="sm" %}
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    {% trans "Add track" %}
+                {% /button %}
+            </div>
+        </form>
+    {% /card %}
+</div>
+{% endblock %}

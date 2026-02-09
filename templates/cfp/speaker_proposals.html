@@ -1,0 +1,131 @@
+{% extends 'layouts/dashboard.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "My proposals" %} - {{ event.title }} - Reckot{% endblock %}
+
+{% block breadcrumbs %}
+{% url 'cfp:public_cfp' org_slug=event.organization.slug event_slug=event.slug as cfp_url %}
+{% #breadcrumb class="mb-4" %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item href=cfp_url %}{{ event.title|truncatewords:3 }}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item %}{% trans "My proposals" %}{% /breadcrumb_item %}
+{% /breadcrumb %}
+{% endblock %}
+
+{% block header_title %}
+<div class="min-w-0">
+    <h1 class="text-lg font-semibold truncate">{{ event.title }}</h1>
+    <p class="text-sm text-muted-foreground hidden md:block">{% trans "My proposals" %}</p>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+{% if cfp.is_open %}
+<a href="{% url 'cfp:submit_proposal' org_slug=event.organization.slug event_slug=event.slug %}">
+    {% #button variant="default" size="sm" %}
+        <i data-lucide="plus" class="w-4 h-4"></i>
+        <span class="hidden md:inline">{% trans "New proposal" %}</span>
+    {% /button %}
+</a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    {% if proposals %}
+    <div class="grid gap-4">
+        {% for proposal in proposals %}
+        <div class="rounded-2xl border border-border bg-card p-5 space-y-3 hover:shadow-md transition-shadow" data-animate="fade-up" data-delay="{{ forloop.counter0 }}00ms">
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                <div class="space-y-1 min-w-0">
+                    <h3 class="font-semibold text-lg truncate">{{ proposal.title }}</h3>
+                    <p class="text-sm text-muted-foreground line-clamp-2">{{ proposal.abstract }}</p>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    {% if proposal.status == "SUBMITTED" %}
+                        {% #status_pill variant="info" dot=True %}{% trans "Submitted" %}{% /status_pill %}
+                    {% elif proposal.status == "UNDER_REVIEW" %}
+                        {% #status_pill variant="warning" dot=True %}{% trans "Under review" %}{% /status_pill %}
+                    {% elif proposal.status == "ACCEPTED" %}
+                        {% #status_pill variant="success" dot=True %}{% trans "Accepted" %}{% /status_pill %}
+                    {% elif proposal.status == "REJECTED" %}
+                        {% #status_pill variant="destructive" dot=True %}{% trans "Rejected" %}{% /status_pill %}
+                    {% elif proposal.status == "WAITLISTED" %}
+                        {% #status_pill variant="warning" dot=True %}{% trans "Waitlisted" %}{% /status_pill %}
+                    {% elif proposal.status == "CONFIRMED" %}
+                        {% #status_pill variant="success" dot=True %}{% trans "Confirmed" %}{% /status_pill %}
+                    {% elif proposal.status == "WITHDRAWN" %}
+                        {% #status_pill variant="default" dot=True %}{% trans "Withdrawn" %}{% /status_pill %}
+                    {% elif proposal.status == "DRAFT" %}
+                        {% #status_pill variant="default" dot=True %}{% trans "Draft" %}{% /status_pill %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                {% if proposal.track %}
+                <span class="inline-flex items-center gap-1">
+                    <span class="h-2 w-2 rounded-full" style="background-color: {{ proposal.track.color }}"></span>
+                    {{ proposal.track.name }}
+                </span>
+                <span class="text-border">|</span>
+                {% endif %}
+                {% if proposal.session_format %}
+                <span>{{ proposal.session_format.name }}</span>
+                <span class="text-border">|</span>
+                {% endif %}
+                {% if proposal.submitted_at %}
+                <span>{% trans "Submitted" %} {{ proposal.submitted_at|date:"M d, Y" }}</span>
+                {% endif %}
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 pt-1">
+                {% if cfp.allow_edits_after_submit or proposal.status == "DRAFT" %}
+                <a href="{% url 'cfp:proposal_edit' org_slug=event.organization.slug event_slug=event.slug id=proposal.id %}">
+                    {% #button variant="outline" size="sm" %}
+                        <i data-lucide="pencil" class="mr-1 h-3 w-3"></i>
+                        {% trans "Edit" %}
+                    {% /button %}
+                </a>
+                {% endif %}
+
+                {% if proposal.status == "ACCEPTED" %}
+                <form method="post" action="{% url 'cfp:proposal_confirm' org_slug=event.organization.slug event_slug=event.slug id=proposal.id %}">
+                    {% csrf_token %}
+                    {% #button type="submit" variant="default" size="sm" %}
+                        <i data-lucide="check-circle" class="mr-1 h-3 w-3"></i>
+                        {% trans "Confirm" %}
+                    {% /button %}
+                </form>
+                {% endif %}
+
+                {% if proposal.status != "WITHDRAWN" and proposal.status != "REJECTED" %}
+                <form method="post" action="{% url 'cfp:proposal_withdraw' org_slug=event.organization.slug event_slug=event.slug id=proposal.id %}"
+                      onsubmit="return confirm('{% trans "Are you sure you want to withdraw this proposal?" %}')">
+                    {% csrf_token %}
+                    {% #button type="submit" variant="ghost" size="sm" class="text-destructive hover:text-destructive" %}
+                        <i data-lucide="x-circle" class="mr-1 h-3 w-3"></i>
+                        {% trans "Withdraw" %}
+                    {% /button %}
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    {% #empty_state icon="file-text" title=_("No proposals yet") description=_("You have not submitted any proposals for this event.") %}
+        {% if cfp.is_open %}
+        <a href="{% url 'cfp:submit_proposal' org_slug=event.organization.slug event_slug=event.slug %}">
+            {% #button variant="default" %}
+                <i data-lucide="plus" class="mr-2 h-4 w-4"></i>
+                {% trans "Submit a proposal" %}
+            {% /button %}
+        </a>
+        {% endif %}
+    {% /empty_state %}
+    {% endif %}
+</div>
+{% endblock %}

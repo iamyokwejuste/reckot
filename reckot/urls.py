@@ -62,6 +62,7 @@ urlpatterns = [
     path("widgets/", include("apps.widgets.urls")),
     path("m/", include("apps.marketing.urls")),
     path("ai/", include("apps.ai.urls")),
+    path("cfp/", include("apps.cfp.urls")),
     path("app/", include("apps.core.urls")),
     path("accounts/", include("allauth.urls")),
     path("accounts/verify-email/", OTPVerificationView.as_view(), name="otp_verify"),

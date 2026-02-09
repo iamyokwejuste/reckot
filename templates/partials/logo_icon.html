@@ -1,5 +1,5 @@
 {% load static %}
 <span data-controller="logo" style="display: contents;">
-    <img class="{{ class|default:'h-7 w-7' }}" data-logo-target="logoDark" src="{% static 'images/logo/reckto_logo_light_mode.png' %}" alt="Reckot" {{ attrs|safe }}>
-    <img class="{{ class|default:'h-7 w-7' }}" data-logo-target="logoLight" src="{% static 'images/logo/reckto_logo_dark_mode.png' %}" alt="Reckot" {{ attrs|safe }} style="display: none;">
+    <img class="{{ class|default:'h-7 w-7' }}" data-logo-target="dark" src="{% static 'images/logo/reckto_logo_light_mode.png' %}" alt="Reckot" {{ attrs|safe }}>
+    <img class="{{ class|default:'h-7 w-7' }}" data-logo-target="light" src="{% static 'images/logo/reckto_logo_dark_mode.png' %}" alt="Reckot" {{ attrs|safe }} style="display: none;">
 </span>

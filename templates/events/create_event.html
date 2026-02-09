@@ -30,7 +30,7 @@
 <div class="max-w-2xl mx-auto pb-24" data-controller="event-form" data-event-form-mode-value="create">
     <div class="mb-8">
         <div class="flex items-center justify-between mb-2">
-            <span class="text-sm font-medium">Step <span data-step-number>1</span> of 4</span>
+            <span class="text-sm font-medium">Step <span data-step-number>1</span> of 5</span>
             <span class="text-sm text-muted-foreground" data-step-label>{% trans "Basic Info" %}</span>
         </div>
         <div class="h-2 bg-muted rounded-full overflow-hidden">
@@ -373,6 +373,76 @@
                         </div>
                     </div>
                     <p data-error="contact" class="hidden text-sm text-red-500 mt-2"></p>
+                </div>
+            </div>
+        </div>
+
+        <div data-event-form-target="step5" class="hidden">
+            <div class="card p-6 space-y-4">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="h-10 w-10 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                        <i data-lucide="megaphone" class="h-5 w-5 text-violet-500"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-semibold">{% trans "Call for proposals" %}</h2>
+                        <p class="text-sm text-muted-foreground">{% trans "Accept speaker submissions for your event" %}</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between p-4 rounded-lg border border-border">
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" name="enable_cfp" id="id_enable_cfp" class="h-4 w-4 rounded border-border"
+                               data-action="change->event-form#toggleCfpFields">
+                        <label for="id_enable_cfp" class="text-sm font-medium">{% trans "Enable call for proposals" %}</label>
+                    </div>
+                </div>
+
+                <div data-cfp-fields class="hidden space-y-4">
+                    <div>
+                        <label for="id_cfp_title" class="block text-sm font-medium mb-2">{% trans "CFP title" %}</label>
+                        <input type="text" name="cfp_title" id="id_cfp_title"
+                               placeholder="{% trans "e.g., Call for speakers" %}"
+                               class="input" value="{% trans "Call for proposals" %}">
+                    </div>
+
+                    <div>
+                        <label for="id_cfp_description" class="block text-sm font-medium mb-2">{% trans "Guidelines" %}</label>
+                        <textarea name="cfp_description" id="id_cfp_description" rows="3"
+                                  placeholder="{% trans "What topics are you looking for? What format?" %}"
+                                  class="input"></textarea>
+                    </div>
+
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="relative">
+                            <label for="id_cfp_opens_at" class="block text-sm font-medium mb-2">{% trans "Opens" %}</label>
+                            <div class="relative">
+                                <input type="text" name="cfp_opens_at" id="id_cfp_opens_at"
+                                       placeholder="{% trans "Select date" %}"
+                                       class="input pl-10 flatpickr-datetime cursor-pointer">
+                                <div class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                                    <i data-lucide="calendar-clock" class="w-4 h-4"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <label for="id_cfp_closes_at" class="block text-sm font-medium mb-2">{% trans "Closes" %}</label>
+                            <div class="relative">
+                                <input type="text" name="cfp_closes_at" id="id_cfp_closes_at"
+                                       placeholder="{% trans "Select date" %}"
+                                       class="input pl-10 flatpickr-datetime cursor-pointer">
+                                <div class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                                    <i data-lucide="calendar-clock" class="w-4 h-4"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="id_cfp_max_submissions" class="block text-sm font-medium mb-2">{% trans "Max submissions per speaker" %}</label>
+                        <input type="number" name="cfp_max_submissions" id="id_cfp_max_submissions" value="3" min="1" max="20" class="input">
+                    </div>
+
+                    <p class="text-xs text-muted-foreground">{% trans "You can configure more options (tracks, formats, custom questions) from the CFP management page after creating the event." %}</p>
                 </div>
             </div>
         </div>

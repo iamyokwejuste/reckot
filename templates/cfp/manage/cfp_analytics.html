@@ -1,0 +1,143 @@
+{% extends "layouts/dashboard.html" %}
+{% load slippers i18n %}
+
+{% block title %}{% trans "CFP Analytics" %} - {{ event.title }} - Reckot{% endblock %}
+
+{% block breadcrumbs %}
+{% #breadcrumb class="mb-4" %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item href="/events/" %}{% trans "Events" %}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item %}{{ event.title|truncatewords:3 }}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item %}{% trans "CFP analytics" %}{% /breadcrumb_item %}
+{% /breadcrumb %}
+{% endblock %}
+
+{% block header_title %}
+<div class="min-w-0">
+    <h1 class="text-lg font-semibold truncate">{% trans "CFP Analytics" %}</h1>
+    <p class="text-sm text-muted-foreground hidden md:block">{{ event.title }}</p>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'cfp:proposals_list' event.organization.slug event.slug %}">
+    {% #button variant="ghost" size="sm" %}
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        <span class="hidden md:inline">{% trans "View proposals" %}</span>
+    {% /button %}
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        {% #stat_card label=_("Total submissions") value=stats.total icon="file-text" color_variant="primary" %}{% /stat_card %}
+        {% #stat_card label=_("Acceptance rate") value=stats.acceptance_rate icon="check-circle" color_variant="success" %}{% /stat_card %}
+        {% #stat_card label=_("Review progress") value=stats.review_progress icon="bar-chart-3" color_variant="warning" %}{% /stat_card %}
+        {% #stat_card label=_("Reviewed") value=stats.reviewed_count icon="eye" color_variant="info" %}{% /stat_card %}
+        {% #stat_card label=_("Confirmed") value=stats.confirmed icon="user-check" color_variant="primary" %}{% /stat_card %}
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-2">
+        {% #card %}
+            <h3 class="text-base font-semibold mb-6">{% trans "Submissions by track" %}</h3>
+            {% if by_track %}
+            <div class="space-y-4">
+                {% for item in by_track %}
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <div class="flex items-center gap-2">
+                            <span class="inline-block h-3 w-3 rounded-full" style="background-color: {{ item.track__color|default:'#09090b' }};"></span>
+                            <span class="text-sm font-medium">{{ item.track__name|default:_("No track") }}</span>
+                        </div>
+                        <span class="text-sm font-semibold">{{ item.count }}</span>
+                    </div>
+                    <div class="h-2.5 w-full rounded-full bg-muted overflow-hidden">
+                        {% widthratio item.count stats.total 100 as bar_width %}
+                        <div class="h-full rounded-full transition-all duration-500" style="width: {% widthratio item.count stats.total 100 %}%; background-color: {{ item.track__color|default:'#09090b' }};"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-sm text-muted-foreground">{% trans "No track data available." %}</p>
+            {% endif %}
+        {% /card %}
+
+        <div class="space-y-6">
+            {% #card %}
+                <h3 class="text-base font-semibold mb-4">{% trans "Submissions by format" %}</h3>
+                {% if by_format %}
+                <div class="grid gap-3 sm:grid-cols-2">
+                    {% for item in by_format %}
+                    <div class="flex items-center gap-3 rounded-xl border border-border p-3">
+                        <div class="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                            <span class="text-base font-bold text-blue-500">{{ item.count }}</span>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-sm font-medium truncate">{{ item.session_format__name|default:_("No format") }}</p>
+                            <p class="text-xs text-muted-foreground">{% widthratio item.count stats.total 100 %}{% trans "% of total" %}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-sm text-muted-foreground">{% trans "No format data available." %}</p>
+                {% endif %}
+            {% /card %}
+
+            {% #card %}
+                <h3 class="text-base font-semibold mb-4">{% trans "Submissions by level" %}</h3>
+                {% if by_level %}
+                <div class="grid gap-3 sm:grid-cols-2">
+                    {% for item in by_level %}
+                    <div class="text-center rounded-xl border border-border p-4">
+                        <p class="text-2xl font-bold">{{ item.count }}</p>
+                        <p class="text-sm text-muted-foreground mt-1">{{ item.level }}</p>
+                        <div class="mt-2 h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                            <div class="h-full rounded-full bg-primary transition-all duration-500" style="width: {% widthratio item.count stats.total 100 %}%;"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-sm text-muted-foreground">{% trans "No level data available." %}</p>
+                {% endif %}
+            {% /card %}
+        </div>
+    </div>
+
+    {% #card %}
+        <h3 class="text-base font-semibold mb-4">{% trans "Status breakdown" %}</h3>
+        <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            <div class="text-center rounded-xl border border-border p-4">
+                <p class="text-2xl font-bold">{{ stats.submitted|default:"0" }}</p>
+                <p class="text-xs text-muted-foreground mt-1">{% trans "Submitted" %}</p>
+            </div>
+            <div class="text-center rounded-xl border border-border p-4">
+                <p class="text-2xl font-bold text-yellow-500">{{ stats.under_review|default:"0" }}</p>
+                <p class="text-xs text-muted-foreground mt-1">{% trans "Under review" %}</p>
+            </div>
+            <div class="text-center rounded-xl border border-border p-4">
+                <p class="text-2xl font-bold text-green-500">{{ stats.accepted|default:"0" }}</p>
+                <p class="text-xs text-muted-foreground mt-1">{% trans "Accepted" %}</p>
+            </div>
+            <div class="text-center rounded-xl border border-border p-4">
+                <p class="text-2xl font-bold text-red-500">{{ stats.rejected|default:"0" }}</p>
+                <p class="text-xs text-muted-foreground mt-1">{% trans "Rejected" %}</p>
+            </div>
+            <div class="text-center rounded-xl border border-border p-4">
+                <p class="text-2xl font-bold text-orange-500">{{ stats.waitlisted|default:"0" }}</p>
+                <p class="text-xs text-muted-foreground mt-1">{% trans "Waitlisted" %}</p>
+            </div>
+            <div class="text-center rounded-xl border border-border p-4">
+                <p class="text-2xl font-bold text-blue-500">{{ stats.confirmed|default:"0" }}</p>
+                <p class="text-xs text-muted-foreground mt-1">{% trans "Confirmed" %}</p>
+            </div>
+        </div>
+    {% /card %}
+</div>
+{% endblock %}

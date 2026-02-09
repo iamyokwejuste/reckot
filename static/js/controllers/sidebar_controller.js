@@ -83,6 +83,13 @@ export default class extends Controller {
             logoIcon.classList.toggle('hidden', !isCollapsed);
         }
 
+        const modeFull = this.element.querySelector('.sidebar-mode-full');
+        const modeIcon = this.element.querySelector('.sidebar-mode-icon');
+        if (modeFull && modeIcon) {
+            modeFull.classList.toggle('hidden', isCollapsed);
+            modeIcon.classList.toggle('hidden', !isCollapsed);
+        }
+
         const mainContent = document.querySelector('.main-content');
         if (mainContent) {
             if (isCollapsed) {

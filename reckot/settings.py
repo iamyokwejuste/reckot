@@ -6,6 +6,10 @@ from dotenv import load_dotenv
 from django.templatetags.static import static
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
+try:
+    import sentry_sdk
+except ImportError:
+    sentry_sdk = None
 
 load_dotenv()
 
@@ -58,6 +62,7 @@ INSTALLED_APPS = [
     "apps.marketing",
     "apps.ai",
     "apps.analytics",
+    "apps.cfp",
 ]
 
 MIDDLEWARE = [
@@ -70,6 +75,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "apps.core.utils.middleware.RateLimitMiddleware",
+    "apps.core.utils.middleware.ModeAccessMiddleware",
     "reckot.middleware.admin_only.AdminOnlyMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -232,6 +238,7 @@ CELERY_TASK_ROUTES = {
     "apps.payments.tasks.*": {"queue": "payments"},
     "apps.reports.tasks.*": {"queue": "exports"},
     "apps.messaging.tasks.*": {"queue": "emails"},
+    "apps.tickets.tasks.*": {"queue": "exports"},
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -437,6 +444,49 @@ RATE_LIMITING_ENABLED = os.getenv("RATE_LIMITING_ENABLED", "True").lower() in (
     "yes",
 )
 
+MODE_ACCESS = {
+    "ORGANIZER_PATHS": [
+        "/reports/",
+        "/orgs/",
+        "/checkin/",
+        "/payments/",
+        "/messaging/",
+    ],
+    "ORGANIZER_EVENT_SUFFIXES": [
+        "/dashboard/",
+        "/edit/",
+        "/manage/",
+        "/tickets/",
+        "/apply-feature/",
+        "/toggle-publish/",
+        "/toggle-public/",
+        "/generate-preview/",
+        "/flyer/config/",
+        "/questions/",
+        "/customize/",
+        "/delete/",
+    ],
+    "ORGANIZER_EVENT_PREFIXES": [
+        "/events/create",
+        "/events/coupons",
+    ],
+    "SPEAKER_PATHS": [
+        "/app/speaker/",
+    ],
+    "EXEMPT_PATHS": [
+        "/admin/",
+        "/static/",
+        "/media/",
+        "/health/",
+        "/i18n/",
+        "/accounts/",
+        "/app/switch-mode/",
+        "/app/settings/",
+        "/events/discover/",
+        "/events/organizer/",
+    ],
+}
+
 if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
@@ -444,6 +494,10 @@ if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_SSL_REDIRECT = True
 
 LOGGING = {
     "version": 1,
@@ -472,6 +526,15 @@ LOGGING = {
         },
     },
 }
+
+_sentry_dsn = os.getenv("SENTRY_DSN", "")
+if _sentry_dsn and sentry_sdk:
+    sentry_sdk.init(
+        dsn=_sentry_dsn,
+        traces_sample_rate=0.1,
+        profiles_sample_rate=0.1,
+        send_default_pii=False,
+    )
 
 UNFOLD = {
     "SITE_TITLE": "Reckot Admin",

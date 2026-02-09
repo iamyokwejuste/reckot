@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Confirm participation" %} - {{ proposal.title }} - Reckot{% endblock %}
+
+{% block content %}
+<div class="container py-8">
+    <div class="max-w-lg mx-auto text-center">
+        <div class="space-y-6" data-animate="fade-up">
+            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-success/10">
+                <i data-lucide="check-circle-2" class="h-8 w-8 text-success"></i>
+            </div>
+
+            <div class="space-y-2">
+                <h1 class="text-3xl font-bold">{% trans "Confirm your participation" %}</h1>
+                <p class="text-muted-foreground">{% trans "Your proposal has been accepted. Please confirm that you will present at the event." %}</p>
+            </div>
+
+            {% #card class="text-left" %}
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-sm text-muted-foreground">{% trans "Proposal" %}</p>
+                        <p class="font-semibold text-lg">{{ proposal.title }}</p>
+                    </div>
+                    {% #separator %}{% /separator %}
+                    <div>
+                        <p class="text-sm text-muted-foreground">{% trans "Event" %}</p>
+                        <p class="font-medium">{{ event.title }}</p>
+                    </div>
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        {% if proposal.session_format %}
+                        <div>
+                            <p class="text-sm text-muted-foreground">{% trans "Session format" %}</p>
+                            <p class="text-sm font-medium">{{ proposal.session_format.name }} ({{ proposal.session_format.duration_minutes }} {% trans "min" %})</p>
+                        </div>
+                        {% endif %}
+                        {% if proposal.track %}
+                        <div>
+                            <p class="text-sm text-muted-foreground">{% trans "Track" %}</p>
+                            <p class="text-sm font-medium inline-flex items-center gap-1.5">
+                                <span class="h-2 w-2 rounded-full" style="background-color: {{ proposal.track.color }}"></span>
+                                {{ proposal.track.name }}
+                            </p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        <div>
+                            <p class="text-sm text-muted-foreground">{% trans "Date" %}</p>
+                            <p class="text-sm font-medium">{{ event.start_at|date:"D, M d, Y" }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-muted-foreground">{% trans "Location" %}</p>
+                            <p class="text-sm font-medium">{{ event.location|default:_("To be announced") }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% /card %}
+
+            <form method="post" action="{% url 'cfp:proposal_confirm' org_slug=event.organization.slug event_slug=event.slug id=proposal.id %}">
+                {% csrf_token %}
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+                    {% #button type="submit" variant="default" size="lg" %}
+                        <i data-lucide="check" class="mr-2 h-5 w-5"></i>
+                        {% trans "Confirm participation" %}
+                    {% /button %}
+                    <a href="{% url 'cfp:speaker_proposals' org_slug=event.organization.slug event_slug=event.slug %}">
+                        {% #button variant="outline" size="lg" %}
+                            {% trans "Back to proposals" %}
+                        {% /button %}
+                    </a>
+                </div>
+            </form>
+
+            <div class="pt-2">
+                <form method="post"
+                      action="{% url 'cfp:proposal_withdraw' org_slug=event.organization.slug event_slug=event.slug id=proposal.id %}"
+                      onsubmit="return confirm('{% trans "Are you sure you want to withdraw this proposal?" %}')">
+                    {% csrf_token %}
+                    <button type="submit" class="text-sm text-destructive hover:underline">
+                        {% trans "Decline and withdraw proposal" %}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

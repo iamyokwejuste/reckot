@@ -1,0 +1,159 @@
+{% extends "layouts/dashboard.html" %}
+{% load slippers i18n %}
+
+{% block title %}{% trans "Custom Questions" %} - {{ event.title }} - Reckot{% endblock %}
+
+{% block breadcrumbs %}
+{% #breadcrumb class="mb-4" %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item href="/events/" %}{% trans "Events" %}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item %}{{ event.title|truncatewords:3 }}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item %}{% trans "Custom questions" %}{% /breadcrumb_item %}
+{% /breadcrumb %}
+{% endblock %}
+
+{% block header_title %}
+<div class="min-w-0">
+    <h1 class="text-lg font-semibold truncate">{% trans "Custom Questions" %}</h1>
+    <p class="text-sm text-muted-foreground hidden md:block">{{ event.title }}</p>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'cfp:manage_config' event.organization.slug event.slug %}">
+    {% #button variant="ghost" size="sm" %}
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        <span class="hidden md:inline">{% trans "Back to CFP" %}</span>
+    {% /button %}
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    {% #card %}
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-lg font-semibold">{% trans "Existing questions" %}</h2>
+                <p class="text-sm text-muted-foreground">{% trans "Additional questions speakers must answer when submitting a proposal" %}</p>
+            </div>
+        </div>
+
+        {% if questions %}
+        {% #table %}
+            {% #table_header %}
+                {% #table_row %}
+                    {% #table_head %}{% trans "Question" %}{% /table_head %}
+                    {% #table_head %}{% trans "Type" %}{% /table_head %}
+                    {% #table_head %}{% trans "Required" %}{% /table_head %}
+                    {% #table_head class="text-right" %}{% trans "Actions" %}{% /table_head %}
+                {% /table_row %}
+            {% /table_header %}
+            {% #table_body %}
+                {% for question in questions %}
+                {% #table_row %}
+                    {% #table_cell %}
+                        <span class="font-medium">{{ question.text }}</span>
+                    {% /table_cell %}
+                    {% #table_cell %}
+                        {% #badge variant="outline" %}{{ question.get_question_type_display }}{% /badge %}
+                    {% /table_cell %}
+                    {% #table_cell %}
+                        {% if question.is_required %}
+                        <span class="flex items-center gap-1 text-sm text-green-600">
+                            <i data-lucide="check" class="w-4 h-4"></i>
+                            {% trans "Yes" %}
+                        </span>
+                        {% else %}
+                        <span class="flex items-center gap-1 text-sm text-muted-foreground">
+                            <i data-lucide="minus" class="w-4 h-4"></i>
+                            {% trans "No" %}
+                        </span>
+                        {% endif %}
+                    {% /table_cell %}
+                    {% #table_cell class="text-right" %}
+                        <div class="flex items-center justify-end gap-1">
+                            <a href="{% url 'cfp:edit_question' event.organization.slug event.slug question.pk %}">
+                                {% #button variant="ghost" size="icon" %}
+                                    <i data-lucide="pencil" class="w-4 h-4"></i>
+                                {% /button %}
+                            </a>
+                            <form method="post" action="{% url 'cfp:delete_question' event.organization.slug event.slug question.pk %}" onsubmit="return confirm('{% trans 'Are you sure you want to delete this question?' %}');">
+                                {% csrf_token %}
+                                {% #button type="submit" variant="ghost" size="icon" class="text-destructive hover:text-destructive" %}
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                {% /button %}
+                            </form>
+                        </div>
+                    {% /table_cell %}
+                {% /table_row %}
+                {% endfor %}
+            {% /table_body %}
+        {% /table %}
+        {% else %}
+        {% #empty_state icon="help-circle" title=_("No custom questions yet") description=_("Add questions that speakers will answer alongside their proposal.") %}{% /empty_state %}
+        {% endif %}
+    {% /card %}
+
+    {% #card %}
+        <h2 class="text-lg font-semibold mb-6">{% trans "Add new question" %}</h2>
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+
+            {% #form_field label=_("Question text") name="text" required=True %}
+                {% #input type="text" name="text" id="text" value=form.text.value placeholder=_("e.g. What is your experience with this topic?") required=True %}{% /input %}
+                {% if form.text.errors %}
+                <p class="text-sm text-destructive mt-1">{{ form.text.errors.0 }}</p>
+                {% endif %}
+            {% /form_field %}
+
+            <div class="grid gap-4 sm:grid-cols-2">
+                {% #form_field label=_("Question type") name="question_type" required=True %}
+                    <select name="question_type" id="question_type" class="flex h-12 w-full rounded-xl border-2 border-border bg-card px-4 py-3 text-sm text-foreground transition-all duration-200 hover:border-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                        <option value="text" {% if form.question_type.value == "text" %}selected{% endif %}>{% trans "Short text" %}</option>
+                        <option value="textarea" {% if form.question_type.value == "textarea" %}selected{% endif %}>{% trans "Long text" %}</option>
+                        <option value="select" {% if form.question_type.value == "select" %}selected{% endif %}>{% trans "Dropdown" %}</option>
+                        <option value="checkbox" {% if form.question_type.value == "checkbox" %}selected{% endif %}>{% trans "Checkbox" %}</option>
+                        <option value="radio" {% if form.question_type.value == "radio" %}selected{% endif %}>{% trans "Radio buttons" %}</option>
+                        <option value="number" {% if form.question_type.value == "number" %}selected{% endif %}>{% trans "Number" %}</option>
+                        <option value="url" {% if form.question_type.value == "url" %}selected{% endif %}>{% trans "URL" %}</option>
+                    </select>
+                    {% if form.question_type.errors %}
+                    <p class="text-sm text-destructive mt-1">{{ form.question_type.errors.0 }}</p>
+                    {% endif %}
+                {% /form_field %}
+
+                {% #form_field label=_("Required") name="is_required" %}
+                    <label class="flex items-center gap-2 h-12 cursor-pointer">
+                        <input type="checkbox" name="is_required" class="h-4 w-4 rounded border-border text-primary focus:ring-primary">
+                        <span class="text-sm">{% trans "Speakers must answer this question" %}</span>
+                    </label>
+                {% /form_field %}
+            </div>
+
+            {% #form_field label=_("Options") name="options" hint=_("Comma-separated list of options, only for dropdown, checkbox, and radio types") %}
+                {% #input type="text" name="options" id="options" value=form.options.value placeholder=_("e.g. Beginner, Intermediate, Advanced") %}{% /input %}
+                {% if form.options.errors %}
+                <p class="text-sm text-destructive mt-1">{{ form.options.errors.0 }}</p>
+                {% endif %}
+            {% /form_field %}
+
+            {% #form_field label=_("Help text") name="help_text" %}
+                {% #input type="text" name="help_text" id="help_text" value=form.help_text.value placeholder=_("Additional instructions for the speaker") %}{% /input %}
+                {% if form.help_text.errors %}
+                <p class="text-sm text-destructive mt-1">{{ form.help_text.errors.0 }}</p>
+                {% endif %}
+            {% /form_field %}
+
+            <div class="flex justify-end">
+                {% #button type="submit" variant="default" size="sm" %}
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    {% trans "Add question" %}
+                {% /button %}
+            </div>
+        </form>
+    {% /card %}
+</div>
+{% endblock %}

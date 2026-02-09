@@ -130,6 +130,19 @@ def initiate_payment(
         except Exception as e:
             logger.warning(f"Failed to get/create gateway config: {e}")
 
+        idempotency_key = kwargs.pop("idempotency_key", "")
+
+        if idempotency_key:
+            existing_idempotent = Payment.objects.filter(
+                idempotency_key=idempotency_key
+            ).first()
+            if existing_idempotent:
+                return existing_idempotent, {
+                    "success": True,
+                    "message": "Payment already exists for this idempotency key",
+                    "provider": existing_idempotent.provider,
+                }
+
         existing_payment = Payment.objects.filter(
             booking=booking, status=Payment.Status.PENDING
         ).first()
@@ -151,6 +164,7 @@ def initiate_payment(
                 customer_email=kwargs.get("email", default_email),
                 gateway_config=gateway_config,
                 expires_at=timezone.now() + timedelta(minutes=30),
+                idempotency_key=idempotency_key,
             )
 
         callback_base = settings.PAYMENT_GATEWAYS.get("CALLBACK_BASE_URL", "")

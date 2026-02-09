@@ -1,0 +1,255 @@
+{% extends "layouts/dashboard.html" %}
+{% load slippers i18n %}
+
+{% block title %}{% trans "Proposals" %} - {{ event.title }} - Reckot{% endblock %}
+
+{% block breadcrumbs %}
+{% #breadcrumb class="mb-4" %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item href="/events/" %}{% trans "Events" %}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item %}{{ event.title|truncatewords:3 }}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item %}{% trans "Proposals" %}{% /breadcrumb_item %}
+{% /breadcrumb %}
+{% endblock %}
+
+{% block header_title %}
+<div class="min-w-0">
+    <h1 class="text-lg font-semibold truncate">{% trans "Proposals" %}</h1>
+    <p class="text-sm text-muted-foreground hidden md:block">{{ event.title }}</p>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'cfp:export_proposals' event.organization.slug event.slug %}" class="hidden sm:inline-flex">
+    {% #button variant="outline" size="sm" %}
+        <i data-lucide="download" class="w-4 h-4"></i>
+        <span class="hidden md:inline">{% trans "Export CSV" %}</span>
+    {% /button %}
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6" data-controller="cfp-review">
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {% #stat_card label=_("Total submissions") value=stats.total icon="file-text" color_variant="primary" %}{% /stat_card %}
+        {% #stat_card label=_("Acceptance rate") value=stats.acceptance_rate icon="check-circle" color_variant="success" description=stats.accepted_count %}{% /stat_card %}
+        {% #stat_card label=_("Review progress") value=stats.review_progress icon="bar-chart-3" color_variant="warning" progress_percent=stats.review_percent %}{% /stat_card %}
+        {% #stat_card label=_("Confirmed") value=stats.confirmed icon="user-check" color_variant="info" %}{% /stat_card %}
+    </div>
+
+    {% #card class="!p-0" %}
+        <div class="border-b border-border">
+            <div class="flex flex-col lg:flex-row lg:items-center gap-4 p-4">
+                <div class="flex items-center gap-1 overflow-x-auto pb-1 lg:pb-0 flex-shrink-0">
+                    <a href="?status=all{% if current_search %}&q={{ current_search }}{% endif %}" class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors whitespace-nowrap {% if current_status == 'all' or not current_status %}bg-primary text-primary-foreground{% else %}hover:bg-muted text-muted-foreground{% endif %}">
+                        {% trans "All" %}
+                        <span class="inline-flex items-center justify-center rounded-full bg-background/20 px-1.5 text-xs">{{ stats.total }}</span>
+                    </a>
+                    <a href="?status=submitted{% if current_search %}&q={{ current_search }}{% endif %}" class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors whitespace-nowrap {% if current_status == 'submitted' %}bg-primary text-primary-foreground{% else %}hover:bg-muted text-muted-foreground{% endif %}">
+                        {% trans "Submitted" %}
+                    </a>
+                    <a href="?status=under_review{% if current_search %}&q={{ current_search }}{% endif %}" class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors whitespace-nowrap {% if current_status == 'under_review' %}bg-primary text-primary-foreground{% else %}hover:bg-muted text-muted-foreground{% endif %}">
+                        {% trans "Under review" %}
+                    </a>
+                    <a href="?status=accepted{% if current_search %}&q={{ current_search }}{% endif %}" class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors whitespace-nowrap {% if current_status == 'accepted' %}bg-primary text-primary-foreground{% else %}hover:bg-muted text-muted-foreground{% endif %}">
+                        {% trans "Accepted" %}
+                    </a>
+                    <a href="?status=rejected{% if current_search %}&q={{ current_search }}{% endif %}" class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors whitespace-nowrap {% if current_status == 'rejected' %}bg-primary text-primary-foreground{% else %}hover:bg-muted text-muted-foreground{% endif %}">
+                        {% trans "Rejected" %}
+                    </a>
+                    <a href="?status=waitlisted{% if current_search %}&q={{ current_search }}{% endif %}" class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors whitespace-nowrap {% if current_status == 'waitlisted' %}bg-primary text-primary-foreground{% else %}hover:bg-muted text-muted-foreground{% endif %}">
+                        {% trans "Waitlisted" %}
+                    </a>
+                </div>
+
+                <div class="flex items-center gap-2 lg:ml-auto flex-1 lg:flex-initial">
+                    <form method="get" class="flex-1 lg:w-64">
+                        {% if current_status %}<input type="hidden" name="status" value="{{ current_status }}">{% endif %}
+                        <div class="relative">
+                            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"></i>
+                            {% #input type="search" name="q" value=current_search placeholder=_("Search proposals...") class="!pl-9 !h-9" %}{% /input %}
+                        </div>
+                    </form>
+
+                    <form method="get" class="hidden sm:block">
+                        {% if current_status %}<input type="hidden" name="status" value="{{ current_status }}">{% endif %}
+                        {% if current_search %}<input type="hidden" name="q" value="{{ current_search }}">{% endif %}
+                        <select name="track" onchange="this.form.submit()" class="h-9 rounded-xl border-2 border-border bg-card px-3 text-sm text-foreground transition-all hover:border-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary">
+                            <option value="">{% trans "All tracks" %}</option>
+                            {% for track in tracks %}
+                            <option value="{{ track.pk }}" {% if current_track == track.pk|stringformat:"d" %}selected{% endif %}>{{ track.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+
+                    <form method="get" class="hidden sm:block">
+                        {% if current_status %}<input type="hidden" name="status" value="{{ current_status }}">{% endif %}
+                        {% if current_search %}<input type="hidden" name="q" value="{{ current_search }}">{% endif %}
+                        <select name="format" onchange="this.form.submit()" class="h-9 rounded-xl border-2 border-border bg-card px-3 text-sm text-foreground transition-all hover:border-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary">
+                            <option value="">{% trans "All formats" %}</option>
+                            {% for format in formats %}
+                            <option value="{{ format.pk }}" {% if current_format == format.pk|stringformat:"d" %}selected{% endif %}>{{ format.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div id="bulk-actions" class="hidden border-b border-border bg-muted/50 px-4 py-3" data-cfp-review-target="bulkBar">
+            <div class="flex items-center gap-3">
+                <span class="text-sm font-medium" data-cfp-review-target="selectionCount">0 {% trans "selected" %}</span>
+                <div class="flex items-center gap-2">
+                    <form method="post" action="{% url 'cfp:bulk_action' event.organization.slug event.slug %}" data-cfp-review-target="bulkForm">
+                        {% csrf_token %}
+                        <div data-cfp-review-target="bulkIds"></div>
+                        {% #button type="submit" name="action" value="accept" variant="default" size="sm" %}
+                            <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                            {% trans "Accept" %}
+                        {% /button %}
+                    </form>
+                    <form method="post" action="{% url 'cfp:bulk_action' event.organization.slug event.slug %}">
+                        {% csrf_token %}
+                        <div data-cfp-review-target="bulkIds"></div>
+                        {% #button type="submit" name="action" value="reject" variant="destructive" size="sm" %}
+                            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                            {% trans "Reject" %}
+                        {% /button %}
+                    </form>
+                    <form method="post" action="{% url 'cfp:bulk_action' event.organization.slug event.slug %}">
+                        {% csrf_token %}
+                        <div data-cfp-review-target="bulkIds"></div>
+                        {% #button type="submit" name="action" value="waitlist" variant="secondary" size="sm" %}
+                            <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                            {% trans "Waitlist" %}
+                        {% /button %}
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {% if proposals %}
+        <div class="overflow-x-auto">
+            {% #table %}
+                {% #table_header %}
+                    {% #table_row %}
+                        {% #table_head class="w-12" %}
+                            <input type="checkbox" data-action="change->cfp-review#toggleAll" data-cfp-review-target="selectAll" class="h-4 w-4 rounded border-border text-primary focus:ring-primary">
+                        {% /table_head %}
+                        {% #table_head %}{% trans "Title" %}{% /table_head %}
+                        {% #table_head class="hidden md:table-cell" %}{% trans "Speaker" %}{% /table_head %}
+                        {% #table_head class="hidden lg:table-cell" %}{% trans "Track" %}{% /table_head %}
+                        {% #table_head class="hidden lg:table-cell" %}{% trans "Format" %}{% /table_head %}
+                        {% #table_head class="hidden sm:table-cell" %}{% trans "Rating" %}{% /table_head %}
+                        {% #table_head %}{% trans "Status" %}{% /table_head %}
+                        {% #table_head class="hidden md:table-cell" %}{% trans "Submitted" %}{% /table_head %}
+                    {% /table_row %}
+                {% /table_header %}
+                {% #table_body %}
+                    {% for proposal in proposals %}
+                    {% #table_row %}
+                        {% #table_cell %}
+                            <input type="checkbox" name="proposal_ids" value="{{ proposal.pk }}" data-action="change->cfp-review#toggleOne" data-cfp-review-target="checkbox" class="h-4 w-4 rounded border-border text-primary focus:ring-primary">
+                        {% /table_cell %}
+                        {% #table_cell %}
+                            <a href="{% url 'cfp:proposal_detail' event.organization.slug event.slug proposal.pk %}" class="font-medium hover:text-primary transition-colors line-clamp-1">{{ proposal.title }}</a>
+                        {% /table_cell %}
+                        {% #table_cell class="hidden md:table-cell" %}
+                            <div class="min-w-0">
+                                <p class="text-sm font-medium truncate">{{ proposal.speaker.get_full_name|default:proposal.speaker.email }}</p>
+                                <p class="text-xs text-muted-foreground truncate">{{ proposal.speaker.email }}</p>
+                            </div>
+                        {% /table_cell %}
+                        {% #table_cell class="hidden lg:table-cell" %}
+                            {% if proposal.track %}
+                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold" style="background-color: {{ proposal.track.color }}20; color: {{ proposal.track.color }};">{{ proposal.track.name }}</span>
+                            {% else %}
+                            <span class="text-muted-foreground">-</span>
+                            {% endif %}
+                        {% /table_cell %}
+                        {% #table_cell class="hidden lg:table-cell" %}
+                            <span class="text-sm text-muted-foreground">{{ proposal.format.name|default:"-" }}</span>
+                        {% /table_cell %}
+                        {% #table_cell class="hidden sm:table-cell" %}
+                            {% if proposal.avg_rating %}
+                            <div class="flex items-center gap-1">
+                                {% for i in "12345" %}
+                                {% if forloop.counter <= proposal.avg_rating|floatformat:"0"|add:"0" %}
+                                <i data-lucide="star" class="w-3.5 h-3.5 fill-yellow-400 text-yellow-400"></i>
+                                {% else %}
+                                <i data-lucide="star" class="w-3.5 h-3.5 text-muted-foreground/30"></i>
+                                {% endif %}
+                                {% endfor %}
+                                <span class="text-xs text-muted-foreground ml-1">{{ proposal.avg_rating|floatformat:"1" }}</span>
+                            </div>
+                            {% else %}
+                            <span class="text-xs text-muted-foreground">{% trans "No reviews" %}</span>
+                            {% endif %}
+                        {% /table_cell %}
+                        {% #table_cell %}
+                            {% if proposal.status == "submitted" %}
+                            {% #badge variant="default" %}{% trans "Submitted" %}{% /badge %}
+                            {% elif proposal.status == "under_review" %}
+                            {% #badge variant="warning" %}{% trans "Under review" %}{% /badge %}
+                            {% elif proposal.status == "accepted" %}
+                            {% #badge variant="success" %}{% trans "Accepted" %}{% /badge %}
+                            {% elif proposal.status == "rejected" %}
+                            {% #badge variant="destructive" %}{% trans "Rejected" %}{% /badge %}
+                            {% elif proposal.status == "waitlisted" %}
+                            {% #badge variant="secondary" %}{% trans "Waitlisted" %}{% /badge %}
+                            {% elif proposal.status == "confirmed" %}
+                            {% #badge variant="success" %}{% trans "Confirmed" %}{% /badge %}
+                            {% else %}
+                            {% #badge variant="outline" %}{{ proposal.status }}{% /badge %}
+                            {% endif %}
+                        {% /table_cell %}
+                        {% #table_cell class="hidden md:table-cell" %}
+                            <span class="text-sm text-muted-foreground whitespace-nowrap">{{ proposal.submitted_at|date:"M d, Y" }}</span>
+                        {% /table_cell %}
+                    {% /table_row %}
+                    {% endfor %}
+                {% /table_body %}
+            {% /table %}
+        </div>
+
+        {% if proposals.has_other_pages %}
+        <div class="flex items-center justify-between border-t border-border px-4 py-3">
+            <p class="text-sm text-muted-foreground">
+                {% blocktrans with start=proposals.start_index end=proposals.end_index total=proposals.paginator.count %}
+                Showing {{ start }} to {{ end }} of {{ total }} proposals
+                {% endblocktrans %}
+            </p>
+            <div class="flex items-center gap-1">
+                {% if proposals.has_previous %}
+                <a href="?page={{ proposals.previous_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_search %}&q={{ current_search }}{% endif %}">
+                    {% #button variant="outline" size="sm" %}
+                        <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                    {% /button %}
+                </a>
+                {% endif %}
+                {% if proposals.has_next %}
+                <a href="?page={{ proposals.next_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_search %}&q={{ current_search }}{% endif %}">
+                    {% #button variant="outline" size="sm" %}
+                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                    {% /button %}
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="p-8">
+            {% #empty_state icon="file-text" title=_("No proposals found") description=_("No proposals match your current filters.") %}
+                <a href="?status=all">
+                    {% #button variant="outline" size="sm" %}{% trans "Clear filters" %}{% /button %}
+                </a>
+            {% /empty_state %}
+        </div>
+        {% endif %}
+    {% /card %}
+</div>
+{% endblock %}

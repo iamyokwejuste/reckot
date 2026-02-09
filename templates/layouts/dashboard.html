@@ -69,11 +69,134 @@
                 </button>
             </div>
 
+            <div class="sidebar-mode-full px-3 pt-3 pb-1">
+                <div class="relative" data-controller="dropdown">
+                    <button data-action="click->dropdown#toggle" data-dropdown-target="trigger"
+                            class="flex items-center gap-2 w-full px-3 py-2 rounded-lg border border-border bg-background hover:bg-muted transition-colors text-sm">
+                        {% if user.active_mode == 'ORGANIZER' %}
+                        <i data-lucide="building-2" class="h-4 w-4 shrink-0"></i>
+                        <span class="truncate flex-1 text-left">{% trans "Organizer" %}</span>
+                        {% elif user.active_mode == 'SPEAKER' %}
+                        <i data-lucide="mic-2" class="h-4 w-4 shrink-0"></i>
+                        <span class="truncate flex-1 text-left">{% trans "Speaker" %}</span>
+                        {% else %}
+                        <i data-lucide="user" class="h-4 w-4 shrink-0"></i>
+                        <span class="truncate flex-1 text-left">{% trans "Attendee" %}</span>
+                        {% endif %}
+                        <i data-lucide="chevrons-up-down" class="h-3 w-3 text-muted-foreground shrink-0"></i>
+                    </button>
+                    <div data-dropdown-target="dropdown"
+                         class="absolute left-0 right-0 mt-1 rounded-lg border border-border bg-card shadow-lg z-50 hidden">
+                        <div class="p-1">
+                            <form method="post" action="{% url 'core:switch_mode' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="mode" value="ATTENDEE">
+                                <button type="submit"
+                                        class="flex items-center gap-2 w-full rounded-md px-3 py-2 text-sm hover:bg-muted transition-colors {% if user.active_mode == 'ATTENDEE' %}bg-muted{% endif %}">
+                                    <i data-lucide="user" class="h-4 w-4"></i>
+                                    <span class="flex-1 text-left">{% trans "Attendee" %}</span>
+                                    {% if user.active_mode == 'ATTENDEE' %}
+                                    <i data-lucide="check" class="h-4 w-4 text-primary"></i>
+                                    {% endif %}
+                                </button>
+                            </form>
+                            <form method="post" action="{% url 'core:switch_mode' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="mode" value="ORGANIZER">
+                                <button type="submit"
+                                        class="flex items-center gap-2 w-full rounded-md px-3 py-2 text-sm hover:bg-muted transition-colors {% if user.active_mode == 'ORGANIZER' %}bg-muted{% endif %}">
+                                    <i data-lucide="building-2" class="h-4 w-4"></i>
+                                    <span class="flex-1 text-left">{% trans "Organizer" %}</span>
+                                    {% if user.active_mode == 'ORGANIZER' %}
+                                    <i data-lucide="check" class="h-4 w-4 text-primary"></i>
+                                    {% endif %}
+                                </button>
+                            </form>
+                            <form method="post" action="{% url 'core:switch_mode' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="mode" value="SPEAKER">
+                                <button type="submit"
+                                        class="flex items-center gap-2 w-full rounded-md px-3 py-2 text-sm hover:bg-muted transition-colors {% if user.active_mode == 'SPEAKER' %}bg-muted{% endif %}">
+                                    <i data-lucide="mic-2" class="h-4 w-4"></i>
+                                    <span class="flex-1 text-left">{% trans "Speaker" %}</span>
+                                    {% if user.active_mode == 'SPEAKER' %}
+                                    <i data-lucide="check" class="h-4 w-4 text-primary"></i>
+                                    {% endif %}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar-mode-icon hidden px-3 pt-3 pb-1">
+                <div class="relative" data-controller="dropdown">
+                    <button data-action="click->dropdown#toggle" data-dropdown-target="trigger"
+                            class="flex items-center justify-center w-10 h-10 mx-auto rounded-lg border border-border bg-background hover:bg-muted transition-colors"
+                            title="{% if user.active_mode == 'ORGANIZER' %}{% trans 'Organizer' %}{% elif user.active_mode == 'SPEAKER' %}{% trans 'Speaker' %}{% else %}{% trans 'Attendee' %}{% endif %}">
+                        {% if user.active_mode == 'ORGANIZER' %}
+                        <i data-lucide="building-2" class="h-4 w-4"></i>
+                        {% elif user.active_mode == 'SPEAKER' %}
+                        <i data-lucide="mic-2" class="h-4 w-4"></i>
+                        {% else %}
+                        <i data-lucide="user" class="h-4 w-4"></i>
+                        {% endif %}
+                    </button>
+                    <div data-dropdown-target="dropdown"
+                         class="absolute left-full top-0 ml-2 w-48 rounded-lg border border-border bg-card shadow-lg z-50 hidden">
+                        <div class="p-1">
+                            <form method="post" action="{% url 'core:switch_mode' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="mode" value="ATTENDEE">
+                                <button type="submit"
+                                        class="flex items-center gap-2 w-full rounded-md px-3 py-2 text-sm hover:bg-muted transition-colors {% if user.active_mode == 'ATTENDEE' %}bg-muted{% endif %}">
+                                    <i data-lucide="user" class="h-4 w-4"></i>
+                                    {% trans "Attendee" %}
+                                    {% if user.active_mode == 'ATTENDEE' %}<i data-lucide="check" class="h-4 w-4 ml-auto text-primary"></i>{% endif %}
+                                </button>
+                            </form>
+                            <form method="post" action="{% url 'core:switch_mode' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="mode" value="ORGANIZER">
+                                <button type="submit"
+                                        class="flex items-center gap-2 w-full rounded-md px-3 py-2 text-sm hover:bg-muted transition-colors {% if user.active_mode == 'ORGANIZER' %}bg-muted{% endif %}">
+                                    <i data-lucide="building-2" class="h-4 w-4"></i>
+                                    {% trans "Organizer" %}
+                                    {% if user.active_mode == 'ORGANIZER' %}<i data-lucide="check" class="h-4 w-4 ml-auto text-primary"></i>{% endif %}
+                                </button>
+                            </form>
+                            <form method="post" action="{% url 'core:switch_mode' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="mode" value="SPEAKER">
+                                <button type="submit"
+                                        class="flex items-center gap-2 w-full rounded-md px-3 py-2 text-sm hover:bg-muted transition-colors {% if user.active_mode == 'SPEAKER' %}bg-muted{% endif %}">
+                                    <i data-lucide="mic-2" class="h-4 w-4"></i>
+                                    {% trans "Speaker" %}
+                                    {% if user.active_mode == 'SPEAKER' %}<i data-lucide="check" class="h-4 w-4 ml-auto text-primary"></i>{% endif %}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <nav class="flex-1 overflow-y-auto p-3 space-y-1">
                 {% block sidebar_nav %}
                 <div class="space-y-1">
                     <p class="sidebar-section-title px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">{% trans "Overview" %}</p>
 
+                    <a href="{% url 'events:discover' %}"
+                       class="sidebar-item {% if request.resolver_match.url_name == 'discover' %}sidebar-item-active{% endif %}">
+                        <i data-lucide="compass" class="h-5 w-5 shrink-0"></i>
+                        <span class="sidebar-text truncate">{% trans "Discover" %}</span>
+                    </a>
+
+                    <a href="{% url 'tickets:list' %}"
+                       class="sidebar-item {% if request.resolver_match.url_name == 'list' and 'tickets' in request.path %}sidebar-item-active{% endif %}">
+                        <i data-lucide="ticket" class="h-5 w-5 shrink-0"></i>
+                        <span class="sidebar-text truncate">{% trans "My tickets" %}</span>
+                    </a>
+
+                    {% if user.active_mode == 'ORGANIZER' %}
                     <a href="{% url 'reports:analytics' %}"
                        class="sidebar-item {% if request.resolver_match.url_name == 'analytics' %}sidebar-item-active{% endif %}">
                         <i data-lucide="bar-chart-3" class="h-5 w-5 shrink-0"></i>
@@ -81,7 +204,7 @@
                     </a>
 
                     <a href="{% url 'events:list' %}"
-                       class="sidebar-item {% if 'events' in request.path %}sidebar-item-active{% endif %}">
+                       class="sidebar-item {% if request.resolver_match.url_name == 'list' and 'events' in request.path %}sidebar-item-active{% endif %}">
                         <i data-lucide="calendar" class="h-5 w-5 shrink-0"></i>
                         <span class="sidebar-text truncate">{% trans "Events" %}</span>
                     </a>
@@ -91,16 +214,12 @@
                         <i data-lucide="building-2" class="h-5 w-5 shrink-0"></i>
                         <span class="sidebar-text truncate">{% trans "Organizations" %}</span>
                     </a>
+                    {% endif %}
                 </div>
 
+                {% if user.active_mode == 'ORGANIZER' %}
                 <div class="pt-4 space-y-1">
                     <p class="sidebar-section-title px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">{% trans "Operations" %}</p>
-
-                    <a href="{% url 'tickets:list' %}"
-                       class="sidebar-item {% if request.resolver_match.url_name == 'list' and 'tickets' in request.path %}sidebar-item-active{% endif %}">
-                        <i data-lucide="ticket" class="h-5 w-5 shrink-0"></i>
-                        <span class="sidebar-text truncate">{% trans "RSVP" %}</span>
-                    </a>
 
                     <a href="{% url 'checkin:list' %}"
                        class="sidebar-item {% if request.resolver_match.url_name == 'list' and 'checkin' in request.path %}sidebar-item-active{% endif %}">
@@ -140,6 +259,18 @@
                     </a>
                     {% endif %}
                 </div>
+                {% endif %}
+
+                {% if user.active_mode == 'SPEAKER' or user.speaker_profiles.exists %}
+                <div class="pt-4 space-y-1">
+                    <p class="sidebar-section-title px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">{% trans "Speaker" %}</p>
+                    <a href="{% url 'core:speaker_dashboard' %}"
+                       class="sidebar-item {% if 'speaker' in request.path %}sidebar-item-active{% endif %}">
+                        <i data-lucide="mic-2" class="h-5 w-5 shrink-0"></i>
+                        <span class="sidebar-text truncate">{% trans "Speaker dashboard" %}</span>
+                    </a>
+                </div>
+                {% endif %}
                 {% endblock %}
             </nav>
 

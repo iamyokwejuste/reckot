@@ -1,0 +1,194 @@
+{% extends 'layouts/dashboard.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Speaker dashboard" %} - Reckot{% endblock %}
+
+{% block breadcrumbs %}
+{% #breadcrumb class="mb-4" %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item %}{% trans "Speaker dashboard" %}{% /breadcrumb_item %}
+{% /breadcrumb %}
+{% endblock %}
+
+{% block header_title %}
+<div class="min-w-0">
+    <h1 class="text-lg font-semibold truncate">{% trans "Speaker dashboard" %}</h1>
+    <p class="text-sm text-muted-foreground hidden md:block">{% trans "All your proposals and profiles across events" %}</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <div class="grid gap-4 sm:grid-cols-3" data-animate="fade-up">
+        {% #stat_card label=_("Total submissions") value=stats.total icon="file-text" color_variant="primary" %}{% /stat_card %}
+        {% #stat_card label=_("Accepted") value=stats.accepted icon="check-circle" color_variant="success" %}{% /stat_card %}
+        {% #stat_card label=_("Pending review") value=stats.pending icon="clock" color_variant="warning" %}{% /stat_card %}
+    </div>
+
+    {% if upcoming_sessions %}
+    <section data-animate="fade-up" data-delay="0.1">
+        <h2 class="text-xl font-semibold mb-4">{% trans "Upcoming sessions" %}</h2>
+        <div class="grid gap-3">
+            {% for session in upcoming_sessions %}
+            <div class="rounded-2xl border border-border bg-card p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div class="space-y-1">
+                    <h4 class="font-medium">{{ session.title }}</h4>
+                    <div class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                        <span>{{ session.event.title }}</span>
+                        <span class="text-border">|</span>
+                        <span class="inline-flex items-center gap-1">
+                            <i data-lucide="calendar" class="h-3 w-3"></i>
+                            {{ session.starts_at|date:"M d, Y" }}
+                        </span>
+                        <span class="text-border">|</span>
+                        <span class="inline-flex items-center gap-1">
+                            <i data-lucide="clock" class="h-3 w-3"></i>
+                            {{ session.starts_at|date:"H:i" }}
+                        </span>
+                        {% if session.room %}
+                        <span class="text-border">|</span>
+                        <span class="inline-flex items-center gap-1">
+                            <i data-lucide="map-pin" class="h-3 w-3"></i>
+                            {{ session.room }}
+                        </span>
+                        {% endif %}
+                        {% if session.track %}
+                        <span class="text-border">|</span>
+                        <span class="inline-flex items-center gap-1">
+                            <span class="h-2 w-2 rounded-full" style="background-color: {{ session.track.color }}"></span>
+                            {{ session.track.name }}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="shrink-0">
+                    <a href="{% url 'cfp:public_session' org_slug=session.event.organization.slug event_slug=session.event.slug id=session.id %}">
+                        {% #button variant="outline" size="sm" %}
+                            {% trans "View session" %}
+                        {% /button %}
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <section data-animate="fade-up" data-delay="0.2">
+        <h2 class="text-xl font-semibold mb-4">{% trans "Proposals" %}</h2>
+
+        {% if proposals %}
+        {% regroup proposals by cfp.event as proposals_by_event %}
+        <div class="space-y-6">
+            {% for event_group in proposals_by_event %}
+            <div>
+                <div class="flex items-center gap-2 mb-3">
+                    <i data-lucide="calendar" class="h-4 w-4 text-muted-foreground"></i>
+                    <h3 class="font-semibold">{{ event_group.grouper.title }}</h3>
+                    {% #badge variant="secondary" %}{{ event_group.list|length }}{% /badge %}
+                </div>
+                <div class="grid gap-3">
+                    {% for proposal in event_group.list %}
+                    <div class="rounded-2xl border border-border bg-card p-4 space-y-2 hover:shadow-md transition-shadow">
+                        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                            <div class="space-y-1 min-w-0">
+                                <h4 class="font-semibold truncate">{{ proposal.title }}</h4>
+                                <p class="text-sm text-muted-foreground line-clamp-2">{{ proposal.abstract }}</p>
+                            </div>
+                            <div class="shrink-0">
+                                {% if proposal.status == "SUBMITTED" %}
+                                    {% #status_pill variant="info" dot=True %}{% trans "Submitted" %}{% /status_pill %}
+                                {% elif proposal.status == "UNDER_REVIEW" %}
+                                    {% #status_pill variant="warning" dot=True %}{% trans "Under review" %}{% /status_pill %}
+                                {% elif proposal.status == "ACCEPTED" %}
+                                    {% #status_pill variant="success" dot=True %}{% trans "Accepted" %}{% /status_pill %}
+                                {% elif proposal.status == "REJECTED" %}
+                                    {% #status_pill variant="destructive" dot=True %}{% trans "Rejected" %}{% /status_pill %}
+                                {% elif proposal.status == "WAITLISTED" %}
+                                    {% #status_pill variant="warning" dot=True %}{% trans "Waitlisted" %}{% /status_pill %}
+                                {% elif proposal.status == "CONFIRMED" %}
+                                    {% #status_pill variant="success" dot=True %}{% trans "Confirmed" %}{% /status_pill %}
+                                {% elif proposal.status == "WITHDRAWN" %}
+                                    {% #status_pill variant="default" dot=True %}{% trans "Withdrawn" %}{% /status_pill %}
+                                {% elif proposal.status == "DRAFT" %}
+                                    {% #status_pill variant="default" dot=True %}{% trans "Draft" %}{% /status_pill %}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                            {% if proposal.track %}
+                            <span class="inline-flex items-center gap-1">
+                                <span class="h-2 w-2 rounded-full" style="background-color: {{ proposal.track.color }}"></span>
+                                {{ proposal.track.name }}
+                            </span>
+                            <span class="text-border">|</span>
+                            {% endif %}
+                            {% if proposal.session_format %}
+                            <span>{{ proposal.session_format.name }}</span>
+                            <span class="text-border">|</span>
+                            {% endif %}
+                            {% if proposal.submitted_at %}
+                            <span>{% trans "Submitted" %} {{ proposal.submitted_at|date:"M d, Y" }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2 pt-1">
+                            <a href="{% url 'cfp:speaker_proposals' org_slug=proposal.cfp.event.organization.slug event_slug=proposal.cfp.event.slug %}">
+                                {% #button variant="outline" size="sm" %}
+                                    <i data-lucide="external-link" class="mr-1 h-3 w-3"></i>
+                                    {% trans "View proposals" %}
+                                {% /button %}
+                            </a>
+                            {% if proposal.status == "ACCEPTED" %}
+                            <a href="{% url 'cfp:speaker_proposals' org_slug=proposal.cfp.event.organization.slug event_slug=proposal.cfp.event.slug %}">
+                                {% #button variant="default" size="sm" %}
+                                    <i data-lucide="check-circle" class="mr-1 h-3 w-3"></i>
+                                    {% trans "Confirm" %}
+                                {% /button %}
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        {% #empty_state icon="file-text" title=_("No proposals yet") description=_("You have not submitted any proposals yet. Find an event with an open call for proposals to get started.") %}{% /empty_state %}
+        {% endif %}
+    </section>
+
+    <section data-animate="fade-up" data-delay="0.3">
+        <h2 class="text-xl font-semibold mb-4">{% trans "Speaker profiles" %}</h2>
+
+        {% if profiles %}
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {% for profile in profiles %}
+            <div class="rounded-2xl border border-border bg-card p-4 flex items-center justify-between gap-3 hover:shadow-md transition-shadow">
+                <div class="flex items-center gap-3 min-w-0">
+                    {% if profile.get_photo_url %}
+                        {% #avatar src=profile.get_photo_url size="sm" %}{% /avatar %}
+                    {% else %}
+                        {% #avatar initials=profile.user.email|slice:":2"|upper size="sm" %}{% /avatar %}
+                    {% endif %}
+                    <div class="min-w-0">
+                        <p class="font-medium truncate text-sm">{{ profile.event.title }}</p>
+                        <p class="text-xs text-muted-foreground truncate">{{ profile.event.organization.name }}</p>
+                        <p class="text-xs text-muted-foreground truncate">{{ profile.tagline|default:profile.company|default:_("No tagline") }}</p>
+                    </div>
+                </div>
+                <a href="{% url 'cfp:speaker_profile' org_slug=profile.event.organization.slug event_slug=profile.event.slug %}" class="shrink-0">
+                    {% #button variant="ghost" size="sm" %}
+                        <i data-lucide="pencil" class="h-4 w-4"></i>
+                    {% /button %}
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        {% #empty_state icon="user" title=_("No speaker profiles") description=_("Your speaker profiles will appear here once you submit a proposal.") %}{% /empty_state %}
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

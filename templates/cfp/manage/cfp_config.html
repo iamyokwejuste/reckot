@@ -1,0 +1,184 @@
+{% extends "layouts/dashboard.html" %}
+{% load slippers i18n %}
+
+{% block title %}{% trans "CFP Settings" %} - {{ event.title }} - Reckot{% endblock %}
+
+{% block breadcrumbs %}
+{% #breadcrumb class="mb-4" %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item href="/events/" %}{% trans "Events" %}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item %}{{ event.title|truncatewords:3 }}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item %}{% trans "CFP settings" %}{% /breadcrumb_item %}
+{% /breadcrumb %}
+{% endblock %}
+
+{% block header_title %}
+<div class="min-w-0">
+    <h1 class="text-lg font-semibold truncate">{% trans "Call for Proposals" %}</h1>
+    <p class="text-sm text-muted-foreground hidden md:block">{{ event.title }}</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    {% #card %}
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+                <h2 class="text-lg font-semibold">{% trans "CFP status" %}</h2>
+                <p class="text-sm text-muted-foreground">{% trans "Set the current stage of your call for proposals" %}</p>
+            </div>
+            {% if cfp %}
+            {% #badge variant="{% if cfp.status == 'OPEN' %}success{% elif cfp.status == 'DRAFT' %}default{% elif cfp.status == 'CLOSED' %}destructive{% elif cfp.status == 'REVIEWING' %}warning{% else %}secondary{% endif %}" %}{{ cfp.get_status_display }}{% /badge %}
+            {% endif %}
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <form method="post" action="?action=set_status" class="contents">
+                {% csrf_token %}
+                <button type="submit" name="status" value="DRAFT" class="inline-flex items-center gap-2 rounded-full border-2 px-4 py-2 text-sm font-medium transition-colors {% if cfp.status == 'DRAFT' %}border-primary bg-primary/10 text-primary{% else %}border-border hover:bg-muted{% endif %}">
+                    <i data-lucide="file-edit" class="w-4 h-4"></i>
+                    {% trans "Draft" %}
+                </button>
+                <button type="submit" name="status" value="OPEN" class="inline-flex items-center gap-2 rounded-full border-2 px-4 py-2 text-sm font-medium transition-colors {% if cfp.status == 'OPEN' %}border-green-500 bg-green-500/10 text-green-600{% else %}border-border hover:bg-muted{% endif %}">
+                    <i data-lucide="door-open" class="w-4 h-4"></i>
+                    {% trans "Open" %}
+                </button>
+                <button type="submit" name="status" value="CLOSED" class="inline-flex items-center gap-2 rounded-full border-2 px-4 py-2 text-sm font-medium transition-colors {% if cfp.status == 'CLOSED' %}border-red-500 bg-red-500/10 text-red-600{% else %}border-border hover:bg-muted{% endif %}">
+                    <i data-lucide="door-closed" class="w-4 h-4"></i>
+                    {% trans "Closed" %}
+                </button>
+                <button type="submit" name="status" value="REVIEWING" class="inline-flex items-center gap-2 rounded-full border-2 px-4 py-2 text-sm font-medium transition-colors {% if cfp.status == 'REVIEWING' %}border-yellow-500 bg-yellow-500/10 text-yellow-600{% else %}border-border hover:bg-muted{% endif %}">
+                    <i data-lucide="eye" class="w-4 h-4"></i>
+                    {% trans "Reviewing" %}
+                </button>
+                <button type="submit" name="status" value="DECIDED" class="inline-flex items-center gap-2 rounded-full border-2 px-4 py-2 text-sm font-medium transition-colors {% if cfp.status == 'DECIDED' %}border-blue-500 bg-blue-500/10 text-blue-600{% else %}border-border hover:bg-muted{% endif %}">
+                    <i data-lucide="check-circle" class="w-4 h-4"></i>
+                    {% trans "Decided" %}
+                </button>
+            </form>
+        </div>
+    {% /card %}
+
+    {% #card %}
+        <h2 class="text-lg font-semibold mb-6">{% trans "CFP configuration" %}</h2>
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+
+            {% #form_field label=_("Title") name="title" required=True %}
+                {% #input type="text" name="title" id="title" value=form.title.value placeholder=_("e.g. Call for speakers 2026") required=True %}{% /input %}
+                {% if form.title.errors %}
+                <p class="text-sm text-destructive mt-1">{{ form.title.errors.0 }}</p>
+                {% endif %}
+            {% /form_field %}
+
+            {% #form_field label=_("Description") name="description" %}
+                {% #textarea name="description" id="description" rows="4" placeholder=_("Describe what kind of proposals you are looking for") %}{{ form.description.value|default:"" }}{% /textarea %}
+                {% if form.description.errors %}
+                <p class="text-sm text-destructive mt-1">{{ form.description.errors.0 }}</p>
+                {% endif %}
+            {% /form_field %}
+
+            <div class="grid gap-6 sm:grid-cols-2">
+                {% #form_field label=_("Opens at") name="opens_at" required=True %}
+                    {% #input type="datetime-local" name="opens_at" id="opens_at" value=form.opens_at.value required=True %}{% /input %}
+                    {% if form.opens_at.errors %}
+                    <p class="text-sm text-destructive mt-1">{{ form.opens_at.errors.0 }}</p>
+                    {% endif %}
+                {% /form_field %}
+
+                {% #form_field label=_("Closes at") name="closes_at" required=True %}
+                    {% #input type="datetime-local" name="closes_at" id="closes_at" value=form.closes_at.value required=True %}{% /input %}
+                    {% if form.closes_at.errors %}
+                    <p class="text-sm text-destructive mt-1">{{ form.closes_at.errors.0 }}</p>
+                    {% endif %}
+                {% /form_field %}
+            </div>
+
+            {% #form_field label=_("Max submissions per speaker") name="max_submissions_per_speaker" hint=_("Leave empty for unlimited submissions") %}
+                {% #input type="number" name="max_submissions_per_speaker" id="max_submissions_per_speaker" value=form.max_submissions_per_speaker.value min="1" placeholder="3" %}{% /input %}
+                {% if form.max_submissions_per_speaker.errors %}
+                <p class="text-sm text-destructive mt-1">{{ form.max_submissions_per_speaker.errors.0 }}</p>
+                {% endif %}
+            {% /form_field %}
+
+            {% #separator %}{% /separator %}
+
+            <div class="space-y-4">
+                <h3 class="text-base font-medium">{% trans "Review options" %}</h3>
+
+                <label class="flex items-center gap-3 cursor-pointer group">
+                    <input type="checkbox" name="anonymous_review" {% if form.anonymous_review.value %}checked{% endif %} class="h-4 w-4 rounded border-border text-primary focus:ring-primary">
+                    <div>
+                        <span class="text-sm font-medium group-hover:text-primary transition-colors">{% trans "Anonymous review" %}</span>
+                        <p class="text-xs text-muted-foreground">{% trans "Hide speaker identity from reviewers" %}</p>
+                    </div>
+                </label>
+
+                <label class="flex items-center gap-3 cursor-pointer group">
+                    <input type="checkbox" name="allow_edits_after_submit" {% if form.allow_edits_after_submit.value %}checked{% endif %} class="h-4 w-4 rounded border-border text-primary focus:ring-primary">
+                    <div>
+                        <span class="text-sm font-medium group-hover:text-primary transition-colors">{% trans "Allow edits after submit" %}</span>
+                        <p class="text-xs text-muted-foreground">{% trans "Speakers can update their proposals after submission" %}</p>
+                    </div>
+                </label>
+
+                <label class="flex items-center gap-3 cursor-pointer group">
+                    <input type="checkbox" name="notify_on_submission" {% if form.notify_on_submission.value %}checked{% endif %} class="h-4 w-4 rounded border-border text-primary focus:ring-primary">
+                    <div>
+                        <span class="text-sm font-medium group-hover:text-primary transition-colors">{% trans "Notify on submission" %}</span>
+                        <p class="text-xs text-muted-foreground">{% trans "Send email notification when a new proposal is submitted" %}</p>
+                    </div>
+                </label>
+            </div>
+
+            <div class="flex justify-end pt-4">
+                {% #button type="submit" variant="default" %}
+                    <i data-lucide="save" class="w-4 h-4"></i>
+                    {% trans "Save settings" %}
+                {% /button %}
+            </div>
+        </form>
+    {% /card %}
+
+    {% #card %}
+        <h2 class="text-lg font-semibold mb-2">{% trans "CFP components" %}</h2>
+        <p class="text-sm text-muted-foreground mb-6">{% trans "Configure the building blocks of your call for proposals" %}</p>
+        <div class="grid gap-4 sm:grid-cols-3">
+            <a href="{% url 'cfp:manage_formats' event.organization.slug event.slug %}" class="group flex items-center gap-4 rounded-xl border border-border p-4 hover:bg-muted/50 transition-colors">
+                <div class="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                    <i data-lucide="layout-grid" class="h-5 w-5 text-blue-500"></i>
+                </div>
+                <div class="min-w-0">
+                    <p class="font-medium group-hover:text-primary transition-colors">{% trans "Session formats" %}</p>
+                    <p class="text-xs text-muted-foreground">{% trans "Talk, workshop, panel, etc." %}</p>
+                </div>
+                <i data-lucide="chevron-right" class="w-4 h-4 text-muted-foreground ml-auto shrink-0"></i>
+            </a>
+
+            <a href="{% url 'cfp:manage_tracks' event.organization.slug event.slug %}" class="group flex items-center gap-4 rounded-xl border border-border p-4 hover:bg-muted/50 transition-colors">
+                <div class="h-10 w-10 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
+                    <i data-lucide="git-branch" class="h-5 w-5 text-purple-500"></i>
+                </div>
+                <div class="min-w-0">
+                    <p class="font-medium group-hover:text-primary transition-colors">{% trans "Tracks" %}</p>
+                    <p class="text-xs text-muted-foreground">{% trans "Categorize proposals by topic" %}</p>
+                </div>
+                <i data-lucide="chevron-right" class="w-4 h-4 text-muted-foreground ml-auto shrink-0"></i>
+            </a>
+
+            <a href="{% url 'cfp:manage_questions' event.organization.slug event.slug %}" class="group flex items-center gap-4 rounded-xl border border-border p-4 hover:bg-muted/50 transition-colors">
+                <div class="h-10 w-10 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+                    <i data-lucide="help-circle" class="h-5 w-5 text-amber-500"></i>
+                </div>
+                <div class="min-w-0">
+                    <p class="font-medium group-hover:text-primary transition-colors">{% trans "Custom questions" %}</p>
+                    <p class="text-xs text-muted-foreground">{% trans "Additional fields for speakers" %}</p>
+                </div>
+                <i data-lucide="chevron-right" class="w-4 h-4 text-muted-foreground ml-auto shrink-0"></i>
+            </a>
+        </div>
+    {% /card %}
+</div>
+{% endblock %}

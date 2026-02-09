@@ -103,9 +103,7 @@ class OrganizationCreateView(LoginRequiredMixin, View):
             )
             return redirect("orgs:detail", slug=organization.slug)
         except Exception as e:
-            import logging
-
-            logging.getLogger(__name__).error(f"Failed to create organization: {e}")
+            logger.error(f"Failed to create organization: {e}")
             return render(
                 request,
                 "orgs/create.html",

@@ -2,7 +2,8 @@ import json
 import base64
 import io
 import logging
-from django.http import JsonResponse
+from datetime import datetime
+from django.http import JsonResponse, StreamingHttpResponse
 from django.views import View
 from django.views.decorators.csrf import csrf_protect
 from django.utils.decorators import method_decorator
@@ -28,7 +29,12 @@ from apps.ai.services.predictive_analytics import (
 )
 from apps.ai.services.agent_orchestration import event_concierge
 from apps.ai.services.smart_scanner import smart_scanner
+from apps.ai.examples.community_templates import community_templates
+from apps.ai.services.conversational_voice import ConversationalEventCreator
+from apps.ai.services.low_bandwidth import low_bandwidth_service
 from apps.ai.utils.decorators import ai_feature_required, ai_rate_limit, log_ai_usage
+from apps.ai.utils.monitoring import metrics_collector
+from apps.ai.utils.streaming import streaming_service
 from apps.events.models import Event
 from apps.core.services.ai import gemini_ai
 from apps.tickets.models import Booking, Ticket
@@ -218,8 +224,6 @@ class PredictSalesView(LoginRequiredMixin, View):
                 location = event.location
                 start_date = event.start_at
             else:
-                from datetime import datetime
-
                 title = data.get("title", "")
                 event_type = data.get("event_type", "general")
                 price = Decimal(str(data.get("price", 0)))
@@ -724,8 +728,6 @@ class AIMetricsDashboardView(LoginRequiredMixin, View):
             return JsonResponse({"error": str(_("Admin access required"))}, status=403)
 
         try:
-            from apps.ai.utils.monitoring import metrics_collector
-
             view_type = request.GET.get("view", "system")
 
             if view_type == "realtime":
@@ -750,9 +752,6 @@ class AIMetricsDashboardView(LoginRequiredMixin, View):
 class StreamingChatView(LoginRequiredMixin, View):
     async def post(self, request):
         try:
-            from apps.ai.utils.streaming import streaming_service
-            from django.http import StreamingHttpResponse
-
             body = json.loads(request.body)
             user_message = body.get("message", "")
             conversation_history = body.get("history", [])
@@ -785,8 +784,6 @@ class LowBandwidthModeView(LoginRequiredMixin, View):
     @log_ai_usage("low_bandwidth_mode")
     def post(self, request):
         try:
-            from apps.ai.services.low_bandwidth import low_bandwidth_service
-
             body = json.loads(request.body)
             mode = body.get("mode", "summarize")
 
@@ -826,8 +823,6 @@ class CommunityTemplateView(LoginRequiredMixin, View):
     @log_ai_usage("community_template")
     def post(self, request):
         try:
-            from apps.ai.examples.community_templates import community_templates
-
             body = json.loads(request.body)
             action = body.get("action", "generate")
 
@@ -865,8 +860,6 @@ class ConversationalVoiceStartView(LoginRequiredMixin, View):
     @log_ai_usage("voice_conversation_start")
     def post(self, request):
         try:
-            from apps.ai.services.conversational_voice import ConversationalEventCreator
-
             body = json.loads(request.body)
             audio_b64 = body.get("audio")
 
@@ -899,8 +892,6 @@ class ConversationalVoiceContinueView(LoginRequiredMixin, View):
     @log_ai_usage("voice_conversation_continue")
     def post(self, request):
         try:
-            from apps.ai.services.conversational_voice import ConversationalEventCreator
-
             body = json.loads(request.body)
             audio_b64 = body.get("audio")
 
@@ -938,8 +929,6 @@ class ConversationalVoiceFinalizeView(LoginRequiredMixin, View):
     @log_ai_usage("voice_conversation_finalize")
     def post(self, request):
         try:
-            from apps.ai.services.conversational_voice import ConversationalEventCreator
-
             body = json.loads(request.body)
             org_id = body.get("organization_id")
 

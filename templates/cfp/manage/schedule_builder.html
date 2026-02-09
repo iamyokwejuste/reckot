@@ -1,0 +1,186 @@
+{% extends "layouts/dashboard.html" %}
+{% load slippers i18n %}
+
+{% block title %}{% trans "Schedule Builder" %} - {{ event.title }} - Reckot{% endblock %}
+
+{% block extra_head %}
+<style>
+    .schedule-grid {
+        display: grid;
+        grid-template-columns: 80px repeat({{ tracks|length }}, minmax(180px, 1fr));
+        gap: 1px;
+        background-color: var(--border);
+    }
+    .schedule-grid > * {
+        background-color: var(--card);
+    }
+    .schedule-slot {
+        min-height: 60px;
+        position: relative;
+    }
+    .session-block {
+        position: absolute;
+        inset: 2px;
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+        overflow: hidden;
+        cursor: pointer;
+        transition: box-shadow 0.2s;
+    }
+    .session-block:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    .draggable-session {
+        cursor: grab;
+    }
+    .draggable-session:active {
+        cursor: grabbing;
+    }
+    .drop-zone.drag-over {
+        background-color: var(--primary-foreground);
+        outline: 2px dashed var(--primary);
+        outline-offset: -2px;
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+{% #breadcrumb class="mb-4" %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item href="/events/" %}{% trans "Events" %}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item %}{{ event.title|truncatewords:3 }}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item %}{% trans "Schedule builder" %}{% /breadcrumb_item %}
+{% /breadcrumb %}
+{% endblock %}
+
+{% block header_title %}
+<div class="min-w-0">
+    <h1 class="text-lg font-semibold truncate">{% trans "Schedule Builder" %}</h1>
+    <p class="text-sm text-muted-foreground hidden md:block">{{ event.title }}</p>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'cfp:proposals_list' event.organization.slug event.slug %}">
+    {% #button variant="ghost" size="sm" %}
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        <span class="hidden md:inline">{% trans "Proposals" %}</span>
+    {% /button %}
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-4"
+     data-controller="schedule-builder"
+     data-schedule-builder-update-url-value="{% url 'cfp:schedule_update' event.organization.slug event.slug %}">
+
+    {% if conflicts %}
+    {% #alert variant="warning" icon="alert-triangle" title=_("Scheduling conflicts detected") %}
+        <ul class="list-disc list-inside text-sm space-y-1">
+            {% for s1, s2 in conflicts %}
+            <li>{{ s1.title }} &amp; {{ s2.title }} ({{ s1.speaker.get_full_name|default:s1.speaker.email }})</li>
+            {% endfor %}
+        </ul>
+    {% /alert %}
+    {% endif %}
+
+    <div class="flex flex-col lg:flex-row gap-6">
+        <aside class="w-full lg:w-72 shrink-0">
+            {% #card class="lg:sticky lg:top-20" %}
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-base font-semibold">{% trans "Unscheduled" %}</h3>
+                    {% #badge variant="outline" %}{{ unscheduled|length }}{% /badge %}
+                </div>
+
+                <div class="mb-3">
+                    <div class="relative">
+                        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"></i>
+                        {% #input type="search" placeholder=_("Filter sessions...") class="!pl-9 !h-9" attrs='data-action="input->schedule-builder#filterUnscheduled" data-schedule-builder-target="searchInput"' %}{% /input %}
+                    </div>
+                </div>
+
+                <div class="space-y-2 max-h-[60vh] overflow-y-auto" data-schedule-builder-target="unscheduledList">
+                    {% for session in unscheduled %}
+                    <div class="draggable-session rounded-xl border border-border p-3 hover:bg-muted/50 transition-colors"
+                         draggable="true"
+                         data-session-id="{{ session.pk }}"
+                         data-action="dragstart->schedule-builder#dragStart dragend->schedule-builder#dragEnd"
+                         data-schedule-builder-target="unscheduledItem">
+                        <p class="text-sm font-medium line-clamp-2">{{ session.title }}</p>
+                        <div class="flex items-center gap-2 mt-1.5">
+                            <span class="text-xs text-muted-foreground">{{ session.speaker.get_full_name|default:session.speaker.email }}</span>
+                        </div>
+                        <div class="flex items-center gap-2 mt-1">
+                            {% if session.session_format %}
+                            <span class="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                                <i data-lucide="clock" class="w-3 h-3"></i>
+                                {{ session.session_format.duration_minutes }} {% trans "min" %}
+                            </span>
+                            {% endif %}
+                            {% if session.track %}
+                            <span class="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold" style="background-color: {{ session.track.color }}20; color: {{ session.track.color }};">{{ session.track.name }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-6">
+                        <i data-lucide="check-circle" class="w-8 h-8 text-muted-foreground/40 mx-auto mb-2"></i>
+                        <p class="text-sm text-muted-foreground">{% trans "All sessions scheduled" %}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% /card %}
+        </aside>
+
+        <div class="flex-1 min-w-0">
+            {% #card class="!p-0 overflow-x-auto" %}
+                {% if sessions %}
+                <div class="schedule-grid min-w-[{{ tracks|length|add:1 }}00px]">
+                    <div class="p-3 font-medium text-xs text-muted-foreground uppercase tracking-wider sticky left-0 bg-card z-10"></div>
+                    {% for track in tracks %}
+                    <div class="p-3 text-center border-b border-border">
+                        <div class="flex items-center justify-center gap-1.5">
+                            <span class="inline-block h-2.5 w-2.5 rounded-full" style="background-color: {{ track.color }};"></span>
+                            <span class="text-sm font-semibold">{{ track.name }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    {% for session in sessions %}
+                    <div class="p-2 text-xs text-muted-foreground font-medium sticky left-0 bg-card z-10 border-t border-border flex items-start">
+                        <span>{{ session.starts_at|time:"H:i" }}</span>
+                    </div>
+                    {% for track in tracks %}
+                    <div class="schedule-slot drop-zone border-t border-border"
+                         data-track-id="{{ track.pk }}"
+                         data-time="{{ session.starts_at|date:'Y-m-d\TH:i' }}"
+                         data-action="dragover->schedule-builder#dragOver dragleave->schedule-builder#dragLeave drop->schedule-builder#drop"
+                         data-schedule-builder-target="dropZone">
+                        {% if session.track_id == track.pk %}
+                        <div class="session-block" style="background-color: {{ track.color }}15; border-left: 3px solid {{ track.color }};">
+                            <a href="{% url 'cfp:session_edit' event.organization.slug event.slug session.pk %}" class="block">
+                                <p class="text-xs font-semibold line-clamp-1" style="color: {{ track.color }};">{{ session.title }}</p>
+                                <p class="text-[10px] text-muted-foreground mt-0.5 truncate">{{ session.speaker.get_full_name|default:session.speaker.email }}</p>
+                                {% if session.session_format %}
+                                <p class="text-[10px] text-muted-foreground">{{ session.session_format.duration_minutes }} {% trans "min" %}</p>
+                                {% endif %}
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="p-8">
+                    {% #empty_state icon="calendar" title=_("No scheduled sessions") description=_("Drag sessions from the sidebar to schedule them.") %}{% /empty_state %}
+                </div>
+                {% endif %}
+            {% /card %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,3 +1,4 @@
+import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from decimal import Decimal
@@ -133,8 +134,6 @@ class PaymentGateway(ABC):
 
     @staticmethod
     def validate_cameroon_phone(phone: str) -> tuple[bool, str]:
-        import re
-
         phone = "".join(filter(str.isdigit, phone))
 
         if phone.startswith("237"):

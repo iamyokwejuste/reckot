@@ -1,0 +1,125 @@
+{% extends 'layouts/dashboard.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Speaker profile" %} - {{ event.title }} - Reckot{% endblock %}
+
+{% block breadcrumbs %}
+{% url 'cfp:public_cfp' org_slug=event.organization.slug event_slug=event.slug as cfp_url %}
+{% #breadcrumb class="mb-4" %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item href=cfp_url %}{{ event.title|truncatewords:3 }}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item %}{% trans "Speaker profile" %}{% /breadcrumb_item %}
+{% /breadcrumb %}
+{% endblock %}
+
+{% block header_title %}
+<div class="min-w-0">
+    <h1 class="text-lg font-semibold truncate">{{ event.title }}</h1>
+    <p class="text-sm text-muted-foreground hidden md:block">{% trans "Speaker profile" %}</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl">
+    <form method="post" enctype="multipart/form-data" class="space-y-8">
+        {% csrf_token %}
+
+        {% #card %}
+            <div class="space-y-6">
+                <div class="flex items-center gap-4">
+                    {% if speaker_profile.get_photo_url %}
+                    <img src="{{ speaker_profile.get_photo_url }}" alt="" class="h-16 w-16 rounded-full object-cover border-2 border-border">
+                    {% else %}
+                    <div class="h-16 w-16 rounded-full bg-muted flex items-center justify-center border-2 border-border">
+                        <i data-lucide="user" class="h-6 w-6 text-muted-foreground"></i>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <h2 class="font-semibold">{{ speaker_profile.user.get_full_name|default:speaker_profile.user.email }}</h2>
+                        <p class="text-sm text-muted-foreground">{{ speaker_profile.tagline|default:_("No tagline set") }}</p>
+                    </div>
+                </div>
+
+                {% #form_field label=_("Photo") name="photo" error=form.photo.errors.0 %}
+                    <input type="file" name="photo" id="photo" accept="image/*"
+                           class="flex h-12 w-full rounded-xl border-2 border-border bg-card px-4 py-2.5 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium">
+                {% /form_field %}
+
+                {% #form_field label=_("Bio") name="bio" required=True error=form.bio.errors.0 hint=_("Tell attendees about yourself.") %}
+                    {% #textarea name="bio" id="bio" rows="4" required=True value=form.bio.value %}{% /textarea %}
+                {% /form_field %}
+
+                {% #form_field label=_("Tagline") name="tagline" error=form.tagline.errors.0 %}
+                    {% #input name="tagline" id="tagline" value=form.tagline.value placeholder=_("e.g. Full-stack developer & OSS contributor") %}{% /input %}
+                {% /form_field %}
+
+                <div class="grid gap-4 sm:grid-cols-2">
+                    {% #form_field label=_("Company") name="company" error=form.company.errors.0 %}
+                        {% #input name="company" id="company" value=form.company.value %}{% /input %}
+                    {% /form_field %}
+
+                    {% #form_field label=_("Job title") name="job_title" error=form.job_title.errors.0 %}
+                        {% #input name="job_title" id="job_title" value=form.job_title.value %}{% /input %}
+                    {% /form_field %}
+                </div>
+            </div>
+        {% /card %}
+
+        {% #card class="mt-6" %}
+            <h3 class="text-lg font-semibold mb-4">{% trans "Social links" %}</h3>
+            <div class="space-y-4">
+                {% #form_field label=_("Website") name="website" error=form.website.errors.0 %}
+                    {% #input type="url" name="website" id="website" value=form.website.value placeholder="https://" %}{% /input %}
+                {% /form_field %}
+
+                <div class="grid gap-4 sm:grid-cols-2">
+                    {% #form_field label=_("Twitter") name="twitter" error=form.twitter.errors.0 %}
+                        {% #input name="twitter" id="twitter" value=form.twitter.value placeholder="@username" %}{% /input %}
+                    {% /form_field %}
+
+                    {% #form_field label=_("GitHub") name="github" error=form.github.errors.0 %}
+                        {% #input name="github" id="github" value=form.github.value placeholder="username" %}{% /input %}
+                    {% /form_field %}
+                </div>
+
+                {% #form_field label=_("LinkedIn") name="linkedin" error=form.linkedin.errors.0 %}
+                    {% #input type="url" name="linkedin" id="linkedin" value=form.linkedin.value placeholder="https://linkedin.com/in/..." %}{% /input %}
+                {% /form_field %}
+            </div>
+        {% /card %}
+
+        {% #card class="mt-6" %}
+            <h3 class="text-lg font-semibold mb-4">{% trans "Travel information" %}</h3>
+            <div class="space-y-4">
+                <div class="flex flex-col gap-3 sm:flex-row sm:gap-6">
+                    <label class="flex items-center gap-2 text-sm">
+                        <input type="checkbox" name="travel_assistance" value="true"
+                               {% if form.travel_assistance.value %}checked{% endif %}
+                               class="h-4 w-4 rounded border-border text-primary focus:ring-primary">
+                        {% trans "I need travel assistance" %}
+                    </label>
+                    <label class="flex items-center gap-2 text-sm">
+                        <input type="checkbox" name="accommodation_needed" value="true"
+                               {% if form.accommodation_needed.value %}checked{% endif %}
+                               class="h-4 w-4 rounded border-border text-primary focus:ring-primary">
+                        {% trans "I need accommodation" %}
+                    </label>
+                </div>
+
+                {% #form_field label=_("Dietary requirements") name="dietary_requirements" error=form.dietary_requirements.errors.0 %}
+                    {% #input name="dietary_requirements" id="dietary_requirements" value=form.dietary_requirements.value %}{% /input %}
+                {% /form_field %}
+            </div>
+        {% /card %}
+
+        <div class="pt-4">
+            {% #button type="submit" variant="default" size="lg" %}
+                <i data-lucide="save" class="mr-2 h-5 w-5"></i>
+                {% trans "Save profile" %}
+            {% /button %}
+        </div>
+    </form>
+</div>
+{% endblock %}

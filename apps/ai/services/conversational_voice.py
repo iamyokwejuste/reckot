@@ -1,10 +1,13 @@
+import io
 import json
 import logging
 from typing import Dict, List, Optional
 from datetime import datetime
+from PIL import Image
 from apps.core.services.ai import gemini_ai
 from apps.events.models import Event
 from apps.orgs.models import Organization
+from apps.tickets.models import TicketType
 
 logger = logging.getLogger(__name__)
 
@@ -129,8 +132,6 @@ class ConversationalEventCreator:
                 state="DRAFT",
             )
 
-            from apps.tickets.models import TicketType
-
             for ticket in event_data.get("ticket_types", []):
                 TicketType.objects.create(
                     event=event,
@@ -176,9 +177,6 @@ class ConversationalEventCreator:
 def generate_cover_from_voice_event(
     event_data: Dict, aspect_ratio: str = "16:9"
 ) -> Optional[bytes]:
-    from PIL import Image
-    import io
-
     title = event_data.get("title", "")
     description = event_data.get("description", "")
     event_type = event_data.get("event_type", "general")

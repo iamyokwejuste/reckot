@@ -45,6 +45,8 @@ class MessageCampaign(models.Model):
         TICKET_TYPE = "TICKET_TYPE", _("By Ticket Type")
         CHECKED_IN = "CHECKED_IN", _("Checked In Only")
         NOT_CHECKED_IN = "NOT_CHECKED_IN", _("Not Checked In")
+        ALL_SPEAKERS = "ALL_SPEAKERS", _("All Speakers")
+        ACCEPTED_SPEAKERS = "ACCEPTED_SPEAKERS", _("Accepted Speakers")
 
     reference = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     organization = models.ForeignKey(

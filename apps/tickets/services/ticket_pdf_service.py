@@ -1,9 +1,14 @@
 import base64
 
 from django.contrib.staticfiles import finders
+from django.core.cache import caches
 from django.template.loader import render_to_string
 from weasyprint import CSS, HTML
 from weasyprint.text.fonts import FontConfiguration
+
+_pdf_cache = caches["reports"]
+_SINGLE_TICKET_TTL = 3600
+_BOOKING_PDF_TTL = 3600
 
 
 def generate_ticket_pdf(booking, tickets, qr_code_bytes=None):
@@ -54,8 +59,22 @@ def generate_ticket_pdf(booking, tickets, qr_code_bytes=None):
 
 
 def generate_single_ticket_pdf(ticket, booking, qr_code_bytes=None):
-    return generate_ticket_pdf(booking, [ticket], qr_code_bytes)
+    cache_key = f"ticket_pdf:{ticket.code}"
+    cached = _pdf_cache.get(cache_key)
+    if cached is not None:
+        return cached
+
+    pdf_bytes = generate_ticket_pdf(booking, [ticket], qr_code_bytes)
+    _pdf_cache.set(cache_key, pdf_bytes, _SINGLE_TICKET_TTL)
+    return pdf_bytes
 
 
 def generate_multi_ticket_pdf(tickets, booking, qr_code_bytes=None):
-    return generate_ticket_pdf(booking, tickets, qr_code_bytes)
+    cache_key = f"booking_pdf:{booking.reference}"
+    cached = _pdf_cache.get(cache_key)
+    if cached is not None:
+        return cached
+
+    pdf_bytes = generate_ticket_pdf(booking, tickets, qr_code_bytes)
+    _pdf_cache.set(cache_key, pdf_bytes, _BOOKING_PDF_TTL)
+    return pdf_bytes

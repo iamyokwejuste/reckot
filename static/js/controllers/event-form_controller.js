@@ -1,11 +1,11 @@
 import { Controller } from "https://unpkg.com/@hotwired/stimulus@3.2.2/dist/stimulus.js"
 
 export default class extends Controller {
-    static targets = ["step1", "step2", "step3", "step4", "coverPreview", "progressBar"]
+    static targets = ["step1", "step2", "step3", "step4", "step5", "coverPreview", "progressBar"]
 
     static values = {
         currentStep: { type: Number, default: 1 },
-        totalSteps: { type: Number, default: 4 },
+        totalSteps: { type: Number, default: 5 },
         mode: String
     }
 
@@ -29,7 +29,7 @@ export default class extends Controller {
     currentStepValueChanged(newStep) {
         this.updateUI();
 
-        if (newStep === 2) {
+        if (newStep === 2 || newStep === 5) {
             this.initializeDatePickers();
         }
     }
@@ -152,6 +152,7 @@ export default class extends Controller {
             case 1: valid = this.validateStep1(); break;
             case 2: valid = this.validateStep2(); break;
             case 3: valid = this.validateStep3(); break;
+            case 4: valid = this.validateStep4(); break;
             default: valid = true;
         }
 
@@ -237,14 +238,24 @@ export default class extends Controller {
         return Object.keys(this.errors).length === 0;
     }
 
-    submitForm(event) {
-        if (!this.validateStep4()) {
-            event.preventDefault();
+    toggleCfpFields() {
+        const checkbox = this.element.querySelector('[name="enable_cfp"]');
+        const cfpFields = this.element.querySelector('[data-cfp-fields]');
+        if (checkbox && cfpFields) {
+            cfpFields.classList.toggle('hidden', !checkbox.checked);
+        }
+
+        if (checkbox?.checked && this.currentStepValue === 5) {
+            this.initializeDatePickers();
         }
     }
 
+    submitForm(event) {}
+
     updateUI() {
-        [this.step1Target, this.step2Target, this.step3Target, this.step4Target].forEach((el, idx) => {
+        const steps = [this.step1Target, this.step2Target, this.step3Target, this.step4Target];
+        if (this.hasStep5Target) steps.push(this.step5Target);
+        steps.forEach((el, idx) => {
             el.classList.toggle('hidden', idx + 1 !== this.currentStepValue);
         });
 
@@ -256,7 +267,7 @@ export default class extends Controller {
         const stepNumber = this.element.querySelector('[data-step-number]');
         if (stepNumber) stepNumber.textContent = this.currentStepValue;
 
-        const stepLabels = ['Basic Info', 'Date & Time', 'Location', 'Details'];
+        const stepLabels = ['Basic Info', 'Date & Time', 'Location', 'Details', 'CFP'];
         const stepLabel = this.element.querySelector('[data-step-label]');
         if (stepLabel) stepLabel.textContent = stepLabels[this.currentStepValue - 1];
 

@@ -1,6 +1,13 @@
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
+from apps.core.validators import (
+    ALLOWED_DOCUMENT_EXTENSIONS,
+    ALLOWED_PDF_EXTENSIONS,
+    validate_document_file_size,
+    validate_pdf_file_size,
+)
 from apps.tickets.models import Booking
 from apps.orgs.models import Organization
 import uuid
@@ -97,6 +104,7 @@ class Payment(models.Model):
         max_length=20, choices=Status.choices, default=Status.PENDING
     )
     external_reference = models.CharField(max_length=255, blank=True)
+    idempotency_key = models.CharField(max_length=255, blank=True, default="", db_index=True)
     redirect_url = models.URLField(blank=True)
     gateway_config = models.ForeignKey(
         PaymentGatewayConfig, on_delete=models.SET_NULL, null=True, blank=True
@@ -112,6 +120,13 @@ class Payment(models.Model):
             models.Index(fields=["status", "expires_at"]),
             models.Index(fields=["booking"]),
             models.Index(fields=["provider"]),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["external_reference"],
+                condition=~models.Q(external_reference=""),
+                name="unique_external_reference_when_set",
+            ),
         ]
         ordering = ["-created_at"]
 
@@ -165,7 +180,11 @@ class OfflinePayment(models.Model):
     )
     method_description = models.CharField(max_length=255)
     instructions = models.TextField(blank=True)
-    proof_file = models.FileField(upload_to="payment_proofs/", blank=True)
+    proof_file = models.FileField(
+        upload_to="payment_proofs/",
+        blank=True,
+        validators=[FileExtensionValidator(ALLOWED_DOCUMENT_EXTENSIONS), validate_document_file_size],
+    )
     proof_notes = models.TextField(blank=True)
     verification_status = models.CharField(
         max_length=20,
@@ -307,7 +326,11 @@ class Invoice(models.Model):
     organization_phone = models.CharField(max_length=50, blank=True)
     organization_logo = models.URLField(blank=True)
     notes = models.TextField(blank=True)
-    pdf_file = models.FileField(upload_to="invoices/", blank=True)
+    pdf_file = models.FileField(
+        upload_to="invoices/",
+        blank=True,
+        validators=[FileExtensionValidator(ALLOWED_PDF_EXTENSIONS), validate_pdf_file_size],
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

@@ -1,0 +1,165 @@
+{% extends "layouts/dashboard.html" %}
+{% load slippers i18n %}
+
+{% block title %}{% trans "Edit Session" %} - {{ session.title }} - Reckot{% endblock %}
+
+{% block breadcrumbs %}
+{% #breadcrumb class="mb-4" %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item href="/events/" %}{% trans "Events" %}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item %}{{ event.title|truncatewords:3 }}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item href="{% url 'cfp:schedule_builder' event.organization.slug event.slug %}" %}{% trans "Schedule" %}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item %}{% trans "Edit session" %}{% /breadcrumb_item %}
+{% /breadcrumb %}
+{% endblock %}
+
+{% block header_title %}
+<div class="min-w-0">
+    <h1 class="text-lg font-semibold truncate">{% trans "Edit Session" %}</h1>
+    <p class="text-sm text-muted-foreground hidden md:block">{{ event.title }}</p>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'cfp:schedule_builder' event.organization.slug event.slug %}">
+    {% #button variant="ghost" size="sm" %}
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        <span class="hidden md:inline">{% trans "Back to schedule" %}</span>
+    {% /button %}
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl space-y-6">
+    {% if session.proposal %}
+    {% #card %}
+        <div class="flex items-center gap-3 mb-3">
+            <div class="h-9 w-9 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
+                <i data-lucide="file-text" class="w-4 h-4 text-purple-500"></i>
+            </div>
+            <div>
+                <h3 class="text-sm font-medium text-muted-foreground">{% trans "Linked proposal" %}</h3>
+                <a href="{% url 'cfp:proposal_detail' event.organization.slug event.slug session.proposal.pk %}" class="text-sm font-semibold hover:text-primary transition-colors">{{ session.proposal.title }}</a>
+            </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+            {% if session.proposal.status == "ACCEPTED" %}
+            {% #badge variant="success" %}{% trans "Accepted" %}{% /badge %}
+            {% elif session.proposal.status == "CONFIRMED" %}
+            {% #badge variant="success" %}{% trans "Confirmed" %}{% /badge %}
+            {% else %}
+            {% #badge variant="outline" %}{{ session.proposal.get_status_display }}{% /badge %}
+            {% endif %}
+            {% if session.proposal.track %}
+            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold" style="background-color: {{ session.proposal.track.color }}20; color: {{ session.proposal.track.color }};">{{ session.proposal.track.name }}</span>
+            {% endif %}
+            {% if session.proposal.session_format %}
+            <span class="text-xs text-muted-foreground">{{ session.proposal.session_format.name }}</span>
+            {% endif %}
+        </div>
+    {% /card %}
+    {% endif %}
+
+    {% #card %}
+        <div class="flex items-start gap-4 mb-6">
+            {% if session.speaker.get_profile_image_url %}
+            <img src="{{ session.speaker.get_profile_image_url }}" alt="{{ session.speaker.get_full_name }}" class="h-12 w-12 rounded-full object-cover shrink-0">
+            {% else %}
+            <div class="h-12 w-12 rounded-full bg-muted flex items-center justify-center shrink-0">
+                <span class="text-base font-semibold">{{ session.speaker.email|slice:":1"|upper }}</span>
+            </div>
+            {% endif %}
+            <div class="min-w-0">
+                <h3 class="text-sm font-medium text-muted-foreground">{% trans "Speaker" %}</h3>
+                <p class="text-base font-semibold">{{ session.speaker.get_full_name|default:session.speaker.email }}</p>
+                <p class="text-sm text-muted-foreground">{{ session.speaker.email }}</p>
+            </div>
+        </div>
+    {% /card %}
+
+    {% #card %}
+        <h2 class="text-lg font-semibold mb-6">{% trans "Session details" %}</h2>
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+
+            {% #form_field label=_("Title") name="title" required=True %}
+                {% #input type="text" name="title" id="title" value=form.title.value required=True %}{% /input %}
+                {% if form.title.errors %}
+                <p class="text-sm text-destructive mt-1">{{ form.title.errors.0 }}</p>
+                {% endif %}
+            {% /form_field %}
+
+            {% #form_field label=_("Description") name="description" %}
+                {% #textarea name="description" id="description" rows="4" %}{{ form.description.value|default:"" }}{% /textarea %}
+                {% if form.description.errors %}
+                <p class="text-sm text-destructive mt-1">{{ form.description.errors.0 }}</p>
+                {% endif %}
+            {% /form_field %}
+
+            <div class="grid gap-4 sm:grid-cols-2">
+                {% #form_field label=_("Track") name="track" %}
+                    <select name="track" id="track" class="flex h-12 w-full rounded-xl border-2 border-border bg-card px-4 py-3 text-sm text-foreground transition-all duration-200 hover:border-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                        <option value="">{% trans "No track" %}</option>
+                        {% for track in event.tracks.all %}
+                        <option value="{{ track.pk }}" {% if form.track.value|stringformat:"d" == track.pk|stringformat:"d" %}selected{% endif %}>{{ track.name }}</option>
+                        {% endfor %}
+                    </select>
+                    {% if form.track.errors %}
+                    <p class="text-sm text-destructive mt-1">{{ form.track.errors.0 }}</p>
+                    {% endif %}
+                {% /form_field %}
+
+                {% #form_field label=_("Room") name="room" %}
+                    {% #input type="text" name="room" id="room" value=form.room.value placeholder=_("e.g. Main hall, Room A") %}{% /input %}
+                    {% if form.room.errors %}
+                    <p class="text-sm text-destructive mt-1">{{ form.room.errors.0 }}</p>
+                    {% endif %}
+                {% /form_field %}
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-2">
+                {% #form_field label=_("Starts at") name="starts_at" %}
+                    {% #input type="datetime-local" name="starts_at" id="starts_at" value=form.starts_at.value %}{% /input %}
+                    {% if form.starts_at.errors %}
+                    <p class="text-sm text-destructive mt-1">{{ form.starts_at.errors.0 }}</p>
+                    {% endif %}
+                {% /form_field %}
+
+                {% #form_field label=_("Ends at") name="ends_at" %}
+                    {% #input type="datetime-local" name="ends_at" id="ends_at" value=form.ends_at.value %}{% /input %}
+                    {% if form.ends_at.errors %}
+                    <p class="text-sm text-destructive mt-1">{{ form.ends_at.errors.0 }}</p>
+                    {% endif %}
+                {% /form_field %}
+            </div>
+
+            {% #form_field label=_("Status") name="status" required=True %}
+                <select name="status" id="status" class="flex h-12 w-full rounded-xl border-2 border-border bg-card px-4 py-3 text-sm text-foreground transition-all duration-200 hover:border-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                    <option value="DRAFT" {% if form.status.value == "DRAFT" %}selected{% endif %}>{% trans "Draft" %}</option>
+                    <option value="SCHEDULED" {% if form.status.value == "SCHEDULED" %}selected{% endif %}>{% trans "Scheduled" %}</option>
+                    <option value="CANCELLED" {% if form.status.value == "CANCELLED" %}selected{% endif %}>{% trans "Cancelled" %}</option>
+                </select>
+                {% if form.status.errors %}
+                <p class="text-sm text-destructive mt-1">{{ form.status.errors.0 }}</p>
+                {% endif %}
+            {% /form_field %}
+
+            <div class="flex items-center justify-between pt-4 border-t border-border">
+                <a href="{% url 'cfp:schedule_builder' event.organization.slug event.slug %}">
+                    {% #button variant="outline" %}
+                        {% trans "Cancel" %}
+                    {% /button %}
+                </a>
+                {% #button type="submit" variant="default" %}
+                    <i data-lucide="save" class="w-4 h-4"></i>
+                    {% trans "Save session" %}
+                {% /button %}
+            </div>
+        </form>
+    {% /card %}
+</div>
+{% endblock %}

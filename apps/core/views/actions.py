@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 
@@ -15,10 +16,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db import connection
 from django.core.cache import cache
 
+from apps.cfp.models import Proposal, SpeakerProfile
 from apps.core.models import OTPVerification, User
 from apps.core.tasks import resend_otp_task, send_otp_sms_task
 from apps.core.services.notifications import NotificationService
 from apps.events.models import Event
+from apps.orgs.models import Membership
 
 
 def robots_txt(request):
@@ -109,7 +112,7 @@ class WhyUsView(View):
 
 @method_decorator(csrf_exempt, name="dispatch")
 class HealthCheckView(View):
-    logger = __import__("logging").getLogger("reckot.health")
+    logger = logging.getLogger("reckot.health")
 
     def get(self, request):
         status = {"status": "ok", "service": "reckot"}
@@ -213,8 +216,6 @@ class ResendOTPView(LoginRequiredMixin, View):
         try:
             resend_otp_task.delay(request.user.id, OTPVerification.Type.EMAIL)
         except Exception as e:
-            import logging
-
             logging.getLogger(__name__).error(f"Failed to resend OTP: {e}")
             return JsonResponse(
                 {
@@ -298,8 +299,6 @@ class PhoneLoginRequestView(View):
                 otp = OTPVerification.create_for_user(user, OTPVerification.Type.PHONE)
                 send_otp_sms_task.delay(phone, otp.code)
         except Exception as e:
-            import logging
-
             logging.getLogger(__name__).error(f"Failed to send OTP SMS: {e}")
         return HttpResponse(
             '<p class="text-sm text-emerald-500 mt-2">'
@@ -403,8 +402,6 @@ class PhoneSignupRequestView(View):
                 request.session["signup_otp"] = OTPVerification.generate_code()
                 send_otp_sms_task.delay(phone, request.session["signup_otp"])
         except Exception as e:
-            import logging
-
             logging.getLogger(__name__).error(f"Failed to send OTP SMS: {e}")
         return HttpResponse(
             '<p class="text-sm text-emerald-500 mt-2">'
@@ -491,3 +488,39 @@ class DeleteAccountView(LoginRequiredMixin, View):
             _("Your account has been permanently deleted. We're sorry to see you go."),
         )
         return redirect("home")
+
+
+class SwitchModeView(LoginRequiredMixin, View):
+    def post(self, request):
+        mode = request.POST.get("mode", "")
+        valid_modes = {m.value for m in User.UserMode}
+
+        if mode not in valid_modes:
+            messages.error(request, _("Invalid mode."))
+            return redirect("home")
+
+        if mode == User.UserMode.ORGANIZER:
+            if not Membership.objects.filter(user=request.user).exists():
+                messages.error(request, _("You need to be part of an organization."))
+                return redirect("home")
+
+        if mode == User.UserMode.SPEAKER:
+            has_proposals = Proposal.objects.filter(speaker=request.user).exists()
+            has_profile = SpeakerProfile.objects.filter(user=request.user).exists()
+            if not has_proposals and not has_profile:
+                messages.error(request, _("Submit a proposal first to unlock speaker mode."))
+                return redirect("home")
+
+        request.user.active_mode = mode
+        request.user.save(update_fields=["active_mode"])
+
+        next_url = request.POST.get("next") or request.META.get("HTTP_REFERER")
+        if next_url:
+            return redirect(next_url)
+
+        redirect_map = {
+            User.UserMode.ATTENDEE: "home",
+            User.UserMode.SPEAKER: "core:speaker_dashboard",
+            User.UserMode.ORGANIZER: "orgs:list",
+        }
+        return redirect(redirect_map.get(mode, "home"))

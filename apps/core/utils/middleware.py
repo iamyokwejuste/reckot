@@ -3,6 +3,9 @@ import hashlib
 from django.core.cache import cache
 from django.http import JsonResponse
 from django.conf import settings
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.utils.translation import gettext_lazy as _
 
 
 class RateLimitMiddleware:
@@ -80,3 +83,61 @@ class RateLimitMiddleware:
     def get_retry_after(self, cache_key, window):
         ttl = cache.ttl(cache_key)
         return ttl if ttl and ttl > 0 else window
+
+
+class ModeAccessMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+        mode_access = getattr(settings, "MODE_ACCESS", {})
+        self.organizer_paths = mode_access.get("ORGANIZER_PATHS", [])
+        self.organizer_event_suffixes = mode_access.get("ORGANIZER_EVENT_SUFFIXES", [])
+        self.organizer_event_prefixes = mode_access.get("ORGANIZER_EVENT_PREFIXES", [])
+        self.speaker_paths = mode_access.get("SPEAKER_PATHS", [])
+        self.exempt_paths = mode_access.get("EXEMPT_PATHS", [])
+
+    def __call__(self, request):
+        if not request.user.is_authenticated:
+            return self.get_response(request)
+
+        path = request.path
+
+        if any(path.startswith(p) for p in self.exempt_paths):
+            return self.get_response(request)
+
+        mode = getattr(request.user, "active_mode", "ATTENDEE")
+
+        if mode != "ORGANIZER":
+            if any(path.startswith(p) for p in self.organizer_paths):
+                return self._deny(request, "ORGANIZER")
+
+            if any(path.startswith(p) for p in self.organizer_event_prefixes):
+                return self._deny(request, "ORGANIZER")
+
+            if path.startswith("/events/") and not path.startswith("/events/discover"):
+                for suffix in self.organizer_event_suffixes:
+                    if path.endswith(suffix) or suffix[:-1] + "/" in path:
+                        return self._deny(request, "ORGANIZER")
+
+        if mode != "SPEAKER":
+            if any(path.startswith(p) for p in self.speaker_paths):
+                return self._deny(request, "SPEAKER")
+
+        return self.get_response(request)
+
+    def _deny(self, request, required_mode):
+        mode_labels = {
+            "ORGANIZER": _("Organizer"),
+            "SPEAKER": _("Speaker"),
+            "ATTENDEE": _("Attendee"),
+        }
+        required_label = mode_labels.get(required_mode, required_mode)
+        return render(
+            request,
+            "errors/mode_required.html",
+            {
+                "required_mode": required_mode,
+                "required_label": required_label,
+                "current_mode": getattr(request.user, "active_mode", "ATTENDEE"),
+            },
+            status=403,
+        )

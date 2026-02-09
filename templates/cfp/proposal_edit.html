@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Edit proposal" %} - {{ proposal.title }} - Reckot{% endblock %}
+
+{% block content %}
+<div class="container py-8">
+    <div class="max-w-3xl mx-auto">
+        {% url 'cfp:speaker_proposals' org_slug=event.organization.slug event_slug=event.slug as proposals_url %}
+        {% #breadcrumb class="mb-6" %}
+            {% #breadcrumb_item href=proposals_url %}{% trans "My proposals" %}{% /breadcrumb_item %}
+            {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+            {% #breadcrumb_item %}{% trans "Edit proposal" %}{% /breadcrumb_item %}
+        {% /breadcrumb %}
+
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <h1 class="text-3xl font-bold">{% trans "Edit proposal" %}</h1>
+            {% if proposal.status == "SUBMITTED" %}
+                {% #status_pill variant="info" dot=True %}{% trans "Submitted" %}{% /status_pill %}
+            {% elif proposal.status == "UNDER_REVIEW" %}
+                {% #status_pill variant="warning" dot=True %}{% trans "Under review" %}{% /status_pill %}
+            {% elif proposal.status == "ACCEPTED" %}
+                {% #status_pill variant="success" dot=True %}{% trans "Accepted" %}{% /status_pill %}
+            {% elif proposal.status == "REJECTED" %}
+                {% #status_pill variant="destructive" dot=True %}{% trans "Rejected" %}{% /status_pill %}
+            {% elif proposal.status == "WAITLISTED" %}
+                {% #status_pill variant="warning" dot=True %}{% trans "Waitlisted" %}{% /status_pill %}
+            {% elif proposal.status == "CONFIRMED" %}
+                {% #status_pill variant="success" dot=True %}{% trans "Confirmed" %}{% /status_pill %}
+            {% elif proposal.status == "DRAFT" %}
+                {% #status_pill variant="default" dot=True %}{% trans "Draft" %}{% /status_pill %}
+            {% endif %}
+        </div>
+        <p class="mt-2 text-muted-foreground">{{ event.title }}</p>
+
+        <form method="post" class="mt-8 space-y-10">
+            {% csrf_token %}
+
+            <section class="space-y-6">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">1</div>
+                    <h2 class="text-xl font-semibold">{% trans "Proposal details" %}</h2>
+                </div>
+                {% #separator %}{% /separator %}
+
+                {% #form_field label=_("Title") name="title" required=True error=form.title.errors.0 %}
+                    {% #input name="title" id="title" value=form.title.value required=True %}{% /input %}
+                {% /form_field %}
+
+                {% #form_field label=_("Abstract") name="abstract" required=True error=form.abstract.errors.0 hint=_("A short public summary. Keep it under 300 characters.") %}
+                    {% #textarea name="abstract" id="abstract" rows="3" required=True value=form.abstract.value %}{% /textarea %}
+                {% /form_field %}
+
+                {% #form_field label=_("Description") name="description" required=True error=form.description.errors.0 hint=_("Detailed description for reviewers.") %}
+                    {% #textarea name="description" id="description" rows="6" required=True value=form.description.value %}{% /textarea %}
+                {% /form_field %}
+
+                {% #form_field label=_("Outline") name="outline" error=form.outline.errors.0 hint=_("Talk structure or agenda.") %}
+                    {% #textarea name="outline" id="outline" rows="4" value=form.outline.value %}{% /textarea %}
+                {% /form_field %}
+
+                <div class="grid gap-4 sm:grid-cols-2">
+                    {% #form_field label=_("Session format") name="session_format" required=True error=form.session_format.errors.0 %}
+                        <select name="session_format" id="session_format" required
+                                class="flex h-12 w-full rounded-xl border-2 border-border bg-card px-4 py-3 text-sm text-foreground transition-all duration-200 hover:border-muted-foreground/50">
+                            <option value="">{% trans "Select a format" %}</option>
+                            {% for choice in form.session_format.field.queryset %}
+                            <option value="{{ choice.pk }}" {% if form.session_format.value|stringformat:"s" == choice.pk|stringformat:"s" %}selected{% endif %}>
+                                {{ choice.name }} ({{ choice.duration_minutes }} {% trans "min" %})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    {% /form_field %}
+
+                    {% #form_field label=_("Track") name="track" error=form.track.errors.0 %}
+                        <select name="track" id="track"
+                                class="flex h-12 w-full rounded-xl border-2 border-border bg-card px-4 py-3 text-sm text-foreground transition-all duration-200 hover:border-muted-foreground/50">
+                            <option value="">{% trans "Select a track" %}</option>
+                            {% for choice in form.track.field.queryset %}
+                            <option value="{{ choice.pk }}" {% if form.track.value|stringformat:"s" == choice.pk|stringformat:"s" %}selected{% endif %}>
+                                {{ choice.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    {% /form_field %}
+                </div>
+
+                <div class="grid gap-4 sm:grid-cols-2">
+                    {% #form_field label=_("Level") name="level" error=form.level.errors.0 %}
+                        <select name="level" id="level"
+                                class="flex h-12 w-full rounded-xl border-2 border-border bg-card px-4 py-3 text-sm text-foreground transition-all duration-200 hover:border-muted-foreground/50">
+                            {% for value, label in form.level.field.choices %}
+                            <option value="{{ value }}" {% if form.level.value == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    {% /form_field %}
+
+                    {% #form_field label=_("Language") name="language" error=form.language.errors.0 %}
+                        {% #input name="language" id="language" value=form.language.value|default:"en" %}{% /input %}
+                    {% /form_field %}
+                </div>
+
+                {% #form_field label=_("Tags") name="tags" error=form.tags.errors.0 hint=_("Comma-separated list of tags.") %}
+                    {% #input name="tags" id="tags" value=form.tags.value placeholder=_("e.g. python, web, security") %}{% /input %}
+                {% /form_field %}
+
+                {% #form_field label=_("Co-speaker emails") name="co_speaker_emails" error=form.co_speaker_emails.errors.0 hint=_("Comma-separated email addresses of co-speakers.") %}
+                    {% #input name="co_speaker_emails" id="co_speaker_emails" value=form.co_speaker_emails.value %}{% /input %}
+                {% /form_field %}
+
+                {% #form_field label=_("Speaker notes") name="speaker_notes" error=form.speaker_notes.errors.0 hint=_("Private notes visible only to organizers.") %}
+                    {% #textarea name="speaker_notes" id="speaker_notes" rows="3" value=form.speaker_notes.value %}{% /textarea %}
+                {% /form_field %}
+            </section>
+
+            {% if custom_questions %}
+            <section class="space-y-6">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">2</div>
+                    <h2 class="text-xl font-semibold">{% trans "Additional questions" %}</h2>
+                </div>
+                {% #separator %}{% /separator %}
+
+                {% for question in custom_questions %}
+                <div class="space-y-2">
+                    <label class="text-sm font-medium leading-none" for="question_{{ question.id }}">
+                        {{ question.question }}{% if question.is_required %}<span class="text-destructive ml-1">*</span>{% endif %}
+                    </label>
+
+                    {% with answer=answers|default_if_none:"" %}
+                    {% if question.field_type == "TEXT" %}
+                        {% #input name="question_{{ question.id }}" id="question_{{ question.id }}" required=question.is_required value=answer %}{% /input %}
+                    {% elif question.field_type == "TEXTAREA" %}
+                        {% #textarea name="question_{{ question.id }}" id="question_{{ question.id }}" rows="3" required=question.is_required value=answer %}{% /textarea %}
+                    {% elif question.field_type == "SELECT" %}
+                        <select name="question_{{ question.id }}" id="question_{{ question.id }}"
+                                {% if question.is_required %}required{% endif %}
+                                class="flex h-12 w-full rounded-xl border-2 border-border bg-card px-4 py-3 text-sm text-foreground transition-all duration-200 hover:border-muted-foreground/50">
+                            <option value="">{% trans "Select an option" %}</option>
+                            {% for opt in question.options %}
+                            <option value="{{ opt }}" {% if answer == opt %}selected{% endif %}>{{ opt }}</option>
+                            {% endfor %}
+                        </select>
+                    {% elif question.field_type == "RADIO" %}
+                        <div class="flex flex-col gap-2">
+                            {% for opt in question.options %}
+                            <label class="flex items-center gap-2 text-sm">
+                                <input type="radio" name="question_{{ question.id }}" value="{{ opt }}"
+                                       {% if answer == opt %}checked{% endif %}
+                                       {% if question.is_required %}required{% endif %}
+                                       class="h-4 w-4 border-border text-primary focus:ring-primary">
+                                {{ opt }}
+                            </label>
+                            {% endfor %}
+                        </div>
+                    {% elif question.field_type == "CHECKBOX" %}
+                        <div class="flex flex-col gap-2">
+                            {% for opt in question.options %}
+                            <label class="flex items-center gap-2 text-sm">
+                                <input type="checkbox" name="question_{{ question.id }}" value="{{ opt }}"
+                                       {% if opt in answer %}checked{% endif %}
+                                       class="h-4 w-4 rounded border-border text-primary focus:ring-primary">
+                                {{ opt }}
+                            </label>
+                            {% endfor %}
+                        </div>
+                    {% elif question.field_type == "NUMBER" %}
+                        {% #input type="number" name="question_{{ question.id }}" id="question_{{ question.id }}" required=question.is_required value=answer %}{% /input %}
+                    {% endif %}
+                    {% endwith %}
+                </div>
+                {% endfor %}
+            </section>
+            {% endif %}
+
+            <div class="flex flex-col sm:flex-row gap-3 pt-4">
+                {% #button type="submit" variant="default" size="lg" %}
+                    <i data-lucide="save" class="mr-2 h-5 w-5"></i>
+                    {% trans "Save changes" %}
+                {% /button %}
+                <a href="{% url 'cfp:speaker_proposals' org_slug=event.organization.slug event_slug=event.slug %}">
+                    {% #button variant="outline" size="lg" %}
+                        {% trans "Cancel" %}
+                    {% /button %}
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

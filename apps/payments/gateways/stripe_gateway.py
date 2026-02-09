@@ -1,8 +1,13 @@
+import logging
 from decimal import Decimal
 from typing import Optional
 from django.conf import settings
 from apps.payments.gateways.base import PaymentGateway, PaymentResult, RefundResult
-import logging
+
+try:
+    import stripe
+except ImportError:
+    stripe = None
 
 logger = logging.getLogger(__name__)
 
@@ -13,14 +18,11 @@ class StripeGateway(PaymentGateway):
         self.webhook_secret = getattr(settings, "STRIPE_WEBHOOK_SECRET", "")
 
     def _get_stripe(self):
-        try:
-            import stripe
-
-            stripe.api_key = self.api_key
-            return stripe
-        except ImportError:
+        if stripe is None:
             logger.error("Stripe library not installed")
             return None
+        stripe.api_key = self.api_key
+        return stripe
 
     def initiate_payment(
         self,

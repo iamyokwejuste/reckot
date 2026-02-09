@@ -178,6 +178,19 @@
                             <p class="text-xs text-muted-foreground">{% trans "Flyer generator for attendees" %}</p>
                         </div>
                     </a>
+                    <a href="{% url 'cfp:cfp_config' event.organization.slug event.slug %}" hx-boost="false" class="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted transition-colors">
+                        <div class="h-10 w-10 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                            <i data-lucide="megaphone" class="h-5 w-5 text-violet-500"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium">{% trans "Call for proposals" %}</p>
+                            {% if has_cfp and cfp_stats %}
+                            <p class="text-xs text-muted-foreground">{{ cfp_stats.total }} {% trans "proposals" %} &middot; {{ event.cfp.get_status_display }}</p>
+                            {% else %}
+                            <p class="text-xs text-muted-foreground">{% trans "Set up your CFP" %}</p>
+                            {% endif %}
+                        </div>
+                    </a>
                 </div>
             </div>
 

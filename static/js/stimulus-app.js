@@ -58,6 +58,10 @@ waitForStimulus(async () => {
         { name: 'image-compress', path: 'image_compress_controller.js' },
         { name: 'logo-upload', path: 'logo-upload_controller.js' },
         { name: 'offline', path: 'offline_controller.js' },
+        { name: 'cfp-submit', path: 'cfp_submit_controller.js' },
+        { name: 'cfp-review', path: 'cfp_review_controller.js' },
+        { name: 'schedule-builder', path: 'schedule_builder_controller.js' },
+        { name: 'user-mode', path: 'user_mode_controller.js' },
     ];
 
     await Promise.all(

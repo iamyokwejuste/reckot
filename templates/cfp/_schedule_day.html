@@ -1,0 +1,64 @@
+{% load i18n %}
+
+{% regroup sessions by starts_at|date:"H:i" as time_slots %}
+<div class="space-y-6">
+    {% for slot in time_slots %}
+    <div data-animate="fade-up">
+        <div class="flex items-center gap-3 mb-3">
+            <div class="flex items-center gap-2 rounded-lg bg-muted px-3 py-1.5">
+                <i data-lucide="clock" class="h-3.5 w-3.5 text-muted-foreground"></i>
+                <span class="text-sm font-semibold">{{ slot.grouper }}</span>
+            </div>
+            <div class="flex-1 h-px bg-border"></div>
+        </div>
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {% for session in slot.list %}
+            <a href="{% url 'cfp:public_session' org_slug=event.organization.slug event_slug=event.slug id=session.id %}"
+               class="group rounded-2xl border border-border bg-card p-4 space-y-3 hover:shadow-md hover:border-primary/30 transition-all">
+                <div class="space-y-1">
+                    <h3 class="font-semibold group-hover:text-primary transition-colors line-clamp-2">{{ session.title }}</h3>
+                    <div class="flex items-center gap-2">
+                        {% if session.speaker %}
+                        <div class="flex items-center gap-2">
+                            {% with profile=session.speaker.speaker_profiles.first %}
+                            {% if profile and profile.get_photo_url %}
+                            <img src="{{ profile.get_photo_url }}" alt="" class="h-5 w-5 rounded-full object-cover">
+                            {% else %}
+                            <div class="h-5 w-5 rounded-full bg-muted flex items-center justify-center">
+                                <span class="text-[10px] font-medium">{{ session.speaker.get_full_name|slice:":1"|upper|default:session.speaker.email|slice:":1"|upper }}</span>
+                            </div>
+                            {% endif %}
+                            {% endwith %}
+                            <span class="text-sm text-muted-foreground">{{ session.speaker.get_full_name|default:session.speaker.email }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 text-xs">
+                    {% if session.track %}
+                    <span class="inline-flex items-center gap-1 rounded-full border px-2 py-0.5" style="border-color: {{ session.track.color }}40; background-color: {{ session.track.color }}10; color: {{ session.track.color }}">
+                        <span class="h-1.5 w-1.5 rounded-full" style="background-color: {{ session.track.color }}"></span>
+                        {{ session.track.name }}
+                    </span>
+                    {% endif %}
+                    {% if session.room %}
+                    <span class="inline-flex items-center gap-1 text-muted-foreground">
+                        <i data-lucide="map-pin" class="h-3 w-3"></i>
+                        {{ session.room }}
+                    </span>
+                    {% endif %}
+                    {% if session.starts_at and session.ends_at %}
+                    <span class="text-muted-foreground">
+                        {{ session.starts_at|date:"H:i" }} - {{ session.ends_at|date:"H:i" }}
+                    </span>
+                    {% endif %}
+                    {% if session.session_format %}
+                    <span class="text-muted-foreground">{{ session.session_format.duration_minutes }} {% trans "min" %}</span>
+                    {% endif %}
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>

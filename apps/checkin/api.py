@@ -1,3 +1,4 @@
+import json
 import logging
 
 from django.contrib.auth.decorators import login_required
@@ -80,8 +81,6 @@ class OfflineDataView(View):
 class SyncCheckinView(View):
     def post(self, request):
         try:
-            import json
-
             data = json.loads(request.body)
             ticket_code = data.get("ticketCode")
             notes = data.get("notes", "")
@@ -118,8 +117,6 @@ class SyncCheckinView(View):
 class SyncSwagCollectionView(View):
     def post(self, request):
         try:
-            import json
-
             data = json.loads(request.body)
             ticket_code = data.get("ticketCode")
             swag_item_id = data.get("swagItemId")

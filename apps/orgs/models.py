@@ -1,3 +1,4 @@
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.conf import settings
 from django.utils.text import slugify
@@ -5,6 +6,8 @@ from django.utils.translation import gettext_lazy as _
 import uuid
 from datetime import timedelta
 from django.utils import timezone
+
+from apps.core.validators import ALLOWED_IMAGE_EXTENSIONS, validate_image_file_size
 
 
 class Organization(models.Model):
@@ -21,7 +24,11 @@ class Organization(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=120, unique=True, blank=True)
     description = models.TextField(blank=True)
-    logo = models.ImageField(upload_to="org_logos/", blank=True)
+    logo = models.ImageField(
+        upload_to="org_logos/",
+        blank=True,
+        validators=[FileExtensionValidator(ALLOWED_IMAGE_EXTENSIONS), validate_image_file_size],
+    )
     website = models.URLField(blank=True)
     currency = models.CharField(
         max_length=3,
@@ -132,6 +139,9 @@ ROLE_PERMISSIONS = {
         "process_refunds",
         "manage_coupons",
         "checkin_attendees",
+        "manage_cfp",
+        "review_proposals",
+        "manage_schedule",
     ],
     MemberRole.ADMIN: [
         "manage_organization",
@@ -150,6 +160,9 @@ ROLE_PERMISSIONS = {
         "process_refunds",
         "manage_coupons",
         "checkin_attendees",
+        "manage_cfp",
+        "review_proposals",
+        "manage_schedule",
     ],
     MemberRole.MANAGER: [
         "manage_events",
@@ -161,12 +174,15 @@ ROLE_PERMISSIONS = {
         "export_reports",
         "manage_coupons",
         "checkin_attendees",
+        "manage_cfp",
+        "review_proposals",
     ],
     MemberRole.MEMBER: [
         "create_events",
         "edit_events",
         "manage_tickets",
         "view_reports",
+        "review_proposals",
         "checkin_attendees",
     ],
     MemberRole.VIEWER: [

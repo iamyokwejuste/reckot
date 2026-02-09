@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -6,16 +7,31 @@ from datetime import timedelta
 import random
 import string
 
+from apps.core.validators import ALLOWED_IMAGE_EXTENSIONS, validate_image_file_size
+
 
 class User(AbstractUser):
+    class UserMode(models.TextChoices):
+        ATTENDEE = "ATTENDEE", _("Attendee")
+        SPEAKER = "SPEAKER", _("Speaker")
+        ORGANIZER = "ORGANIZER", _("Organizer")
+
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     email_verified = models.BooleanField(default=False)
     phone_verified = models.BooleanField(default=False)
     ai_features_enabled = models.BooleanField(default=False)
     profile_image = models.ImageField(
-        upload_to="profile_images/", blank=True, null=True
+        upload_to="profile_images/",
+        blank=True,
+        null=True,
+        validators=[FileExtensionValidator(ALLOWED_IMAGE_EXTENSIONS), validate_image_file_size],
     )
     social_avatar_url = models.URLField(max_length=500, blank=True, null=True)
+    active_mode = models.CharField(
+        max_length=20,
+        choices=UserMode.choices,
+        default=UserMode.ATTENDEE,
+    )
 
     def __str__(self):
         return self.email or self.username
@@ -113,11 +129,16 @@ class Notification(models.Model):
         EVENT_UPDATE = "EVENT_UPDATE", _("Event Update")
         EVENT_CANCELLED = "EVENT_CANCELLED", _("Event Cancelled")
         SALE_MADE = "SALE_MADE", _("Sale Made")
+        PROPOSAL_SUBMITTED = "PROPOSAL_SUBMITTED", _("Proposal Submitted")
+        PROPOSAL_ACCEPTED = "PROPOSAL_ACCEPTED", _("Proposal Accepted")
+        PROPOSAL_REJECTED = "PROPOSAL_REJECTED", _("Proposal Rejected")
+        PROPOSAL_WAITLISTED = "PROPOSAL_WAITLISTED", _("Proposal Waitlisted")
+        CFP_OPENED = "CFP_OPENED", _("CFP Opened")
 
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="notifications"
     )
-    notification_type = models.CharField(max_length=20, choices=Type.choices)
+    notification_type = models.CharField(max_length=25, choices=Type.choices)
     title = models.CharField(max_length=200)
     message = models.TextField()
     link = models.CharField(max_length=500, blank=True)

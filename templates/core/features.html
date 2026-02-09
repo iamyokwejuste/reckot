@@ -421,6 +421,74 @@
 
 <section class="py-16 md:py-20 bg-muted/30">
     <div class="container">
+        <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <div class="order-2 lg:order-1 relative" data-controller="animate" data-animate-classes-value="animate-scale" data-animate-once-value="true">
+                <div class="aspect-[4/3] rounded-2xl border border-border bg-card p-6 lg:p-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <span class="text-sm font-medium">{% trans "Call for proposals" %}</span>
+                        <span class="px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-600 text-xs">{% trans "Open" %}</span>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="p-4 rounded-xl border border-border bg-background">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-2">
+                                    <div class="h-8 w-8 rounded-full bg-muted"></div>
+                                    <div>
+                                        <p class="font-medium text-sm">{% trans "Building APIs with Django" %}</p>
+                                        <p class="text-xs text-muted-foreground">{% trans "Workshop - 45 min" %}</p>
+                                    </div>
+                                </div>
+                                <span class="px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-600 text-xs">{% trans "Review" %}</span>
+                            </div>
+                        </div>
+                        <div class="p-4 rounded-xl border border-border bg-background">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-2">
+                                    <div class="h-8 w-8 rounded-full bg-muted"></div>
+                                    <div>
+                                        <p class="font-medium text-sm">{% trans "Scaling mobile payments" %}</p>
+                                        <p class="text-xs text-muted-foreground">{% trans "Talk - 30 min" %}</p>
+                                    </div>
+                                </div>
+                                <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 text-xs">{% trans "Accepted" %}</span>
+                            </div>
+                        </div>
+                        <div class="p-4 rounded-xl border border-border bg-background">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-2">
+                                    <div class="h-8 w-8 rounded-full bg-muted"></div>
+                                    <div>
+                                        <p class="font-medium text-sm">{% trans "Open source in Africa" %}</p>
+                                        <p class="text-xs text-muted-foreground">{% trans "Panel - 60 min" %}</p>
+                                    </div>
+                                </div>
+                                <span class="px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 text-xs">{% trans "New" %}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="order-1 lg:order-2" data-controller="animate" data-animate-classes-value="animate-in" data-animate-once-value="true">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-500/10 text-violet-600 text-sm font-medium mb-4">
+                    <i data-lucide="mic-2" class="w-4 h-4"></i>
+                    {% trans "Call for proposals" %}
+                </div>
+                <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">{% trans "Find your next speakers" %}</h2>
+                <p class="text-muted-foreground mt-4 text-lg">{% trans "Open a call for proposals, review submissions, and build your event schedule. All from one place." %}</p>
+                <ul class="mt-8 space-y-4">
+                    {% #feature_list_item title="Custom submission forms" description="Define tracks, session formats, and review questions" %}{% /feature_list_item %}
+
+                    {% #feature_list_item title="Speaker profiles" description="Speakers submit their bio, photo, and social links with each proposal" %}{% /feature_list_item %}
+
+                    {% #feature_list_item title="Review & decide" description="Accept, reject, or waitlist proposals with one click" %}{% /feature_list_item %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-16 md:py-20">
+    <div class="container">
         <div class="text-center max-w-2xl mx-auto mb-12" data-controller="animate" data-animate-classes-value="animate-in" data-animate-once-value="true">
             <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">{% trans "And much more"%}</h2>
             <p class="text-muted-foreground mt-4 text-lg">{% trans "Everything else you need to run successful events"%}</p>
