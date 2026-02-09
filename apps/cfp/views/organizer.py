@@ -3,6 +3,8 @@ import json
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator
+from django.db import models
 from django.db.models import Avg, Count, Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -25,6 +27,7 @@ from apps.cfp.models import (
     Review,
     Session,
     SessionFormat,
+    SpeakerProfile,
     Track,
 )
 from apps.cfp.services.cfp_service import (
@@ -41,7 +44,6 @@ from apps.orgs.models import Organization
 
 
 def get_event_for_organizer(request, org_slug, event_slug, permission=None):
-    """Helper to resolve event and check organizer permissions."""
     event = get_object_or_404(
         Event.objects.select_related("organization"),
         organization__slug=org_slug,
@@ -141,6 +143,14 @@ class SessionFormatManageView(LoginRequiredMixin, View):
                 fmt.event = event
                 fmt.save()
                 messages.success(request, _("Session format created."))
+            else:
+                messages.error(request, _("Please correct the errors below."))
+                formats = event.session_formats.all()
+                return render(request, "cfp/manage/session_formats.html", {
+                    "event": event,
+                    "formats": formats,
+                    "form": form,
+                })
 
         return redirect(
             "cfp:session_formats", org_slug=org_slug, event_slug=event_slug
@@ -191,6 +201,14 @@ class TrackManageView(LoginRequiredMixin, View):
                 track.event = event
                 track.save()
                 messages.success(request, _("Track created."))
+            else:
+                messages.error(request, _("Please correct the errors below."))
+                tracks = event.tracks.all()
+                return render(request, "cfp/manage/tracks.html", {
+                    "event": event,
+                    "tracks": tracks,
+                    "form": form,
+                })
 
         return redirect("cfp:tracks", org_slug=org_slug, event_slug=event_slug)
 
@@ -667,3 +685,223 @@ class SessionEditView(LoginRequiredMixin, View):
             "session": session,
             "form": form,
         })
+
+
+class CFPDashboardView(LoginRequiredMixin, View):
+    def get(self, request):
+        events = Event.objects.filter(
+            organization__members=request.user
+        ).select_related("organization").prefetch_related("cfp")
+
+        cfp_events = []
+        for event in events:
+            cfp = getattr(event, "cfp", None)
+            if cfp:
+                proposal_count = cfp.proposals.exclude(
+                    status=Proposal.Status.DRAFT
+                ).count()
+                speaker_count = SpeakerProfile.objects.filter(event=event).count()
+                cfp_events.append({
+                    "event": event,
+                    "cfp": cfp,
+                    "proposal_count": proposal_count,
+                    "speaker_count": speaker_count,
+                })
+
+        stats = {
+            "total_cfps": len(cfp_events),
+            "open_cfps": sum(1 for e in cfp_events if e["cfp"].is_open),
+            "total_proposals": sum(e["proposal_count"] for e in cfp_events),
+            "total_speakers": sum(e["speaker_count"] for e in cfp_events),
+        }
+
+        return render(request, "cfp/manage/dashboard.html", {
+            "cfp_events": cfp_events,
+            "stats": stats,
+        })
+
+
+class SpeakerManagementView(LoginRequiredMixin, View):
+    def get(self, request):
+        speakers = SpeakerProfile.objects.filter(
+            event__organization__members=request.user
+        ).select_related("user", "event", "event__organization").annotate(
+            proposal_count=Count(
+                "user__proposals",
+                filter=Q(
+                    user__proposals__cfp__event=models.F("event"),
+                ) & ~Q(user__proposals__status=Proposal.Status.DRAFT),
+            )
+        )
+
+        event_filter = request.GET.get("event")
+        search = request.GET.get("q")
+        has_photo_filter = request.GET.get("has_photo")
+
+        if event_filter:
+            speakers = speakers.filter(event_id=event_filter)
+        if search:
+            speakers = speakers.filter(
+                Q(user__email__icontains=search)
+                | Q(user__first_name__icontains=search)
+                | Q(user__last_name__icontains=search)
+                | Q(company__icontains=search)
+                | Q(job_title__icontains=search)
+            )
+        if has_photo_filter == "yes":
+            speakers = speakers.exclude(photo="")
+        elif has_photo_filter == "no":
+            speakers = speakers.filter(photo="")
+
+        speakers = speakers.order_by("-created_at")
+
+        events = Event.objects.filter(
+            organization__members=request.user,
+            cfp__isnull=False,
+        ).select_related("organization")
+
+        paginator = Paginator(speakers, 50)
+        page_obj = paginator.get_page(request.GET.get("page", 1))
+
+        stats = {
+            "total": paginator.count,
+            "with_photo": SpeakerProfile.objects.filter(
+                event__organization__members=request.user
+            ).exclude(photo="").count(),
+        }
+
+        return render(request, "cfp/manage/speakers.html", {
+            "speakers": page_obj.object_list,
+            "page_obj": page_obj,
+            "paginator": paginator,
+            "stats": stats,
+            "events": events,
+            "current_event": event_filter or "",
+            "current_search": search or "",
+            "current_has_photo": has_photo_filter or "",
+        })
+
+
+class ExportSpeakersView(LoginRequiredMixin, View):
+    HEADERS = [
+        "Name", "Email", "Event", "Company", "Job Title",
+        "Bio", "Website", "Twitter", "LinkedIn", "GitHub",
+        "Has Photo", "Travel Assistance", "Accommodation",
+        "Dietary Requirements", "Custom Fields",
+    ]
+
+    def _get_speakers(self, request):
+        speakers = SpeakerProfile.objects.filter(
+            event__organization__members=request.user
+        ).select_related("user", "event")
+
+        event_filter = request.GET.get("event")
+        if event_filter:
+            speakers = speakers.filter(event_id=event_filter)
+
+        return speakers.order_by("event__title", "user__email")
+
+    def _speaker_to_row(self, sp):
+        return {
+            "Name": sp.user.get_full_name() or sp.user.email,
+            "Email": sp.user.email,
+            "Event": sp.event.title,
+            "Company": sp.company,
+            "Job Title": sp.job_title,
+            "Bio": sp.bio[:200] if sp.bio else "",
+            "Website": sp.website,
+            "Twitter": sp.twitter,
+            "LinkedIn": sp.linkedin,
+            "GitHub": sp.github,
+            "Has Photo": "Yes" if sp.photo else "No",
+            "Travel Assistance": "Yes" if sp.travel_assistance else "No",
+            "Accommodation": "Yes" if sp.accommodation_needed else "No",
+            "Dietary Requirements": sp.dietary_requirements,
+            "Custom Fields": json.dumps(sp.custom_fields) if sp.custom_fields else "",
+        }
+
+    def get(self, request):
+        export_format = request.GET.get("format", "csv").lower()
+        speakers = self._get_speakers(request)
+        rows = [self._speaker_to_row(sp) for sp in speakers]
+
+        if export_format == "json":
+            return self._export_json(rows)
+        elif export_format == "pdf":
+            return self._export_pdf(rows)
+        return self._export_csv(rows)
+
+    def _export_csv(self, rows):
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="speakers.csv"'
+        writer = csv.DictWriter(response, fieldnames=self.HEADERS)
+        writer.writeheader()
+        writer.writerows(rows)
+        return response
+
+    def _export_json(self, rows):
+        response = HttpResponse(
+            json.dumps(rows, indent=2, ensure_ascii=False),
+            content_type="application/json",
+        )
+        response["Content-Disposition"] = 'attachment; filename="speakers.json"'
+        return response
+
+    def _export_pdf(self, rows):
+        from io import BytesIO
+
+        try:
+            from reportlab.lib import colors
+            from reportlab.lib.pagesizes import A4, landscape
+            from reportlab.lib.styles import getSampleStyleSheet
+            from reportlab.lib.units import mm
+            from reportlab.platypus import (
+                Paragraph,
+                SimpleDocTemplate,
+                Spacer,
+                Table,
+                TableStyle,
+            )
+        except ImportError:
+            return HttpResponse(
+                _("PDF export requires reportlab. Install it with: pip install reportlab"),
+                status=501,
+            )
+
+        buf = BytesIO()
+        doc = SimpleDocTemplate(buf, pagesize=landscape(A4), leftMargin=10 * mm, rightMargin=10 * mm)
+        styles = getSampleStyleSheet()
+        elements = []
+
+        elements.append(Paragraph(_("Speakers Export"), styles["Title"]))
+        elements.append(Spacer(1, 6 * mm))
+
+        display_cols = ["Name", "Email", "Event", "Company", "Job Title", "Bio"]
+        table_data = [display_cols]
+        for row in rows:
+            table_data.append([
+                Paragraph(str(row.get(col, "")), styles["BodyText"])
+                for col in display_cols
+            ])
+
+        col_widths = [45 * mm, 55 * mm, 40 * mm, 35 * mm, 35 * mm, 60 * mm]
+        table = Table(table_data, colWidths=col_widths, repeatRows=1)
+        table.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#09090b")),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+            ("FONTSIZE", (0, 0), (-1, 0), 9),
+            ("FONTSIZE", (0, 1), (-1, -1), 8),
+            ("BOTTOMPADDING", (0, 0), (-1, 0), 8),
+            ("TOPPADDING", (0, 0), (-1, 0), 8),
+            ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e5e7eb")),
+            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f9fafb")]),
+            ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ]))
+
+        elements.append(table)
+        doc.build(elements)
+        buf.seek(0)
+
+        response = HttpResponse(buf.read(), content_type="application/pdf")
+        response["Content-Disposition"] = 'attachment; filename="speakers.pdf"'
+        return response

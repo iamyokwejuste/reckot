@@ -113,7 +113,11 @@ class SpeakerProfileForm(forms.ModelForm):
             "travel_assistance",
             "accommodation_needed",
             "dietary_requirements",
+            "custom_fields",
         ]
+        widgets = {
+            "custom_fields": forms.HiddenInput(),
+        }
 
 
 class ProposalForm(forms.ModelForm):

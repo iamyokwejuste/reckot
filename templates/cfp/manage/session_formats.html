@@ -23,7 +23,7 @@
 {% endblock %}
 
 {% block header_actions %}
-<a href="{% url 'cfp:manage_config' event.organization.slug event.slug %}">
+<a href="{% url 'cfp:cfp_config' event.organization.slug event.slug %}">
     {% #button variant="ghost" size="sm" %}
         <i data-lucide="arrow-left" class="w-4 h-4"></i>
         <span class="hidden md:inline">{% trans "Back to CFP" %}</span>
@@ -112,17 +112,17 @@
                     {% endif %}
                 {% /form_field %}
 
-                {% #form_field label=_("Duration (minutes)") name="duration" required=True %}
-                    {% #input type="number" name="duration" id="duration" value=form.duration.value min="5" step="5" placeholder="30" required=True %}{% /input %}
-                    {% if form.duration.errors %}
-                    <p class="text-sm text-destructive mt-1">{{ form.duration.errors.0 }}</p>
+                {% #form_field label=_("Duration (minutes)") name="duration_minutes" required=True %}
+                    {% #input type="number" name="duration_minutes" id="duration_minutes" value=form.duration_minutes.value min="5" step="5" placeholder="30" required=True %}{% /input %}
+                    {% if form.duration_minutes.errors %}
+                    <p class="text-sm text-destructive mt-1">{{ form.duration_minutes.errors.0 }}</p>
                     {% endif %}
                 {% /form_field %}
 
-                {% #form_field label=_("Capacity") name="capacity" hint=_("Max attendees, leave empty for no limit") %}
-                    {% #input type="number" name="capacity" id="capacity" value=form.capacity.value min="1" placeholder="100" %}{% /input %}
-                    {% if form.capacity.errors %}
-                    <p class="text-sm text-destructive mt-1">{{ form.capacity.errors.0 }}</p>
+                {% #form_field label=_("Capacity") name="max_capacity" hint=_("Max attendees, leave empty for no limit") %}
+                    {% #input type="number" name="max_capacity" id="max_capacity" value=form.max_capacity.value min="1" placeholder="100" %}{% /input %}
+                    {% if form.max_capacity.errors %}
+                    <p class="text-sm text-destructive mt-1">{{ form.max_capacity.errors.0 }}</p>
                     {% endif %}
                 {% /form_field %}
 

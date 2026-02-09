@@ -115,38 +115,73 @@
 
                 <div class="grid gap-4 sm:grid-cols-2">
                     {% #form_field label=_("Session format") name="session_format" required=True error=proposal_form.session_format.errors.0 %}
-                        <select name="session_format" id="session_format" required
-                                class="flex h-12 w-full rounded-xl border-2 border-border bg-card px-4 py-3 text-sm text-foreground transition-all duration-200 hover:border-muted-foreground/50">
-                            <option value="">{% trans "Select a format" %}</option>
-                            {% for choice in proposal_form.session_format.field.queryset %}
-                            <option value="{{ choice.pk }}" {% if proposal_form.session_format.value|stringformat:"s" == choice.pk|stringformat:"s" %}selected{% endif %}>
-                                {{ choice.name }} ({{ choice.duration_minutes }} {% trans "min" %})
-                            </option>
-                            {% endfor %}
-                        </select>
+                        <div class="custom-select-wrapper" data-controller="dropdown" data-dropdown-value-value="{{ proposal_form.session_format.value|default:'' }}" data-action="click@window->dropdown#clickOutside">
+                            <input type="hidden" name="session_format" value="{{ proposal_form.session_format.value|default:'' }}" data-dropdown-target="hiddenInput" required>
+                            <button type="button" data-dropdown-target="trigger" data-action="click->dropdown#toggle" class="custom-select-trigger">
+                                <span class="custom-select-value">{% for choice in proposal_form.session_format.field.queryset %}{% if proposal_form.session_format.value|stringformat:'s' == choice.pk|stringformat:'s' %}{{ choice.name }} ({{ choice.duration_minutes }} {% trans "min" %}){% endif %}{% endfor %}{% if not proposal_form.session_format.value %}{% trans "Select a format" %}{% endif %}</span>
+                                <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4"></i>
+                            </button>
+                            <div data-dropdown-target="dropdown" class="custom-select-dropdown hidden">
+                                <div class="custom-select-options">
+                                    <button type="button" data-dropdown-target="option" data-value="" data-label="{% trans 'Select a format' %}" data-action="click->dropdown#selectOption" class="custom-select-option">
+                                        <span>{% trans "Select a format" %}</span>
+                                        <i data-lucide="check" class="custom-select-check w-4 h-4 hidden"></i>
+                                    </button>
+                                    {% for choice in proposal_form.session_format.field.queryset %}
+                                    <button type="button" data-dropdown-target="option" data-value="{{ choice.pk }}" data-label="{{ choice.name }} ({{ choice.duration_minutes }} min)" data-action="click->dropdown#selectOption" class="custom-select-option{% if proposal_form.session_format.value|stringformat:'s' == choice.pk|stringformat:'s' %} custom-select-option-selected{% endif %}">
+                                        <span>{{ choice.name }} ({{ choice.duration_minutes }} {% trans "min" %})</span>
+                                        <i data-lucide="check" class="custom-select-check w-4 h-4 {% if proposal_form.session_format.value|stringformat:'s' != choice.pk|stringformat:'s' %}hidden{% endif %}"></i>
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
                     {% /form_field %}
 
                     {% #form_field label=_("Track") name="track" error=proposal_form.track.errors.0 %}
-                        <select name="track" id="track"
-                                class="flex h-12 w-full rounded-xl border-2 border-border bg-card px-4 py-3 text-sm text-foreground transition-all duration-200 hover:border-muted-foreground/50">
-                            <option value="">{% trans "Select a track" %}</option>
-                            {% for choice in proposal_form.track.field.queryset %}
-                            <option value="{{ choice.pk }}" {% if proposal_form.track.value|stringformat:"s" == choice.pk|stringformat:"s" %}selected{% endif %}>
-                                {{ choice.name }}
-                            </option>
-                            {% endfor %}
-                        </select>
+                        <div class="custom-select-wrapper" data-controller="dropdown" data-dropdown-value-value="{{ proposal_form.track.value|default:'' }}" data-action="click@window->dropdown#clickOutside">
+                            <input type="hidden" name="track" value="{{ proposal_form.track.value|default:'' }}" data-dropdown-target="hiddenInput">
+                            <button type="button" data-dropdown-target="trigger" data-action="click->dropdown#toggle" class="custom-select-trigger">
+                                <span class="custom-select-value">{% for choice in proposal_form.track.field.queryset %}{% if proposal_form.track.value|stringformat:'s' == choice.pk|stringformat:'s' %}{{ choice.name }}{% endif %}{% endfor %}{% if not proposal_form.track.value %}{% trans "Select a track" %}{% endif %}</span>
+                                <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4"></i>
+                            </button>
+                            <div data-dropdown-target="dropdown" class="custom-select-dropdown hidden">
+                                <div class="custom-select-options">
+                                    <button type="button" data-dropdown-target="option" data-value="" data-label="{% trans 'Select a track' %}" data-action="click->dropdown#selectOption" class="custom-select-option">
+                                        <span>{% trans "Select a track" %}</span>
+                                        <i data-lucide="check" class="custom-select-check w-4 h-4 hidden"></i>
+                                    </button>
+                                    {% for choice in proposal_form.track.field.queryset %}
+                                    <button type="button" data-dropdown-target="option" data-value="{{ choice.pk }}" data-label="{{ choice.name }}" data-action="click->dropdown#selectOption" class="custom-select-option{% if proposal_form.track.value|stringformat:'s' == choice.pk|stringformat:'s' %} custom-select-option-selected{% endif %}">
+                                        <span>{{ choice.name }}</span>
+                                        <i data-lucide="check" class="custom-select-check w-4 h-4 {% if proposal_form.track.value|stringformat:'s' != choice.pk|stringformat:'s' %}hidden{% endif %}"></i>
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
                     {% /form_field %}
                 </div>
 
                 <div class="grid gap-4 sm:grid-cols-2">
                     {% #form_field label=_("Level") name="level" error=proposal_form.level.errors.0 %}
-                        <select name="level" id="level"
-                                class="flex h-12 w-full rounded-xl border-2 border-border bg-card px-4 py-3 text-sm text-foreground transition-all duration-200 hover:border-muted-foreground/50">
-                            {% for value, label in proposal_form.level.field.choices %}
-                            <option value="{{ value }}" {% if proposal_form.level.value == value %}selected{% endif %}>{{ label }}</option>
-                            {% endfor %}
-                        </select>
+                        <div class="custom-select-wrapper" data-controller="dropdown" data-dropdown-value-value="{{ proposal_form.level.value|default:'' }}" data-action="click@window->dropdown#clickOutside">
+                            <input type="hidden" name="level" value="{{ proposal_form.level.value|default:'' }}" data-dropdown-target="hiddenInput">
+                            <button type="button" data-dropdown-target="trigger" data-action="click->dropdown#toggle" class="custom-select-trigger">
+                                <span class="custom-select-value">{% for value, label in proposal_form.level.field.choices %}{% if proposal_form.level.value == value %}{{ label }}{% endif %}{% endfor %}{% if not proposal_form.level.value %}{% trans "Select a level" %}{% endif %}</span>
+                                <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4"></i>
+                            </button>
+                            <div data-dropdown-target="dropdown" class="custom-select-dropdown hidden">
+                                <div class="custom-select-options">
+                                    {% for value, label in proposal_form.level.field.choices %}
+                                    <button type="button" data-dropdown-target="option" data-value="{{ value }}" data-label="{{ label }}" data-action="click->dropdown#selectOption" class="custom-select-option{% if proposal_form.level.value == value %} custom-select-option-selected{% endif %}">
+                                        <span>{{ label }}</span>
+                                        <i data-lucide="check" class="custom-select-check w-4 h-4 {% if proposal_form.level.value != value %}hidden{% endif %}"></i>
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
                     {% /form_field %}
 
                     {% #form_field label=_("Language") name="language" error=proposal_form.language.errors.0 %}
@@ -186,14 +221,27 @@
                     {% elif question.field_type == "TEXTAREA" %}
                         {% #textarea name="question_{{ question.id }}" id="question_{{ question.id }}" rows="3" required=question.is_required %}{% /textarea %}
                     {% elif question.field_type == "SELECT" %}
-                        <select name="question_{{ question.id }}" id="question_{{ question.id }}"
-                                {% if question.is_required %}required{% endif %}
-                                class="flex h-12 w-full rounded-xl border-2 border-border bg-card px-4 py-3 text-sm text-foreground transition-all duration-200 hover:border-muted-foreground/50">
-                            <option value="">{% trans "Select an option" %}</option>
-                            {% for opt in question.options %}
-                            <option value="{{ opt }}">{{ opt }}</option>
-                            {% endfor %}
-                        </select>
+                        <div class="custom-select-wrapper" data-controller="dropdown" data-dropdown-value-value="" data-action="click@window->dropdown#clickOutside">
+                            <input type="hidden" name="question_{{ question.id }}" value="" data-dropdown-target="hiddenInput" {% if question.is_required %}required{% endif %}>
+                            <button type="button" data-dropdown-target="trigger" data-action="click->dropdown#toggle" class="custom-select-trigger">
+                                <span class="custom-select-value">{% trans "Select an option" %}</span>
+                                <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4"></i>
+                            </button>
+                            <div data-dropdown-target="dropdown" class="custom-select-dropdown hidden">
+                                <div class="custom-select-options">
+                                    <button type="button" data-dropdown-target="option" data-value="" data-label="{% trans 'Select an option' %}" data-action="click->dropdown#selectOption" class="custom-select-option">
+                                        <span>{% trans "Select an option" %}</span>
+                                        <i data-lucide="check" class="custom-select-check w-4 h-4 hidden"></i>
+                                    </button>
+                                    {% for opt in question.options %}
+                                    <button type="button" data-dropdown-target="option" data-value="{{ opt }}" data-label="{{ opt }}" data-action="click->dropdown#selectOption" class="custom-select-option">
+                                        <span>{{ opt }}</span>
+                                        <i data-lucide="check" class="custom-select-check w-4 h-4 hidden"></i>
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
                     {% elif question.field_type == "RADIO" %}
                         <div class="flex flex-col gap-2">
                             {% for opt in question.options %}

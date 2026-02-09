@@ -1,0 +1,237 @@
+{% extends "layouts/dashboard.html" %}
+{% load slippers i18n %}
+
+{% block title %}{% trans "Speakers" %} - Reckot{% endblock %}
+
+{% block breadcrumbs %}
+{% #breadcrumb class="mb-4" %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% url 'cfp:dashboard' as cfp_dashboard_url %}
+    {% #breadcrumb_item href=cfp_dashboard_url %}{% trans "CFP" %}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item %}{% trans "Speakers" %}{% /breadcrumb_item %}
+{% /breadcrumb %}
+{% endblock %}
+
+{% block header_title %}
+<div class="min-w-0">
+    <h1 class="text-lg font-semibold truncate">{% trans "Speakers" %}</h1>
+    <p class="text-sm text-muted-foreground hidden md:block">{% trans "Manage speakers across all your events" %}</p>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<div class="relative" data-controller="dropdown">
+    <button type="button" data-action="click->dropdown#toggle" data-dropdown-target="trigger"
+            class="inline-flex items-center gap-2 rounded-xl border-2 border-border bg-card px-3 py-2 text-sm font-medium transition-all hover:bg-muted">
+        <i data-lucide="download" class="w-4 h-4"></i>
+        <span class="hidden md:inline">{% trans "Export" %}</span>
+        <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-muted-foreground"></i>
+    </button>
+    <div data-dropdown-target="menu" class="hidden absolute right-0 top-full mt-1 z-50 min-w-[180px] rounded-xl border-2 border-border bg-card shadow-lg py-1">
+        <a href="{% url 'cfp:export_speakers' %}?format=csv{% if current_event %}&event={{ current_event }}{% endif %}"
+           class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted transition-colors">
+            <i data-lucide="file-spreadsheet" class="w-4 h-4 text-muted-foreground"></i>
+            {% trans "Download as CSV" %}
+        </a>
+        <a href="{% url 'cfp:export_speakers' %}?format=json{% if current_event %}&event={{ current_event }}{% endif %}"
+           class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted transition-colors">
+            <i data-lucide="file-json" class="w-4 h-4 text-muted-foreground"></i>
+            {% trans "Download as JSON" %}
+        </a>
+        <a href="{% url 'cfp:export_speakers' %}?format=pdf{% if current_event %}&event={{ current_event }}{% endif %}"
+           class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted transition-colors">
+            <i data-lucide="file-text" class="w-4 h-4 text-muted-foreground"></i>
+            {% trans "Download as PDF" %}
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="grid gap-4 sm:grid-cols-2">
+        <div class="stat-card">
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Total speakers" %}</p>
+                <i data-lucide="users" class="h-4 w-4 text-muted-foreground"></i>
+            </div>
+            <p class="text-2xl font-bold mt-2">{{ stats.total }}</p>
+        </div>
+        <div class="stat-card">
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-muted-foreground">{% trans "With photo" %}</p>
+                <i data-lucide="image" class="h-4 w-4 text-muted-foreground"></i>
+            </div>
+            <p class="text-2xl font-bold mt-2">{{ stats.with_photo }}</p>
+        </div>
+    </div>
+
+    {% #card %}
+        <form method="get" class="flex flex-col sm:flex-row gap-3 mb-6">
+            <div class="relative flex-1">
+                <div class="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                    <i data-lucide="search" class="w-4 h-4"></i>
+                </div>
+                {% #input type="text" name="q" value=current_search placeholder=_("Search by name, email, company...") class="pl-10" %}{% /input %}
+            </div>
+            <div class="custom-select-wrapper" data-controller="dropdown" data-dropdown-value-value="{{ current_event|default:'' }}" data-action="click@window->dropdown#clickOutside">
+                <input type="hidden" name="event" value="{{ current_event|default:'' }}" data-dropdown-target="hiddenInput">
+                <button type="button" data-dropdown-target="trigger" data-action="click->dropdown#toggle" class="custom-select-trigger">
+                    <span class="custom-select-value">{% for event in events %}{% if current_event == event.pk|stringformat:"d" %}{{ event.title }}{% endif %}{% endfor %}{% if not current_event %}{% trans "All events" %}{% endif %}</span>
+                    <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4"></i>
+                </button>
+                <div data-dropdown-target="dropdown" class="custom-select-dropdown hidden">
+                    <div class="custom-select-options">
+                        <button type="button" data-dropdown-target="option" data-value="" data-label="{% trans 'All events' %}" data-action="click->dropdown#selectOption" class="custom-select-option{% if not current_event %} custom-select-option-selected{% endif %}">
+                            <span>{% trans "All events" %}</span>
+                            <i data-lucide="check" class="custom-select-check w-4 h-4 {% if current_event %}hidden{% endif %}"></i>
+                        </button>
+                        {% for event in events %}
+                        <button type="button" data-dropdown-target="option" data-value="{{ event.pk }}" data-label="{{ event.title }}" data-action="click->dropdown#selectOption" class="custom-select-option{% if current_event == event.pk|stringformat:'d' %} custom-select-option-selected{% endif %}">
+                            <span>{{ event.title }}</span>
+                            <i data-lucide="check" class="custom-select-check w-4 h-4 {% if current_event != event.pk|stringformat:'d' %}hidden{% endif %}"></i>
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="custom-select-wrapper" data-controller="dropdown" data-dropdown-value-value="{{ current_has_photo|default:'' }}" data-action="click@window->dropdown#clickOutside">
+                <input type="hidden" name="has_photo" value="{{ current_has_photo|default:'' }}" data-dropdown-target="hiddenInput">
+                <button type="button" data-dropdown-target="trigger" data-action="click->dropdown#toggle" class="custom-select-trigger">
+                    <span class="custom-select-value">{% if current_has_photo == "yes" %}{% trans "Has photo" %}{% elif current_has_photo == "no" %}{% trans "No photo" %}{% else %}{% trans "Photo status" %}{% endif %}</span>
+                    <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4"></i>
+                </button>
+                <div data-dropdown-target="dropdown" class="custom-select-dropdown hidden">
+                    <div class="custom-select-options">
+                        <button type="button" data-dropdown-target="option" data-value="" data-label="{% trans 'Photo status' %}" data-action="click->dropdown#selectOption" class="custom-select-option{% if not current_has_photo %} custom-select-option-selected{% endif %}">
+                            <span>{% trans "Photo status" %}</span>
+                            <i data-lucide="check" class="custom-select-check w-4 h-4 {% if current_has_photo %}hidden{% endif %}"></i>
+                        </button>
+                        <button type="button" data-dropdown-target="option" data-value="yes" data-label="{% trans 'Has photo' %}" data-action="click->dropdown#selectOption" class="custom-select-option{% if current_has_photo == 'yes' %} custom-select-option-selected{% endif %}">
+                            <span>{% trans "Has photo" %}</span>
+                            <i data-lucide="check" class="custom-select-check w-4 h-4 {% if current_has_photo != 'yes' %}hidden{% endif %}"></i>
+                        </button>
+                        <button type="button" data-dropdown-target="option" data-value="no" data-label="{% trans 'No photo' %}" data-action="click->dropdown#selectOption" class="custom-select-option{% if current_has_photo == 'no' %} custom-select-option-selected{% endif %}">
+                            <span>{% trans "No photo" %}</span>
+                            <i data-lucide="check" class="custom-select-check w-4 h-4 {% if current_has_photo != 'no' %}hidden{% endif %}"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% #button type="submit" variant="default" size="sm" %}
+                {% trans "Filter" %}
+            {% /button %}
+            {% if current_search or current_event or current_has_photo %}
+            <a href="{% url 'cfp:speakers' %}">
+                {% #button variant="ghost" size="sm" %}
+                    {% trans "Clear" %}
+                {% /button %}
+            </a>
+            {% endif %}
+        </form>
+
+        {% if speakers %}
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-border">
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Speaker" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Event" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Company" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Proposals" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Photo" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Joined" %}</th>
+                        <th class="text-right text-sm font-medium text-muted-foreground p-4">{% trans "Actions" %}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border">
+                    {% for speaker in speakers %}
+                    <tr class="hover:bg-muted/50 transition-colors">
+                        <td class="p-4">
+                            <div class="flex items-center gap-3">
+                                {% if speaker.get_photo_url %}
+                                <img src="{{ speaker.get_photo_url }}" alt="" class="h-9 w-9 rounded-full object-cover shrink-0">
+                                {% else %}
+                                <div class="h-9 w-9 rounded-full bg-muted flex items-center justify-center shrink-0">
+                                    <span class="text-sm font-semibold">{{ speaker.user.email|slice:":1"|upper }}</span>
+                                </div>
+                                {% endif %}
+                                <div class="min-w-0">
+                                    <p class="text-sm font-medium truncate">{{ speaker.user.get_full_name|default:speaker.user.email }}</p>
+                                    <p class="text-xs text-muted-foreground truncate">{{ speaker.user.email }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="p-4">
+                            <p class="text-sm">{{ speaker.event.title|truncatewords:4 }}</p>
+                        </td>
+                        <td class="p-4">
+                            <p class="text-sm text-muted-foreground">{{ speaker.company|default:"-" }}</p>
+                            {% if speaker.job_title %}
+                            <p class="text-xs text-muted-foreground">{{ speaker.job_title }}</p>
+                            {% endif %}
+                        </td>
+                        <td class="p-4">
+                            <p class="text-sm font-medium">{{ speaker.proposal_count }}</p>
+                        </td>
+                        <td class="p-4">
+                            {% if speaker.photo %}
+                            <span class="inline-flex items-center rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600">{% trans "Yes" %}</span>
+                            {% else %}
+                            <span class="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">{% trans "No" %}</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-4">
+                            <p class="text-sm text-muted-foreground">{{ speaker.created_at|date:"M d, Y" }}</p>
+                        </td>
+                        <td class="p-4 text-right">
+                            <a href="{% url 'cfp:proposals_list' speaker.event.organization.slug speaker.event.slug %}?q={{ speaker.user.email }}" class="text-sm text-primary hover:underline">{% trans "View proposals" %}</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if paginator.num_pages > 1 %}
+        <div class="flex items-center justify-between pt-4 border-t border-border mt-4">
+            <p class="text-sm text-muted-foreground">
+                {% blocktrans with start=page_obj.start_index end=page_obj.end_index total=paginator.count %}
+                Showing {{ start }}-{{ end }} of {{ total }}
+                {% endblocktrans %}
+            </p>
+            <div class="flex gap-2">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if current_event %}&event={{ current_event }}{% endif %}{% if current_search %}&q={{ current_search }}{% endif %}{% if current_has_photo %}&has_photo={{ current_has_photo }}{% endif %}">
+                    {% #button variant="outline" size="sm" %}{% trans "Previous" %}{% /button %}
+                </a>
+                {% endif %}
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if current_event %}&event={{ current_event }}{% endif %}{% if current_search %}&q={{ current_search }}{% endif %}{% if current_has_photo %}&has_photo={{ current_has_photo }}{% endif %}">
+                    {% #button variant="outline" size="sm" %}{% trans "Next" %}{% /button %}
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="text-center py-12">
+            <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
+                <i data-lucide="users" class="h-8 w-8 text-muted-foreground"></i>
+            </div>
+            <h3 class="text-lg font-semibold mb-2">{% trans "No speakers found" %}</h3>
+            <p class="text-muted-foreground">
+                {% if current_search or current_event or current_has_photo %}
+                {% trans "Try adjusting your filters." %}
+                {% else %}
+                {% trans "Speakers will appear here when they submit proposals to your events." %}
+                {% endif %}
+            </p>
+        </div>
+        {% endif %}
+    {% /card %}
+</div>
+{% endblock %}

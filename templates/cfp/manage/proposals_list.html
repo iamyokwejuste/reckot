@@ -77,23 +77,59 @@
                     <form method="get" class="hidden sm:block">
                         {% if current_status %}<input type="hidden" name="status" value="{{ current_status }}">{% endif %}
                         {% if current_search %}<input type="hidden" name="q" value="{{ current_search }}">{% endif %}
-                        <select name="track" onchange="this.form.submit()" class="h-9 rounded-xl border-2 border-border bg-card px-3 text-sm text-foreground transition-all hover:border-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary">
-                            <option value="">{% trans "All tracks" %}</option>
-                            {% for track in tracks %}
-                            <option value="{{ track.pk }}" {% if current_track == track.pk|stringformat:"d" %}selected{% endif %}>{{ track.name }}</option>
-                            {% endfor %}
-                        </select>
+                        <div class="custom-select-wrapper"
+                             data-controller="dropdown"
+                             data-dropdown-value-value="{{ current_track|default:'' }}"
+                             data-action="click@window->dropdown#clickOutside">
+                            <input type="hidden" name="track" value="{{ current_track|default:'' }}" data-dropdown-target="hiddenInput" data-action="change->dropdown#submitForm">
+                            <button type="button" data-dropdown-target="trigger" data-action="click->dropdown#toggle" class="custom-select-trigger !h-9 !text-sm">
+                                <span class="custom-select-value">{% for track in tracks %}{% if current_track == track.pk|stringformat:"d" %}{{ track.name }}{% endif %}{% endfor %}{% if not current_track %}{% trans "All tracks" %}{% endif %}</span>
+                                <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4"></i>
+                            </button>
+                            <div data-dropdown-target="dropdown" class="custom-select-dropdown hidden">
+                                <div class="custom-select-options">
+                                    <button type="button" data-dropdown-target="option" data-value="" data-label="{% trans "All tracks" %}" data-action="click->dropdown#selectOption" class="custom-select-option{% if not current_track %} custom-select-option-selected{% endif %}">
+                                        <span>{% trans "All tracks" %}</span>
+                                        <i data-lucide="check" class="custom-select-check w-4 h-4 {% if current_track %}hidden{% endif %}"></i>
+                                    </button>
+                                    {% for track in tracks %}
+                                    <button type="button" data-dropdown-target="option" data-value="{{ track.pk }}" data-label="{{ track.name }}" data-action="click->dropdown#selectOption" class="custom-select-option{% if current_track == track.pk|stringformat:"d" %} custom-select-option-selected{% endif %}">
+                                        <span>{{ track.name }}</span>
+                                        <i data-lucide="check" class="custom-select-check w-4 h-4 {% if current_track != track.pk|stringformat:"d" %}hidden{% endif %}"></i>
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
                     </form>
 
                     <form method="get" class="hidden sm:block">
                         {% if current_status %}<input type="hidden" name="status" value="{{ current_status }}">{% endif %}
                         {% if current_search %}<input type="hidden" name="q" value="{{ current_search }}">{% endif %}
-                        <select name="format" onchange="this.form.submit()" class="h-9 rounded-xl border-2 border-border bg-card px-3 text-sm text-foreground transition-all hover:border-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary">
-                            <option value="">{% trans "All formats" %}</option>
-                            {% for format in formats %}
-                            <option value="{{ format.pk }}" {% if current_format == format.pk|stringformat:"d" %}selected{% endif %}>{{ format.name }}</option>
-                            {% endfor %}
-                        </select>
+                        <div class="custom-select-wrapper"
+                             data-controller="dropdown"
+                             data-dropdown-value-value="{{ current_format|default:'' }}"
+                             data-action="click@window->dropdown#clickOutside">
+                            <input type="hidden" name="format" value="{{ current_format|default:'' }}" data-dropdown-target="hiddenInput" data-action="change->dropdown#submitForm">
+                            <button type="button" data-dropdown-target="trigger" data-action="click->dropdown#toggle" class="custom-select-trigger !h-9 !text-sm">
+                                <span class="custom-select-value">{% for format in formats %}{% if current_format == format.pk|stringformat:"d" %}{{ format.name }}{% endif %}{% endfor %}{% if not current_format %}{% trans "All formats" %}{% endif %}</span>
+                                <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4"></i>
+                            </button>
+                            <div data-dropdown-target="dropdown" class="custom-select-dropdown hidden">
+                                <div class="custom-select-options">
+                                    <button type="button" data-dropdown-target="option" data-value="" data-label="{% trans "All formats" %}" data-action="click->dropdown#selectOption" class="custom-select-option{% if not current_format %} custom-select-option-selected{% endif %}">
+                                        <span>{% trans "All formats" %}</span>
+                                        <i data-lucide="check" class="custom-select-check w-4 h-4 {% if current_format %}hidden{% endif %}"></i>
+                                    </button>
+                                    {% for format in formats %}
+                                    <button type="button" data-dropdown-target="option" data-value="{{ format.pk }}" data-label="{{ format.name }}" data-action="click->dropdown#selectOption" class="custom-select-option{% if current_format == format.pk|stringformat:"d" %} custom-select-option-selected{% endif %}">
+                                        <span>{{ format.name }}</span>
+                                        <i data-lucide="check" class="custom-select-check w-4 h-4 {% if current_format != format.pk|stringformat:"d" %}hidden{% endif %}"></i>
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
                     </form>
                 </div>
             </div>

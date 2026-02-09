@@ -326,32 +326,59 @@
 
                 <div class="grid gap-3 sm:grid-cols-2">
                     {% #form_field label=_("Content score") name="content_score" %}
-                        <select name="content_score" id="content_score" class="flex h-10 w-full rounded-xl border-2 border-border bg-card px-3 text-sm text-foreground transition-all hover:border-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary">
-                            <option value="">-</option>
-                            {% for i in "12345" %}
-                            <option value="{{ forloop.counter }}">{{ forloop.counter }}</option>
-                            {% endfor %}
-                        </select>
+                        <div class="custom-select-wrapper" data-controller="dropdown" data-action="click@window->dropdown#clickOutside">
+                            <input type="hidden" name="content_score" value="" data-dropdown-target="hiddenInput">
+                            <button type="button" data-dropdown-target="trigger" data-action="click->dropdown#toggle" class="custom-select-trigger !h-10">
+                                <span class="custom-select-value">-</span>
+                                <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4"></i>
+                            </button>
+                            <div data-dropdown-target="dropdown" class="custom-select-dropdown hidden">
+                                <div class="custom-select-options">
+                                    <button type="button" data-dropdown-target="option" data-value="" data-label="-" data-action="click->dropdown#selectOption" class="custom-select-option custom-select-option-selected"><span>-</span><i data-lucide="check" class="custom-select-check w-4 h-4"></i></button>
+                                    {% for i in "12345" %}
+                                    <button type="button" data-dropdown-target="option" data-value="{{ forloop.counter }}" data-label="{{ forloop.counter }}" data-action="click->dropdown#selectOption" class="custom-select-option"><span>{{ forloop.counter }}</span><i data-lucide="check" class="custom-select-check w-4 h-4 hidden"></i></button>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
                     {% /form_field %}
 
                     {% #form_field label=_("Relevance score") name="relevance_score" %}
-                        <select name="relevance_score" id="relevance_score" class="flex h-10 w-full rounded-xl border-2 border-border bg-card px-3 text-sm text-foreground transition-all hover:border-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary">
-                            <option value="">-</option>
-                            {% for i in "12345" %}
-                            <option value="{{ forloop.counter }}">{{ forloop.counter }}</option>
-                            {% endfor %}
-                        </select>
+                        <div class="custom-select-wrapper" data-controller="dropdown" data-action="click@window->dropdown#clickOutside">
+                            <input type="hidden" name="relevance_score" value="" data-dropdown-target="hiddenInput">
+                            <button type="button" data-dropdown-target="trigger" data-action="click->dropdown#toggle" class="custom-select-trigger !h-10">
+                                <span class="custom-select-value">-</span>
+                                <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4"></i>
+                            </button>
+                            <div data-dropdown-target="dropdown" class="custom-select-dropdown hidden">
+                                <div class="custom-select-options">
+                                    <button type="button" data-dropdown-target="option" data-value="" data-label="-" data-action="click->dropdown#selectOption" class="custom-select-option custom-select-option-selected"><span>-</span><i data-lucide="check" class="custom-select-check w-4 h-4"></i></button>
+                                    {% for i in "12345" %}
+                                    <button type="button" data-dropdown-target="option" data-value="{{ forloop.counter }}" data-label="{{ forloop.counter }}" data-action="click->dropdown#selectOption" class="custom-select-option"><span>{{ forloop.counter }}</span><i data-lucide="check" class="custom-select-check w-4 h-4 hidden"></i></button>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
                     {% /form_field %}
                 </div>
 
                 {% if not anonymous_review %}
                 {% #form_field label=_("Speaker score") name="speaker_score" %}
-                    <select name="speaker_score" id="speaker_score" class="flex h-10 w-full rounded-xl border-2 border-border bg-card px-3 text-sm text-foreground transition-all hover:border-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary">
-                        <option value="">-</option>
-                        {% for i in "12345" %}
-                        <option value="{{ forloop.counter }}">{{ forloop.counter }}</option>
-                        {% endfor %}
-                    </select>
+                    <div class="custom-select-wrapper" data-controller="dropdown" data-action="click@window->dropdown#clickOutside">
+                        <input type="hidden" name="speaker_score" value="" data-dropdown-target="hiddenInput">
+                        <button type="button" data-dropdown-target="trigger" data-action="click->dropdown#toggle" class="custom-select-trigger !h-10">
+                            <span class="custom-select-value">-</span>
+                            <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4"></i>
+                        </button>
+                        <div data-dropdown-target="dropdown" class="custom-select-dropdown hidden">
+                            <div class="custom-select-options">
+                                <button type="button" data-dropdown-target="option" data-value="" data-label="-" data-action="click->dropdown#selectOption" class="custom-select-option custom-select-option-selected"><span>-</span><i data-lucide="check" class="custom-select-check w-4 h-4"></i></button>
+                                {% for i in "12345" %}
+                                <button type="button" data-dropdown-target="option" data-value="{{ forloop.counter }}" data-label="{{ forloop.counter }}" data-action="click->dropdown#selectOption" class="custom-select-option"><span>{{ forloop.counter }}</span><i data-lucide="check" class="custom-select-check w-4 h-4 hidden"></i></button>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
                 {% /form_field %}
                 {% endif %}
 
@@ -401,32 +428,59 @@
 
                 <div class="grid gap-3 sm:grid-cols-2">
                     {% #form_field label=_("Content score") name="content_score" %}
-                        <select name="content_score" id="content_score_edit" class="flex h-10 w-full rounded-xl border-2 border-border bg-card px-3 text-sm text-foreground transition-all hover:border-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary">
-                            <option value="">-</option>
-                            {% for i in "12345" %}
-                            <option value="{{ forloop.counter }}" {% if existing_review.content_score == forloop.counter %}selected{% endif %}>{{ forloop.counter }}</option>
-                            {% endfor %}
-                        </select>
+                        <div class="custom-select-wrapper" data-controller="dropdown" data-dropdown-value-value="{{ existing_review.content_score|default:'' }}" data-dropdown-label-value="{{ existing_review.content_score|default:'-' }}" data-action="click@window->dropdown#clickOutside">
+                            <input type="hidden" name="content_score" value="{{ existing_review.content_score|default:'' }}" data-dropdown-target="hiddenInput">
+                            <button type="button" data-dropdown-target="trigger" data-action="click->dropdown#toggle" class="custom-select-trigger !h-10">
+                                <span class="custom-select-value">{{ existing_review.content_score|default:"-" }}</span>
+                                <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4"></i>
+                            </button>
+                            <div data-dropdown-target="dropdown" class="custom-select-dropdown hidden">
+                                <div class="custom-select-options">
+                                    <button type="button" data-dropdown-target="option" data-value="" data-label="-" data-action="click->dropdown#selectOption" class="custom-select-option{% if not existing_review.content_score %} custom-select-option-selected{% endif %}"><span>-</span><i data-lucide="check" class="custom-select-check w-4 h-4 {% if existing_review.content_score %}hidden{% endif %}"></i></button>
+                                    {% for i in "12345" %}
+                                    <button type="button" data-dropdown-target="option" data-value="{{ forloop.counter }}" data-label="{{ forloop.counter }}" data-action="click->dropdown#selectOption" class="custom-select-option{% if existing_review.content_score == forloop.counter %} custom-select-option-selected{% endif %}"><span>{{ forloop.counter }}</span><i data-lucide="check" class="custom-select-check w-4 h-4 {% if existing_review.content_score != forloop.counter %}hidden{% endif %}"></i></button>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
                     {% /form_field %}
 
                     {% #form_field label=_("Relevance score") name="relevance_score" %}
-                        <select name="relevance_score" id="relevance_score_edit" class="flex h-10 w-full rounded-xl border-2 border-border bg-card px-3 text-sm text-foreground transition-all hover:border-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary">
-                            <option value="">-</option>
-                            {% for i in "12345" %}
-                            <option value="{{ forloop.counter }}" {% if existing_review.relevance_score == forloop.counter %}selected{% endif %}>{{ forloop.counter }}</option>
-                            {% endfor %}
-                        </select>
+                        <div class="custom-select-wrapper" data-controller="dropdown" data-dropdown-value-value="{{ existing_review.relevance_score|default:'' }}" data-dropdown-label-value="{{ existing_review.relevance_score|default:'-' }}" data-action="click@window->dropdown#clickOutside">
+                            <input type="hidden" name="relevance_score" value="{{ existing_review.relevance_score|default:'' }}" data-dropdown-target="hiddenInput">
+                            <button type="button" data-dropdown-target="trigger" data-action="click->dropdown#toggle" class="custom-select-trigger !h-10">
+                                <span class="custom-select-value">{{ existing_review.relevance_score|default:"-" }}</span>
+                                <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4"></i>
+                            </button>
+                            <div data-dropdown-target="dropdown" class="custom-select-dropdown hidden">
+                                <div class="custom-select-options">
+                                    <button type="button" data-dropdown-target="option" data-value="" data-label="-" data-action="click->dropdown#selectOption" class="custom-select-option{% if not existing_review.relevance_score %} custom-select-option-selected{% endif %}"><span>-</span><i data-lucide="check" class="custom-select-check w-4 h-4 {% if existing_review.relevance_score %}hidden{% endif %}"></i></button>
+                                    {% for i in "12345" %}
+                                    <button type="button" data-dropdown-target="option" data-value="{{ forloop.counter }}" data-label="{{ forloop.counter }}" data-action="click->dropdown#selectOption" class="custom-select-option{% if existing_review.relevance_score == forloop.counter %} custom-select-option-selected{% endif %}"><span>{{ forloop.counter }}</span><i data-lucide="check" class="custom-select-check w-4 h-4 {% if existing_review.relevance_score != forloop.counter %}hidden{% endif %}"></i></button>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
                     {% /form_field %}
                 </div>
 
                 {% if not anonymous_review %}
                 {% #form_field label=_("Speaker score") name="speaker_score" %}
-                    <select name="speaker_score" id="speaker_score_edit" class="flex h-10 w-full rounded-xl border-2 border-border bg-card px-3 text-sm text-foreground transition-all hover:border-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary">
-                        <option value="">-</option>
-                        {% for i in "12345" %}
-                        <option value="{{ forloop.counter }}" {% if existing_review.speaker_score == forloop.counter %}selected{% endif %}>{{ forloop.counter }}</option>
-                        {% endfor %}
-                    </select>
+                    <div class="custom-select-wrapper" data-controller="dropdown" data-dropdown-value-value="{{ existing_review.speaker_score|default:'' }}" data-dropdown-label-value="{{ existing_review.speaker_score|default:'-' }}" data-action="click@window->dropdown#clickOutside">
+                        <input type="hidden" name="speaker_score" value="{{ existing_review.speaker_score|default:'' }}" data-dropdown-target="hiddenInput">
+                        <button type="button" data-dropdown-target="trigger" data-action="click->dropdown#toggle" class="custom-select-trigger !h-10">
+                            <span class="custom-select-value">{{ existing_review.speaker_score|default:"-" }}</span>
+                            <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4"></i>
+                        </button>
+                        <div data-dropdown-target="dropdown" class="custom-select-dropdown hidden">
+                            <div class="custom-select-options">
+                                <button type="button" data-dropdown-target="option" data-value="" data-label="-" data-action="click->dropdown#selectOption" class="custom-select-option{% if not existing_review.speaker_score %} custom-select-option-selected{% endif %}"><span>-</span><i data-lucide="check" class="custom-select-check w-4 h-4 {% if existing_review.speaker_score %}hidden{% endif %}"></i></button>
+                                {% for i in "12345" %}
+                                <button type="button" data-dropdown-target="option" data-value="{{ forloop.counter }}" data-label="{{ forloop.counter }}" data-action="click->dropdown#selectOption" class="custom-select-option{% if existing_review.speaker_score == forloop.counter %} custom-select-option-selected{% endif %}"><span>{{ forloop.counter }}</span><i data-lucide="check" class="custom-select-check w-4 h-4 {% if existing_review.speaker_score != forloop.counter %}hidden{% endif %}"></i></button>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
                 {% /form_field %}
                 {% endif %}
 

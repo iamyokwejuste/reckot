@@ -278,6 +278,22 @@
                     </a>
                     {% endif %}
                 </div>
+
+                <div class="pt-4 space-y-1">
+                    <p class="sidebar-section-title px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">{% trans "CFP" %}</p>
+
+                    <a href="{% url 'cfp:dashboard' %}"
+                       class="sidebar-item {% if request.path == '/cfp/dashboard/' %}sidebar-item-active{% endif %}">
+                        <i data-lucide="megaphone" class="h-5 w-5 shrink-0"></i>
+                        <span class="sidebar-text truncate">{% trans "Call for proposals" %}</span>
+                    </a>
+
+                    <a href="{% url 'cfp:speakers' %}"
+                       class="sidebar-item {% if '/cfp/speakers' in request.path %}sidebar-item-active{% endif %}">
+                        <i data-lucide="mic-2" class="h-5 w-5 shrink-0"></i>
+                        <span class="sidebar-text truncate">{% trans "Speakers" %}</span>
+                    </a>
+                </div>
                 {% endif %}
 
                 {% if user.active_mode == 'SPEAKER' or user.speaker_profiles.exists %}

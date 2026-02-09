@@ -23,7 +23,7 @@
 {% endblock %}
 
 {% block header_actions %}
-<a href="{% url 'cfp:manage_config' event.organization.slug event.slug %}">
+<a href="{% url 'cfp:cfp_config' event.organization.slug event.slug %}">
     {% #button variant="ghost" size="sm" %}
         <i data-lucide="arrow-left" class="w-4 h-4"></i>
         <span class="hidden md:inline">{% trans "Back to CFP" %}</span>
@@ -111,15 +111,45 @@
 
             <div class="grid gap-4 sm:grid-cols-2">
                 {% #form_field label=_("Question type") name="question_type" required=True %}
-                    <select name="question_type" id="question_type" class="flex h-12 w-full rounded-xl border-2 border-border bg-card px-4 py-3 text-sm text-foreground transition-all duration-200 hover:border-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
-                        <option value="text" {% if form.question_type.value == "text" %}selected{% endif %}>{% trans "Short text" %}</option>
-                        <option value="textarea" {% if form.question_type.value == "textarea" %}selected{% endif %}>{% trans "Long text" %}</option>
-                        <option value="select" {% if form.question_type.value == "select" %}selected{% endif %}>{% trans "Dropdown" %}</option>
-                        <option value="checkbox" {% if form.question_type.value == "checkbox" %}selected{% endif %}>{% trans "Checkbox" %}</option>
-                        <option value="radio" {% if form.question_type.value == "radio" %}selected{% endif %}>{% trans "Radio buttons" %}</option>
-                        <option value="number" {% if form.question_type.value == "number" %}selected{% endif %}>{% trans "Number" %}</option>
-                        <option value="url" {% if form.question_type.value == "url" %}selected{% endif %}>{% trans "URL" %}</option>
-                    </select>
+                    <div class="custom-select-wrapper" data-controller="dropdown" data-dropdown-value-value="{{ form.question_type.value|default:'text' }}" data-action="click@window->dropdown#clickOutside">
+                        <input type="hidden" name="question_type" value="{{ form.question_type.value|default:'text' }}" data-dropdown-target="hiddenInput" required>
+                        <button type="button" data-dropdown-target="trigger" data-action="click->dropdown#toggle" class="custom-select-trigger">
+                            <span class="custom-select-value">{% if form.question_type.value == "textarea" %}{% trans "Long text" %}{% elif form.question_type.value == "select" %}{% trans "Dropdown" %}{% elif form.question_type.value == "checkbox" %}{% trans "Checkbox" %}{% elif form.question_type.value == "radio" %}{% trans "Radio buttons" %}{% elif form.question_type.value == "number" %}{% trans "Number" %}{% elif form.question_type.value == "url" %}{% trans "URL" %}{% else %}{% trans "Short text" %}{% endif %}</span>
+                            <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4"></i>
+                        </button>
+                        <div data-dropdown-target="dropdown" class="custom-select-dropdown hidden">
+                            <div class="custom-select-options">
+                                <button type="button" data-dropdown-target="option" data-value="text" data-label="{% trans 'Short text' %}" data-action="click->dropdown#selectOption" class="custom-select-option{% if form.question_type.value == 'text' or not form.question_type.value %} custom-select-option-selected{% endif %}">
+                                    <span>{% trans "Short text" %}</span>
+                                    <i data-lucide="check" class="custom-select-check w-4 h-4 {% if form.question_type.value != 'text' and form.question_type.value %}hidden{% endif %}"></i>
+                                </button>
+                                <button type="button" data-dropdown-target="option" data-value="textarea" data-label="{% trans 'Long text' %}" data-action="click->dropdown#selectOption" class="custom-select-option{% if form.question_type.value == 'textarea' %} custom-select-option-selected{% endif %}">
+                                    <span>{% trans "Long text" %}</span>
+                                    <i data-lucide="check" class="custom-select-check w-4 h-4 {% if form.question_type.value != 'textarea' %}hidden{% endif %}"></i>
+                                </button>
+                                <button type="button" data-dropdown-target="option" data-value="select" data-label="{% trans 'Dropdown' %}" data-action="click->dropdown#selectOption" class="custom-select-option{% if form.question_type.value == 'select' %} custom-select-option-selected{% endif %}">
+                                    <span>{% trans "Dropdown" %}</span>
+                                    <i data-lucide="check" class="custom-select-check w-4 h-4 {% if form.question_type.value != 'select' %}hidden{% endif %}"></i>
+                                </button>
+                                <button type="button" data-dropdown-target="option" data-value="checkbox" data-label="{% trans 'Checkbox' %}" data-action="click->dropdown#selectOption" class="custom-select-option{% if form.question_type.value == 'checkbox' %} custom-select-option-selected{% endif %}">
+                                    <span>{% trans "Checkbox" %}</span>
+                                    <i data-lucide="check" class="custom-select-check w-4 h-4 {% if form.question_type.value != 'checkbox' %}hidden{% endif %}"></i>
+                                </button>
+                                <button type="button" data-dropdown-target="option" data-value="radio" data-label="{% trans 'Radio buttons' %}" data-action="click->dropdown#selectOption" class="custom-select-option{% if form.question_type.value == 'radio' %} custom-select-option-selected{% endif %}">
+                                    <span>{% trans "Radio buttons" %}</span>
+                                    <i data-lucide="check" class="custom-select-check w-4 h-4 {% if form.question_type.value != 'radio' %}hidden{% endif %}"></i>
+                                </button>
+                                <button type="button" data-dropdown-target="option" data-value="number" data-label="{% trans 'Number' %}" data-action="click->dropdown#selectOption" class="custom-select-option{% if form.question_type.value == 'number' %} custom-select-option-selected{% endif %}">
+                                    <span>{% trans "Number" %}</span>
+                                    <i data-lucide="check" class="custom-select-check w-4 h-4 {% if form.question_type.value != 'number' %}hidden{% endif %}"></i>
+                                </button>
+                                <button type="button" data-dropdown-target="option" data-value="url" data-label="{% trans 'URL' %}" data-action="click->dropdown#selectOption" class="custom-select-option{% if form.question_type.value == 'url' %} custom-select-option-selected{% endif %}">
+                                    <span>{% trans "URL" %}</span>
+                                    <i data-lucide="check" class="custom-select-check w-4 h-4 {% if form.question_type.value != 'url' %}hidden{% endif %}"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                     {% if form.question_type.errors %}
                     <p class="text-sm text-destructive mt-1">{{ form.question_type.errors.0 }}</p>
                     {% endif %}

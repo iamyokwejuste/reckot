@@ -27,9 +27,6 @@ export default class extends Controller {
 
         const config = {
             dateFormat: this.enableTimeValue ? "Y-m-d H:i" : "Y-m-d",
-            altInput: true,
-            altFormat: this.enableTimeValue ? "F j, Y \\a\\t h:i K" : "F j, Y",
-            altInputClass: "input w-full pl-12 cursor-pointer",
             enableTime: this.enableTimeValue,
             time_24hr: this.time24hrValue,
             minuteIncrement: this.enableTimeValue ? 15 : 1,
@@ -66,7 +63,6 @@ export default class extends Controller {
             console.error('Flatpickr initialization failed:', e);
         }
 
-        // Reinitialize Lucide icons
         requestAnimationFrame(() => {
             if (typeof lucide !== 'undefined') {
                 lucide.createIcons();

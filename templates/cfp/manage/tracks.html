@@ -23,7 +23,7 @@
 {% endblock %}
 
 {% block header_actions %}
-<a href="{% url 'cfp:manage_config' event.organization.slug event.slug %}">
+<a href="{% url 'cfp:cfp_config' event.organization.slug event.slug %}">
     {% #button variant="ghost" size="sm" %}
         <i data-lucide="arrow-left" class="w-4 h-4"></i>
         <span class="hidden md:inline">{% trans "Back to CFP" %}</span>

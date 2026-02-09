@@ -52,9 +52,13 @@ export default class extends Controller {
         this.close();
     }
 
-    // Alias for selectOption to support both action names
     select(event) {
         this.selectOption(event);
+    }
+
+    submitForm() {
+        const form = this.element.closest('form');
+        if (form) form.submit();
     }
 
     updateSelectedState(selectedOption) {

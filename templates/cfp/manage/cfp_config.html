@@ -35,7 +35,17 @@
                 <p class="text-sm text-muted-foreground">{% trans "Set the current stage of your call for proposals" %}</p>
             </div>
             {% if cfp %}
-            {% #badge variant="{% if cfp.status == 'OPEN' %}success{% elif cfp.status == 'DRAFT' %}default{% elif cfp.status == 'CLOSED' %}destructive{% elif cfp.status == 'REVIEWING' %}warning{% else %}secondary{% endif %}" %}{{ cfp.get_status_display }}{% /badge %}
+                {% if cfp.status == 'OPEN' %}
+                    {% #badge variant="success" %}{{ cfp.get_status_display }}{% /badge %}
+                {% elif cfp.status == 'DRAFT' %}
+                    {% #badge variant="default" %}{{ cfp.get_status_display }}{% /badge %}
+                {% elif cfp.status == 'CLOSED' %}
+                    {% #badge variant="destructive" %}{{ cfp.get_status_display }}{% /badge %}
+                {% elif cfp.status == 'REVIEWING' %}
+                    {% #badge variant="warning" %}{{ cfp.get_status_display }}{% /badge %}
+                {% else %}
+                    {% #badge variant="secondary" %}{{ cfp.get_status_display }}{% /badge %}
+                {% endif %}
             {% endif %}
         </div>
         <div class="flex flex-wrap gap-2">
@@ -172,7 +182,7 @@
         <h2 class="text-lg font-semibold mb-2">{% trans "CFP components" %}</h2>
         <p class="text-sm text-muted-foreground mb-6">{% trans "Configure the building blocks of your call for proposals" %}</p>
         <div class="grid gap-4 sm:grid-cols-3">
-            <a href="{% url 'cfp:manage_formats' event.organization.slug event.slug %}" class="group flex items-center gap-4 rounded-xl border border-border p-4 hover:bg-muted/50 transition-colors">
+            <a href="{% url 'cfp:session_formats' event.organization.slug event.slug %}" class="group flex items-center gap-4 rounded-xl border border-border p-4 hover:bg-muted/50 transition-colors">
                 <div class="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
                     <i data-lucide="layout-grid" class="h-5 w-5 text-blue-500"></i>
                 </div>
@@ -183,7 +193,7 @@
                 <i data-lucide="chevron-right" class="w-4 h-4 text-muted-foreground ml-auto shrink-0"></i>
             </a>
 
-            <a href="{% url 'cfp:manage_tracks' event.organization.slug event.slug %}" class="group flex items-center gap-4 rounded-xl border border-border p-4 hover:bg-muted/50 transition-colors">
+            <a href="{% url 'cfp:tracks' event.organization.slug event.slug %}" class="group flex items-center gap-4 rounded-xl border border-border p-4 hover:bg-muted/50 transition-colors">
                 <div class="h-10 w-10 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
                     <i data-lucide="git-branch" class="h-5 w-5 text-purple-500"></i>
                 </div>
@@ -194,7 +204,7 @@
                 <i data-lucide="chevron-right" class="w-4 h-4 text-muted-foreground ml-auto shrink-0"></i>
             </a>
 
-            <a href="{% url 'cfp:manage_questions' event.organization.slug event.slug %}" class="group flex items-center gap-4 rounded-xl border border-border p-4 hover:bg-muted/50 transition-colors">
+            <a href="{% url 'cfp:cfp_questions' event.organization.slug event.slug %}" class="group flex items-center gap-4 rounded-xl border border-border p-4 hover:bg-muted/50 transition-colors">
                 <div class="h-10 w-10 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
                     <i data-lucide="help-circle" class="h-5 w-5 text-amber-500"></i>
                 </div>

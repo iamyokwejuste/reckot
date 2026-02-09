@@ -131,6 +131,10 @@ class SpeakerProfile(models.Model):
         blank=True,
         help_text=_("Private notes visible only to organizers"),
     )
+    custom_fields = models.JSONField(
+        default=dict, blank=True,
+        help_text=_("Custom speaker data as key-value pairs"),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

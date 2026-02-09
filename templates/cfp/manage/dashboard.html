@@ -1,0 +1,132 @@
+{% extends "layouts/dashboard.html" %}
+{% load slippers i18n %}
+
+{% block title %}{% trans "Call for proposals" %} - Reckot{% endblock %}
+
+{% block breadcrumbs %}
+{% #breadcrumb class="mb-4" %}
+    {% #breadcrumb_item href="/" %}{% trans "Home" %}{% /breadcrumb_item %}
+    {% #breadcrumb_separator %}{% /breadcrumb_separator %}
+    {% #breadcrumb_item %}{% trans "Call for proposals" %}{% /breadcrumb_item %}
+{% /breadcrumb %}
+{% endblock %}
+
+{% block header_title %}
+<div class="min-w-0">
+    <h1 class="text-lg font-semibold truncate">{% trans "Call for proposals" %}</h1>
+    <p class="text-sm text-muted-foreground hidden md:block">{% trans "Manage CFPs across all your events" %}</p>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'cfp:speakers' %}">
+    {% #button variant="outline" size="sm" %}
+        <i data-lucide="users" class="w-4 h-4"></i>
+        <span class="hidden md:inline">{% trans "All speakers" %}</span>
+    {% /button %}
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="stat-card">
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Total CFPs" %}</p>
+                <i data-lucide="megaphone" class="h-4 w-4 text-muted-foreground"></i>
+            </div>
+            <p class="text-2xl font-bold mt-2">{{ stats.total_cfps }}</p>
+        </div>
+        <div class="stat-card">
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Open CFPs" %}</p>
+                <i data-lucide="door-open" class="h-4 w-4 text-green-500"></i>
+            </div>
+            <p class="text-2xl font-bold mt-2">{{ stats.open_cfps }}</p>
+        </div>
+        <div class="stat-card">
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Total proposals" %}</p>
+                <i data-lucide="file-text" class="h-4 w-4 text-muted-foreground"></i>
+            </div>
+            <p class="text-2xl font-bold mt-2">{{ stats.total_proposals }}</p>
+        </div>
+        <div class="stat-card">
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-muted-foreground">{% trans "Total speakers" %}</p>
+                <i data-lucide="mic-2" class="h-4 w-4 text-muted-foreground"></i>
+            </div>
+            <p class="text-2xl font-bold mt-2">{{ stats.total_speakers }}</p>
+        </div>
+    </div>
+
+    <div class="card">
+        {% if cfp_events %}
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-border">
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Event" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Status" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Proposals" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Speakers" %}</th>
+                        <th class="text-left text-sm font-medium text-muted-foreground p-4">{% trans "Closes at" %}</th>
+                        <th class="text-right text-sm font-medium text-muted-foreground p-4">{% trans "Actions" %}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border">
+                    {% for item in cfp_events %}
+                    <tr class="hover:bg-muted/50 transition-colors">
+                        <td class="p-4">
+                            <div class="min-w-0">
+                                <p class="text-sm font-medium truncate">{{ item.event.title }}</p>
+                                <p class="text-xs text-muted-foreground">{{ item.event.organization.name }}</p>
+                            </div>
+                        </td>
+                        <td class="p-4">
+                            {% if item.cfp.status == "OPEN" %}
+                            {% #badge variant="success" %}{% trans "Open" %}{% /badge %}
+                            {% elif item.cfp.status == "DRAFT" %}
+                            {% #badge variant="default" %}{% trans "Draft" %}{% /badge %}
+                            {% elif item.cfp.status == "CLOSED" %}
+                            {% #badge variant="destructive" %}{% trans "Closed" %}{% /badge %}
+                            {% elif item.cfp.status == "REVIEWING" %}
+                            {% #badge variant="warning" %}{% trans "Reviewing" %}{% /badge %}
+                            {% elif item.cfp.status == "DECIDED" %}
+                            {% #badge variant="secondary" %}{% trans "Decided" %}{% /badge %}
+                            {% endif %}
+                        </td>
+                        <td class="p-4">
+                            <p class="text-sm font-medium">{{ item.proposal_count }}</p>
+                        </td>
+                        <td class="p-4">
+                            <p class="text-sm font-medium">{{ item.speaker_count }}</p>
+                        </td>
+                        <td class="p-4">
+                            <p class="text-sm text-muted-foreground">{{ item.cfp.closes_at|date:"M d, Y H:i" }}</p>
+                        </td>
+                        <td class="p-4 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <a href="{% url 'cfp:proposals_list' item.event.organization.slug item.event.slug %}" class="text-sm text-primary hover:underline">{% trans "Proposals" %}</a>
+                                <a href="{% url 'cfp:cfp_config' item.event.organization.slug item.event.slug %}" class="text-sm text-muted-foreground hover:text-foreground">
+                                    <i data-lucide="settings" class="w-4 h-4"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-12">
+            <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
+                <i data-lucide="megaphone" class="h-8 w-8 text-muted-foreground"></i>
+            </div>
+            <h3 class="text-lg font-semibold mb-2">{% trans "No CFPs yet" %}</h3>
+            <p class="text-muted-foreground">{% trans "Create a call for proposals from your event settings." %}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

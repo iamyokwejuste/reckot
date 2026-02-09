@@ -106,12 +106,27 @@
 
             <div class="grid gap-4 sm:grid-cols-2">
                 {% #form_field label=_("Track") name="track" %}
-                    <select name="track" id="track" class="flex h-12 w-full rounded-xl border-2 border-border bg-card px-4 py-3 text-sm text-foreground transition-all duration-200 hover:border-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
-                        <option value="">{% trans "No track" %}</option>
-                        {% for track in event.tracks.all %}
-                        <option value="{{ track.pk }}" {% if form.track.value|stringformat:"d" == track.pk|stringformat:"d" %}selected{% endif %}>{{ track.name }}</option>
-                        {% endfor %}
-                    </select>
+                    <div class="custom-select-wrapper" data-controller="dropdown" data-dropdown-value-value="{{ form.track.value|default:'' }}" data-action="click@window->dropdown#clickOutside">
+                        <input type="hidden" name="track" value="{{ form.track.value|default:'' }}" data-dropdown-target="hiddenInput">
+                        <button type="button" data-dropdown-target="trigger" data-action="click->dropdown#toggle" class="custom-select-trigger">
+                            <span class="custom-select-value">{% for track in event.tracks.all %}{% if form.track.value|stringformat:"d" == track.pk|stringformat:"d" %}{{ track.name }}{% endif %}{% endfor %}{% if not form.track.value %}{% trans "No track" %}{% endif %}</span>
+                            <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4"></i>
+                        </button>
+                        <div data-dropdown-target="dropdown" class="custom-select-dropdown hidden">
+                            <div class="custom-select-options">
+                                <button type="button" data-dropdown-target="option" data-value="" data-label="{% trans 'No track' %}" data-action="click->dropdown#selectOption" class="custom-select-option{% if not form.track.value %} custom-select-option-selected{% endif %}">
+                                    <span>{% trans "No track" %}</span>
+                                    <i data-lucide="check" class="custom-select-check w-4 h-4 {% if form.track.value %}hidden{% endif %}"></i>
+                                </button>
+                                {% for track in event.tracks.all %}
+                                <button type="button" data-dropdown-target="option" data-value="{{ track.pk }}" data-label="{{ track.name }}" data-action="click->dropdown#selectOption" class="custom-select-option{% if form.track.value|stringformat:'d' == track.pk|stringformat:'d' %} custom-select-option-selected{% endif %}">
+                                    <span>{{ track.name }}</span>
+                                    <i data-lucide="check" class="custom-select-check w-4 h-4 {% if form.track.value|stringformat:'d' != track.pk|stringformat:'d' %}hidden{% endif %}"></i>
+                                </button>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
                     {% if form.track.errors %}
                     <p class="text-sm text-destructive mt-1">{{ form.track.errors.0 }}</p>
                     {% endif %}
@@ -164,11 +179,29 @@
             </div>
 
             {% #form_field label=_("Status") name="status" required=True %}
-                <select name="status" id="status" class="flex h-12 w-full rounded-xl border-2 border-border bg-card px-4 py-3 text-sm text-foreground transition-all duration-200 hover:border-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
-                    <option value="DRAFT" {% if form.status.value == "DRAFT" %}selected{% endif %}>{% trans "Draft" %}</option>
-                    <option value="SCHEDULED" {% if form.status.value == "SCHEDULED" %}selected{% endif %}>{% trans "Scheduled" %}</option>
-                    <option value="CANCELLED" {% if form.status.value == "CANCELLED" %}selected{% endif %}>{% trans "Cancelled" %}</option>
-                </select>
+                <div class="custom-select-wrapper" data-controller="dropdown" data-dropdown-value-value="{{ form.status.value|default:'DRAFT' }}" data-action="click@window->dropdown#clickOutside">
+                    <input type="hidden" name="status" value="{{ form.status.value|default:'DRAFT' }}" data-dropdown-target="hiddenInput" required>
+                    <button type="button" data-dropdown-target="trigger" data-action="click->dropdown#toggle" class="custom-select-trigger">
+                        <span class="custom-select-value">{% if form.status.value == "SCHEDULED" %}{% trans "Scheduled" %}{% elif form.status.value == "CANCELLED" %}{% trans "Cancelled" %}{% else %}{% trans "Draft" %}{% endif %}</span>
+                        <i data-lucide="chevron-down" class="custom-select-chevron w-4 h-4"></i>
+                    </button>
+                    <div data-dropdown-target="dropdown" class="custom-select-dropdown hidden">
+                        <div class="custom-select-options">
+                            <button type="button" data-dropdown-target="option" data-value="DRAFT" data-label="{% trans 'Draft' %}" data-action="click->dropdown#selectOption" class="custom-select-option{% if form.status.value == 'DRAFT' or not form.status.value %} custom-select-option-selected{% endif %}">
+                                <span>{% trans "Draft" %}</span>
+                                <i data-lucide="check" class="custom-select-check w-4 h-4 {% if form.status.value != 'DRAFT' and form.status.value %}hidden{% endif %}"></i>
+                            </button>
+                            <button type="button" data-dropdown-target="option" data-value="SCHEDULED" data-label="{% trans 'Scheduled' %}" data-action="click->dropdown#selectOption" class="custom-select-option{% if form.status.value == 'SCHEDULED' %} custom-select-option-selected{% endif %}">
+                                <span>{% trans "Scheduled" %}</span>
+                                <i data-lucide="check" class="custom-select-check w-4 h-4 {% if form.status.value != 'SCHEDULED' %}hidden{% endif %}"></i>
+                            </button>
+                            <button type="button" data-dropdown-target="option" data-value="CANCELLED" data-label="{% trans 'Cancelled' %}" data-action="click->dropdown#selectOption" class="custom-select-option{% if form.status.value == 'CANCELLED' %} custom-select-option-selected{% endif %}">
+                                <span>{% trans "Cancelled" %}</span>
+                                <i data-lucide="check" class="custom-select-check w-4 h-4 {% if form.status.value != 'CANCELLED' %}hidden{% endif %}"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 {% if form.status.errors %}
                 <p class="text-sm text-destructive mt-1">{{ form.status.errors.0 }}</p>
                 {% endif %}
