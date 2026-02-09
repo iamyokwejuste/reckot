@@ -23,7 +23,7 @@
 {% endblock %}
 
 {% block header_actions %}
-<a href="{% url 'cfp:export_proposals' event.organization.slug event.slug %}" class="hidden sm:inline-flex">
+<a href="{% url 'cfp:export_proposals' event.organization.slug event.slug %}" download="proposals.csv" hx-boost="false" data-controller="file-download" data-action="click->file-download#download" class="hidden sm:inline-flex">
     {% #button variant="outline" size="sm" %}
         <i data-lucide="download" class="w-4 h-4"></i>
         <span class="hidden md:inline">{% trans "Export CSV" %}</span>

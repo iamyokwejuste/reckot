@@ -1,6 +1,6 @@
 'use strict';
 
-(function() {
+(function () {
     if (window._ReckotApp) return;
 
     const ReckotApp = {
@@ -48,7 +48,7 @@
             if (typeof lucide !== 'undefined') {
                 try {
                     lucide.createIcons();
-                } catch (error) {}
+                } catch (error) { }
             }
         }
     };
@@ -61,7 +61,7 @@
         showToast(type, message);
     });
 
-    window.showToast = function(type, message) {
+    window.showToast = function (type, message) {
         const container = document.getElementById('toast-container') || createToastContainer();
         const toast = document.createElement('div');
         toast.className = 'pointer-events-auto rounded-lg border shadow-lg p-4 flex items-start gap-3 transition-all duration-300 transform translate-x-4 opacity-0';

@@ -62,13 +62,27 @@ waitForStimulus(async () => {
         { name: 'cfp-review', path: 'cfp_review_controller.js' },
         { name: 'schedule-builder', path: 'schedule_builder_controller.js' },
         { name: 'user-mode', path: 'user_mode_controller.js' },
+        { name: 'walkthrough', path: 'walkthrough_controller.js' },
+        { name: 'file-download', path: 'file_download_controller.js' },
     ];
 
+    const used = new Set();
+    document.querySelectorAll('[data-controller]').forEach(el => {
+        el.dataset.controller.split(/\s+/).forEach(n => {
+            if (n.trim()) used.add(n.trim());
+        });
+    });
+
+    const needed = controllers.filter(c => used.has(c.name));
+    const deferred = controllers.filter(c => !used.has(c.name));
+
     await Promise.all(
-        controllers.map(ctrl => registerController(ctrl.name, `${baseUrl}${ctrl.path}?v=${version}`))
+        needed.map(ctrl => registerController(ctrl.name, `${baseUrl}${ctrl.path}?v=${version}`))
     );
 
     document.dispatchEvent(new CustomEvent('stimulus:ready'));
+
+    deferred.forEach(ctrl => registerController(ctrl.name, `${baseUrl}${ctrl.path}?v=${version}`));
 });
 
 document.addEventListener('htmx:afterSwap', () => {

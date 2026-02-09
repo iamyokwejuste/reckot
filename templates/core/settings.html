@@ -328,6 +328,32 @@
                     </div>
                 </div>
             </div>
+
+            <div class="card p-6">
+                <h2 class="text-lg font-semibold mb-4">{% trans "Help" %}</h2>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between py-3">
+                        <div>
+                            <p class="font-medium">{% trans "Guided tour" %}</p>
+                            <p class="text-sm text-muted-foreground">{% trans "Replay the onboarding walkthrough" %}</p>
+                        </div>
+                        {% if user.has_completed_onboarding %}
+                        <form method="post" action="{% url 'core:reset_onboarding' %}">
+                            {% csrf_token %}
+                            {% #button type="submit" variant="outline" size="sm" %}
+                                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                                {% trans "Restart tour" %}
+                            {% /button %}
+                        </form>
+                        {% else %}
+                        <span class="text-sm text-muted-foreground flex items-center gap-1.5">
+                            <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                            {% trans "Pending" %}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

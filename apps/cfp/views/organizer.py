@@ -1,16 +1,21 @@
 import csv
 import json
+from datetime import datetime
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.staticfiles import finders
 from django.core.paginator import Paginator
 from django.db import models
 from django.db.models import Avg, Count, Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views import View
+from weasyprint import CSS, HTML
+from weasyprint.text.fonts import FontConfiguration
 
 from apps.cfp.forms import (
     CFPConfigForm,
@@ -823,12 +828,14 @@ class ExportSpeakersView(LoginRequiredMixin, View):
     def get(self, request):
         export_format = request.GET.get("format", "csv").lower()
         speakers = self._get_speakers(request)
-        rows = [self._speaker_to_row(sp) for sp in speakers]
 
         if export_format == "json":
+            rows = [self._speaker_to_row(sp) for sp in speakers]
             return self._export_json(rows)
         elif export_format == "pdf":
-            return self._export_pdf(rows)
+            return self._export_pdf(speakers)
+
+        rows = [self._speaker_to_row(sp) for sp in speakers]
         return self._export_csv(rows)
 
     def _export_csv(self, rows):
@@ -847,61 +854,20 @@ class ExportSpeakersView(LoginRequiredMixin, View):
         response["Content-Disposition"] = 'attachment; filename="speakers.json"'
         return response
 
-    def _export_pdf(self, rows):
-        from io import BytesIO
+    def _export_pdf(self, speakers):
+        html_content = render_to_string("cfp/pdf/speakers.html", {
+            "speakers": speakers,
+            "generated_at": datetime.now(),
+        })
 
-        try:
-            from reportlab.lib import colors
-            from reportlab.lib.pagesizes import A4, landscape
-            from reportlab.lib.styles import getSampleStyleSheet
-            from reportlab.lib.units import mm
-            from reportlab.platypus import (
-                Paragraph,
-                SimpleDocTemplate,
-                Spacer,
-                Table,
-                TableStyle,
-            )
-        except ImportError:
-            return HttpResponse(
-                _("PDF export requires reportlab. Install it with: pip install reportlab"),
-                status=501,
-            )
+        font_config = FontConfiguration()
+        css_path = finders.find("css/report_pdf.css")
+        css = CSS(filename=css_path, font_config=font_config)
 
-        buf = BytesIO()
-        doc = SimpleDocTemplate(buf, pagesize=landscape(A4), leftMargin=10 * mm, rightMargin=10 * mm)
-        styles = getSampleStyleSheet()
-        elements = []
+        pdf_content = HTML(string=html_content).write_pdf(
+            stylesheets=[css], font_config=font_config
+        )
 
-        elements.append(Paragraph(_("Speakers Export"), styles["Title"]))
-        elements.append(Spacer(1, 6 * mm))
-
-        display_cols = ["Name", "Email", "Event", "Company", "Job Title", "Bio"]
-        table_data = [display_cols]
-        for row in rows:
-            table_data.append([
-                Paragraph(str(row.get(col, "")), styles["BodyText"])
-                for col in display_cols
-            ])
-
-        col_widths = [45 * mm, 55 * mm, 40 * mm, 35 * mm, 35 * mm, 60 * mm]
-        table = Table(table_data, colWidths=col_widths, repeatRows=1)
-        table.setStyle(TableStyle([
-            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#09090b")),
-            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-            ("FONTSIZE", (0, 0), (-1, 0), 9),
-            ("FONTSIZE", (0, 1), (-1, -1), 8),
-            ("BOTTOMPADDING", (0, 0), (-1, 0), 8),
-            ("TOPPADDING", (0, 0), (-1, 0), 8),
-            ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e5e7eb")),
-            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f9fafb")]),
-            ("VALIGN", (0, 0), (-1, -1), "TOP"),
-        ]))
-
-        elements.append(table)
-        doc.build(elements)
-        buf.seek(0)
-
-        response = HttpResponse(buf.read(), content_type="application/pdf")
+        response = HttpResponse(pdf_content, content_type="application/pdf")
         response["Content-Disposition"] = 'attachment; filename="speakers.pdf"'
         return response

@@ -4,6 +4,7 @@
 <div id="floating-chatbot" data-controller="chatbot">
     <button data-action="click->chatbot#toggle"
             data-chatbot-trigger
+            data-walkthrough="chat-button"
             style="position: fixed !important; bottom: 1.5rem !important; right: 1.5rem !important;"
             class="z-[60] h-14 w-14 sm:h-16 sm:w-16 rounded-full shadow-2xl hover:scale-110 transition-all duration-300 flex items-center justify-center group bg-background border-2 border-border"
             aria-label="{% trans 'Reckot Assistant - Powered by Gemini' %}">
@@ -20,7 +21,7 @@
                 sm:inset-auto sm:bottom-6 sm:right-6 sm:w-[33vw] sm:rounded-2xl sm:border sm:border-border sm:shadow-2xl"
          style="overflow: hidden !important;">
 
-        <div class="flex items-center justify-between py-2.5 px-3 sm:px-4 border-b border-border bg-primary sm:rounded-t-2xl flex-shrink-0">
+        <div data-walkthrough="chat-header" class="flex items-center justify-between py-2.5 px-3 sm:px-4 border-b border-border bg-primary sm:rounded-t-2xl flex-shrink-0">
             <div class="flex items-center gap-2 sm:gap-3">
                 <div class="h-9 w-9 sm:h-10 sm:w-10 rounded-full backdrop-blur flex items-center justify-center bg-primary-foreground/20 flex-shrink-0">
                     <i data-lucide="bot" class="h-5 w-5 text-primary-foreground"></i>
@@ -51,6 +52,7 @@
             <div class="flex items-center gap-2">
                 <input type="text"
                        data-chatbot-target="input"
+                       data-walkthrough="chat-input"
                        placeholder="{% trans 'Type your message...' %}"
                        class="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 text-sm rounded-xl border border-border bg-card focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                        maxlength="500"
@@ -58,6 +60,7 @@
                        data-action="keydown->chatbot#handleEnter keydown.escape->chatbot#close input->chatbot#updateSendButton">
                 <button type="button"
                         data-chatbot-target="voiceButton"
+                        data-walkthrough="voice-input"
                         data-action="click->chatbot#toggleVoiceInput"
                         class="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:scale-105 active:scale-95 bg-muted hover:bg-muted/80 text-foreground"
                         title="{% trans 'Voice input' %}">

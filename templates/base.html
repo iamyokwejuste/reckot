@@ -136,5 +136,9 @@
     {% block extra_scripts %}{% endblock %}
 
     {% include "partials/floating_chatbot.html" %}
+
+    {% if user.is_authenticated and not user.has_completed_onboarding %}
+    {% include "components/ai_walkthrough.html" %}
+    {% endif %}
 </body>
 </html>

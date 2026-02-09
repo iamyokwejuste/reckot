@@ -341,7 +341,7 @@
                     </div>
                 </div>
                 {% if export.file %}
-                <a href="{% url 'reports:download' export.reference %}" hx-boost="false">
+                <a href="{% url 'reports:download' export.reference %}" download hx-boost="false" data-controller="file-download" data-action="click->file-download#download">
                     {% #button variant="outline" size="sm" class="p-2" %}
                         <i data-lucide="download" class="w-4 h-4"></i>
                     {% /button %}

@@ -240,85 +240,34 @@ def chat_with_assistant(
     result = {"message": response, "action": None}
 
     try:
-        is_data_question = any(
-            keyword in user_message.lower()
-            for keyword in [
-                "how many",
-                "count",
-                "total",
-                "list",
-                "show",
-                "find",
-                "search",
-                "latest",
-                "recent",
-                "last",
-                "events",
-                "tickets",
-                "revenue",
-            ]
-        )
-
-        if ('{"action": "execute_query"' in response or is_data_question) and ai_service:
-            query_response = ai_service.answer_question(user_message, user)
-
-            if not query_response["success"]:
+        entity_action_detected = False
+        for action_name in ("create_event", "create_cfp", "create_ticket_type"):
+            marker = f'{{"action": "{action_name}"'
+            if marker in response:
+                start = response.find(marker)
+                depth = 0
+                end = start
+                for i in range(start, len(response)):
+                    if response[i] == "{":
+                        depth += 1
+                    elif response[i] == "}":
+                        depth -= 1
+                        if depth == 0:
+                            end = i + 1
+                            break
+                entity_json = json.loads(response[start:end])
+                result["action"] = action_name
+                result["entity_data"] = entity_json.get("data", {})
                 result["message"] = (
-                    f"I encountered an error: {query_response.get('error', 'Unknown error')}"
+                    response[:start].strip()
+                    if start > 0
+                    else f"Creating {action_name.replace('_', ' ')} for you."
                 )
-            else:
-                query_result = query_response.get("data", [])
+                entity_action_detected = True
+                break
 
-                if isinstance(query_result, list) and len(query_result) > 0:
-                    if all(
-                        isinstance(item, dict)
-                        and "slug" in item
-                        and "organization__slug" in item
-                        for item in query_result
-                    ):
-                        formatted_events = []
-                        for event in query_result:
-                            title = event.get("title", "Untitled Event")
-                            org_slug = event.get("organization__slug", "")
-                            event_slug = event.get("slug", "")
-                            location = event.get("location", "")
-                            start_at = event.get("start_at", "")
-
-                            event_url = f"/events/{org_slug}/{event_slug}/"
-                            event_line = f"**[{title}]({event_url})**"
-                            if location or start_at:
-                                details = []
-                                if location:
-                                    details.append(location)
-                                if start_at:
-                                    try:
-                                        if isinstance(start_at, str):
-                                            date_obj = datetime.fromisoformat(
-                                                start_at.replace("Z", "+00:00")
-                                            )
-                                        else:
-                                            date_obj = start_at
-                                        details.append(date_obj.strftime("%b %d, %Y"))
-                                    except (ValueError, AttributeError, TypeError):
-                                        pass
-                                event_line += f" - {', '.join(details)}"
-                            formatted_events.append(event_line)
-
-                        result["message"] = (
-                            f"I found {len(formatted_events)} event{'s' if len(formatted_events) != 1 else ''}:\n\n"
-                            + "\n".join(formatted_events)
-                        )
-                    else:
-                        result["message"] = _format_query_result(query_result)
-                else:
-                    if isinstance(query_result, list) and len(query_result) == 0:
-                        result["message"] = (
-                            "I couldn't find any events matching your search. You can [browse all events](/events/discover/) to see what's available!"
-                        )
-                    else:
-                        result["message"] = _format_query_result(query_result)
-                result["action"] = "execute_query"
-                result["query_result"] = query_result
+        if entity_action_detected:
+            pass
 
         elif '{"action": "create_ticket"' in response:
             start = response.find('{"action": "create_ticket"')
@@ -331,6 +280,88 @@ def chat_with_assistant(
                 if start > 0
                 else "I'll create a support ticket for you."
             )
+
+        else:
+            is_data_question = any(
+                keyword in user_message.lower()
+                for keyword in [
+                    "how many",
+                    "count",
+                    "total",
+                    "list",
+                    "show",
+                    "find",
+                    "search",
+                    "latest",
+                    "recent",
+                    "last",
+                    "events",
+                    "tickets",
+                    "revenue",
+                ]
+            )
+
+            if ('{"action": "execute_query"' in response or is_data_question) and ai_service:
+                query_response = ai_service.answer_question(user_message, user)
+
+                if not query_response["success"]:
+                    result["message"] = (
+                        f"I encountered an error: {query_response.get('error', 'Unknown error')}"
+                    )
+                else:
+                    query_result = query_response.get("data", [])
+
+                    if isinstance(query_result, list) and len(query_result) > 0:
+                        if all(
+                            isinstance(item, dict)
+                            and "slug" in item
+                            and "organization__slug" in item
+                            for item in query_result
+                        ):
+                            formatted_events = []
+                            for event in query_result:
+                                title = event.get("title", "Untitled Event")
+                                org_slug = event.get("organization__slug", "")
+                                event_slug = event.get("slug", "")
+                                location = event.get("location", "")
+                                start_at = event.get("start_at", "")
+
+                                event_url = f"/events/{org_slug}/{event_slug}/"
+                                event_line = f"**[{title}]({event_url})**"
+                                if location or start_at:
+                                    details = []
+                                    if location:
+                                        details.append(location)
+                                    if start_at:
+                                        try:
+                                            if isinstance(start_at, str):
+                                                date_obj = datetime.fromisoformat(
+                                                    start_at.replace("Z", "+00:00")
+                                                )
+                                            else:
+                                                date_obj = start_at
+                                            details.append(date_obj.strftime("%b %d, %Y"))
+                                        except (ValueError, AttributeError, TypeError):
+                                            pass
+                                    event_line += f" - {', '.join(details)}"
+                                formatted_events.append(event_line)
+
+                            result["message"] = (
+                                f"I found {len(formatted_events)} event{'s' if len(formatted_events) != 1 else ''}:\n\n"
+                                + "\n".join(formatted_events)
+                            )
+                        else:
+                            result["message"] = _format_query_result(query_result)
+                    else:
+                        if isinstance(query_result, list) and len(query_result) == 0:
+                            result["message"] = (
+                                "I couldn't find any events matching your search. You can [browse all events](/events/discover/) to see what's available!"
+                            )
+                        else:
+                            result["message"] = _format_query_result(query_result)
+                    result["action"] = "execute_query"
+                    result["query_result"] = query_result
+
     except json.JSONDecodeError as e:
         logger.error(f"JSON parse error: {e}\nResponse: {response}")
         pass

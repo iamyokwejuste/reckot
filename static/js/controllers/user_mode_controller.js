@@ -18,28 +18,42 @@ export default class extends Controller {
 
     toggle(event) {
         event.stopPropagation();
-        this.dropdownTarget.classList.toggle("hidden");
+        if (this.hasDropdownTarget) {
+            this.dropdownTarget.classList.toggle("hidden");
+        }
     }
 
     selectMode(event) {
-        const mode = event.currentTarget.dataset.mode;
+        const btn = event.currentTarget;
+        const mode = btn.dataset.mode;
+
+        btn.style.opacity = '0.5';
+        btn.style.pointerEvents = 'none';
+
+        const formData = new FormData();
+        formData.append("mode", mode);
 
         fetch(this.switchUrlValue, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
                 "X-CSRFToken": this.csrfTokenValue
             },
-            body: JSON.stringify({ mode: mode })
+            body: formData
         }).then(response => {
-            if (response.ok) {
+            if (response.ok || response.redirected) {
                 window.location.reload();
+            } else {
+                btn.style.opacity = '';
+                btn.style.pointerEvents = '';
             }
-        }).catch(() => {});
+        }).catch(() => {
+            btn.style.opacity = '';
+            btn.style.pointerEvents = '';
+        });
     }
 
     clickOutside(event) {
-        if (!this.element.contains(event.target)) {
+        if (this.hasDropdownTarget && !this.element.contains(event.target)) {
             this.dropdownTarget.classList.add("hidden");
         }
     }

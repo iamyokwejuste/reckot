@@ -56,16 +56,17 @@ export default class extends Controller {
 
     async fetchNotifications() {
         this.loadingValue = true;
+        this.renderNotifications();
         try {
             const res = await fetch('/app/api/notifications/');
             const data = await res.json();
             this.notifications = data.notifications || [];
             this.unreadCountValue = data.unread_count || 0;
-            this.renderNotifications();
         } catch (e) {
             console.error('[Notifications] Failed to fetch:', e);
         }
         this.loadingValue = false;
+        this.renderNotifications();
     }
 
     async markAsRead(event) {

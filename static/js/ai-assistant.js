@@ -337,8 +337,8 @@ if (typeof ReckotAI === 'undefined') {
 
                 const toast = document.createElement('div');
                 toast.className = `ai-toast fixed bottom-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-sm font-medium animate-in ${type === 'error'
-                        ? 'bg-red-500/10 border border-red-500/20 text-red-500'
-                        : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-500'
+                    ? 'bg-red-500/10 border border-red-500/20 text-red-500'
+                    : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-500'
                     }`;
                 toast.textContent = message;
                 document.body.appendChild(toast);

@@ -12,18 +12,16 @@
             </a>
 
             <div class="hidden md:flex items-center gap-1">
-                <a href="{% url 'events:discover' %}" class="px-4 py-2 text-sm transition-colors {% if request.resolver_match.url_name == 'discover' %}text-foreground font-medium{% else %}text-muted-foreground hover:text-foreground{% endif %}">{% trans "Discover Events" %}</a>
-                {% if not user.is_authenticated %}
+                <a href="{% url 'events:discover' %}" data-walkthrough="discover" class="px-4 py-2 text-sm transition-colors {% if request.resolver_match.url_name == 'discover' %}text-foreground font-medium{% else %}text-muted-foreground hover:text-foreground{% endif %}">{% trans "Discover Events" %}</a>
                 <a href="{% url 'features' %}" class="px-4 py-2 text-sm transition-colors {% if request.resolver_match.url_name == 'features' %}text-foreground font-medium{% else %}text-muted-foreground hover:text-foreground{% endif %}">{% trans "Features" %}</a>
                 <a href="{% url 'home' %}#pricing" class="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">{% trans "Pricing" %}</a>
                 <a href="{% url 'why_us' %}" class="px-4 py-2 text-sm transition-colors {% if request.resolver_match.url_name == 'why_us' %}text-foreground font-medium{% else %}text-muted-foreground hover:text-foreground{% endif %}">{% trans "Why Us" %}</a>
-                {% endif %}
             </div>
 
             <div class="hidden md:flex items-center gap-3">
                 <div class="navbar-dock-only">{% include "partials/language_switcher.html" %}</div>
 
-                <button data-action="click->theme#toggleMode" class="p-2 rounded-lg hover:bg-muted transition-colors" aria-label="Toggle theme">
+                <button data-action="click->theme#toggleMode" data-walkthrough="theme-toggle" class="p-2 rounded-lg hover:bg-muted transition-colors" aria-label="Toggle theme">
                     <i data-lucide="moon" class="h-5 w-5 dark:hidden" aria-hidden="true"></i>
                     <i data-lucide="sun" class="h-5 w-5 hidden dark:inline-block" aria-hidden="true"></i>
                 </button>
@@ -36,6 +34,7 @@
                      data-notifications-empty-message-value="{% trans 'No notifications' %}"
                      data-action="click@window->notifications#clickOutside">
                     <button data-action="click->notifications#toggle"
+                            data-walkthrough="notifications"
                             class="relative p-2 rounded-lg hover:bg-muted transition-colors"
                             aria-label="Notifications">
                         <i data-lucide="bell" class="h-5 w-5"></i>
@@ -61,6 +60,7 @@
                      data-controller="toggle"
                      data-action="click@window->toggle#clickOutside">
                     <button data-action="click->toggle#toggle"
+                            data-walkthrough="user-menu"
                             class="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full hover:bg-muted transition-colors"
                             aria-label="User menu"
                             aria-haspopup="true">
@@ -141,35 +141,26 @@
                             </a>
                         </div>
                         {% endif %}
-                        <div class="border-t border-border mt-2 pt-2">
+                        <div class="border-t border-border mt-2 pt-2"
+                             data-controller="user-mode"
+                             data-user-mode-switch-url-value="{% url 'core:switch_mode' %}"
+                             data-user-mode-csrf-token-value="{{ csrf_token }}">
                             <p class="px-3 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">{% trans "Switch mode" %}</p>
-                            <form method="post" action="{% url 'core:switch_mode' %}">
-                                {% csrf_token %}
-                                <input type="hidden" name="mode" value="ATTENDEE">
-                                <button type="submit" class="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors {% if user.active_mode == 'ATTENDEE' %}bg-muted{% endif %}" role="menuitem">
-                                    <i data-lucide="user" class="h-4 w-4" aria-hidden="true"></i>
-                                    {% trans "Attendee" %}
-                                    {% if user.active_mode == 'ATTENDEE' %}<i data-lucide="check" class="h-3 w-3 ml-auto text-primary"></i>{% endif %}
-                                </button>
-                            </form>
-                            <form method="post" action="{% url 'core:switch_mode' %}">
-                                {% csrf_token %}
-                                <input type="hidden" name="mode" value="ORGANIZER">
-                                <button type="submit" class="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors {% if user.active_mode == 'ORGANIZER' %}bg-muted{% endif %}" role="menuitem">
-                                    <i data-lucide="building-2" class="h-4 w-4" aria-hidden="true"></i>
-                                    {% trans "Organizer" %}
-                                    {% if user.active_mode == 'ORGANIZER' %}<i data-lucide="check" class="h-3 w-3 ml-auto text-primary"></i>{% endif %}
-                                </button>
-                            </form>
-                            <form method="post" action="{% url 'core:switch_mode' %}">
-                                {% csrf_token %}
-                                <input type="hidden" name="mode" value="SPEAKER">
-                                <button type="submit" class="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors {% if user.active_mode == 'SPEAKER' %}bg-muted{% endif %}" role="menuitem">
-                                    <i data-lucide="mic-2" class="h-4 w-4" aria-hidden="true"></i>
-                                    {% trans "Speaker" %}
-                                    {% if user.active_mode == 'SPEAKER' %}<i data-lucide="check" class="h-3 w-3 ml-auto text-primary"></i>{% endif %}
-                                </button>
-                            </form>
+                            <button type="button" data-mode="ATTENDEE" data-action="click->user-mode#selectMode" class="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors {% if user.active_mode == 'ATTENDEE' %}bg-muted{% endif %}" role="menuitem">
+                                <i data-lucide="user" class="h-4 w-4" aria-hidden="true"></i>
+                                {% trans "Attendee" %}
+                                {% if user.active_mode == 'ATTENDEE' %}<i data-lucide="check" class="h-3 w-3 ml-auto text-primary"></i>{% endif %}
+                            </button>
+                            <button type="button" data-mode="ORGANIZER" data-action="click->user-mode#selectMode" class="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors {% if user.active_mode == 'ORGANIZER' %}bg-muted{% endif %}" role="menuitem">
+                                <i data-lucide="building-2" class="h-4 w-4" aria-hidden="true"></i>
+                                {% trans "Organizer" %}
+                                {% if user.active_mode == 'ORGANIZER' %}<i data-lucide="check" class="h-3 w-3 ml-auto text-primary"></i>{% endif %}
+                            </button>
+                            <button type="button" data-mode="SPEAKER" data-action="click->user-mode#selectMode" class="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors {% if user.active_mode == 'SPEAKER' %}bg-muted{% endif %}" role="menuitem">
+                                <i data-lucide="mic-2" class="h-4 w-4" aria-hidden="true"></i>
+                                {% trans "Speaker" %}
+                                {% if user.active_mode == 'SPEAKER' %}<i data-lucide="check" class="h-3 w-3 ml-auto text-primary"></i>{% endif %}
+                            </button>
                         </div>
                         <div class="border-t border-border mt-2 pt-2">
                             <a href="{% url 'account_logout' %}?next={{ request.path }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-red-500 hover:bg-red-500/10 transition-colors" role="menuitem">
@@ -232,37 +223,40 @@
             </div>
             <span class="font-medium truncate text-foreground">{{ user.email }}</span>
         </div>
-        <div class="flex gap-2 mb-6">
-            <form method="post" action="{% url 'core:switch_mode' %}" class="flex-1">
-                {% csrf_token %}
-                <input type="hidden" name="mode" value="ATTENDEE">
-                <button type="submit" class="w-full flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-medium transition-all touch-manipulation active:scale-95 {% if user.active_mode == 'ATTENDEE' %}bg-foreground text-background{% else %}bg-muted text-foreground hover:bg-muted/80{% endif %}">
-                    <i data-lucide="user" class="h-4 w-4" aria-hidden="true"></i>
-                    {% trans "Attendee" %}
-                </button>
-            </form>
-            <form method="post" action="{% url 'core:switch_mode' %}" class="flex-1">
-                {% csrf_token %}
-                <input type="hidden" name="mode" value="ORGANIZER">
-                <button type="submit" class="w-full flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-medium transition-all touch-manipulation active:scale-95 {% if user.active_mode == 'ORGANIZER' %}bg-foreground text-background{% else %}bg-muted text-foreground hover:bg-muted/80{% endif %}">
-                    <i data-lucide="building-2" class="h-4 w-4" aria-hidden="true"></i>
-                    {% trans "Organizer" %}
-                </button>
-            </form>
-            <form method="post" action="{% url 'core:switch_mode' %}" class="flex-1">
-                {% csrf_token %}
-                <input type="hidden" name="mode" value="SPEAKER">
-                <button type="submit" class="w-full flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-medium transition-all touch-manipulation active:scale-95 {% if user.active_mode == 'SPEAKER' %}bg-foreground text-background{% else %}bg-muted text-foreground hover:bg-muted/80{% endif %}">
-                    <i data-lucide="mic-2" class="h-4 w-4" aria-hidden="true"></i>
-                    {% trans "Speaker" %}
-                </button>
-            </form>
+        <div class="flex gap-2 mb-6"
+             data-controller="user-mode"
+             data-user-mode-switch-url-value="{% url 'core:switch_mode' %}"
+             data-user-mode-csrf-token-value="{{ csrf_token }}">
+            <button type="button" data-mode="ATTENDEE" data-action="click->user-mode#selectMode" class="flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-medium transition-all touch-manipulation active:scale-95 {% if user.active_mode == 'ATTENDEE' %}bg-foreground text-background{% else %}bg-muted text-foreground hover:bg-muted/80{% endif %}">
+                <i data-lucide="user" class="h-4 w-4" aria-hidden="true"></i>
+                {% trans "Attendee" %}
+            </button>
+            <button type="button" data-mode="ORGANIZER" data-action="click->user-mode#selectMode" class="flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-medium transition-all touch-manipulation active:scale-95 {% if user.active_mode == 'ORGANIZER' %}bg-foreground text-background{% else %}bg-muted text-foreground hover:bg-muted/80{% endif %}">
+                <i data-lucide="building-2" class="h-4 w-4" aria-hidden="true"></i>
+                {% trans "Organizer" %}
+            </button>
+            <button type="button" data-mode="SPEAKER" data-action="click->user-mode#selectMode" class="flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-medium transition-all touch-manipulation active:scale-95 {% if user.active_mode == 'SPEAKER' %}bg-foreground text-background{% else %}bg-muted text-foreground hover:bg-muted/80{% endif %}">
+                <i data-lucide="mic-2" class="h-4 w-4" aria-hidden="true"></i>
+                {% trans "Speaker" %}
+            </button>
         </div>
         <div class="space-y-1">
             <p class="px-4 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">{% trans "Overview" %}</p>
             <a href="{% url 'events:discover' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-3 rounded-xl text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
                 <i data-lucide="compass" class="h-5 w-5" aria-hidden="true"></i>
                 {% trans "Discover events" %}
+            </a>
+            <a href="{% url 'features' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-3 rounded-xl text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
+                <i data-lucide="sparkles" class="h-5 w-5" aria-hidden="true"></i>
+                {% trans "Features" %}
+            </a>
+            <a href="{% url 'home' %}#pricing" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-3 rounded-xl text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
+                <i data-lucide="tag" class="h-5 w-5" aria-hidden="true"></i>
+                {% trans "Pricing" %}
+            </a>
+            <a href="{% url 'why_us' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-3 rounded-xl text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
+                <i data-lucide="heart" class="h-5 w-5" aria-hidden="true"></i>
+                {% trans "Why Us" %}
             </a>
             <a href="{% url 'tickets:list' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-3 rounded-xl text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
                 <i data-lucide="ticket" class="h-5 w-5" aria-hidden="true"></i>

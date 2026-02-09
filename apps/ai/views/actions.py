@@ -15,6 +15,7 @@ from django.conf import settings
 
 from apps.ai.models import SupportTicket, AIConversation, AIMessage
 from apps.ai import services
+from apps.ai.services import entity_creator
 from apps.ai.utils.decorators import (
     ai_feature_required,
     ai_rate_limit,
@@ -89,9 +90,9 @@ class AIAssistantChatView(View):
             return JsonResponse({"error": str(_("Message is required"))}, status=400)
 
         word_count = len(user_message.split())
-        if word_count > 50:
+        if word_count > 200:
             return JsonResponse(
-                {"error": str(_("Message too long. Please limit to 50 words or less."))},
+                {"error": str(_("Message too long. Please limit to 200 words or less."))},
                 status=400,
             )
 
@@ -133,6 +134,37 @@ class AIAssistantChatView(View):
                 result["ticket_reference"] = str(ticket.reference)
                 result["message"] += f"\n\nTicket created: #{ticket.reference}"
 
+            elif result.get("action") == "create_event":
+                entity_result = entity_creator.create_event_from_chat(
+                    request.user, result.get("entity_data", {})
+                )
+                if entity_result["success"]:
+                    created_items = ", ".join(entity_result.get("created", ["Event"]))
+                    result["message"] += f"\n\nCreated: {created_items}. [View your event]({entity_result['url']})"
+                    result["entity_url"] = entity_result["url"]
+                else:
+                    result["message"] += f"\n\nCouldn't create the event: {entity_result['error']}"
+
+            elif result.get("action") == "create_cfp":
+                entity_result = entity_creator.create_cfp_from_chat(
+                    request.user, result.get("entity_data", {})
+                )
+                if entity_result["success"]:
+                    result["message"] += f"\n\nCFP created for \"{entity_result['event_title']}\"! [Configure it]({entity_result['url']})"
+                    result["entity_url"] = entity_result["url"]
+                else:
+                    result["message"] += f"\n\nCouldn't create the CFP: {entity_result['error']}"
+
+            elif result.get("action") == "create_ticket_type":
+                entity_result = entity_creator.create_ticket_type_from_chat(
+                    request.user, result.get("entity_data", {})
+                )
+                if entity_result["success"]:
+                    result["message"] += f"\n\nTicket type \"{entity_result['name']}\" created for \"{entity_result['event_title']}\"! [View event]({entity_result['url']})"
+                    result["entity_url"] = entity_result["url"]
+                else:
+                    result["message"] += f"\n\nCouldn't create the ticket type: {entity_result['error']}"
+
             AIMessage.objects.create(
                 conversation=conversation,
                 role=AIMessage.Role.ASSISTANT,
@@ -146,6 +178,7 @@ class AIAssistantChatView(View):
                     "action": result.get("action"),
                     "ticket_reference": result.get("ticket_reference"),
                     "query_result": result.get("query_result"),
+                    "entity_url": result.get("entity_url"),
                     "session_id": str(conversation.session_id),
                 }
             )
@@ -181,6 +214,7 @@ class AIAssistantChatView(View):
         if request.user.is_authenticated:
             context["is_authenticated"] = True
             context["user_name"] = request.user.get_full_name() or request.user.username
+            context["user_id"] = request.user.id
         return context
 
     def _create_ticket(self, request, ticket_data, conversation):

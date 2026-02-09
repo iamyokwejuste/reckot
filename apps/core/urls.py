@@ -54,6 +54,8 @@ urlpatterns = [
     path("api/ai/suggest-tags/", ai.suggest_tags, name="ai_suggest_tags"),
     path("api/ai/assistant/", ai.event_assistant, name="ai_assistant"),
     path("api/ai/insight/", ai.generate_insight, name="ai_insight"),
+    path("complete-onboarding/", actions.CompleteOnboardingView.as_view(), name="complete_onboarding"),
+    path("reset-onboarding/", actions.ResetOnboardingView.as_view(), name="reset_onboarding"),
     path("switch-mode/", actions.SwitchModeView.as_view(), name="switch_mode"),
     path("speaker/", SpeakerDashboardView.as_view(), name="speaker_dashboard"),
 ]

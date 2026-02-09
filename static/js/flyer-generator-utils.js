@@ -19,7 +19,7 @@ window.FlyerGeneratorUtils = {
     previewPhoto(file) {
         if (file) {
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 document.getElementById('photo-image').src = e.target.result;
                 document.getElementById('photo-placeholder').classList.add('hidden');
                 document.getElementById('photo-preview').classList.remove('hidden');
@@ -52,7 +52,7 @@ window.FlyerGeneratorUtils = {
                     title: title,
                     text: text
                 });
-            } catch (error) {}
+            } catch (error) { }
         } else {
             alert(window.FlyerGeneratorTranslations?.sharNotSupported || 'Sharing is not supported on your device. Please use the download button.');
         }
@@ -64,7 +64,7 @@ window.getCookie = window.FlyerGeneratorUtils.getCookie;
 window.previewPhoto = window.FlyerGeneratorUtils.previewPhoto;
 window.showGenerationError = window.FlyerGeneratorUtils.showGenerationError;
 window.hideGenerationError = window.FlyerGeneratorUtils.hideGenerationError;
-window.shareFlyer = function() {
+window.shareFlyer = function () {
     const eventSlug = document.querySelector('[data-event-slug]')?.dataset.eventSlug || 'event';
     const title = document.querySelector('[data-share-title]')?.dataset.shareTitle || 'My Event Flyer';
     const text = document.querySelector('[data-share-text]')?.dataset.shareText || 'Check out my flyer!';

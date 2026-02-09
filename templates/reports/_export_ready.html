@@ -4,7 +4,7 @@
         <p class="text-sm">{% blocktrans with report_type=export.get_report_type_display %}Your {{ report_type }} report has been generated.{% endblocktrans %}</p>
     {% /alert %}
 
-    <a href="{% url 'reports:download' export.reference %}" class="mt-4 block" hx-boost="false">
+    <a href="{% url 'reports:download' export.reference %}" download hx-boost="false" data-controller="file-download" data-action="click->file-download#download" class="mt-4 block">
         {% #button variant="outline" class="w-full" %}
             <i data-lucide="download" class="mr-2 h-4 w-4"></i>
             {% blocktrans with format=export.get_format_display %}Download {{ format }}{% endblocktrans %}

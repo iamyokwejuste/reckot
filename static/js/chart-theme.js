@@ -3,7 +3,7 @@
 window.ChartTheme = {
     getChartTheme() {
         const isDark = document.documentElement.classList.contains('dark') ||
-                      document.documentElement.getAttribute('data-theme') === 'dark';
+            document.documentElement.getAttribute('data-theme') === 'dark';
         return {
             backgroundColor: isDark ? '#1f2937' : '#ffffff',
             gridColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',

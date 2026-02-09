@@ -22,7 +22,7 @@
 {% endblock %}
 
 {% block header_actions %}
-<div class="relative" data-controller="dropdown">
+<div class="relative" data-controller="dropdown file-download">
     <button type="button" data-action="click->dropdown#toggle" data-dropdown-target="trigger"
             class="inline-flex items-center gap-2 rounded-xl border-2 border-border bg-card px-3 py-2 text-sm font-medium transition-all hover:bg-muted">
         <i data-lucide="download" class="w-4 h-4"></i>
@@ -31,16 +31,19 @@
     </button>
     <div data-dropdown-target="menu" class="hidden absolute right-0 top-full mt-1 z-50 min-w-[180px] rounded-xl border-2 border-border bg-card shadow-lg py-1">
         <a href="{% url 'cfp:export_speakers' %}?format=csv{% if current_event %}&event={{ current_event }}{% endif %}"
+           download="speakers.csv" hx-boost="false" data-action="click->file-download#download"
            class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted transition-colors">
             <i data-lucide="file-spreadsheet" class="w-4 h-4 text-muted-foreground"></i>
             {% trans "Download as CSV" %}
         </a>
         <a href="{% url 'cfp:export_speakers' %}?format=json{% if current_event %}&event={{ current_event }}{% endif %}"
+           download="speakers.json" hx-boost="false" data-action="click->file-download#download"
            class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted transition-colors">
             <i data-lucide="file-json" class="w-4 h-4 text-muted-foreground"></i>
             {% trans "Download as JSON" %}
         </a>
         <a href="{% url 'cfp:export_speakers' %}?format=pdf{% if current_event %}&event={{ current_event }}{% endif %}"
+           download="speakers.pdf" hx-boost="false" data-action="click->file-download#download"
            class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted transition-colors">
             <i data-lucide="file-text" class="w-4 h-4 text-muted-foreground"></i>
             {% trans "Download as PDF" %}

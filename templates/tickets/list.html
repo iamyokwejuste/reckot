@@ -45,7 +45,7 @@
         </div>
     </div>
 
-    <div class="card p-4" data-controller="toggle dropdown">
+    <div class="card p-4" data-controller="toggle dropdown file-download">
         <div class="space-y-4">
             <div class="flex flex-col sm:flex-row gap-3">
                 <div class="flex-1">
@@ -73,19 +73,19 @@
                     {% /button %}
                     <div data-dropdown-target="dropdown"
                          class="absolute right-0 mt-2 w-48 bg-popover border border-border rounded-md shadow-lg z-10 hidden">
-                        <a href="?export=pdf&{{ request.GET.urlencode }}" hx-boost="false" class="block px-4 py-2 text-sm hover:bg-muted transition-colors">
+                        <a href="?export=pdf&{{ request.GET.urlencode }}" download="tickets.pdf" hx-boost="false" data-action="click->file-download#download" class="block px-4 py-2 text-sm hover:bg-muted transition-colors">
                             <i data-lucide="file-text" class="h-4 w-4 inline mr-2"></i>
                             {% trans "Export as PDF" %}
                         </a>
-                        <a href="?export=excel&{{ request.GET.urlencode }}" hx-boost="false" class="block px-4 py-2 text-sm hover:bg-muted transition-colors">
+                        <a href="?export=excel&{{ request.GET.urlencode }}" download="tickets.xlsx" hx-boost="false" data-action="click->file-download#download" class="block px-4 py-2 text-sm hover:bg-muted transition-colors">
                             <i data-lucide="file-spreadsheet" class="h-4 w-4 inline mr-2"></i>
                             {% trans "Export as Excel" %}
                         </a>
-                        <a href="?export=csv&{{ request.GET.urlencode }}" hx-boost="false" class="block px-4 py-2 text-sm hover:bg-muted transition-colors">
+                        <a href="?export=csv&{{ request.GET.urlencode }}" download="tickets.csv" hx-boost="false" data-action="click->file-download#download" class="block px-4 py-2 text-sm hover:bg-muted transition-colors">
                             <i data-lucide="file-text" class="h-4 w-4 inline mr-2"></i>
                             {% trans "Export as CSV" %}
                         </a>
-                        <a href="?export=json&{{ request.GET.urlencode }}" hx-boost="false" class="block px-4 py-2 text-sm hover:bg-muted transition-colors">
+                        <a href="?export=json&{{ request.GET.urlencode }}" download="tickets.json" hx-boost="false" data-action="click->file-download#download" class="block px-4 py-2 text-sm hover:bg-muted transition-colors">
                             <i data-lucide="braces" class="h-4 w-4 inline mr-2"></i>
                             {% trans "Export as JSON" %}
                         </a>

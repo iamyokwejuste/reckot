@@ -1,0 +1,56 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{% trans "Speakers Export" %}</title>
+</head>
+<body>
+    <div class="cover-page">
+        <div class="cover-title">{% trans "Speakers Export" %}</div>
+        <div class="cover-date">{% blocktrans with date=generated_at|date:"F j, Y" time=generated_at|time:"g:i A" %}Generated on {{ date }} at {{ time }}{% endblocktrans %}</div>
+    </div>
+
+    <div class="summary-section">
+        <div class="stat-card">
+            <div class="stat-value">{{ speakers|length }}</div>
+            <div class="stat-label">{% trans "Total Speakers" %}</div>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>{% trans "Name" %}</th>
+                <th>{% trans "Email" %}</th>
+                <th>{% trans "Event" %}</th>
+                <th>{% trans "Company" %}</th>
+                <th>{% trans "Job Title" %}</th>
+                <th>{% trans "Bio" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sp in speakers %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ sp.user.get_full_name|default:sp.user.email }}</td>
+                <td>{{ sp.user.email }}</td>
+                <td>{{ sp.event.title }}</td>
+                <td>{{ sp.company }}</td>
+                <td>{{ sp.job_title }}</td>
+                <td>{{ sp.bio|truncatewords:30 }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-muted">{% trans "No speakers found" %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="summary-section text-muted" style="margin-top: 40px; font-size: 10px;">
+        <p>{% blocktrans with date=generated_at|date:"F j, Y" time=generated_at|time:"g:i A" %}This report was generated automatically by Reckot. Data is accurate as of {{ date }} at {{ time }}.{% endblocktrans %}</p>
+    </div>
+</body>
+</html>

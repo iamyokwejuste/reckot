@@ -192,7 +192,7 @@
                         <p class="text-xs text-muted-foreground">{{ export.created_at|date:"M j, Y g:i A" }}</p>
                     </div>
                 </div>
-                <a href="{% url 'reports:download' export.reference %}">
+                <a href="{% url 'reports:download' export.reference %}" download hx-boost="false" data-controller="file-download" data-action="click->file-download#download">
                     {% #button type="button" variant="outline" size="sm" %}
                         <i data-lucide="download" class="w-4 h-4"></i>
                         {% trans "Download" %}

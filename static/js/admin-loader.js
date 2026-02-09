@@ -1,10 +1,10 @@
 'use strict';
 
-document.addEventListener('stimulus:ready', function() {
+document.addEventListener('stimulus:ready', function () {
     document.body.setAttribute('data-controller', 'theme');
 });
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const logoLightUrl = '/static/images/logo/reckto_logo_light_mode.png';
     const logoDarkUrl = '/static/images/logo/reckto_logo_dark_mode.png';
 

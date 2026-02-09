@@ -1,10 +1,14 @@
-{% load static %}
+{% load i18n %}
 
-<div id="ai-walkthrough-container">
-    <div id="walkthrough-overlay" class="fixed inset-0 bg-black/75 z-[9998] hidden opacity-0 transition-opacity duration-300"></div>
-    <div id="walkthrough-spotlight" class="fixed bg-transparent border-4 border-green-500 rounded-xl z-[9999] pointer-events-none transition-all duration-500 ease-out"></div>
-    <div id="walkthrough-tooltip" class="fixed bg-white rounded-2xl p-7 w-full max-w-md shadow-2xl z-[10000] transition-all duration-500 ease-out opacity-0 scale-95"></div>
+<div data-controller="walkthrough"
+     data-walkthrough-complete-url-value="{% url 'core:complete_onboarding' %}"
+     data-walkthrough-csrf-token-value="{{ csrf_token }}"
+     data-walkthrough-ai-enabled-value="{% if user.ai_features_enabled %}true{% else %}false{% endif %}">
+    <div data-walkthrough-target="overlay"
+         class="fixed inset-0 bg-black/75 z-[9998] hidden opacity-0 transition-opacity duration-300"></div>
+    <div data-walkthrough-target="spotlight"
+         class="fixed bg-transparent border-4 border-primary rounded-xl z-[9999] pointer-events-none transition-all duration-500 ease-out hidden"
+         style="box-shadow: 0 0 0 9999px rgba(0,0,0,0.75);"></div>
+    <div data-walkthrough-target="tooltip"
+         class="fixed bg-card border border-border rounded-2xl p-6 w-full max-w-sm shadow-2xl z-[10000] transition-all duration-300 ease-out opacity-0 scale-95"></div>
 </div>
-
-<script src="https://unpkg.com/lucide@latest"></script>
-<script defer src="{% static 'js/walkthrough.js' %}"></script>

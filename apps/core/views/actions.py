@@ -490,6 +490,22 @@ class DeleteAccountView(LoginRequiredMixin, View):
         return redirect("home")
 
 
+@method_decorator(csrf_exempt, name="dispatch")
+class CompleteOnboardingView(LoginRequiredMixin, View):
+    def post(self, request):
+        if not request.user.has_completed_onboarding:
+            request.user.has_completed_onboarding = True
+            request.user.save(update_fields=["has_completed_onboarding"])
+        return JsonResponse({"success": True})
+
+
+class ResetOnboardingView(LoginRequiredMixin, View):
+    def post(self, request):
+        request.user.has_completed_onboarding = False
+        request.user.save(update_fields=["has_completed_onboarding"])
+        return redirect("home")
+
+
 class SwitchModeView(LoginRequiredMixin, View):
     def post(self, request):
         mode = request.POST.get("mode", "")

@@ -32,6 +32,7 @@ class User(AbstractUser):
         choices=UserMode.choices,
         default=UserMode.ATTENDEE,
     )
+    has_completed_onboarding = models.BooleanField(default=False)
 
     def __str__(self):
         return self.email or self.username
