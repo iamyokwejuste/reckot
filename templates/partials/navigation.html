@@ -96,12 +96,50 @@
                         {% if user.active_mode == 'ORGANIZER' %}
                         <a href="{% url 'events:list' %}" hx-boost="false" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors" role="menuitem">
                             <i data-lucide="calendar" class="h-4 w-4" aria-hidden="true"></i>
-                            {% trans "My events" %}
+                            {% trans "Events" %}
+                        </a>
+                        <a href="{% url 'orgs:list' %}" hx-boost="false" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors" role="menuitem">
+                            <i data-lucide="building-2" class="h-4 w-4" aria-hidden="true"></i>
+                            {% trans "Organizations" %}
                         </a>
                         <a href="{% url 'reports:analytics' %}" hx-boost="false" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors" role="menuitem">
                             <i data-lucide="bar-chart-3" class="h-4 w-4" aria-hidden="true"></i>
                             {% trans "Analytics" %}
                         </a>
+                        <div class="border-t border-border mt-1 pt-1">
+                            <p class="px-3 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">{% trans "Operations" %}</p>
+                            <a href="{% url 'checkin:list' %}" hx-boost="false" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors" role="menuitem">
+                                <i data-lucide="scan-line" class="h-4 w-4" aria-hidden="true"></i>
+                                {% trans "Check-in" %}
+                            </a>
+                            <a href="{% url 'payments:list' %}" hx-boost="false" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors" role="menuitem">
+                                <i data-lucide="credit-card" class="h-4 w-4" aria-hidden="true"></i>
+                                {% trans "Payments" %}
+                            </a>
+                            <a href="{% url 'events:coupons' %}" hx-boost="false" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors" role="menuitem">
+                                <i data-lucide="tag" class="h-4 w-4" aria-hidden="true"></i>
+                                {% trans "Coupons" %}
+                            </a>
+                        </div>
+                        <div class="border-t border-border mt-1 pt-1">
+                            <p class="px-3 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">{% trans "CFP" %}</p>
+                            <a href="{% url 'cfp:dashboard' %}" hx-boost="false" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors" role="menuitem">
+                                <i data-lucide="megaphone" class="h-4 w-4" aria-hidden="true"></i>
+                                {% trans "Call for proposals" %}
+                            </a>
+                            <a href="{% url 'cfp:speakers' %}" hx-boost="false" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors" role="menuitem">
+                                <i data-lucide="mic-2" class="h-4 w-4" aria-hidden="true"></i>
+                                {% trans "Speakers" %}
+                            </a>
+                        </div>
+                        {% endif %}
+                        {% if user.active_mode == 'SPEAKER' or user.speaker_profiles.exists %}
+                        <div class="border-t border-border mt-1 pt-1">
+                            <a href="{% url 'core:speaker_dashboard' %}" hx-boost="false" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors" role="menuitem">
+                                <i data-lucide="mic-2" class="h-4 w-4" aria-hidden="true"></i>
+                                {% trans "Speaker dashboard" %}
+                            </a>
+                        </div>
                         {% endif %}
                         <div class="border-t border-border mt-2 pt-2">
                             <p class="px-3 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">{% trans "Switch mode" %}</p>
@@ -220,32 +258,85 @@
                 </button>
             </form>
         </div>
-        <div class="space-y-2">
-            <a href="{% url 'events:discover' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
-                <i data-lucide="compass" class="h-6 w-6" aria-hidden="true"></i>
+        <div class="space-y-1">
+            <p class="px-4 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">{% trans "Overview" %}</p>
+            <a href="{% url 'events:discover' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-3 rounded-xl text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
+                <i data-lucide="compass" class="h-5 w-5" aria-hidden="true"></i>
                 {% trans "Discover events" %}
             </a>
-            <a href="{% url 'tickets:list' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
-                <i data-lucide="ticket" class="h-6 w-6" aria-hidden="true"></i>
+            <a href="{% url 'tickets:list' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-3 rounded-xl text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
+                <i data-lucide="ticket" class="h-5 w-5" aria-hidden="true"></i>
                 {% trans "My tickets" %}
             </a>
             {% if user.active_mode == 'ORGANIZER' %}
-            <a href="{% url 'events:list' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
-                <i data-lucide="calendar" class="h-6 w-6" aria-hidden="true"></i>
-                {% trans "My events" %}
-            </a>
-            <a href="{% url 'reports:analytics' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
-                <i data-lucide="bar-chart-3" class="h-6 w-6" aria-hidden="true"></i>
+            <a href="{% url 'reports:analytics' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-3 rounded-xl text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
+                <i data-lucide="bar-chart-3" class="h-5 w-5" aria-hidden="true"></i>
                 {% trans "Analytics" %}
             </a>
-            {% endif %}
-            {% if user.active_mode == 'SPEAKER' or user.speaker_profiles.exists %}
-            <a href="{% url 'core:speaker_dashboard' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
-                <i data-lucide="mic-2" class="h-6 w-6" aria-hidden="true"></i>
-                {% trans "Speaker dashboard" %}
+            <a href="{% url 'events:list' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-3 rounded-xl text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
+                <i data-lucide="calendar" class="h-5 w-5" aria-hidden="true"></i>
+                {% trans "Events" %}
+            </a>
+            <a href="{% url 'orgs:list' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-3 rounded-xl text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
+                <i data-lucide="building-2" class="h-5 w-5" aria-hidden="true"></i>
+                {% trans "Organizations" %}
             </a>
             {% endif %}
         </div>
+
+        {% if user.active_mode == 'ORGANIZER' %}
+        <div class="space-y-1 pt-4">
+            <p class="px-4 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">{% trans "Operations" %}</p>
+            <a href="{% url 'checkin:list' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-3 rounded-xl text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
+                <i data-lucide="scan-line" class="h-5 w-5" aria-hidden="true"></i>
+                {% trans "Check-in" %}
+            </a>
+            <a href="{% url 'payments:list' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-3 rounded-xl text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
+                <i data-lucide="credit-card" class="h-5 w-5" aria-hidden="true"></i>
+                {% trans "Payments" %}
+            </a>
+            <a href="{% url 'payments:refunds' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-3 rounded-xl text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
+                <i data-lucide="rotate-ccw" class="h-5 w-5" aria-hidden="true"></i>
+                {% trans "Refunds" %}
+            </a>
+            <a href="{% url 'payments:transactions' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-3 rounded-xl text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
+                <i data-lucide="receipt" class="h-5 w-5" aria-hidden="true"></i>
+                {% trans "Transactions" %}
+            </a>
+            <a href="{% url 'events:coupons' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-3 rounded-xl text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
+                <i data-lucide="tag" class="h-5 w-5" aria-hidden="true"></i>
+                {% trans "Coupons" %}
+            </a>
+            {% if user_orgs.first %}
+            <a href="{% url 'messaging:campaign_list' org_slug=user_orgs.first.organization.slug %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-3 rounded-xl text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
+                <i data-lucide="mail" class="h-5 w-5" aria-hidden="true"></i>
+                {% trans "Messaging" %}
+            </a>
+            {% endif %}
+        </div>
+
+        <div class="space-y-1 pt-4">
+            <p class="px-4 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">{% trans "CFP" %}</p>
+            <a href="{% url 'cfp:dashboard' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-3 rounded-xl text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
+                <i data-lucide="megaphone" class="h-5 w-5" aria-hidden="true"></i>
+                {% trans "Call for proposals" %}
+            </a>
+            <a href="{% url 'cfp:speakers' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-3 rounded-xl text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
+                <i data-lucide="mic-2" class="h-5 w-5" aria-hidden="true"></i>
+                {% trans "Speakers" %}
+            </a>
+        </div>
+        {% endif %}
+
+        {% if user.active_mode == 'SPEAKER' or user.speaker_profiles.exists %}
+        <div class="space-y-1 pt-4">
+            <p class="px-4 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">{% trans "Speaker" %}</p>
+            <a href="{% url 'core:speaker_dashboard' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-3 rounded-xl text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
+                <i data-lucide="mic-2" class="h-5 w-5" aria-hidden="true"></i>
+                {% trans "Speaker dashboard" %}
+            </a>
+        </div>
+        {% endif %}
         {% else %}
         <div class="space-y-2">
             <a href="{% url 'events:discover' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-4 rounded-xl text-lg text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
