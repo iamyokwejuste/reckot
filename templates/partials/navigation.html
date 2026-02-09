@@ -243,7 +243,7 @@
         </div>
         <div class="space-y-1">
             <p class="px-4 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">{% trans "Overview" %}</p>
-            <a href="{% url 'events:discover' %}" hx-boost="false" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-3 rounded-xl text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
+            <a href="{% url 'events:discover' %}" hx-boost="false" data-walkthrough="discover" data-action="click->navbar#close" class="flex items-center gap-4 px-4 py-3 rounded-xl text-foreground hover:bg-muted active:scale-95 transition-all touch-manipulation">
                 <i data-lucide="compass" class="h-5 w-5" aria-hidden="true"></i>
                 {% trans "Discover events" %}
             </a>

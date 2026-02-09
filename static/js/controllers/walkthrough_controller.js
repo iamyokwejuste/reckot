@@ -84,6 +84,7 @@ export default class extends Controller {
     connect() {
         this.currentStep = 0;
         this._chatbotOpened = false;
+        this._mobileMenuOpened = false;
         this._resizeHandler = () => this._repositionCurrent();
         this.steps = this._buildSteps();
 
@@ -137,6 +138,7 @@ export default class extends Controller {
 
     skip() {
         sessionStorage.removeItem(STORAGE_KEY);
+        this._closeMobileMenuIfOpen();
         this._closeChatbotIfOpen();
         this._complete();
     }
@@ -150,6 +152,7 @@ export default class extends Controller {
 
     _showStep(index) {
         if (index >= this.steps.length) {
+            this._closeMobileMenuIfOpen();
             this._closeChatbotIfOpen();
             this._complete();
             return;
@@ -187,10 +190,30 @@ export default class extends Controller {
     }
 
     _renderStep(step, index) {
-        const target = this._findVisibleTarget(step.target);
+        let target = this._findVisibleTarget(step.target);
 
         if (!target) {
+            const hidden = document.querySelector(step.target);
+            if (hidden && hidden.closest('[data-navbar-target="menu"]')) {
+                this._openMobileMenu();
+                setTimeout(() => {
+                    const t = this._findVisibleTarget(step.target);
+                    if (!t) { this._showStep(index + 1); return; }
+                    this._highlight(t);
+                    this._renderTooltip(t, step, index);
+                }, 350);
+                return;
+            }
             this._showStep(index + 1);
+            return;
+        }
+
+        if (this._mobileMenuOpened && !target.closest('[data-navbar-target="menu"]')) {
+            this._closeMobileMenuIfOpen();
+            setTimeout(() => {
+                this._highlight(target);
+                this._renderTooltip(target, step, index);
+            }, 350);
             return;
         }
 
@@ -205,6 +228,22 @@ export default class extends Controller {
             if (rect.width > 0 && rect.height > 0) return el;
         }
         return elements[0] || null;
+    }
+
+    _openMobileMenu() {
+        const toggle = document.querySelector('[data-navbar-target="toggle"]');
+        if (toggle) toggle.click();
+        this._mobileMenuOpened = true;
+    }
+
+    _closeMobileMenuIfOpen() {
+        if (!this._mobileMenuOpened) return;
+        const menu = document.querySelector('[data-navbar-target="menu"]');
+        if (menu && menu.style.display !== 'none') {
+            const closeBtn = menu.querySelector('[data-action*="navbar#close"]');
+            if (closeBtn) closeBtn.click();
+        }
+        this._mobileMenuOpened = false;
     }
 
     _openChatbot() {
