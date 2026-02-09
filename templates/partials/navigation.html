@@ -178,12 +178,12 @@
 
             <div class="flex md:hidden items-center gap-2">
                 {% include "partials/language_switcher.html" %}
-                <button data-action="click->theme#toggleMode" class="p-2 rounded-lg hover:bg-muted transition-colors touch-manipulation" aria-label="Toggle theme">
+                <button data-action="click->theme#toggleMode" data-walkthrough="theme-toggle" class="p-2 rounded-lg hover:bg-muted transition-colors touch-manipulation" aria-label="Toggle theme">
                     <i data-lucide="moon" class="h-5 w-5 dark:hidden" aria-hidden="true"></i>
                     <i data-lucide="sun" class="h-5 w-5 hidden dark:inline-block" aria-hidden="true"></i>
                 </button>
                 {% if user.is_authenticated %}
-                <button data-action="click->navbar#openNotifications" class="relative p-2 rounded-lg hover:bg-muted transition-colors touch-manipulation" aria-label="Notifications">
+                <button data-action="click->navbar#openNotifications" data-walkthrough="notifications" class="relative p-2 rounded-lg hover:bg-muted transition-colors touch-manipulation" aria-label="Notifications">
                     <i data-lucide="bell" class="h-5 w-5"></i>
                     {% if unread_notifications_count > 0 %}
                     <span class="absolute -top-1 -right-1 h-5 min-w-5 px-1 flex items-center justify-center bg-destructive text-background text-xs font-bold rounded-full">{{ unread_notifications_count|truncatechars:4 }}</span>
@@ -192,6 +192,7 @@
                 {% endif %}
                 <button data-navbar-target="toggle"
                         data-action="click->navbar#toggle"
+                        data-walkthrough="user-menu"
                         class="p-2 rounded-lg hover:bg-muted transition-colors touch-manipulation active:scale-95"
                         aria-label="Open menu"
                         aria-expanded="false"

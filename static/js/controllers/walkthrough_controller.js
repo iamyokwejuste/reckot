@@ -159,7 +159,7 @@ export default class extends Controller {
         const step = this.steps[index];
 
         if (step.navigateTo) {
-            const target = document.querySelector(step.target);
+            const target = this._findVisibleTarget(step.target);
             if (!target) {
                 sessionStorage.setItem(STORAGE_KEY, index.toString());
                 window.location.href = step.navigateTo;
@@ -187,7 +187,7 @@ export default class extends Controller {
     }
 
     _renderStep(step, index) {
-        const target = document.querySelector(step.target);
+        const target = this._findVisibleTarget(step.target);
 
         if (!target) {
             this._showStep(index + 1);
@@ -196,6 +196,15 @@ export default class extends Controller {
 
         this._highlight(target);
         this._renderTooltip(target, step, index);
+    }
+
+    _findVisibleTarget(selector) {
+        const elements = document.querySelectorAll(selector);
+        for (const el of elements) {
+            const rect = el.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) return el;
+        }
+        return elements[0] || null;
     }
 
     _openChatbot() {
@@ -308,7 +317,7 @@ export default class extends Controller {
     _repositionCurrent() {
         const step = this.steps[this.currentStep];
         if (!step) return;
-        const target = document.querySelector(step.target);
+        const target = this._findVisibleTarget(step.target);
         if (target) this._highlight(target);
     }
 
